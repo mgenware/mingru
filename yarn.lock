@@ -25,10 +25,10 @@
   dependencies:
     symbol-observable "^1.2.0"
 
-"@types/jest@^23.3.5":
-  version "23.3.5"
-  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-23.3.5.tgz#870a1434208b60603745bfd214fc3fc675142364"
-  integrity sha512-3LI+vUC3Wju28vbjIjsTKakhMB8HC4l+tMz+Z8WRzVK+kmvezE5jcOvKtBpznWSI5KDLFo+FouUhpTKoekadCA==
+"@types/jest@^23.3.7":
+  version "23.3.7"
+  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-23.3.7.tgz#77f9a4332ccf8db680a31818ade3ee454c831a79"
+  integrity sha512-N0p6mHrS0RHC3A9hHN4QH1RM2fGSb2E8rt6ONEK5xKSnyKtn/JAhr1VritkCn6cdyDBephVB80THqJGWzK8FAw==
 
 "@types/node@^10.12.0":
   version "10.12.0"
@@ -691,10 +691,10 @@ data-urls@^1.0.0:
     whatwg-mimetype "^2.1.0"
     whatwg-url "^7.0.0"
 
-dd-models@^0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/dd-models/-/dd-models-0.0.1.tgz#8bae17d224c1918e0c5d7baf20786255aa225ae8"
-  integrity sha512-2MTZ0/uRt6SjDqWIPkUczQm2S9AjvCRYBpea6p2Yu9XnFNSMZOuskDxKT7xnMgNhs5VIwb6Mtf4aSZle+VrQFQ==
+dd-models@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/dd-models/-/dd-models-0.0.2.tgz#887c3aa2c26a7dbe3dd3deb03de8baa40f13bc1f"
+  integrity sha512-CoTNBwhmMNVEd84MQvP5i3/OWmLVR6+8mHdyDfx8KOBfNEv6dKJqeva1BbK0kO3qXvI75Uwpa7tzIMA9LFNuGA==
   dependencies:
     throw-if-arg-empty "^1.0.1"
 

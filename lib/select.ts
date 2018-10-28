@@ -1,62 +1,142 @@
-import * as dd from 'dd-models';
+import * as dd from '../../dd-models';
 import is from '@sindresorhus/is';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from './dialect';
+import { View, ViewIO } from './view';
 
-export default class Select {
+const MainAlias = '_main';
+
+export class JoinIO {
+  static fromColumn(lCol: dd.ColumnBase, rCol: dd.ColumnBase, table: string): JoinIO {
+    return new JoinIO(
+      lCol.tableName,
+      lCol,
+      rCol.tableName,
+      rCol,
+      table,
+    );
+  }
+
   constructor(
-    public columns: unknown,
-    public from: dd.Table,
+    public lTable: string,
+    public lColumn: dd.ColumnBase,
+    public rTable: string,
+    public rColumn: dd.ColumnBase,
+    public table: string, // table alias of this join
+  ) { }
+}
+
+export class SelectedColumnIO {
+  constructor(
+    public col: dd.ColumnBase,
+    public sql: string,
+  ) { }
+}
+
+export class SelectIO extends ViewIO {
+  constructor(
+    sql: string,
+    cols: SelectedColumnIO[],
+    fromSQL: string,
+  ) {
+    super(sql, dialect);
+  }
+}
+
+class SelectProcessor {
+  jcMap = new Map<string, JoinIO>();
+  joins: JoinIO[] = [];
+  joinedTableCounter = 0;
+
+  constructor(
+    public select: Select,
     public dialect: Dialect,
   ) { }
 
-  toString(): string {
+  convert(): SelectIO {
     let sql = '';
-    const { columns, from, dialect } = this;
+    const { columns, from } = this.select;
     throwIfFalsy(columns, 'columns');
     throwIfFalsy(from, 'from');
 
     sql += 'SELECT ';
-    let needJoin = false;
-    // columns
-    let cols: Array<unknown>;
-    if (is.array(columns)) {
-      cols = columns as Array<unknown>;
+    const hasJoin = columns.some(c => c instanceof dd.JoinedColumn);
 
-      let firstTable: dd.Table|null = null;
-      for (const col of cols) {
-        if (col instanceof dd.Column) {
-          const table = (col as dd.Column).table;
-          if (firstTable === null) {
-            firstTable = table;
-          } else if (firstTable !== table) {
-            needJoin = true;
-            break;
-          }
-        }
-      }
-    } else {
-      cols = [columns];
+    // Process columns
+    const colIOs: SelectedColumnIO[] = [];
+    for (const col of columns) {
+      const io = this.processSelect(col, hasJoin);
+      colIOs.push(io);
     }
-    sql += cols.map(c => this.formatColumn(c, needJoin)).join(', ');
+    sql += colIOs.map(c => c.sql).join(', ');
 
     // from
-    sql += ` FROM ${dialect.escapeName(from.TableName)}`;
+    sql += this.processFrom(from, hasJoin);
+
+    return new SelectIO(sql);
+  }
+
+  private processFrom(table: dd.Table, hasJoin: boolean): string {
+    let sql = this.dialect.escapeName(table.__name);
+    if (hasJoin) {
+      sql += 'AS ' + MainAlias;
+    }
     return sql;
   }
 
-  private formatColumn(col: unknown, needJoin: boolean): string {
-    throwIfFalsy(col, 'col');
-
-    const { dialect } = this;
-    if (col instanceof dd.Column) {
-      const column = col as dd.Column;
-      const colName = dialect.escapeName(column.name);
-      if (needJoin) {
-        return `${colName} AS ${dialect.escapeName(column.table.TableName)}`;
-      }
-      return colName;
+  private processSelect(col: dd.ColumnBase, hasJoin: boolean): SelectedColumnIO {
+    if (col instanceof dd.JoinedColumn) {
+      return this.processJoinedColumn(col as dd.JoinedColumn);
     }
-    return (col as object).toString();
+    return this.processStandardColumn(col, hasJoin);
+  }
+
+  private processJoinedColumnInternal(local: dd.ColumnBase, remote: dd.ColumnBase): JoinIO {
+    let id: string;
+    if (local.isJoinedColumn) {
+      const io = this.processJoinedColumnInternal(local as dd.JoinedColumn, remote);
+      id = `${io.table}.${io.rColumn.__name}:${remote.path}`;
+    } else {
+      id = local.path + ':' + remote.path;
+    }
+    const result = this.jcMap.get(id);
+    if (result) {
+      return result;
+    } else {
+      return JoinIO.fromColumn(local, remote, this.nextJoinedTableName());
+    }
+  }
+
+  private processJoinedColumn(jc: dd.JoinedColumn): SelectedColumnIO {
+    const io = this.processJoinedColumnInternal(jc.localCol, jc.remoteCol);
+    const { dialect } = this;
+    const sql = `${dialect.escapeName(io.table)}.${dialect.escapeName(io.rColumn.__name)}`;
+    return new SelectedColumnIO(jc, sql);
+  }
+
+  private nextJoinedTableName(): string {
+    this.joinedTableCounter++;
+    return `_join_${this.joinedTableCounter}`;
+  }
+
+  private processStandardColumn(col: dd.ColumnBase, hasJoin: boolean): SelectedColumnIO {
+    let sql = '';
+    if (hasJoin) {
+      sql = `${MainAlias}.`;
+    }
+    sql += this.dialect.escapeName(col.__name);
+    return new SelectedColumnIO(col, sql);
   }
 }
+
+export class Select extends View {
+  constructor(
+    public name: string,
+    public columns: dd.ColumnBase[],
+    public from: dd.Table,
+  ) {
+    super(name);
+  }
+}
+
+export default Select;
