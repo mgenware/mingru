@@ -17,7 +17,7 @@
   "license": "MIT",
   "scripts": {
     "test": "yarn run clean && yarn run compile && yarn run lint && yarn run t",
-    "t": "tsc -p ./tests && jest",
+    "t": "jest --verbose=false",
     "build": "yarn test",
     "compile": "tsc -b tests",
     "dev": "yarn run clean && tsc -b tests -w",
