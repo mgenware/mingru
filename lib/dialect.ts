@@ -1,5 +1,5 @@
 export default class Dialect {
-  escapeName(_: string): string {
+  escape(_: string): string {
     throw new Error('Not implemented yet');
   }
 }
