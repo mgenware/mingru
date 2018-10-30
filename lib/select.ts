@@ -1,33 +1,27 @@
-import * as dd from '../../dd-models';
+import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from './dialect';
 import { View } from './view';
+import { JoinedColumn } from 'dd-models';
 export { default as MySQL } from './dialects/mysql';
 
 const MainAlias = '_main';
 
 export class JoinIO {
-  static fromColumn(localName: string, localCol: dd.ColumnBase, remoteName: string, remoteCol: dd.ColumnBase): JoinIO {
-    return new JoinIO(
-      localName,
-      localCol,
-      remoteName,
-      remoteCol.tableName,
-      remoteCol,
-    );
-  }
-
   constructor(
-    public localAlias: string,
+    public path: string,
+    public tableAlias: string,
+    // Note that localTable can also be an alias of another join
+    public localTable: string,
     public localColumn: dd.ColumnBase,
-    public remoteAlias: string,
-    public remoteColumn: dd.ColumnBase,
     public remoteTable: string,
+    public remoteColumn: dd.ColumnBase,
   ) { }
 
   toSQL(dialect: Dialect): string {
     const e = dialect.escape;
-    return `INNER JOIN ${e(this.remoteTable)} AS ${e(this.remoteAlias)} ON ${e(this.remoteAlias)}.${e(this.remoteColumn.__name)} = ${e(this.localAlias)}.${e(this.localColumn.__name)}`;
+    // Note that localTable is not used here, we use MainAlias as local table alias
+    return `INNER JOIN ${e(this.remoteTable)} AS ${e(this.tableAlias)} ON ${e(this.tableAlias)}.${e(this.remoteColumn.__name)} = ${e(MainAlias)}.${e(this.localColumn.__name)}`;
   }
 }
 
@@ -103,29 +97,38 @@ class SelectProcessor {
     return this.handleStandardColumn(col, hasJoin);
   }
 
-  private handleJoin(local: dd.ColumnBase, remote: dd.ColumnBase): JoinIO {
-    let id: string;
-    if (local instanceof dd.JoinedColumn) {
-      const io = this.handleJoin(local as dd.JoinedColumn, remote);
-      id = `${io.localAlias}.${io.localColumn.__name}:${io.remoteAlias}.${io.remoteColumn.__name}`;
-    } else {
-      id = local.path + ':' + remote.path;
-    }
-    const result = this.jcMap.get(id);
+  private handleJoin(jc: JoinedColumn): JoinIO {
+    const result = this.jcMap.get(jc.path);
     if (result) {
       return result;
-    } else {
-      const io = JoinIO.fromColumn(this.nextJoinedTableName(), local, remote);
-      this.jcMap.set(id, io);
-      this.joins.push(io);
-      return io;
     }
+
+    let localTableName: string;
+    const { localColumn, remoteColumn } = jc;
+    if (localColumn instanceof dd.JoinedColumn) {
+      const srcIO = this.handleJoin(jc.localColumn as dd.JoinedColumn);
+      localTableName = srcIO.tableAlias;
+    } else {
+      localTableName = localColumn.tableName;
+    }
+
+    const io = new JoinIO(
+      jc.path,
+      this.nextJoinedTableName(),
+      localTableName,
+      localColumn,
+      remoteColumn.tableName,
+      remoteColumn,
+    );
+    this.jcMap.set(jc.path, io);
+    this.joins.push(io);
+    return io;
   }
 
   private handleJoinedColumn(jc: dd.JoinedColumn): SelectedColumnIO {
-    const io = this.handleJoin(jc.localColumn, jc.remoteColumn);
+    const io = this.handleJoin(jc);
     const e = this.dialect.escape;
-    const sql = `${e(io.tableName)}.${e(jc.targetColumn.__name)}`;
+    const sql = `${e(io.tableAlias)}.${e(jc.selectedColumn.__name)}`;
     return new SelectedColumnIO(jc, sql);
   }
 

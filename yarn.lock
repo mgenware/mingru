@@ -691,10 +691,10 @@ data-urls@^1.0.0:
     whatwg-mimetype "^2.1.0"
     whatwg-url "^7.0.0"
 
-dd-models@^0.0.2:
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/dd-models/-/dd-models-0.0.2.tgz#887c3aa2c26a7dbe3dd3deb03de8baa40f13bc1f"
-  integrity sha512-CoTNBwhmMNVEd84MQvP5i3/OWmLVR6+8mHdyDfx8KOBfNEv6dKJqeva1BbK0kO3qXvI75Uwpa7tzIMA9LFNuGA==
+dd-models@^0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/dd-models/-/dd-models-0.0.5.tgz#5d5c52bf5c911392dc786c5618fa37eeb0b86180"
+  integrity sha512-cojRwaQkDV9o+uvyUsyDYvOHz6jFE236kbWKwiFbVqXrCY/fSl68/AYRlYYL2MExCN+anl7AS3wLiznpgylhMQ==
   dependencies:
     throw-if-arg-empty "^1.0.1"
 
