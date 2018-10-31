@@ -1,18 +1,18 @@
 {
-  "name": "fx263",
+  "name": "mingru",
   "version": "0.0.1",
-  "description": "<NoDescription>",
+  "description": "SQL Generator for dd-models",
   "main": "dist/main.js",
   "types": "dist/main.d.ts",
   "author": "Mgen (https://www.mgenware.com)",
-  "homepage": "https://github.com/mgenware/fx263",
-  "bugs": "https://github.com/mgenware/fx263/issues",
+  "homepage": "https://github.com/mgenware/mingru",
+  "bugs": "https://github.com/mgenware/mingru/issues",
   "keywords": [
-    "fx263"
+    "mingru"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/mgenware/fx263.git"
+    "url": "https://github.com/mgenware/mingru.git"
   },
   "license": "MIT",
   "scripts": {
