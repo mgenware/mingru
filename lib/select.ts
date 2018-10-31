@@ -1,7 +1,7 @@
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from './dialect';
-import { View } from './view';
+import View from './view';
 import { JoinedColumn } from 'dd-models';
 export { default as MySQL } from './dialects/mysql';
 
