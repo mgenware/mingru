@@ -7,7 +7,7 @@ const mysql = new MySQL();
 test('Basic', () => {
   const v = new Select('t', [user.id, user.nick], user);
   expect(v.name).toBe('t');
-  expect(v.convert(mysql).sql).toBe('SELECT `id`, `name` FROM `user`');
+  expect(v.convert(mysql).sql).toBe('SELECT `id`, `nick` FROM `user`');
 });
 
 test('Basic join', () => {
