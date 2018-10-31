@@ -3,7 +3,7 @@ import user from './user';
 
 class Post extends dd.Table {
   id = dd.pk();
-  name = dd.varChar(100);
+  title = dd.varChar(100);
   user_id = user.id;
 }
 
