@@ -98,7 +98,7 @@ class SelectProcessor {
   }
 
   private handleJoin(jc: JoinedColumn): JoinIO {
-    const result = this.jcMap.get(jc.path);
+    const result = this.jcMap.get(jc.joinPath);
     if (result) {
       return result;
     }
@@ -113,14 +113,14 @@ class SelectProcessor {
     }
 
     const io = new JoinIO(
-      jc.path,
+      jc.joinPath,
       this.nextJoinedTableName(),
       localTableName,
       localColumn,
       remoteColumn.tableName,
       remoteColumn,
     );
-    this.jcMap.set(jc.path, io);
+    this.jcMap.set(jc.joinPath, io);
     this.joins.push(io);
     return io;
   }
