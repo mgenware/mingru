@@ -1,7 +1,6 @@
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from './dialect';
-import View from './view';
 import { JoinedColumn } from 'dd-models';
 export { default as MySQL } from './dialects/mysql';
 
@@ -40,23 +39,25 @@ export class SelectIO {
   ) { }
 }
 
-class SelectProcessor {
+export class SelectProcessor {
   jcMap = new Map<string, JoinIO>();
   joins: JoinIO[] = [];
   joinedTableCounter = 0;
+  fromSQL = '';
+  cols: SelectedColumnIO[]|null = null;
 
   constructor(
-    public select: Select,
+    public action: dd.SelectAction,
     public dialect: Dialect,
-  ) { }
+  ) {
+    throwIfFalsy(action, 'action');
+    throwIfFalsy(dialect, 'dialect');
+  }
 
   convert(): SelectIO {
-    let sql = '';
-    const { columns, from } = this.select;
-    throwIfFalsy(columns, 'columns');
-    throwIfFalsy(from, 'from');
-
-    sql += 'SELECT ';
+    let sql = 'SELECT ';
+    const { action } = this;
+    const { columns, table: from } = action;
     const hasJoin = columns.some(c => c instanceof dd.JoinedColumn);
 
     // Process columns
@@ -68,7 +69,7 @@ class SelectProcessor {
     sql += colIOs.map(c => c.sql).join(', ');
 
     // from
-    const fromSQL = this.handleFrom(from, hasJoin);
+    const fromSQL = this.handleFrom(from as dd.Table, hasJoin);
     sql += ' ' + fromSQL;
 
     // joins
@@ -79,13 +80,17 @@ class SelectProcessor {
       }
     }
 
+    this.fromSQL = fromSQL;
+    this.cols = colIOs;
+
     return new SelectIO(sql, colIOs, fromSQL);
   }
 
   private handleFrom(table: dd.Table, hasJoin: boolean): string {
-    let sql = `FROM ${this.dialect.escape(table.__name)}`;
+    const e = this.dialect.escape;
+    let sql = `FROM ${e(table.__name)}`;
     if (hasJoin) {
-      sql += ' AS ' + MainAlias;
+      sql += ' AS ' + e(MainAlias);
     }
     return sql;
   }
@@ -138,28 +143,20 @@ class SelectProcessor {
   }
 
   private handleStandardColumn(col: dd.ColumnBase, hasJoin: boolean): SelectedColumnIO {
+    const e = this.dialect.escape;
     let sql = '';
     if (hasJoin) {
-      sql = `${MainAlias}.`;
+      sql = `${e(MainAlias)}.`;
     }
-    sql += this.dialect.escape(col.__name);
+    sql += e(col.__name);
     return new SelectedColumnIO(col, sql);
   }
 }
 
-export class Select extends View {
-  constructor(
-    public name: string,
-    public columns: dd.ColumnBase[],
-    public from: dd.Table,
-  ) {
-    super(name);
-  }
-
-  convert(dialect: Dialect): SelectIO {
-    const processor = new SelectProcessor(this, dialect);
-    return processor.convert();
-  }
+export default function select(
+  action: dd.SelectAction,
+  dialect: Dialect,
+): SelectIO {
+  const pro = new SelectProcessor(action, dialect);
+  return pro.convert();
 }
-
-export default Select;
