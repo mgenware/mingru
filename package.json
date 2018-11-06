@@ -23,7 +23,7 @@
     "dev": "yarn run clean && tsc -b tests -w",
     "prepublishOnly": "yarn run test",
     "lint": "tslint --project tsconfig.json --config tslint.json",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist && rimraf dist_tests"
   },
   "engines": {
     "node": ">=8.0.0"
@@ -34,15 +34,15 @@
   },
   "devDependencies": {
     "@types/jest": "^23.3.9",
-    "@types/node": "^10.12.1",
+    "@types/node": "^10.12.2",
     "jest": "^23.6.0",
     "rimraf": "^2.6.2",
     "tslint": "^5.11.0",
-    "typescript": "^3.1.4"
+    "typescript": "^3.1.6"
   },
   "dependencies": {
-    "@sindresorhus/is": "^0.12.0",
-    "dd-models": "^0.0.5",
+    "@sindresorhus/is": "^0.13.0",
+    "dd-models": "^0.0.10",
     "throw-if-arg-empty": "^1.0.1"
   }
 }
