@@ -17,10 +17,10 @@ test('Basic', () => {
 test('Basic join', () => {
   const v = dd.action('t')
   .select(post.user_id.join(user).nick, post.title)
-  .from(user);
+  .from(post);
   const io = select(v, dialect);
 
-  expect(io.sql).toBe('SELECT `_join_1`.`nick`, _main.`title` FROM `post` AS _main INNER JOIN `user` AS `_join_1` ON `_join_1`.`id` = `_main`.`user_id`');
+  expect(io.sql).toBe('SELECT `_join_1`.`nick`, `_main`.`title` FROM `post` AS `_main` INNER JOIN `user` AS `_join_1` ON `_join_1`.`id` = `_main`.`user_id`');
 });
 
 test('Same table, multiple cols join', () => {
@@ -33,5 +33,5 @@ test('Same table, multiple cols join', () => {
     .from(post);
   const io = select(v, dialect);
 
-  expect(io.sql).toBe('SELECT `_join_1`.`nick`, `_join_1`.`id`, `_join_2`.`nick` FROM `post` AS _main INNER JOIN `user` AS `_join_1` ON `_join_1`.`id` = `_main`.`user_id` INNER JOIN `user` AS `_join_2` ON `_join_2`.`id` = `_main`.`reviewer_id`');
+  expect(io.sql).toBe('SELECT `_join_1`.`nick`, `_join_1`.`id`, `_join_2`.`nick` FROM `post` AS `_main` INNER JOIN `user` AS `_join_1` ON `_join_1`.`id` = `_main`.`user_id` INNER JOIN `user` AS `_join_2` ON `_join_2`.`id` = `_main`.`reviewer_id`');
 });
