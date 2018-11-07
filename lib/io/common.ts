@@ -27,3 +27,16 @@ export class ColumnIO {
     public sql: string,
   ) { }
 }
+
+export class RawSQLIO {
+  constructor(
+    public rawSQL: dd.RawSQL,
+  ) { }
+}
+
+export class SetterIO {
+  constructor(
+    public col: dd.ColumnBase,
+    public rawSQL: RawSQLIO,
+  ) { }
+}
