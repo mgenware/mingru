@@ -1,50 +1,22 @@
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import Dialect from './dialect';
-import { JoinedColumn } from 'dd-models';
-export { default as MySQL } from './dialects/mysql';
-
-const MainAlias = '_main';
-
-export class JoinIO {
-  constructor(
-    public path: string,
-    public tableAlias: string,
-    // Note that localTable can also be an alias of another join
-    public localTable: string,
-    public localColumn: dd.ColumnBase,
-    public remoteTable: string,
-    public remoteColumn: dd.ColumnBase,
-  ) { }
-
-  toSQL(dialect: Dialect): string {
-    const e = dialect.escape;
-    // Note that localTable is not used here, we use MainAlias as local table alias
-    return `INNER JOIN ${e(this.remoteTable)} AS ${e(this.tableAlias)} ON ${e(this.tableAlias)}.${e(this.remoteColumn.__name)} = ${e(MainAlias)}.${e(this.localColumn.__name)}`;
-  }
-}
-
-export class SelectedColumnIO {
-  constructor(
-    public col: dd.ColumnBase,
-    public sql: string,
-  ) { }
-}
+import Dialect from '../dialect';
+import * as cm from './common';
 
 export class SelectIO {
   constructor(
     public sql: string,
-    public cols: SelectedColumnIO[],
+    public cols: cm.ColumnIO[],
     public fromSQL: string,
   ) { }
 }
 
 export class SelectProcessor {
-  jcMap = new Map<string, JoinIO>();
-  joins: JoinIO[] = [];
+  jcMap = new Map<string, cm.JoinIO>();
+  joins: cm.JoinIO[] = [];
   joinedTableCounter = 0;
   fromSQL = '';
-  cols: SelectedColumnIO[]|null = null;
+  cols: cm.ColumnIO[]|null = null;
 
   constructor(
     public action: dd.SelectAction,
@@ -61,7 +33,7 @@ export class SelectProcessor {
     const hasJoin = columns.some(c => c instanceof dd.JoinedColumn);
 
     // Process columns
-    const colIOs: SelectedColumnIO[] = [];
+    const colIOs: cm.ColumnIO[] = [];
     for (const col of columns) {
       const io = this.handleSelect(col, hasJoin);
       colIOs.push(io);
@@ -90,19 +62,19 @@ export class SelectProcessor {
     const e = this.dialect.escape;
     let sql = `FROM ${e(table.__name)}`;
     if (hasJoin) {
-      sql += ' AS ' + e(MainAlias);
+      sql += ' AS ' + e(cm.MainAlias);
     }
     return sql;
   }
 
-  private handleSelect(col: dd.ColumnBase, hasJoin: boolean): SelectedColumnIO {
+  private handleSelect(col: dd.ColumnBase, hasJoin: boolean): cm.ColumnIO {
     if (col instanceof dd.JoinedColumn) {
       return this.handleJoinedColumn(col as dd.JoinedColumn);
     }
     return this.handleStandardColumn(col, hasJoin);
   }
 
-  private handleJoin(jc: JoinedColumn): JoinIO {
+  private handleJoin(jc: dd.JoinedColumn): cm.JoinIO {
     const result = this.jcMap.get(jc.joinPath);
     if (result) {
       return result;
@@ -117,7 +89,7 @@ export class SelectProcessor {
       localTableName = localColumn.tableName;
     }
 
-    const io = new JoinIO(
+    const io = new cm.JoinIO(
       jc.joinPath,
       this.nextJoinedTableName(),
       localTableName,
@@ -130,11 +102,11 @@ export class SelectProcessor {
     return io;
   }
 
-  private handleJoinedColumn(jc: dd.JoinedColumn): SelectedColumnIO {
+  private handleJoinedColumn(jc: dd.JoinedColumn): cm.ColumnIO {
     const io = this.handleJoin(jc);
     const e = this.dialect.escape;
     const sql = `${e(io.tableAlias)}.${e(jc.selectedColumn.__name)}`;
-    return new SelectedColumnIO(jc, sql);
+    return new cm.ColumnIO(jc, sql);
   }
 
   private nextJoinedTableName(): string {
@@ -142,14 +114,14 @@ export class SelectProcessor {
     return `_join_${this.joinedTableCounter}`;
   }
 
-  private handleStandardColumn(col: dd.ColumnBase, hasJoin: boolean): SelectedColumnIO {
+  private handleStandardColumn(col: dd.ColumnBase, hasJoin: boolean): cm.ColumnIO {
     const e = this.dialect.escape;
     let sql = '';
     if (hasJoin) {
-      sql = `${e(MainAlias)}.`;
+      sql = `${e(cm.MainAlias)}.`;
     }
     sql += e(col.__name);
-    return new SelectedColumnIO(col, sql);
+    return new cm.ColumnIO(col, sql);
   }
 }
 
