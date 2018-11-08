@@ -13,6 +13,17 @@ test('Basic', () => {
 
   expect(io.sql).toBe('SELECT `id`, `name` FROM `user`');
   expect(io.from).toBeInstanceOf(mr.TableIO);
+  expect(io.where).toBeNull();
+});
+
+test('Where', () => {
+  const v = dd.action('t')
+    .select(user.id, user.name)
+    .from(user)
+    .where(dd.sql`${user.id} = 1`);
+  const io = mr.select(v, dialect);
+
+  expect(io.where).toBeInstanceOf(mr.SQLIO);
 });
 
 test('Basic join', () => {

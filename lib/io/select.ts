@@ -8,6 +8,7 @@ export class SelectIO {
     public sql: string,
     public cols: cm.ColumnIO[],
     public from: cm.TableIO,
+    public where: cm.SQLIO|null,
   ) { }
 }
 
@@ -15,7 +16,6 @@ export class SelectProcessor {
   jcMap = new Map<string, cm.JoinIO>();
   joins: cm.JoinIO[] = [];
   joinedTableCounter = 0;
-  cols: cm.ColumnIO[]|null = null;
 
   constructor(
     public action: dd.SelectAction,
@@ -51,9 +51,9 @@ export class SelectProcessor {
       }
     }
 
-    this.cols = colIOs;
-
-    return new SelectIO(sql, colIOs, fromIO);
+    // where
+    const whereIO = action.whereSQL ? new cm.SQLIO(action.whereSQL) : null;
+    return new SelectIO(sql, colIOs, fromIO, whereIO);
   }
 
   private handleFrom(table: dd.Table, hasJoin: boolean): cm.TableIO {
