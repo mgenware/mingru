@@ -28,15 +28,42 @@ export class ColumnIO {
   ) { }
 }
 
-export class RawSQLIO {
+export class SQLIO {
   constructor(
-    public rawSQL: dd.RawSQL,
+    public sql: dd.SQL,
   ) { }
+
+  toSQL(dialect: Dialect): string {
+    const { sql } = this;
+    let res = '';
+    for (let i = 0; i < sql.literals.length; i++) {
+      res += sql.literals[i];
+      res += this.handleParam(sql.params[i], dialect);
+    }
+    return res;
+  }
+
+  private handleParam(param: dd.SQLParam, dialect: Dialect): string {
+    if (param instanceof dd.ColumnBase) {
+      return dialect.escapeColumn(param as dd.ColumnBase);
+    }
+    if (param instanceof dd.InputParam) {
+      return dialect.inputPlaceholder(param as dd.InputParam);
+    }
+    throw new Error(`Unsupported type of dd.SQLParam: ${param}`);
+  }
 }
 
 export class SetterIO {
+  static fromSetter(setter: dd.ColumnSetter): SetterIO {
+    return new SetterIO(
+      setter.column,
+      new SQLIO(setter.sql),
+    );
+  }
+
   constructor(
     public col: dd.ColumnBase,
-    public rawSQL: RawSQLIO,
+    public rawSQL: SQLIO,
   ) { }
 }

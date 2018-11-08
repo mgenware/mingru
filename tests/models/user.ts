@@ -2,7 +2,8 @@ import * as dd from 'dd-models';
 
 class User extends dd.Table {
   id = dd.pk();
-  nick = dd.varChar(100);
+  name = dd.varChar(100);
+  age = dd.int(0);
 }
 
 export default dd.table(User);
