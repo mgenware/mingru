@@ -11,5 +11,5 @@ test('Basic', () => {
     .set(user.age, dd.sql`${user.age} + 1`);
   const io = update(v, dialect);
 
-  expect(io.sql).toBe('SELECT `id`, `nick` FROM `user`');
+  expect(io.sql).toBe('UPDATE `user` SET `name` = haha SET `age` = `age` + 1');
 });

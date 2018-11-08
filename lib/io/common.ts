@@ -36,9 +36,12 @@ export class SQLIO {
   toSQL(dialect: Dialect): string {
     const { sql } = this;
     let res = '';
-    for (let i = 0; i < sql.literals.length; i++) {
-      res += sql.literals[i];
-      res += this.handleParam(sql.params[i], dialect);
+    for (const element of sql.elements) {
+      if (typeof element === 'string') {
+        res += element as string;
+      } else {
+        res += this.handleParam(element as dd.SQLParam, dialect);
+      }
     }
     return res;
   }
