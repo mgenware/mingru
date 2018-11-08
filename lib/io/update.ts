@@ -6,7 +6,7 @@ import * as cm from './common';
 export class UpdateIO {
   constructor(
     public sql: string,
-    public table: dd.Table,
+    public table: cm.TableIO,
     public setters: cm.SetterIO[],
     public where: cm.SQLIO,
   ) { }
@@ -27,7 +27,8 @@ export class UpdateProcessor {
     const table = action.table as dd.Table;
 
     // table
-    sql += this.handleFrom(table);
+    const fromIO = this.handleFrom(table);
+    sql += fromIO.sql;
 
     // setters
     const setters: cm.SetterIO[] = [];
@@ -41,12 +42,13 @@ export class UpdateProcessor {
     // where
     const whereIO = new cm.SQLIO(action.whereSQL as dd.SQL);
 
-    return new UpdateIO(sql, table, setters, whereIO);
+    return new UpdateIO(sql, fromIO, setters, whereIO);
   }
 
-  private handleFrom(table: dd.Table): string {
+  private handleFrom(table: dd.Table): cm.TableIO {
     const e = this.dialect.escape;
-    return `${e(table.__name)}`;
+    const sql = `${e(table.__name)}`;
+    return new cm.TableIO(table, sql);
   }
 }
 

@@ -21,6 +21,13 @@ export class JoinIO {
   }
 }
 
+export class TableIO {
+  constructor(
+    public table: dd.Table,
+    public sql: string,
+  ) { }
+}
+
 export class ColumnIO {
   constructor(
     public col: dd.ColumnBase,

@@ -7,7 +7,7 @@ export class SelectIO {
   constructor(
     public sql: string,
     public cols: cm.ColumnIO[],
-    public fromSQL: string,
+    public from: cm.TableIO,
   ) { }
 }
 
@@ -15,7 +15,6 @@ export class SelectProcessor {
   jcMap = new Map<string, cm.JoinIO>();
   joins: cm.JoinIO[] = [];
   joinedTableCounter = 0;
-  fromSQL = '';
   cols: cm.ColumnIO[]|null = null;
 
   constructor(
@@ -41,8 +40,8 @@ export class SelectProcessor {
     sql += colIOs.map(c => c.sql).join(', ');
 
     // from
-    const fromSQL = this.handleFrom(from as dd.Table, hasJoin);
-    sql += ' ' + fromSQL;
+    const fromIO = this.handleFrom(from as dd.Table, hasJoin);
+    sql += ' ' + fromIO.sql;
 
     // joins
     if (hasJoin) {
@@ -52,19 +51,18 @@ export class SelectProcessor {
       }
     }
 
-    this.fromSQL = fromSQL;
     this.cols = colIOs;
 
-    return new SelectIO(sql, colIOs, fromSQL);
+    return new SelectIO(sql, colIOs, fromIO);
   }
 
-  private handleFrom(table: dd.Table, hasJoin: boolean): string {
+  private handleFrom(table: dd.Table, hasJoin: boolean): cm.TableIO {
     const e = this.dialect.escape;
     let sql = `FROM ${e(table.__name)}`;
     if (hasJoin) {
       sql += ' AS ' + e(cm.MainAlias);
     }
-    return sql;
+    return new cm.TableIO(table, sql);
   }
 
   private handleSelect(col: dd.ColumnBase, hasJoin: boolean): cm.ColumnIO {
