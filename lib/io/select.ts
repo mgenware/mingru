@@ -5,6 +5,7 @@ import * as cm from './common';
 
 export class SelectIO {
   constructor(
+    public action: dd.SelectAction,
     public sql: string,
     public cols: cm.ColumnIO[],
     public from: cm.TableIO,
@@ -53,7 +54,7 @@ export class SelectProcessor {
 
     // where
     const whereIO = action.whereSQL ? new cm.SQLIO(action.whereSQL) : null;
-    return new SelectIO(sql, colIOs, fromIO, whereIO);
+    return new SelectIO(this.action, sql, colIOs, fromIO, whereIO);
   }
 
   private handleFrom(table: dd.Table, hasJoin: boolean): cm.TableIO {
@@ -104,7 +105,8 @@ export class SelectProcessor {
     const io = this.handleJoin(jc);
     const e = this.dialect.escape;
     const sql = `${e(io.tableAlias)}.${e(jc.selectedColumn.__name)}`;
-    return new cm.ColumnIO(jc, sql);
+    // TODO: alias support
+    return new cm.ColumnIO(jc, jc.__name, sql);
   }
 
   private nextJoinedTableName(): string {
@@ -119,7 +121,7 @@ export class SelectProcessor {
       sql = `${e(cm.MainAlias)}.`;
     }
     sql += e(col.__name);
-    return new cm.ColumnIO(col, sql);
+    return new cm.ColumnIO(col, col.__name, sql);
   }
 }
 
