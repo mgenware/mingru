@@ -7,8 +7,7 @@ const dialect = new mr.MySQL();
 
 test('Basic', () => {
   const actions = dd.actions(user);
-  const v = actions.select('t', user.id, user.name)
-    .from(user);
+  const v = actions.select('t', user.id, user.name);
   const io = mr.select(v, dialect);
 
   expect(io.sql).toBe('SELECT `id`, `name` FROM `user`');
@@ -19,7 +18,6 @@ test('Basic', () => {
 test('Where', () => {
   const actions = dd.actions(user);
   const v = actions.select('t', user.id, user.name)
-    .from(user)
     .where(dd.sql`${user.id} = 1`);
   const io = mr.select(v, dialect);
 
@@ -27,23 +25,21 @@ test('Where', () => {
 });
 
 test('Basic join', () => {
-  const actions = dd.actions(user);
-  const v = actions.select('t', post.user_id.join(user).name, post.title)
-  .from(post);
+  const actions = dd.actions(post);
+  const v = actions.select('t', post.user_id.join(user).name, post.title);
   const io = mr.select(v, dialect);
 
   expect(io.sql).toBe('SELECT `_join_1`.`name`, `_main`.`title` FROM `post` AS `_main` INNER JOIN `user` AS `_join_1` ON `_join_1`.`id` = `_main`.`user_id`');
 });
 
 test('Same table, multiple cols join', () => {
-  const actions = dd.actions(user);
+  const actions = dd.actions(post);
   const v = actions.select(
       't',
       post.user_id.join(user).name,
       post.user_id.join(user).id,
       post.reviewer_id.join(user).name,
-    )
-    .from(post);
+    );
   const io = mr.select(v, dialect);
 
   expect(io.sql).toBe('SELECT `_join_1`.`name`, `_join_1`.`id`, `_join_2`.`name` FROM `post` AS `_main` INNER JOIN `user` AS `_join_1` ON `_join_1`.`id` = `_main`.`user_id` INNER JOIN `user` AS `_join_2` ON `_join_2`.`id` = `_main`.`reviewer_id`');

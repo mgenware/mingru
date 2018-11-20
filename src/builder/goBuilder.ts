@@ -1,6 +1,8 @@
 import { SelectIO } from '../io/select';
 import { capitalizeFirstLetter } from '../lib/stringUtil';
 import Dialect from '../dialect';
+import * as dd from 'dd-models';
+import { throwIfFalsy } from 'throw-if-arg-empty';
 
 const INDENT = '\t';
 const NEWLINE = '\n';
@@ -12,7 +14,12 @@ export default class GoBuilder {
     public dialect: Dialect,
   ) { }
 
-  private select(io: SelectIO) {
+  build(tableActions: dd.TableActionCollection): string {
+    throwIfFalsy(tableActions, 'tableActions');
+    return '';
+  }
+
+  select(io: SelectIO): string {
     const { dialect } = this;
     const actionName = capitalizeFirstLetter(io.action.name);
     const funcName = this.getMemberName('Select', actionName);
@@ -37,6 +44,8 @@ export default class GoBuilder {
       code += `${INDENT}${capitalizeFirstLetter(fieldName)} ${fieldType}\n`;
     }
     code += `}${NEWLINE}${NEWLINE}`;
+
+    return code;
   }
 
   private getMemberName(prefix: string, viewName: string) {

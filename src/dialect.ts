@@ -5,7 +5,7 @@ export default class Dialect {
     throw new Error('Not implemented yet');
   }
 
-  goType(column: dd.Column): string {
+  goType(_: dd.Column): string {
     throw new Error('Not implemented yet');
   }
 
