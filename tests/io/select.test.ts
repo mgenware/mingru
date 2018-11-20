@@ -1,4 +1,4 @@
-import * as mr from '../..';
+import * as mr from '../../';
 import * as dd from 'dd-models';
 import user from '../models/user';
 import post from '../models/post';
@@ -6,8 +6,8 @@ import post from '../models/post';
 const dialect = new mr.MySQL();
 
 test('Basic', () => {
-  const v = dd.action('t')
-    .select(user.id, user.name)
+  const actions = dd.actions(user);
+  const v = actions.select('t', user.id, user.name)
     .from(user);
   const io = mr.select(v, dialect);
 
@@ -17,8 +17,8 @@ test('Basic', () => {
 });
 
 test('Where', () => {
-  const v = dd.action('t')
-    .select(user.id, user.name)
+  const actions = dd.actions(user);
+  const v = actions.select('t', user.id, user.name)
     .from(user)
     .where(dd.sql`${user.id} = 1`);
   const io = mr.select(v, dialect);
@@ -27,8 +27,8 @@ test('Where', () => {
 });
 
 test('Basic join', () => {
-  const v = dd.action('t')
-  .select(post.user_id.join(user).name, post.title)
+  const actions = dd.actions(user);
+  const v = actions.select('t', post.user_id.join(user).name, post.title)
   .from(post);
   const io = mr.select(v, dialect);
 
@@ -36,8 +36,9 @@ test('Basic join', () => {
 });
 
 test('Same table, multiple cols join', () => {
-  const v = dd.action('t')
-    .select(
+  const actions = dd.actions(user);
+  const v = actions.select(
+      't',
       post.user_id.join(user).name,
       post.user_id.join(user).id,
       post.reviewer_id.join(user).name,
