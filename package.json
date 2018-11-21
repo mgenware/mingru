@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "@sindresorhus/is": "^0.13.0",
-    "dd-models": "^0.0.18",
+    "dd-models": "^0.0.20",
     "throw-if-arg-empty": "^1.0.1"
   }
 }

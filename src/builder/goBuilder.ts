@@ -50,7 +50,7 @@ export default class GoBuilder {
       return this.select(io as SelectIO);
     }
     throw new Error(`Not supported io object "${inspect(io)}"`);
-  )
+  }
 
   private select(io: SelectIO): string {
     const { dialect, daType } = this;
@@ -82,10 +82,17 @@ export default class GoBuilder {
       for (const element of io.where.sql.elements) {
         if (element instanceof dd.InputParam) {
           const input = element as dd.InputParam;
+          let typeCode;
+          if (input.type instanceof dd.Column) {
+            typeCode = dialect.goType(input.type as dd.Column);
+          } else {
+            typeCode = input.type as string;
+          }
+          paramsCode += `, ${input.name} ${typeCode}`;
         }
       }
     }
-    code += `func (da *${daType}) ${actionName}()`;
+    code += `func (da *${daType}) ${actionName}(${paramsCode})`;
     return code;
   }
 
