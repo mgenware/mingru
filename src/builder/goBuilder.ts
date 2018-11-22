@@ -4,7 +4,7 @@ import Dialect from '../dialect';
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import { Action } from 'dd-models/dist/actions/action';
-import { inspect } from 'util';
+import toTypeString from 'to-type-string';
 
 const INDENT = '\t';
 const NEWLINE = '\n';
@@ -49,7 +49,7 @@ export default class GoBuilder {
     if (io instanceof SelectIO) {
       return this.select(io as SelectIO);
     }
-    throw new Error(`Not supported io object "${inspect(io)}"`);
+    throw new Error(`Not supported io object "${toTypeString(io)}"`);
   }
 
   private select(io: SelectIO): string {

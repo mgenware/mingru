@@ -43,6 +43,7 @@
   "dependencies": {
     "@sindresorhus/is": "^0.13.0",
     "dd-models": "^0.0.20",
-    "throw-if-arg-empty": "^1.0.1"
+    "throw-if-arg-empty": "^1.0.1",
+    "to-type-string": "^1.0.0"
   }
 }

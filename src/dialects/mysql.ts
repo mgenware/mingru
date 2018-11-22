@@ -1,7 +1,7 @@
 import Dialect from '../dialect';
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import { inspect } from 'util';
+import toTypeString from 'to-type-string';
 
 export default class MySQL extends Dialect {
   escape(name: string): string {
@@ -35,6 +35,6 @@ export default class MySQL extends Dialect {
         }
       }
     }
-    throw new Error(`Type not supported: ${inspect(column.types)}`);
+    throw new Error(`Type not supported: ${toTypeString(column.types)}`);
   }
 }
