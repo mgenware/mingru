@@ -5,7 +5,7 @@ import user from '../models/user';
 const dialect = new mr.MySQL();
 
 test('inputPlaceholder', () => {
-  expect(dialect.inputPlaceholder(new dd.InputParam(new Set<string>('t')))).toBe('?');
+  expect(dialect.inputPlaceholder(new dd.InputParam('Type', 'name'))).toBe('?');
 });
 
 test('escapeColumn', () => {

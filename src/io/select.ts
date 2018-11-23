@@ -44,6 +44,13 @@ export class SelectProcessor {
     const fromIO = this.handleFrom(from as dd.Table, hasJoin);
     sql += ' ' + fromIO.sql;
 
+    // where
+    let whereIO: cm.SQLIO|null = null;
+    if (action.whereSQL) {
+      whereIO = new cm.SQLIO(action.whereSQL);
+      sql += ' WHERE ' + whereIO.toSQL(this.dialect);
+    }
+
     // joins
     if (hasJoin) {
       for (const join of this.joins) {
@@ -51,9 +58,6 @@ export class SelectProcessor {
         sql += ' ' + joinSQL;
       }
     }
-
-    // where
-    const whereIO = action.whereSQL ? new cm.SQLIO(action.whereSQL) : null;
     return new SelectIO(this.action, sql, colIOs, fromIO, whereIO);
   }
 

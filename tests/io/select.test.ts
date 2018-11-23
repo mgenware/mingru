@@ -22,6 +22,7 @@ test('Where', () => {
   const io = mr.select(v, dialect);
 
   expect(io.where).toBeInstanceOf(mr.SQLIO);
+  expect(io.sql).toBe('SELECT `id`, `name` FROM `user` WHERE `id` = 1');
 });
 
 test('Basic join', () => {

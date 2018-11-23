@@ -3,18 +3,19 @@ import { capitalizeFirstLetter } from '../lib/stringUtil';
 import Dialect from '../dialect';
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import { Action } from 'dd-models/dist/actions/action';
 import toTypeString from 'to-type-string';
+import select from '../io/select';
 
-const INDENT = '\t';
-const NEWLINE = '\n';
-const QUERYABLE = 'queryable sqlx.Queryable';
+const Indent = '\t';
+const Newline = '\n';
+const QueryableParam = 'queryable';
+const QueryableType = 'sqlx.Queryable';
 
 export default class GoBuilder {
   memberNames: Set<string> = new Set<string>();
 
   private tableName: string;
-  private daType: string;
+  private tableClassType: string;
 
   constructor(
     public dialect: Dialect,
@@ -22,15 +23,15 @@ export default class GoBuilder {
   ) {
     throwIfFalsy(tableActions, 'tableActions');
     this.tableName = this.tableActions.table.__name;
-    this.daType = `${this.tableName}DA`;
+    this.tableClassType = `${this.tableName}DA`;
   }
 
   build(): string {
     const { tableActions } = this;
 
     let code = this.buildDataObject(tableActions);
-    code += `// ----- Actions ----- //${NEWLINE}`;
-    for (const [_, action] of tableActions.map) {
+    code += `// ----- Actions ----- //${Newline}`;
+    for (const action of tableActions.map.values()) {
       code += this.buildAction(action);
     }
     return code;
@@ -40,27 +41,30 @@ export default class GoBuilder {
     const tableName = tableActions.table.__name;
     const clsName = tableName + 'TableType';
     const objName = capitalizeFirstLetter(tableName);
-    let code = `type ${clsName} struct {${NEWLINE}}${NEWLINE}`;
-    code += `var ${objName} = &${clsName}{}${NEWLINE}${NEWLINE}`;
+    let code = `type ${clsName} struct {${Newline}}${Newline}`;
+    code += `var ${objName} = &${clsName}{}${Newline}${Newline}`;
     return code;
   }
 
-  private buildAction(io: unknown): string {
-    if (io instanceof SelectIO) {
-      return this.select(io as SelectIO);
+  private buildAction(action: unknown): string {
+    const { dialect } = this;
+    if (action instanceof dd.SelectAction) {
+      const selectAction = action as dd.SelectAction;
+      const io = select(selectAction, dialect);
+      return this.select(io);
     }
-    throw new Error(`Not supported io object "${toTypeString(io)}"`);
+    throw new Error(`Not supported io object "${toTypeString(action)}"`);
   }
 
   private select(io: SelectIO): string {
-    const { dialect, daType } = this;
+    const { dialect, tableClassType } = this;
     const actionName = capitalizeFirstLetter(io.action.name);
     const funcName = this.getMemberName('Select', actionName);
-    const clsName = funcName + 'Result';
+    const resultTypeName = funcName + 'Result';
 
     let code = '';
     // Build result type
-    code += `type ${clsName} struct {${NEWLINE}`;
+    code += `type ${resultTypeName} struct {${Newline}`;
 
     const colNames = new Set<string>();
     for (const col of io.cols) {
@@ -72,12 +76,12 @@ export default class GoBuilder {
       colNames.add(fieldName);
       const fieldType = dialect.goType(col.col.__getTargetColumn());
 
-      code += `${INDENT}${capitalizeFirstLetter(fieldName)} ${fieldType}\n`;
+      code += `${Indent}${capitalizeFirstLetter(fieldName)} ${fieldType}\n`;
     }
-    code += `}${NEWLINE}${NEWLINE}`;
+    code += `}${Newline}${Newline}`;
 
     // Build func
-    let paramsCode = QUERYABLE;
+    let paramsCode = `${QueryableParam} ${QueryableType}`;
     if (io.where) {
       for (const element of io.where.sql.elements) {
         if (element instanceof dd.InputParam) {
@@ -92,7 +96,19 @@ export default class GoBuilder {
         }
       }
     }
-    code += `func (da *${daType}) ${actionName}(${paramsCode})`;
+    // > func
+    code += `func (da *${tableClassType}) ${actionName}(${paramsCode}) *${resultTypeName} {`;
+    code += `${Indent}var result *${resultTypeName}`;
+    // > call
+    code += `err := .QueryRow("${io.sql}`;
+    if (io.where) {
+    }
+
+    // < call
+    code += '")';
+
+    // < func
+    code += `}${Newline}`;
     return code;
   }
 
