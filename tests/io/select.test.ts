@@ -25,6 +25,16 @@ test('Where', () => {
   expect(io.sql).toBe('SELECT `id`, `name` FROM `user` WHERE `id` = 1');
 });
 
+test('Where with inputs', () => {
+  const actions = dd.actions(user);
+  const v = actions.select('t', user.id, user.name)
+    .where(dd.sql`${user.id} = ${dd.input(user.id)} && ${user.name} = ${dd.input('string', 'userName')}`);
+  const io = mr.select(v, dialect);
+
+  expect(io.where).toBeInstanceOf(mr.SQLIO);
+  expect(io.sql).toBe('SELECT `id`, `name` FROM `user` WHERE `id` = ? && `name` = ?');
+});
+
 test('Basic join', () => {
   const actions = dd.actions(post);
   const v = actions.select('t', post.user_id.join(user).name, post.title);
