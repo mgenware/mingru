@@ -108,8 +108,8 @@ export default class GoBuilder {
     // Prepare
     let funcParams = `${QueryableParam} ${QueryableType}`;
     const paramInfos = ParamInfo.getList(dialect, io.where);
-    funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join();
-    const queryParams = paramInfos.map(p => `, ${p.name}`).join();
+    funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join('');
+    const queryParams = paramInfos.map(p => `, ${p.name}`).join('');
 
     code += `// ${actionName} ...
 func (da *${tableClassType}) ${actionName}(${funcParams}) (${selectAll ? `[]*${resultType}` : `*${resultType}`}, error) {

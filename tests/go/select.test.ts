@@ -29,3 +29,15 @@ test('WhereAll', async () => {
   ta.selectAll('t', post.id, post.title).where(dd.sql`${post.id} = ${dd.input(post.id)}`);
   await testBuilderAsync(ta, 'select/whereAll');
 });
+
+test('Where: multiple cols', async () => {
+  const ta = newTA();
+  ta.select('t', post.id, post.title).where(dd.sql`${post.id} = ${dd.input(post.id)} && ${post.title} != ${dd.input(post.title)}`);
+  await testBuilderAsync(ta, 'select/whereMultipleCols');
+});
+
+test('Custom params', async () => {
+  const ta = newTA();
+  ta.select('t', post.id, post.title).where(dd.sql`${post.id} = ${dd.input(post.id, 'id')} && raw_name = ${dd.input('string', 'name')}`);
+  await testBuilderAsync(ta, 'select/customParams');
+});
