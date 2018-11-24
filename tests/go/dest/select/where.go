@@ -7,9 +7,9 @@ type SelectTResult struct {
 }
 
 // SelectT ...
-func (da *TableTypePost) SelectT(queryable sqlx.Queryable) (*SelectTResult, error) {
+func (da *TableTypePost) SelectT(queryable sqlx.Queryable, postID uint64) (*SelectTResult, error) {
 	result := &SelectTResult{}
-	err := queryable.QueryRow("SELECT `id`, `title` FROM `post`").Scan(&result.ID, &result.Title)
+	err := queryable.QueryRow("SELECT `id`, `title` FROM `post` WHERE `id` = ?", postID).Scan(&result.ID, &result.Title)
 	if err != nil {
 		return nil, err
 	}

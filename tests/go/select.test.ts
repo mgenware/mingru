@@ -15,5 +15,17 @@ test('Basic', async () => {
 test('Select all', async () => {
   const ta = newTA();
   ta.selectAll('t', post.id, post.title);
-  await testBuilderAsync(ta, 'select/selectAll');
+  await testBuilderAsync(ta, 'select/basicAll');
+});
+
+test('Where', async () => {
+  const ta = newTA();
+  ta.select('t', post.id, post.title).where(dd.sql`${post.id} = ${dd.input(post.id)}`);
+  await testBuilderAsync(ta, 'select/where');
+});
+
+test('WhereAll', async () => {
+  const ta = newTA();
+  ta.selectAll('t', post.id, post.title).where(dd.sql`${post.id} = ${dd.input(post.id)}`);
+  await testBuilderAsync(ta, 'select/whereAll');
 });

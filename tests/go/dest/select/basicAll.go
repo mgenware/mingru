@@ -2,7 +2,7 @@ import "github.com/mgenware/go-packagex/database/sqlx"
 
 // SelectTResult ...
 type SelectTResult struct {
-	ID    int64
+	ID    uint64
 	Title string
 }
 

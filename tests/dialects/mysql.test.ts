@@ -13,6 +13,7 @@ test('DT', () => {
     [dd.unsignedInt(), 'uint'],
     [dd.bigInt(), 'int64'],
     [dd.unsignedBigInt(), 'uint64'],
+    [dd.pk(), 'uint64'],
     [dd.smallInt(), 'int16'],
     [dd.unsignedSmallInt(), 'uint16'],
     [dd.tinyInt(), 'int8'],
