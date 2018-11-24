@@ -5,11 +5,22 @@ import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import toTypeString from 'to-type-string';
 import select from '../io/select';
+import ParamInfo from './paramInfo';
+import {
+  struct,
+  sep,
+  pointerVar,
+  InstanceVariable,
+  makeArray,
+} from './go';
 
-const Indent = '\t';
-const Newline = '\n';
 const QueryableParam = 'queryable';
 const QueryableType = 'sqlx.Queryable';
+const ResultVar = 'res';
+
+function joinParams(arr: string[]): string {
+  return arr.join(', ');
+}
 
 export default class GoBuilder {
   memberNames: Set<string> = new Set<string>();
@@ -18,31 +29,37 @@ export default class GoBuilder {
   private tableClassType: string;
 
   constructor(
-    public dialect: Dialect,
     public tableActions: dd.TableActionCollection,
+    public dialect: Dialect,
+    public packageName = 'da',
   ) {
     throwIfFalsy(tableActions, 'tableActions');
     this.tableName = this.tableActions.table.__name;
-    this.tableClassType = `${this.tableName}DA`;
+    const tableName = tableActions.table.__name;
+    this.tableClassType = `TableType${capitalizeFirstLetter(tableName)}`;
   }
 
-  build(): string {
+  build(actionsOnly?: boolean): string {
     const { tableActions } = this;
 
-    let code = this.buildDataObject(tableActions);
-    code += `// ----- Actions ----- //${Newline}`;
+    let code = '';
+    if (!actionsOnly) {
+      code +=
+        `package ${this.packageName}
+
+`;
+      code += `import (
+\t"github.com/mgenware/go-packagex/database/sqlx"
+)
+
+`;
+
+      code += this.buildDataObject();
+      code += sep('Actions');
+    }
     for (const action of tableActions.map.values()) {
       code += this.buildAction(action);
     }
-    return code;
-  }
-
-  private buildDataObject(tableActions: dd.TableActionCollection): string {
-    const tableName = tableActions.table.__name;
-    const clsName = tableName + 'TableType';
-    const objName = capitalizeFirstLetter(tableName);
-    let code = `type ${clsName} struct {${Newline}}${Newline}`;
-    code += `var ${objName} = &${clsName}{}${Newline}${Newline}`;
     return code;
   }
 
@@ -56,17 +73,26 @@ export default class GoBuilder {
     throw new Error(`Not supported io object "${toTypeString(action)}"`);
   }
 
+  private buildDataObject(): string {
+    let code = struct(this.tableClassType, []);
+    code += `var ${capitalizeFirstLetter(this.tableName)} = &${
+      this.tableClassType
+    }{}
+
+`;
+    return code;
+  }
+
   private select(io: SelectIO): string {
     const { dialect, tableClassType } = this;
-    const actionName = capitalizeFirstLetter(io.action.name);
-    const funcName = this.getMemberName('Select', actionName);
-    const resultTypeName = funcName + 'Result';
+    const actionName = io.action.name;
+    const resultType = `${actionName}Result`;
+    const selectAll = io.action.selectAll;
 
     let code = '';
     // Build result type
-    code += `type ${resultTypeName} struct {${Newline}`;
-
     const colNames = new Set<string>();
+    const selectedFields: InstanceVariable[] = [];
     for (const col of io.cols) {
       const fieldName = col.name;
       // TOOO: support alias
@@ -75,45 +101,56 @@ export default class GoBuilder {
       }
       colNames.add(fieldName);
       const fieldType = dialect.goType(col.col.__getTargetColumn());
-
-      code += `${Indent}${capitalizeFirstLetter(fieldName)} ${fieldType}\n`;
+      selectedFields.push(new InstanceVariable(fieldName, fieldType));
     }
-    code += `}${Newline}${Newline}`;
+    code += struct(resultType, selectedFields);
 
-    // Build func
-    let paramsCode = `${QueryableParam} ${QueryableType}`;
-    if (io.where) {
-      for (const element of io.where.sql.elements) {
-        if (element instanceof dd.InputParam) {
-          const input = element as dd.InputParam;
-          let typeCode;
-          if (input.type instanceof dd.Column) {
-            typeCode = dialect.goType(input.type as dd.Column);
-          } else {
-            typeCode = input.type as string;
-          }
-          paramsCode += `, ${input.name} ${typeCode}`;
-        }
-      }
-    }
+    // Prepare
+    let funcParams = `${QueryableParam} ${QueryableType}`;
+    const paramInfos = ParamInfo.getList(dialect, io.where);
+    funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join();
+    const queryParams = paramInfos.map(p => `, ${p.name}`).join();
+    const scanParams = joinParams(selectedFields.map(p => `&${ResultVar}.${p.name}`));
+
     // > func
-    code += `func (da *${tableClassType}) ${actionName}(${paramsCode}) *${resultTypeName} {`;
-    code += `${Indent}var result *${resultTypeName}`;
-    // > call
-    code += `err := .QueryRow("${io.sql}`;
-    if (io.where) {
+    code += `// ${actionName} ...
+func (da *${tableClassType}) ${actionName}(${funcParams}) (${selectAll ? `[]*${resultType}` : `*${resultType}`}, error) {
+`;
+    // Result var
+    if (selectAll) {
+      // > call Query
+      code += `\trows, err := ${QueryableParam}.Query("${io.sql}${queryParams})
+\tif err != nil {
+\t\treturn nil, err
+\t}
+\t${makeArray(ResultVar, `*${resultType}`)}
+\tdefer rows.Close()
+\tfor rows.Next() {
+\t\t${pointerVar('item', resultType)}
+\t\terr = rows.Scan(${scanParams})
+\t\tif err != nil {
+\t\t\treturn nil, err
+\t\t}
+\t\tresult = append(result, item)
+\t}
+\terr = rows.Err()
+\tif err != nil {
+\t\treturn nil, err
+\t}
+`;
+    } else {
+      code += `\t${pointerVar(ResultVar, resultType)}
+\terr := ${QueryableParam}.QueryRow("${io.sql}${queryParams}").Scan(${scanParams})
+\tif err != nil {
+\t\treturn nil, err
+\t}
+`;
     }
+    // Return the result
+    code += `\treturn ${ResultVar}, nil
+}
 
-    // < call
-    code += '")';
-
-    // < func
-    code += `}${Newline}`;
+`;
     return code;
-  }
-
-  private getMemberName(prefix: string, viewName: string) {
-    const name = prefix + viewName;
-    return name;
   }
 }
