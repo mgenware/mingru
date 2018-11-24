@@ -16,7 +16,7 @@ import {
 
 const QueryableParam = 'queryable';
 const QueryableType = 'sqlx.Queryable';
-const ResultVar = 'res';
+const ResultVar = 'result';
 
 function joinParams(arr: string[]): string {
   return arr.join(', ');
@@ -110,16 +110,14 @@ export default class GoBuilder {
     const paramInfos = ParamInfo.getList(dialect, io.where);
     funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join();
     const queryParams = paramInfos.map(p => `, ${p.name}`).join();
-    const scanParams = joinParams(selectedFields.map(p => `&${ResultVar}.${p.name}`));
 
-    // > func
     code += `// ${actionName} ...
 func (da *${tableClassType}) ${actionName}(${funcParams}) (${selectAll ? `[]*${resultType}` : `*${resultType}`}, error) {
 `;
-    // Result var
     if (selectAll) {
+      const scanParams = joinParams(selectedFields.map(p => `&item.${p.name}`));
       // > call Query
-      code += `\trows, err := ${QueryableParam}.Query("${io.sql}${queryParams})
+      code += `\trows, err := ${QueryableParam}.Query("${io.sql}${queryParams}")
 \tif err != nil {
 \t\treturn nil, err
 \t}
@@ -139,6 +137,7 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) (${selectAll ? `[]*${r
 \t}
 `;
     } else {
+      const scanParams = joinParams(selectedFields.map(p => `&${ResultVar}.${p.name}`));
       code += `\t${pointerVar(ResultVar, resultType)}
 \terr := ${QueryableParam}.QueryRow("${io.sql}${queryParams}").Scan(${scanParams})
 \tif err != nil {

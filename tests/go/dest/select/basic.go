@@ -8,11 +8,11 @@ type SelectTResult struct {
 
 // SelectT ...
 func (da *TableTypePost) SelectT(queryable sqlx.Queryable) (*SelectTResult, error) {
-	res := &SelectTResult{}
-	err := queryable.QueryRow("SELECT `id`, `title` FROM `post`").Scan(&res.ID, &res.Title)
+	result := &SelectTResult{}
+	err := queryable.QueryRow("SELECT `id`, `title` FROM `post`").Scan(&result.ID, &result.Title)
 	if err != nil {
 		return nil, err
 	}
-	return res, nil
+	return result, nil
 }
 
