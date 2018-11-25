@@ -1,4 +1,4 @@
-import { capitalizeFirstLetter } from '../lib/stringUtil';
+import { capitalizeColumnName } from '../lib/stringUtil';
 
 export class InstanceVariable {
   name: string;
@@ -7,11 +7,7 @@ export class InstanceVariable {
     name: string,
     public type: string,
   ) {
-    if (name === 'id') {
-      this.name = 'ID';
-    } else {
-      this.name = capitalizeFirstLetter(name);
-    }
+    this.name = capitalizeColumnName(name);
   }
 }
 

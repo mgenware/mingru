@@ -691,13 +691,15 @@ data-urls@^1.0.0:
     whatwg-mimetype "^2.1.0"
     whatwg-url "^7.0.0"
 
-dd-models@^0.0.26:
-  version "0.0.26"
-  resolved "https://registry.yarnpkg.com/dd-models/-/dd-models-0.0.26.tgz#df389381834f9f4b00ea2c1354f9bf0f2797434c"
-  integrity sha512-37hB0SpqOtPbaE4TsM3uTsizVIfsZP662ID7oeaq+clCjQNs2au1w+x2pKkNVeClQi1B/jMUeu2ERVD0WJbhmA==
+dd-models@^0.0.29:
+  version "0.0.29"
+  resolved "https://registry.yarnpkg.com/dd-models/-/dd-models-0.0.29.tgz#0cbb38d5a9c5d16eaff1e23ca14d4aa203898eb6"
+  integrity sha512-tH6O0iSoQBUKd1GZ8DujsyaJ5rztUcghwSGRZWhI00+Q3Ch6jWbiphjVG4tDxSRspjXpm3ie1ts/9jUug5OoKg==
   dependencies:
+    lodash.camelcase "^4.3.0"
     lodash.snakecase "^4.1.1"
     throw-if-arg-empty "^1.0.1"
+    to-type-string "^1.0.0"
 
 debug@^2.1.2, debug@^2.2.0, debug@^2.3.3, debug@^2.6.8, debug@^2.6.9:
   version "2.6.9"
@@ -2163,6 +2165,11 @@ locate-path@^2.0.0:
   dependencies:
     p-locate "^2.0.0"
     path-exists "^3.0.0"
+
+lodash.camelcase@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/lodash.camelcase/-/lodash.camelcase-4.3.0.tgz#b28aa6288a2b9fc651035c7711f65ab6190331a6"
+  integrity sha1-soqmKIorn8ZRA1x3EfZathkDMaY=
 
 lodash.snakecase@^4.1.1:
   version "4.1.1"

@@ -37,4 +37,8 @@ export default class MySQL extends Dialect {
     }
     throw new Error(`Type not supported: ${toTypeString(column.types)}`);
   }
+
+  as(sql: string, name: string): string {
+    return `${sql} AS ${this.escape(name)}`;
+  }
 }

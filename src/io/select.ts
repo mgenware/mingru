@@ -16,7 +16,10 @@ export class SelectIO {
 export class SelectProcessor {
   jcMap = new Map<string, cm.JoinIO>();
   joins: cm.JoinIO[] = [];
+  // This makes sure all join table alias names are unique
   joinedTableCounter = 0;
+  // This makes sure all selected column names are unique
+  joinedColumnNameMap: { [k: string]: number } = {};
 
   constructor(
     public action: dd.SelectAction,
@@ -107,10 +110,12 @@ export class SelectProcessor {
 
   private handleJoinedColumn(jc: dd.JoinedColumn): cm.ColumnIO {
     const io = this.handleJoin(jc);
-    const e = this.dialect.escape;
+    const { dialect } = this;
+    const e = dialect.escape;
     const sql = `${e(io.tableAlias)}.${e(jc.selectedColumn.__name)}`;
     // TODO: alias support
-    return new cm.ColumnIO(jc, jc.__name, sql);
+    const alias = this.nextSelectedName(jc.__getInputName());
+    return new cm.ColumnIO(jc, jc.__name, dialect.as(sql, alias));
   }
 
   private nextJoinedTableName(): string {
@@ -118,13 +123,28 @@ export class SelectProcessor {
     return `_join_${this.joinedTableCounter}`;
   }
 
+  private nextSelectedName(name: string): string {
+    const { joinedColumnNameMap } = this;
+    if (!joinedColumnNameMap[name]) {
+      joinedColumnNameMap[name] = 1;
+    } else {
+      name += joinedColumnNameMap[name];
+      joinedColumnNameMap[name]++;
+    }
+    return name;
+  }
+
   private handleStandardColumn(col: dd.ColumnBase, hasJoin: boolean): cm.ColumnIO {
-    const e = this.dialect.escape;
+    const { dialect } = this;
+    const e = dialect.escape;
     let sql = '';
     if (hasJoin) {
       sql = `${e(cm.MainAlias)}.`;
     }
     sql += e(col.__name);
+    if (hasJoin) {
+      sql = dialect.as(sql, this.nextSelectedName(col.__getInputName()));
+    }
     return new cm.ColumnIO(col, col.__name, sql);
   }
 }

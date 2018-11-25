@@ -9,6 +9,10 @@ export default class Dialect {
     throw new Error('Not implemented yet');
   }
 
+  as(_: string, __: string): string {
+    throw new Error('Not implemented yet');
+  }
+
   escapeColumn(column: dd.ColumnBase): string {
     return this.escape(column.__name);
   }

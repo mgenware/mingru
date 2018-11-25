@@ -26,3 +26,7 @@ test('DT', () => {
     expect(dialect.goType(obj)).toBe(e);
   }
 });
+
+test('as', () => {
+  expect(dialect.as('abc', 'def')).toBe('abc AS `def`');
+});
