@@ -71,3 +71,17 @@ test('3-table joins', () => {
 
   expect(io.sql).toBe('SELECT `_main`.`id` AS `post_cmtID`, `_main`.`user_id` AS `post_cmtUserID`, `_join_1`.`user_id` AS `postCmtTargetUser`, `_join_1`.`title` AS `postCmtTargetTitle` FROM `post_cmt` AS `_main` INNER JOIN `post` AS `_join_1` ON `_join_1`.`id` = `_main`.`target_id`');
 });
+
+test('AS', () => {
+  const actions = dd.actions(cmt);
+  const v = actions.select(
+      't',
+      cmt.id,
+      cmt.user_id.as('a'),
+      cmt.target_id.join(post).user_id,
+      cmt.target_id.join(post).title.as('b'),
+    );
+  const io = mr.select(v, dialect);
+
+  expect(io.sql).toBe('SELECT `_main`.`id` AS `post_cmtID`, `_main`.`user_id` AS `a`, `_join_1`.`user_id` AS `postCmtTargetUser`, `_join_1`.`title` AS `b` FROM `post_cmt` AS `_main` INNER JOIN `post` AS `_join_1` ON `_join_1`.`id` = `_main`.`target_id`');
+});
