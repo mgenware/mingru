@@ -64,24 +64,12 @@ test('3-table joins', () => {
       't',
       cmt.id,
       cmt.user_id,
-      cmt.target_id.join(post).user_id,
       cmt.target_id.join(post).title,
-    );
-  const io = mr.select(v, dialect);
-
-  expect(io.sql).toBe('SELECT `_main`.`id` AS `post_cmtID`, `_main`.`user_id` AS `post_cmtUserID`, `_join_1`.`user_id` AS `postCmtTargetUser`, `_join_1`.`title` AS `postCmtTargetTitle` FROM `post_cmt` AS `_main` INNER JOIN `post` AS `_join_1` ON `_join_1`.`id` = `_main`.`target_id`');
-});
-
-test('AS', () => {
-  const actions = dd.actions(cmt);
-  const v = actions.select(
-      't',
-      cmt.id,
-      cmt.user_id.as('a'),
       cmt.target_id.join(post).user_id,
-      cmt.target_id.join(post).title.as('b'),
+      cmt.target_id.join(post).user_id.join(user).url_name,
+      cmt.target_id.join(post).user_id.join(user).id,
     );
   const io = mr.select(v, dialect);
 
-  expect(io.sql).toBe('SELECT `_main`.`id` AS `post_cmtID`, `_main`.`user_id` AS `a`, `_join_1`.`user_id` AS `postCmtTargetUser`, `_join_1`.`title` AS `b` FROM `post_cmt` AS `_main` INNER JOIN `post` AS `_join_1` ON `_join_1`.`id` = `_main`.`target_id`');
+  expect(io.sql).toBe('SELECT `_main`.`id` AS `postCmtID`, `_main`.`user_id` AS `postCmtUserID`, `_join_1`.`title` AS `postCmtTargetTitle`, `_join_1`.`user_id` AS `postCmtTargetUser`, `_join_2`.`url_name` AS `postCmtTargetUserUrlName`, `_join_2`.`id` AS `postCmtTargetUserID` FROM `post_cmt` AS `_main` INNER JOIN `post` AS `_join_1` ON `_join_1`.`id` = `_main`.`target_id` INNER JOIN `user` AS `_join_2` ON `_join_2`.`id` = `_main`.`user_id`');
 });
