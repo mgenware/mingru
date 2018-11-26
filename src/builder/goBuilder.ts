@@ -1,5 +1,4 @@
 import { SelectIO } from '../io/select';
-import { capitalizeFirstLetter } from '../lib/stringUtil';
 import Dialect from '../dialect';
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
@@ -36,7 +35,7 @@ export default class GoBuilder {
     throwIfFalsy(tableActions, 'tableActions');
     this.tableName = this.tableActions.table.__name;
     const tableName = tableActions.table.__name;
-    this.tableClassType = `TableType${capitalizeFirstLetter(tableName)}`;
+    this.tableClassType = `TableType${dd.utils.capitalizeFirstLetter(dd.utils.toCamelCase(tableName))}`;
   }
 
   build(actionsOnly?: boolean): string {
@@ -75,7 +74,7 @@ export default class GoBuilder {
 
   private buildDataObject(): string {
     let code = struct(this.tableClassType, []);
-    code += `var ${capitalizeFirstLetter(this.tableName)} = &${
+    code += `var ${dd.utils.capitalizeFirstLetter(this.tableName)} = &${
       this.tableClassType
     }{}
 

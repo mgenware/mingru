@@ -1,4 +1,4 @@
-import { capitalizeColumnName } from '../lib/stringUtil';
+import * as dd from 'dd-models';
 
 export class InstanceVariable {
   name: string;
@@ -7,7 +7,7 @@ export class InstanceVariable {
     name: string,
     public type: string,
   ) {
-    this.name = capitalizeColumnName(name);
+    this.name = dd.utils.capitalizeColumnName(name);
   }
 }
 
