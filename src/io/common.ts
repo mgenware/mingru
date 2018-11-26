@@ -31,9 +31,8 @@ export class TableIO {
 export class ColumnIO {
   constructor(
     public col: dd.ColumnBase,
-    public name: string,
     public sql: string,
-    public inputName: string,
+    public varName: string,
   ) { }
 }
 

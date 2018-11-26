@@ -123,7 +123,7 @@ export class SelectProcessor {
     const alias = this.nextSelectedName(
       presetAlias ? presetAlias : jc.__getInputName(),
     );
-    return new cm.ColumnIO(jc, jc.__name, dialect.as(sql, alias), alias);
+    return new cm.ColumnIO(jc, dialect.as(sql, alias), alias);
   }
 
   private nextJoinedTableName(): string {
@@ -165,7 +165,7 @@ export class SelectProcessor {
     } else {
       alias = this.nextSelectedName(col.__getInputName());
     }
-    return new cm.ColumnIO(col, col.__name, sql, alias);
+    return new cm.ColumnIO(col, sql, alias);
   }
 }
 

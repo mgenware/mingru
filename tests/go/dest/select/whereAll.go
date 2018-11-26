@@ -2,8 +2,8 @@ import "github.com/mgenware/go-packagex/database/sqlx"
 
 // SelectTResult ...
 type SelectTResult struct {
-	ID    uint64
-	Title string
+	PostID    uint64
+	PostTitle string
 }
 
 // SelectT ...
@@ -16,7 +16,7 @@ func (da *TableTypePost) SelectT(queryable sqlx.Queryable, postID uint64) ([]*Se
 	defer rows.Close()
 	for rows.Next() {
 		item := &SelectTResult{}
-		err = rows.Scan(&item.ID, &item.Title)
+		err = rows.Scan(&item.PostID, &item.PostTitle)
 		if err != nil {
 			return nil, err
 		}

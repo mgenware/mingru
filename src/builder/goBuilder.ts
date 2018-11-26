@@ -94,11 +94,7 @@ export default class GoBuilder {
     const colNames = new Set<string>();
     const selectedFields: InstanceVariable[] = [];
     for (const col of io.cols) {
-      const fieldName = col.name;
-      // TOOO: support alias
-      if (colNames.has(fieldName)) {
-        throw new Error(`Column name "${fieldName}" already exists`);
-      }
+      const fieldName = col.varName;
       colNames.add(fieldName);
       const fieldType = dialect.goType(col.col.__getTargetColumn());
       selectedFields.push(new InstanceVariable(fieldName, fieldType));
