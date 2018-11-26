@@ -73,8 +73,10 @@ export class SelectProcessor {
   private handleSelect(col: dd.ColumnBase, hasJoin: boolean): cm.ColumnIO {
     let alias: string | null = null;
     if (col instanceof dd.SelectedColumn) {
-      col = col.__getTargetColumn();
-      alias = (col as dd.SelectedColumn).selectedName;
+      const selectedCol = col as dd.SelectedColumn;
+      alias = selectedCol.selectedName;
+      // Reset the column to the underlying column of SelectedColumn.
+      col = selectedCol.column;
     }
     if (col instanceof dd.JoinedColumn) {
       return this.handleJoinedColumn(col as dd.JoinedColumn, alias);
@@ -152,7 +154,7 @@ export class SelectProcessor {
       sql = `${e(cm.MainAlias)}.`;
     }
     sql += e(col.__name);
-    if (hasJoin) {
+    if (presetAlias || hasJoin) {
       const alias = presetAlias
         ? presetAlias
         : col.__getInputName();
