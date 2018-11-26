@@ -1,5 +1,7 @@
-import post from '../models/post';
 import * as dd from 'dd-models';
+import post from '../models/post';
+import rpl from '../models/cmtReply';
+import user from '../models/user';
 import { testBuilderAsync } from './common';
 
 function newTA(): dd.TableActionCollection {
@@ -40,4 +42,15 @@ test('Custom params', async () => {
   const ta = newTA();
   ta.select('t', post.id, post.title).where(dd.sql`${post.id} = ${dd.input(post.id, 'id')} && raw_name = ${dd.input('string', 'name')}`);
   await testBuilderAsync(ta, 'select/customParams');
+});
+
+test('Join1', async () => {
+  const ta = newTA();
+  ta.select(
+      't',
+      rpl.user_id.join(user).url_name,
+      rpl.user_id.join(user).id,
+      rpl.to_user_id.join(user).url_name,
+    );
+  await testBuilderAsync(ta, 'select/join1');
 });

@@ -120,10 +120,10 @@ export class SelectProcessor {
     const { dialect } = this;
     const e = dialect.escape;
     const sql = `${e(io.tableAlias)}.${e(jc.selectedColumn.__name)}`;
-    const alias = presetAlias
-      ? presetAlias
-      : this.nextSelectedName(jc.__getInputName());
-    return new cm.ColumnIO(jc, jc.__name, dialect.as(sql, alias));
+    const alias = this.nextSelectedName(
+      presetAlias ? presetAlias : jc.__getInputName(),
+    );
+    return new cm.ColumnIO(jc, jc.__name, dialect.as(sql, alias), alias);
   }
 
   private nextJoinedTableName(): string {
@@ -133,13 +133,14 @@ export class SelectProcessor {
 
   private nextSelectedName(name: string): string {
     const { joinedColumnNameMap } = this;
+    let result = name;
     if (!joinedColumnNameMap[name]) {
-      joinedColumnNameMap[name] = 1;
+      joinedColumnNameMap[name] = 2;
     } else {
-      name += joinedColumnNameMap[name];
-      joinedColumnNameMap[name]++;
+      result = name + joinedColumnNameMap[name];
+      joinedColumnNameMap[name] += 1;
     }
-    return name;
+    return result;
   }
 
   private handleStandardColumn(
@@ -154,13 +155,17 @@ export class SelectProcessor {
       sql = `${e(cm.MainAlias)}.`;
     }
     sql += e(col.__name);
+
+    let alias: string;
     if (presetAlias || hasJoin) {
-      const alias = presetAlias
-        ? presetAlias
-        : col.__getInputName();
-      sql = dialect.as(sql, this.nextSelectedName(alias));
+      alias = this.nextSelectedName(
+        presetAlias ? presetAlias : col.__getInputName(),
+      );
+      sql = dialect.as(sql, alias);
+    } else {
+      alias = this.nextSelectedName(col.__getInputName());
     }
-    return new cm.ColumnIO(col, col.__name, sql);
+    return new cm.ColumnIO(col, col.__name, sql, alias);
   }
 }
 

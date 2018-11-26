@@ -33,6 +33,7 @@ export class ColumnIO {
     public col: dd.ColumnBase,
     public name: string,
     public sql: string,
+    public inputName: string,
   ) { }
 }
 
