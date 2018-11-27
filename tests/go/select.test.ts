@@ -44,13 +44,23 @@ test('Custom params', async () => {
   await testBuilderAsync(ta, 'select/customParams');
 });
 
-test('Join1', async () => {
-  const ta = newTA(rpl);
+test('Basic join', async () => {
+  const ta = newTA(post);
   ta.select(
       't',
-      rpl.user_id.join(user).url_name,
-      rpl.user_id.join(user).id,
-      rpl.to_user_id.join(user).url_name,
+      post.user_id.join(user).url_name,
+      post.title,
     );
-  await testBuilderAsync(ta, 'select/join1');
+  await testBuilderAsync(ta, 'select/joinBasic');
+});
+
+test('Same table, multiple cols join', async () => {
+  const ta = newTA(rpl);
+  ta.select(
+    't',
+    rpl.user_id.join(user).url_name,
+    rpl.user_id.join(user).id,
+    rpl.to_user_id.join(user).url_name,
+  );
+  await testBuilderAsync(ta, 'select/joinCols');
 });

@@ -56,7 +56,7 @@ test('Basic join', () => {
   );
 });
 
-test('Same table, multiple cols join', () => {
+test('Multiple cols join', () => {
   const actions = dd.actions(rpl);
   const v = actions.select(
     't',
