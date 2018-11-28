@@ -1,5 +1,6 @@
 import * as dd from 'dd-models';
 import post from '../models/post';
+import cmt from '../models/cmt';
 import rpl from '../models/cmtReply';
 import user from '../models/user';
 import { testBuilderAsync } from './common';
@@ -63,4 +64,37 @@ test('Same table, multiple cols join', async () => {
     rpl.to_user_id.join(user).url_name,
   );
   await testBuilderAsync(ta, 'select/joinCols');
+});
+
+test('AS', async () => {
+  const ta = newTA(cmt);
+  ta.select(
+    't',
+    cmt.id,
+    cmt.user_id.as('a'),
+    cmt.target_id.join(post).title.as('b'),
+    cmt.target_id.join(post).user_id.join(user).url_name,
+    cmt.target_id
+      .join(post)
+      .user_id.join(user)
+      .url_name.as('c'),
+  );
+  await testBuilderAsync(ta, 'select/joinAs');
+});
+
+test('Duplicate selected names', async () => {
+  const ta = newTA(post);
+  ta.select(
+    't',
+    post.title,
+    post.title,
+    post.title.as('a'),
+    post.title,
+    post.title.as('a'),
+    post.user_id.as('a'),
+    post.user_id.join(user).url_name,
+    post.user_id.join(user).url_name,
+    post.user_id.join(user).url_name.as('a'),
+  );
+  await testBuilderAsync(ta, 'select/joinDup');
 });
