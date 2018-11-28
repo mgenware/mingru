@@ -96,7 +96,7 @@ export default class GoBuilder {
       const fieldName = col.varName;
       colNames.add(fieldName);
       const fieldType = dialect.goType(col.col.__getTargetColumn());
-      selectedFields.push(new InstanceVariable(fieldName, fieldType));
+      selectedFields.push(new InstanceVariable(fieldName, fieldType.type));
     }
     code += struct(resultType, selectedFields);
 

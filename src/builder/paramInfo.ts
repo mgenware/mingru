@@ -11,13 +11,13 @@ export default class ParamInfo {
     for (const element of sql.sql.elements) {
       if (element instanceof dd.InputParam) {
         const input = element as dd.InputParam;
-        let typeCode;
+        let type;
         if (input.type instanceof dd.Column) {
-          typeCode = dialect.goType(input.type as dd.Column);
+          type = dialect.goType(input.type as dd.Column).type;
         } else {
-          typeCode = input.type as string;
+          type = input.type as string;
         }
-        result.push(new ParamInfo(input.name, typeCode, input));
+        result.push(new ParamInfo(input.name, type, input));
       }
     }
     return result;
