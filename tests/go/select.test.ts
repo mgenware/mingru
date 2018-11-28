@@ -3,7 +3,7 @@ import post from '../models/post';
 import cmt from '../models/cmt';
 import rpl from '../models/cmtReply';
 import user from '../models/user';
-import { testBuilderAsync } from './common';
+import { testBuildAsync } from './common';
 
 function newTA(table: dd.Table): dd.TableActionCollection {
   return dd.actions(table);
@@ -12,37 +12,37 @@ function newTA(table: dd.Table): dd.TableActionCollection {
 test('Basic', async () => {
   const ta = newTA(post);
   ta.select('t', post.id, post.title);
-  await testBuilderAsync(ta, 'select/basic');
+  await testBuildAsync(ta, 'select/basic');
 });
 
 test('Select all', async () => {
   const ta = newTA(post);
   ta.selectAll('t', post.id, post.title);
-  await testBuilderAsync(ta, 'select/basicAll');
+  await testBuildAsync(ta, 'select/basicAll');
 });
 
 test('Where', async () => {
   const ta = newTA(post);
   ta.select('t', post.id, post.title).where(dd.sql`${post.id} = ${dd.input(post.id)}`);
-  await testBuilderAsync(ta, 'select/where');
+  await testBuildAsync(ta, 'select/where');
 });
 
 test('WhereAll', async () => {
   const ta = newTA(post);
   ta.selectAll('t', post.id, post.title).where(dd.sql`${post.id} = ${dd.input(post.id)}`);
-  await testBuilderAsync(ta, 'select/whereAll');
+  await testBuildAsync(ta, 'select/whereAll');
 });
 
 test('Where: multiple cols', async () => {
   const ta = newTA(post);
   ta.select('t', post.id, post.title).where(dd.sql`${post.id} = ${dd.input(post.id)} && ${post.title} != ${dd.input(post.title)}`);
-  await testBuilderAsync(ta, 'select/whereMultipleCols');
+  await testBuildAsync(ta, 'select/whereMultipleCols');
 });
 
 test('Custom params', async () => {
   const ta = newTA(post);
   ta.select('t', post.id, post.title).where(dd.sql`${post.id} = ${dd.input(post.id, 'id')} && raw_name = ${dd.input('string', 'name')}`);
-  await testBuilderAsync(ta, 'select/customParams');
+  await testBuildAsync(ta, 'select/customParams');
 });
 
 test('Basic join', async () => {
@@ -52,7 +52,7 @@ test('Basic join', async () => {
       post.user_id.join(user).url_name,
       post.title,
     );
-  await testBuilderAsync(ta, 'select/joinBasic');
+  await testBuildAsync(ta, 'select/joinBasic');
 });
 
 test('Same table, multiple cols join', async () => {
@@ -63,7 +63,7 @@ test('Same table, multiple cols join', async () => {
     rpl.user_id.join(user).id,
     rpl.to_user_id.join(user).url_name,
   );
-  await testBuilderAsync(ta, 'select/joinCols');
+  await testBuildAsync(ta, 'select/joinCols');
 });
 
 test('AS', async () => {
@@ -79,7 +79,7 @@ test('AS', async () => {
       .user_id.join(user)
       .url_name.as('c'),
   );
-  await testBuilderAsync(ta, 'select/joinAs');
+  await testBuildAsync(ta, 'select/joinAs');
 });
 
 test('Duplicate selected names', async () => {
@@ -96,5 +96,5 @@ test('Duplicate selected names', async () => {
     post.user_id.join(user).url_name,
     post.user_id.join(user).url_name.as('a'),
   );
-  await testBuilderAsync(ta, 'select/joinDup');
+  await testBuildAsync(ta, 'select/joinDup');
 });

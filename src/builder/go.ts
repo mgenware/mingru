@@ -44,3 +44,24 @@ export function makeArray(name: string, type: string, size?: number): string {
   size = size || 0;
   return `${name} := make([]${type}, ${size})`;
 }
+
+function formatImports(imports: string[]): string {
+  if (!imports || !imports.length) {
+    return '';
+  }
+  return imports.map(s => `\t"${s}"\n`).join('');
+}
+
+export function makeImports(system: string[], user: string[]): string {
+  const sysCode = formatImports(system);
+  const userCode = formatImports(user);
+  let code = sysCode;
+  if (userCode) {
+    code += '\n';
+  }
+  code += userCode;
+  return `import (
+${code})
+
+`;
+}

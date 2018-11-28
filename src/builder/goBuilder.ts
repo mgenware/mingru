@@ -5,13 +5,8 @@ import { throwIfFalsy } from 'throw-if-arg-empty';
 import toTypeString from 'to-type-string';
 import select from '../io/select';
 import ParamInfo from './paramInfo';
-import {
-  struct,
-  sep,
-  pointerVar,
-  InstanceVariable,
-  makeArray,
-} from './go';
+import * as go from './go';
+import * as defs from './defs';
 
 const QueryableParam = 'queryable';
 const QueryableType = 'sqlx.Queryable';
@@ -26,6 +21,8 @@ export default class GoBuilder {
 
   private tableName: string;
   private tableClassType: string;
+  private sysImports: string[] = [];
+  private userImports: string[] = [];
 
   constructor(
     public tableActions: dd.TableActionCollection,
@@ -36,44 +33,47 @@ export default class GoBuilder {
     this.tableName = this.tableActions.table.__name;
     const tableName = tableActions.table.__name;
     this.tableClassType = `TableType${dd.utils.capitalizeFirstLetter(dd.utils.toCamelCase(tableName))}`;
+
+    this.userImports.push(defs.SQLXPath);
   }
 
   build(actionsOnly?: boolean): string {
-    const { tableActions } = this;
-
     let code = '';
-    if (!actionsOnly) {
-      code +=
-        `package ${this.packageName}
-
-`;
-      code += `import (
-\t"github.com/mgenware/go-packagex/database/sqlx"
-)
-
-`;
-
-      code += this.buildDataObject();
-      code += sep('Actions');
+    if (actionsOnly) {
+      return this.buildActions();
     }
-    for (const action of tableActions.map.values()) {
-      code += this.buildAction(action);
+    code += `package ${this.packageName}
+
+`;
+
+    // this.buildActions will set this.systemImports and this.userImports
+    let body = '';
+    body += this.buildDataObject();
+    body += go.sep('Actions');
+    body += this.buildActions();
+
+    // Add imports
+    code = go.makeImports(this.sysImports, this.userImports) + body;
+    return code;
+  }
+
+  private buildActions(): string {
+    const { dialect } = this;
+    let code = '';
+    for (const action of this.tableActions.map.values()) {
+      if (action instanceof dd.SelectAction) {
+        const selectAction = action as dd.SelectAction;
+        const io = select(selectAction, dialect);
+        code += this.select(io);
+      } else {
+        throw new Error(`Not supported io object "${toTypeString(action)}"`);
+      }
     }
     return code;
   }
 
-  private buildAction(action: unknown): string {
-    const { dialect } = this;
-    if (action instanceof dd.SelectAction) {
-      const selectAction = action as dd.SelectAction;
-      const io = select(selectAction, dialect);
-      return this.select(io);
-    }
-    throw new Error(`Not supported io object "${toTypeString(action)}"`);
-  }
-
   private buildDataObject(): string {
-    let code = struct(this.tableClassType, []);
+    let code = go.struct(this.tableClassType, []);
     code += `var ${dd.utils.capitalizeFirstLetter(this.tableName)} = &${
       this.tableClassType
     }{}
@@ -91,14 +91,14 @@ export default class GoBuilder {
     let code = '';
     // Build result type
     const colNames = new Set<string>();
-    const selectedFields: InstanceVariable[] = [];
+    const selectedFields: go.InstanceVariable[] = [];
     for (const col of io.cols) {
       const fieldName = col.varName;
       colNames.add(fieldName);
       const fieldType = dialect.goType(col.col.__getTargetColumn());
-      selectedFields.push(new InstanceVariable(fieldName, fieldType.type));
+      selectedFields.push(new go.InstanceVariable(fieldName, fieldType.type));
     }
-    code += struct(resultType, selectedFields);
+    code += go.struct(resultType, selectedFields);
 
     // Prepare
     let funcParams = `${QueryableParam} ${QueryableType}`;
@@ -116,10 +116,10 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) (${selectAll ? `[]*${r
 \tif err != nil {
 \t\treturn nil, err
 \t}
-\t${makeArray(ResultVar, `*${resultType}`)}
+\t${go.makeArray(ResultVar, `*${resultType}`)}
 \tdefer rows.Close()
 \tfor rows.Next() {
-\t\t${pointerVar('item', resultType)}
+\t\t${go.pointerVar('item', resultType)}
 \t\terr = rows.Scan(${scanParams})
 \t\tif err != nil {
 \t\t\treturn nil, err
@@ -133,7 +133,7 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) (${selectAll ? `[]*${r
 `;
     } else {
       const scanParams = joinParams(selectedFields.map(p => `&${ResultVar}.${p.name}`));
-      code += `\t${pointerVar(ResultVar, resultType)}
+      code += `\t${go.pointerVar(ResultVar, resultType)}
 \terr := ${QueryableParam}.QueryRow("${io.sql}"${queryParams}).Scan(${scanParams})
 \tif err != nil {
 \t\treturn nil, err
