@@ -18,13 +18,6 @@
     esutils "^2.0.2"
     js-tokens "^4.0.0"
 
-"@sindresorhus/is@^0.13.0":
-  version "0.13.0"
-  resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.13.0.tgz#a85d06c13658d0cc9584537df4a99423461f114b"
-  integrity sha512-xTPFzGRnYKVMQlcrVRhO7XIXX5t5hmBC+KpEnlhvjbN1cg5k4qDEVPwzkqhC7jGzmhAY0F9vouWHCt4S/kyeNg==
-  dependencies:
-    symbol-observable "^1.2.0"
-
 "@types/jest@^23.3.9":
   version "23.3.9"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-23.3.9.tgz#c16b55186ee73ae65e001fbee69d392c51337ad1"
@@ -691,10 +684,10 @@ data-urls@^1.0.0:
     whatwg-mimetype "^2.1.0"
     whatwg-url "^7.0.0"
 
-dd-models@^0.0.30:
-  version "0.0.30"
-  resolved "https://registry.yarnpkg.com/dd-models/-/dd-models-0.0.30.tgz#bdda753070835d24d5f36ef3912c1ca972a3f5ed"
-  integrity sha512-hU9JmOQvepUMfiGdbG5mucpSOZv16R1m422v9X1RM3Y40tzOB7luiew5xs3weDgmnQKahxdxUWY0hcl1vXcQyw==
+dd-models@^0.0.32:
+  version "0.0.32"
+  resolved "https://registry.yarnpkg.com/dd-models/-/dd-models-0.0.32.tgz#9dccd05c6239d043a45bed673cec20d9ace38cbc"
+  integrity sha512-C0yQtKXziwUonDOZ5QANI/MrArRLqeKBPuGklIeSUDtTSsEgjO+Vep37YYRbnx68m1M5z7yjESEzZAzwjy926g==
   dependencies:
     lodash.camelcase "^4.3.0"
     lodash.snakecase "^4.1.1"
@@ -3312,11 +3305,6 @@ supports-color@^5.3.0:
   integrity sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==
   dependencies:
     has-flag "^3.0.0"
-
-symbol-observable@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.2.0.tgz#c22688aed4eab3cdc2dfeacbb561660560a00804"
-  integrity sha512-e900nM8RRtGhlV36KGEU9k65K3mPb1WV70OdjfxlG2EAuM1noi/E/BaW/uMhL7bPEssK8QV57vN3esixjUvcXQ==
 
 symbol-tree@^3.2.2:
   version "3.2.2"

@@ -29,8 +29,8 @@ export default class MySQL extends Dialect {
     throwIfFalsy(column, 'column');
 
     const DT = dd.dt;
-    const unsigned = column.unsigned;
-    const nullable = !column.notNull;
+    const unsigned = column.props.unsigned;
+    const nullable = !column.props.notNull;
     for (const type of column.types) {
       switch (type) {
         case DT.bigInt: {

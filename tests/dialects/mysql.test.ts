@@ -50,18 +50,18 @@ test('DT', () => {
     // PK
     [dd.pk(), 'uint64'],
     // Integer
-    [dd.notNull(dd.int()), 'int'],
-    [dd.notNull(dd.unsignedInt()), 'uint'],
-    [dd.notNull(dd.bigInt()), 'int64'],
-    [dd.notNull(dd.unsignedBigInt()), 'uint64'],
-    [dd.notNull(dd.pk()), 'uint64'],
-    [dd.notNull(dd.smallInt()), 'int16'],
-    [dd.notNull(dd.unsignedSmallInt()), 'uint16'],
-    [dd.notNull(dd.tinyInt()), 'int8'],
-    [dd.notNull(dd.unsignedTinyInt()), 'uint8'],
+    [dd.int().notNull, 'int'],
+    [dd.unsignedInt().notNull, 'uint'],
+    [dd.bigInt().notNull, 'int64'],
+    [dd.unsignedBigInt().notNull, 'uint64'],
+    [dd.pk().notNull, 'uint64'],
+    [dd.smallInt().notNull, 'int16'],
+    [dd.unsignedSmallInt().notNull, 'uint16'],
+    [dd.tinyInt().notNull, 'int8'],
+    [dd.unsignedTinyInt().notNull, 'uint8'],
     // String
-    [dd.notNull(dd.varChar(10)), 'string'],
-    [dd.notNull(dd.char(10)), 'string'],
+    [dd.varChar(10).notNull, 'string'],
+    [dd.char(10).notNull, 'string'],
   ];
 
   for (const t of tests) {
