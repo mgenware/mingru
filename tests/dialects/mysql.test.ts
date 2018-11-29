@@ -72,3 +72,10 @@ test('DT', () => {
 test('as', () => {
   expect(dialect.as('abc', 'def')).toBe('abc AS `def`');
 });
+
+test('goString', () => {
+  expect(dialect.goString('abc')).toBe('"abc"');
+  expect(dialect.goString('')).toBe('""');
+  expect(dialect.goString('"\'')).toBe('"\\"\'"');
+  expect(dialect.goString('\\/')).toBe('"\\\\/"');
+});

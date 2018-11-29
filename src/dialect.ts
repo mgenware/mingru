@@ -30,6 +30,10 @@ export class Dialect {
     return this.escape(table.__name);
   }
 
+  goString(_: string): string {
+    throw new Error('Not implemented yet');
+  }
+
   inputPlaceholder(_: dd.InputParam): string {
     return '?';
   }

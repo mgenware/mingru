@@ -73,4 +73,8 @@ export default class MySQL extends Dialect {
   as(sql: string, name: string): string {
     return `${sql} AS ${this.escape(name)}`;
   }
+
+  goString(s: string): string {
+    return JSON.stringify(s);
+  }
 }
