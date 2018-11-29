@@ -90,18 +90,16 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
     const selectAll = io.action.selectAll;
 
     let code = '';
-    // Build result type
-    const colNames = new Set<string>();
+    // Collect selected columns info, used to generate result type and params passed to `Scan`.
     const selectedFields: go.InstanceVariable[] = [];
     for (const col of io.cols) {
       const fieldName = col.varName;
-      colNames.add(fieldName);
       const fieldType = dialect.goType(col.col.__getTargetColumn());
       selectedFields.push(new go.InstanceVariable(fieldName, fieldType.type));
     }
     code += go.struct(resultType, selectedFields);
 
-    // Prepare
+    // Collect params info, used to generate function header, e.g. `(queryable sqlx.Queryable, id uint64, name string)`.
     let funcParams = `${QueryableParam} ${QueryableType}`;
     const paramInfos = ParamInfo.getList(dialect, [io.where]);
     funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join('');
