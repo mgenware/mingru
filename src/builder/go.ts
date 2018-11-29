@@ -28,7 +28,8 @@ type ${typeName} struct {
 }
 
 export function sep(s: string): string {
-  return `/************ ${s} ************/
+  return `// ------------ ${s} ------------
+
 `;
 }
 
@@ -49,17 +50,18 @@ function formatImports(imports: string[]): string {
   if (!imports || !imports.length) {
     return '';
   }
-  return imports.map(s => `\t"${s}"\n`).join('');
+  return imports.map(s => `\t${s}\n`).join('');
 }
 
 export function makeImports(system: string[], user: string[]): string {
   const sysCode = formatImports(system);
   const userCode = formatImports(user);
   let code = sysCode;
-  if (userCode) {
+  if (sysCode && userCode) {
     code += '\n';
   }
   code += userCode;
+
   return `import (
 ${code})
 

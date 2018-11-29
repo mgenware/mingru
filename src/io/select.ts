@@ -1,21 +1,11 @@
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
-import * as cm from './common';
-
-export class SelectIO {
-  constructor(
-    public action: dd.SelectAction,
-    public sql: string,
-    public cols: cm.ColumnIO[],
-    public from: cm.TableIO,
-    public where: cm.SQLIO | null,
-  ) {}
-}
+import * as io from './io';
 
 export class SelectProcessor {
-  jcMap = new Map<string, cm.JoinIO>();
-  joins: cm.JoinIO[] = [];
+  jcMap = new Map<string, io.JoinIO>();
+  joins: io.JoinIO[] = [];
   // This makes sure all join table alias names are unique
   joinedTableCounter = 0;
   // This makes sure all selected column names are unique
@@ -26,17 +16,17 @@ export class SelectProcessor {
     throwIfFalsy(dialect, 'dialect');
   }
 
-  convert(): SelectIO {
+  convert(): io.SelectIO {
     let sql = 'SELECT ';
     const { action } = this;
     const { columns, table: from } = action;
     const hasJoin = columns.some(c => c instanceof dd.JoinedColumn);
 
     // Process columns
-    const colIOs: cm.ColumnIO[] = [];
+    const colIOs: io.ColumnIO[] = [];
     for (const col of columns) {
-      const io = this.handleSelect(col, hasJoin);
-      colIOs.push(io);
+      const selIO = this.handleSelect(col, hasJoin);
+      colIOs.push(selIO);
     }
     sql += colIOs.map(c => c.sql).join(', ');
 
@@ -45,9 +35,9 @@ export class SelectProcessor {
     sql += ' ' + fromIO.sql;
 
     // where
-    let whereIO: cm.SQLIO | null = null;
+    let whereIO: io.SQLIO | null = null;
     if (action.whereSQL) {
-      whereIO = new cm.SQLIO(action.whereSQL);
+      whereIO = new io.SQLIO(action.whereSQL);
       sql += ' WHERE ' + whereIO.toSQL(this.dialect);
     }
 
@@ -58,19 +48,19 @@ export class SelectProcessor {
         sql += ' ' + joinSQL;
       }
     }
-    return new SelectIO(this.action, sql, colIOs, fromIO, whereIO);
+    return new io.SelectIO(this.action, sql, colIOs, fromIO, whereIO);
   }
 
-  private handleFrom(table: dd.Table, hasJoin: boolean): cm.TableIO {
+  private handleFrom(table: dd.Table, hasJoin: boolean): io.TableIO {
     const e = this.dialect.escape;
     let sql = `FROM ${e(table.__name)}`;
     if (hasJoin) {
-      sql += ' AS ' + e(cm.MainAlias);
+      sql += ' AS ' + e(io.MainAlias);
     }
-    return new cm.TableIO(table, sql);
+    return new io.TableIO(table, sql);
   }
 
-  private handleSelect(col: dd.ColumnBase, hasJoin: boolean): cm.ColumnIO {
+  private handleSelect(col: dd.ColumnBase, hasJoin: boolean): io.ColumnIO {
     let alias: string | null = null;
     if (col instanceof dd.SelectedColumn) {
       const selectedCol = col as dd.SelectedColumn;
@@ -84,7 +74,7 @@ export class SelectProcessor {
     return this.handleStandardColumn(col, hasJoin, alias);
   }
 
-  private handleJoin(jc: dd.JoinedColumn): cm.JoinIO {
+  private handleJoin(jc: dd.JoinedColumn): io.JoinIO {
     const result = this.jcMap.get(jc.joinPath);
     if (result) {
       return result;
@@ -99,7 +89,7 @@ export class SelectProcessor {
       localTableName = localColumn.tableName;
     }
 
-    const io = new cm.JoinIO(
+    const joinIO = new io.JoinIO(
       jc.joinPath,
       this.nextJoinedTableName(),
       localTableName,
@@ -107,23 +97,23 @@ export class SelectProcessor {
       remoteColumn.tableName,
       remoteColumn,
     );
-    this.jcMap.set(jc.joinPath, io);
-    this.joins.push(io);
-    return io;
+    this.jcMap.set(jc.joinPath, joinIO);
+    this.joins.push(joinIO);
+    return joinIO;
   }
 
   private handleJoinedColumn(
     jc: dd.JoinedColumn,
     presetAlias: string | null,
-  ): cm.ColumnIO {
-    const io = this.handleJoin(jc);
+  ): io.ColumnIO {
+    const joinIO = this.handleJoin(jc);
     const { dialect } = this;
     const e = dialect.escape;
-    const sql = `${e(io.tableAlias)}.${e(jc.selectedColumn.__name)}`;
+    const sql = `${e(joinIO.tableAlias)}.${e(jc.selectedColumn.__name)}`;
     const alias = this.nextSelectedName(
       presetAlias ? presetAlias : jc.__getInputName(),
     );
-    return new cm.ColumnIO(jc, dialect.as(sql, alias), alias);
+    return new io.ColumnIO(jc, dialect.as(sql, alias), alias);
   }
 
   private nextJoinedTableName(): string {
@@ -147,12 +137,12 @@ export class SelectProcessor {
     col: dd.ColumnBase,
     hasJoin: boolean,
     presetAlias: string | null,
-  ): cm.ColumnIO {
+  ): io.ColumnIO {
     const { dialect } = this;
     const e = dialect.escape;
     let sql = '';
     if (hasJoin) {
-      sql = `${e(cm.MainAlias)}.`;
+      sql = `${e(io.MainAlias)}.`;
     }
     sql += e(col.__name);
 
@@ -165,14 +155,14 @@ export class SelectProcessor {
     } else {
       alias = this.nextSelectedName(col.__getInputName());
     }
-    return new cm.ColumnIO(col, sql, alias);
+    return new io.ColumnIO(col, sql, alias);
   }
 }
 
 export default function select(
   action: dd.SelectAction,
   dialect: Dialect,
-): SelectIO {
+): io.SelectIO {
   const pro = new SelectProcessor(action, dialect);
   return pro.convert();
 }

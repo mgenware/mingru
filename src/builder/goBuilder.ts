@@ -1,4 +1,4 @@
-import { SelectIO } from '../io/select';
+import { SelectIO } from '../io/io';
 import Dialect from '../dialect';
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
@@ -19,7 +19,7 @@ function joinParams(arr: string[]): string {
 export default class GoBuilder {
   memberNames: Set<string> = new Set<string>();
 
-  private tableName: string;
+  private tableClassObject: string;
   private tableClassType: string;
   private sysImports: string[] = [];
   private userImports: string[] = [];
@@ -30,9 +30,9 @@ export default class GoBuilder {
     public packageName = 'da',
   ) {
     throwIfFalsy(tableActions, 'tableActions');
-    this.tableName = this.tableActions.table.__name;
-    const tableName = tableActions.table.__name;
-    this.tableClassType = `TableType${dd.utils.capitalizeFirstLetter(dd.utils.toCamelCase(tableName))}`;
+    const capTableName = dd.utils.capitalizeFirstLetter(dd.utils.toCamelCase(tableActions.table.__name));
+    this.tableClassType = `TableType${capTableName}`;
+    this.tableClassObject = capTableName;
 
     this.userImports.push(defs.SQLXPath);
   }
@@ -48,12 +48,12 @@ export default class GoBuilder {
 
     // this.buildActions will set this.systemImports and this.userImports
     let body = '';
-    body += this.buildDataObject();
+    body += this.buildTableObject();
     body += go.sep('Actions');
     body += this.buildActions();
 
     // Add imports
-    code = go.makeImports(this.sysImports, this.userImports) + body;
+    code = code + go.makeImports(this.sysImports, this.userImports) + body;
     return code;
   }
 
@@ -72,9 +72,10 @@ export default class GoBuilder {
     return code;
   }
 
-  private buildDataObject(): string {
+  private buildTableObject(): string {
     let code = go.struct(this.tableClassType, []);
-    code += `var ${dd.utils.capitalizeFirstLetter(this.tableName)} = &${
+    code += `// ${this.tableClassObject} ...
+var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
       this.tableClassType
     }{}
 
@@ -102,7 +103,7 @@ export default class GoBuilder {
 
     // Prepare
     let funcParams = `${QueryableParam} ${QueryableType}`;
-    const paramInfos = ParamInfo.getList(dialect, io.where);
+    const paramInfos = ParamInfo.getList(dialect, [io.where]);
     funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join('');
     const queryParams = paramInfos.map(p => `, ${p.name}`).join('');
 
@@ -143,7 +144,6 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) (${selectAll ? `[]*${r
     // Return the result
     code += `\treturn ${ResultVar}, nil
 }
-
 `;
     return code;
   }

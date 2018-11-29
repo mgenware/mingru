@@ -28,4 +28,3 @@ func (da *TableTypePost) SelectT(queryable sqlx.Queryable) ([]*SelectTResult, er
 	}
 	return result, nil
 }
-

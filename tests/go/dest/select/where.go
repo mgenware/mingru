@@ -15,4 +15,3 @@ func (da *TableTypePost) SelectT(queryable sqlx.Queryable, postID uint64) (*Sele
 	}
 	return result, nil
 }
-

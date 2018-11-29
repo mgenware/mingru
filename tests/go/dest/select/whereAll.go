@@ -28,4 +28,3 @@ func (da *TableTypePost) SelectT(queryable sqlx.Queryable, postID uint64) ([]*Se
 	}
 	return result, nil
 }
-

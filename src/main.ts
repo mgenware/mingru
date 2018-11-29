@@ -11,4 +11,4 @@ export {
   SQLIO,
   SetterIO,
   TableIO,
-} from './io/common';
+} from './io/io';

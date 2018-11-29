@@ -22,4 +22,3 @@ func (da *TableTypePost) SelectT(queryable sqlx.Queryable) (*SelectTResult, erro
 	}
 	return result, nil
 }
-

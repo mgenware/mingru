@@ -18,4 +18,3 @@ func (da *TableTypePostCmt) SelectT(queryable sqlx.Queryable) (*SelectTResult, e
 	}
 	return result, nil
 }
-

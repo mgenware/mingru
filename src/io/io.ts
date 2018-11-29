@@ -75,6 +75,26 @@ export class SetterIO {
 
   constructor(
     public col: dd.ColumnBase,
-    public rawSQL: SQLIO,
+    public sql: SQLIO,
+  ) { }
+}
+
+export class SelectIO {
+  constructor(
+    public action: dd.SelectAction,
+    public sql: string,
+    public cols: ColumnIO[],
+    public from: TableIO,
+    public where: SQLIO | null,
+  ) {}
+}
+
+export class UpdateIO {
+  constructor(
+    public action: dd.UpdateAction,
+    public sql: string,
+    public table: TableIO,
+    public setters: SetterIO[],
+    public where: SQLIO,
   ) { }
 }
