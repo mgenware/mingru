@@ -22,17 +22,14 @@ export class UpdateProcessor {
     sql += fromIO.sql;
 
     // setters
-    const setters: io.SetterIO[] = [];
-    for (const setter of action.setters) {
-      const setterIO = io.SetterIO.fromSetter(setter);
-      setters.push(setterIO);
+    sql += ' SET ';
 
-      sql += ` SET ${dialect.escapeColumn(setterIO.col)} = ${setterIO.sql.toSQL(dialect)}`;
-    }
+    const setterIOs = action.setters.map(s => io.SetterIO.fromSetter(s));
+    sql += setterIOs.map(s => `${dialect.escapeColumn(s.col)} = ${s.sql.toSQL(dialect)}`).join(', ');
 
     // where
     const whereIO = new io.SQLIO(action.whereSQL as dd.SQL);
-    return new io.UpdateIO(action, sql, fromIO, setters, whereIO);
+    return new io.UpdateIO(action, sql, fromIO, setterIOs, whereIO);
   }
 
   private handleFrom(table: dd.Table): io.TableIO {

@@ -13,7 +13,7 @@ test('Basic', () => {
   const io = mr.select(v, dialect);
 
   expect(io.sql).toBe('SELECT `id`, `url_name` FROM `user`');
-  expect(io.from).toBeInstanceOf(mr.TableIO);
+  expect(io.from).toBeInstanceOf(mr.io.TableIO);
   expect(io.where).toBeNull();
 });
 
@@ -24,7 +24,7 @@ test('Where', () => {
     .where(dd.sql`${user.id} = 1`);
   const io = mr.select(v, dialect);
 
-  expect(io.where).toBeInstanceOf(mr.SQLIO);
+  expect(io.where).toBeInstanceOf(mr.io.SQLIO);
   expect(io.sql).toBe('SELECT `id`, `url_name` FROM `user` WHERE `id` = 1');
 });
 
@@ -40,7 +40,7 @@ test('Where and inputs', () => {
     );
   const io = mr.select(v, dialect);
 
-  expect(io.where).toBeInstanceOf(mr.SQLIO);
+  expect(io.where).toBeInstanceOf(mr.io.SQLIO);
   expect(io.sql).toBe(
     'SELECT `id`, `url_name` FROM `user` WHERE `id` = ? && `url_name` = ?',
   );

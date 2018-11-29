@@ -67,3 +67,7 @@ ${code})
 
 `;
 }
+
+export function stringLiteral(s: string): string {
+  return JSON.stringify(s);
+}

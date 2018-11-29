@@ -111,10 +111,12 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
     code += `// ${actionName} ...
 func (da *${tableClassType}) ${actionName}(${funcParams}) (${selectAll ? `[]*${resultType}` : `*${resultType}`}, error) {
 `;
+
+    const sqlLiteral = go.stringLiteral(io.sql);
     if (selectAll) {
       const scanParams = joinParams(selectedFields.map(p => `&item.${p.name}`));
       // > call Query
-      code += `\trows, err := ${QueryableParam}.Query("${io.sql}"${queryParams})
+      code += `\trows, err := ${QueryableParam}.Query(${sqlLiteral}${queryParams})
 \tif err != nil {
 \t\treturn nil, err
 \t}
@@ -136,7 +138,7 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) (${selectAll ? `[]*${r
     } else {
       const scanParams = joinParams(selectedFields.map(p => `&${ResultVar}.${p.name}`));
       code += `\t${go.pointerVar(ResultVar, resultType)}
-\terr := ${QueryableParam}.QueryRow("${io.sql}"${queryParams}).Scan(${scanParams})
+\terr := ${QueryableParam}.QueryRow(${sqlLiteral}${queryParams}).Scan(${scanParams})
 \tif err != nil {
 \t\treturn nil, err
 \t}
@@ -162,19 +164,18 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) (${selectAll ? `[]*${r
     const paramInfos = ParamInfo.getList(dialect, setterSQLs);
     funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join('');
     const queryParams = paramInfos.map(p => `, ${p.name}`).join('');
-
     code += `// ${actionName} ...
 func (da *${tableClassType}) ${actionName}(${funcParams}) error {
 `;
     // Body
-    code += `\terr := ${QueryableParam}.QueryRow("${io.sql}"${queryParams})
+    code += `\t_, err := ${QueryableParam}.Exec("${io.sql}"${queryParams})
 \tif err != nil {
-\t\treturn nil, err
+\t\treturn err
 \t}
 `;
 
     // Return the result
-    code += `\treturn ${ResultVar}, nil
+    code += `\treturn nil
 }
 `;
     return code;
