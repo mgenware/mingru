@@ -684,10 +684,10 @@ data-urls@^1.0.0:
     whatwg-mimetype "^2.1.0"
     whatwg-url "^7.0.0"
 
-dd-models@^0.0.32:
-  version "0.0.32"
-  resolved "https://registry.yarnpkg.com/dd-models/-/dd-models-0.0.32.tgz#9dccd05c6239d043a45bed673cec20d9ace38cbc"
-  integrity sha512-C0yQtKXziwUonDOZ5QANI/MrArRLqeKBPuGklIeSUDtTSsEgjO+Vep37YYRbnx68m1M5z7yjESEzZAzwjy926g==
+dd-models@^0.0.33:
+  version "0.0.33"
+  resolved "https://registry.yarnpkg.com/dd-models/-/dd-models-0.0.33.tgz#ef51a99ff32d39b3ee0a7321d7cb812f949639fa"
+  integrity sha512-2adK2mHiN09rXpoYQzv600pIKg8bS+EGgGktEy5MzTClaIEowkDzDo6xdksIVn3mHcAGvn4LJsaZxva6JzNILw==
   dependencies:
     lodash.camelcase "^4.3.0"
     lodash.snakecase "^4.1.1"
