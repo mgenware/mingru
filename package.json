@@ -41,7 +41,7 @@
     "typescript": "^3.1.6"
   },
   "dependencies": {
-    "dd-models": "^0.0.33",
+    "dd-models": "^0.0.34",
     "throw-if-arg-empty": "^1.0.1",
     "to-type-string": "^1.0.0"
   }

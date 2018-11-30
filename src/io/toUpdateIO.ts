@@ -39,7 +39,7 @@ export class UpdateProcessor {
   }
 }
 
-export default function update(
+export default function updateIO(
   action: dd.UpdateAction,
   dialect: Dialect,
 ): io.UpdateIO {

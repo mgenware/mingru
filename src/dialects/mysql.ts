@@ -10,13 +10,11 @@ const NullInt64 = 'NullInt64';
 const NullString = 'NullString';
 
 function sysType(type: string): TypeBridge {
-  return new TypeBridge(type);
+  return new TypeBridge(type, null, true);
 }
 
 function nullType(type: string): TypeBridge {
-  const b = new TypeBridge(`sql.${type}`);
-  b.importPath = 'database/sql';
-  return b;
+  return new TypeBridge(`sql.${type}`, 'database/sql', true);
 }
 
 export default class MySQL extends Dialect {

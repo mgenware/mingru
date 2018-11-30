@@ -98,3 +98,11 @@ export class UpdateIO {
     public where: SQLIO,
   ) { }
 }
+
+export class InsertIO {
+  constructor(
+    public action: dd.InsertAction,
+    public sql: string,
+    public table: TableIO,
+  ) { }
+}

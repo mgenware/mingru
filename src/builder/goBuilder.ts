@@ -1,10 +1,11 @@
-import { SelectIO, UpdateIO } from '../io/io';
+import { SelectIO, UpdateIO, InsertIO } from '../io/io';
 import Dialect from '../dialect';
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import toTypeString from 'to-type-string';
-import { default as toSelectIO } from '../io/select';
-import { default as toUpdateIO } from '../io/update';
+import toSelectIO from '../io/toSelectIO';
+import toUpdateIO from '../io/toUpdateIO';
+import toInsertIO from '../io/toInsertIO';
 import ParamInfo from './paramInfo';
 import * as go from './go';
 import * as defs from './defs';
@@ -62,14 +63,28 @@ export default class GoBuilder {
     const { dialect } = this;
     let code = '';
     for (const action of this.tableActions.map.values()) {
-      if (action instanceof dd.SelectAction) {
-        const io = toSelectIO(action as dd.SelectAction, dialect);
-        code += this.select(io);
-      } else if (action instanceof dd.UpdateAction) {
-        const io = toUpdateIO(action as dd.UpdateAction, dialect);
-        code += this.update(io);
-      } else {
-        throw new Error(`Not supported io object "${toTypeString(action)}"`);
+      switch (action.type) {
+        case dd.ActionType.select: {
+          const io = toSelectIO(action as dd.SelectAction, dialect);
+          code += this.select(io);
+          break;
+        }
+
+        case dd.ActionType.update: {
+          const io = toUpdateIO(action as dd.UpdateAction, dialect);
+          code += this.update(io);
+          break;
+        }
+
+        case dd.ActionType.insert: {
+          const io = toInsertIO(action as dd.InsertAction, dialect);
+          code += this.insert(io);
+          break;
+        }
+
+        default: {
+          throw new Error(`Not supported io object "${toTypeString(action)}"`);
+        }
       }
     }
     return code;
@@ -104,7 +119,7 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
 
     // Collect params info, used to generate function header, e.g. `(queryable sqlx.Queryable, id uint64, name string)`.
     let funcParams = `${QueryableParam} ${QueryableType}`;
-    const paramInfos = ParamInfo.getList(dialect, [io.where]);
+    const paramInfos = ParamInfo.fromSQLArray(dialect, io.where ? [io.where] : []);
     funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join('');
     const queryParams = paramInfos.map(p => `, ${p.name}`).join('');
 
@@ -161,7 +176,37 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) (${selectAll ? `[]*${r
     // Prepare params
     let funcParams = `${QueryableParam} ${QueryableType}`;
     const setterSQLs = io.setters.map(setter => setter.sql);
-    const paramInfos = ParamInfo.getList(dialect, setterSQLs);
+    const paramInfos = ParamInfo.fromSQLArray(dialect, setterSQLs);
+    funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join('');
+    const queryParams = paramInfos.map(p => `, ${p.name}`).join('');
+    code += `// ${actionName} ...
+func (da *${tableClassType}) ${actionName}(${funcParams}) error {
+`;
+    // Body
+    const sqlLiteral = go.makeStringLiteral(io.sql);
+    code += `\t_, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParams})
+\tif err != nil {
+\t\treturn err
+\t}
+`;
+
+    // Return the result
+    code += `\treturn nil
+}
+`;
+    return code;
+  }
+
+  private insert(io: InsertIO): string {
+    const { dialect, tableClassType } = this;
+    const { action } = io;
+    const actionName = action.name;
+
+    let code = '';
+
+    // Prepare params
+    let funcParams = `${QueryableParam} ${QueryableType}`;
+    const paramInfos = action.columns.map(c => ParamInfo.fromColumn(dialect, c));
     funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join('');
     const queryParams = paramInfos.map(p => `, ${p.name}`).join('');
     code += `// ${actionName} ...

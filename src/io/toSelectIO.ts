@@ -159,7 +159,7 @@ export class SelectProcessor {
   }
 }
 
-export default function select(
+export default function selectIO(
   action: dd.SelectAction,
   dialect: Dialect,
 ): io.SelectIO {

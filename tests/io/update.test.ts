@@ -10,7 +10,7 @@ test('Basic', () => {
     .set(post.title, dd.sql`"haha"`)
     .set(post.content, dd.sql`${dd.input(post.content)}`)
     .set(post.cmtCount, dd.sql`${post.cmtCount} + 1`);
-  const io = mr.update(v, dialect);
+  const io = mr.io.toUpdateIO(v, dialect);
 
   expect(io.sql).toBe('UPDATE `post` SET `title` = "haha", `content` = ?, `cmt_c` = `cmt_c` + 1');
   expect(io.table).toBeInstanceOf(mr.io.TableIO);

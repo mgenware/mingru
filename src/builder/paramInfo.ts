@@ -1,37 +1,34 @@
 import * as dd from 'dd-models';
-import Dialect from '../dialect';
+import { Dialect, TypeBridge } from '../dialect';
 import { SQLIO } from '../io/io';
 
 export default class ParamInfo {
-  static getList(dialect: Dialect, sqls: Array<SQLIO|null>): ParamInfo[] {
-    if (!sqls) {
-      return [];
-    }
-    const result: ParamInfo[] = [];
-    // Filter out null values
+  static fromColumn(dialect: Dialect, col: dd.ColumnBase): ParamInfo {
+    return new ParamInfo(col.__name, dialect.goType(col.__getTargetColumn()), col);
+  }
+
+  static fromSQLArray(dialect: Dialect, sqls: SQLIO[]): ParamInfo[] {
+    const res: ParamInfo[] = [];
     for (const sql of sqls) {
-      if (!sql) {
-        continue;
-      }
       for (const element of sql.sql.elements) {
         if (element instanceof dd.InputParam) {
           const input = element as dd.InputParam;
-          let type;
+          let type: TypeBridge;
           if (input.type instanceof dd.Column) {
-            type = dialect.goType(input.type as dd.Column).type;
+            type = dialect.goType(input.type as dd.Column);
           } else {
-            type = input.type as string;
+            type = new TypeBridge(input.type as string, null, false);
           }
-          result.push(new ParamInfo(input.name, type, input));
+          res.push(new ParamInfo(input.name, type, input));
         }
       }
     }
-    return result;
+    return res;
   }
 
   constructor(
     public name: string,
-    public type: string,
-    public inputParam: dd.InputParam,
+    public type: TypeBridge,
+    public rawObject: dd.InputParam|dd.ColumnBase,
   ) { }
 }

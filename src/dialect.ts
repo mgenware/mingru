@@ -2,11 +2,15 @@ import * as dd from 'dd-models';
 
 // A bridge represents a mapping from SQL type to Go type.
 export class TypeBridge {
-  importPath: string|null = null;
-
   constructor(
     public type: string,
+    public importPath: string|null,
+    public isSystemImport: boolean,
   ) { }
+
+  toString(): string {
+    return this.type;
+  }
 }
 
 export class Dialect {
@@ -30,7 +34,7 @@ export class Dialect {
     return this.escape(table.__name);
   }
 
-  inputPlaceholder(_: dd.InputParam): string {
+  inputPlaceholder(_: dd.InputParam|null): string {
     return '?';
   }
 }
