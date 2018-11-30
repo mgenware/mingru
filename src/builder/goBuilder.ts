@@ -168,7 +168,8 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) (${selectAll ? `[]*${r
 func (da *${tableClassType}) ${actionName}(${funcParams}) error {
 `;
     // Body
-    code += `\t_, err := ${QueryableParam}.Exec("${io.sql}"${queryParams})
+    const sqlLiteral = go.makeStringLiteral(io.sql);
+    code += `\t_, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParams})
 \tif err != nil {
 \t\treturn err
 \t}
