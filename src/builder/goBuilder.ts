@@ -112,7 +112,7 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
 func (da *${tableClassType}) ${actionName}(${funcParams}) (${selectAll ? `[]*${resultType}` : `*${resultType}`}, error) {
 `;
 
-    const sqlLiteral = go.stringLiteral(io.sql);
+    const sqlLiteral = go.makeStringLiteral(io.sql);
     if (selectAll) {
       const scanParams = joinParams(selectedFields.map(p => `&item.${p.name}`));
       // > call Query

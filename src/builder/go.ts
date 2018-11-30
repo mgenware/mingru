@@ -68,6 +68,6 @@ ${code})
 `;
 }
 
-export function stringLiteral(s: string): string {
+export function makeStringLiteral(s: string): string {
   return JSON.stringify(s);
 }

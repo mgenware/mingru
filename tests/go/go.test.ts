@@ -6,8 +6,8 @@ function newTA(table: dd.Table): dd.TableActionCollection {
   return dd.actions(table);
 }
 
-test('Basic', async () => {
+test('Escape string', async () => {
   const ta = newTA(post);
-  ta.select('t', post.id, post.title).where(dd.sql`${post.title} = "<>\""`);
+  ta.select('t', post.id, post.title).where(dd.sql`${post.title} = "\\\\a\\\""`);
   await testBuildAsync(ta, 'go/escapeString');
 });
