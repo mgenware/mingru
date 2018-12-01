@@ -10,7 +10,7 @@ export class DeleteProcessor {
   }
 
   convert(): io.DeleteIO {
-    let sql = 'DELETE ';
+    let sql = 'DELETE FROM ';
     const { action, dialect } = this;
     const table = action.table as dd.Table;
 
@@ -34,7 +34,7 @@ export class DeleteProcessor {
 }
 
 export default function deleteIO(
-  action: dd.UpdateAction,
+  action: dd.DeleteAction,
   dialect: Dialect,
 ): io.DeleteIO {
   const pro = new DeleteProcessor(action, dialect);
