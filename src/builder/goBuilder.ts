@@ -1,4 +1,4 @@
-import { SelectIO, UpdateIO, InsertIO } from '../io/io';
+import { SelectIO, UpdateIO, InsertIO, DeleteIO } from '../io/io';
 import Dialect from '../dialect';
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
@@ -6,6 +6,7 @@ import toTypeString from 'to-type-string';
 import toSelectIO from '../io/toSelectIO';
 import toUpdateIO from '../io/toUpdateIO';
 import toInsertIO from '../io/toInsertIO';
+import toDeleteIO from '../io/toDeleteIO';
 import ParamInfo from './paramInfo';
 import * as go from './go';
 import * as defs from './defs';
@@ -32,7 +33,9 @@ export default class GoBuilder {
     public packageName = 'da',
   ) {
     throwIfFalsy(tableActions, 'tableActions');
-    const capTableName = dd.utils.capitalizeFirstLetter(dd.utils.toCamelCase(tableActions.table.__name));
+    const capTableName = dd.utils.capitalizeFirstLetter(
+      dd.utils.toCamelCase(tableActions.table.__name),
+    );
     this.tableClassType = `TableType${capTableName}`;
     this.tableClassObject = capTableName;
 
@@ -63,6 +66,7 @@ export default class GoBuilder {
     const { dialect } = this;
     let code = '';
     for (const action of this.tableActions.map.values()) {
+      code += '\n';
       switch (action.type) {
         case dd.ActionType.select: {
           const io = toSelectIO(action as dd.SelectAction, dialect);
@@ -79,6 +83,12 @@ export default class GoBuilder {
         case dd.ActionType.insert: {
           const io = toInsertIO(action as dd.InsertAction, dialect);
           code += this.insert(io);
+          break;
+        }
+
+        case dd.ActionType.delete: {
+          const io = toDeleteIO(action as dd.DeleteAction, dialect);
+          code += this.delete(io);
           break;
         }
 
@@ -119,12 +129,17 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
 
     // Collect params info, used to generate function header, e.g. `(queryable sqlx.Queryable, id uint64, name string)`.
     let funcParams = `${QueryableParam} ${QueryableType}`;
-    const paramInfos = ParamInfo.fromSQLArray(dialect, io.where ? [io.where] : []);
+    const paramInfos = ParamInfo.fromSQLArray(
+      dialect,
+      io.where ? [io.where] : [],
+    );
     funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join('');
     const queryParams = paramInfos.map(p => `, ${p.name}`).join('');
 
     code += `// ${actionName} ...
-func (da *${tableClassType}) ${actionName}(${funcParams}) (${selectAll ? `[]*${resultType}` : `*${resultType}`}, error) {
+func (da *${tableClassType}) ${actionName}(${funcParams}) (${
+      selectAll ? `[]*${resultType}` : `*${resultType}`
+    }, error) {
 `;
 
     const sqlLiteral = go.makeStringLiteral(io.sql);
@@ -151,7 +166,9 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) (${selectAll ? `[]*${r
 \t}
 `;
     } else {
-      const scanParams = joinParams(selectedFields.map(p => `&${ResultVar}.${p.name}`));
+      const scanParams = joinParams(
+        selectedFields.map(p => `&${ResultVar}.${p.name}`),
+      );
       code += `\t${go.pointerVar(ResultVar, resultType)}
 \terr := ${QueryableParam}.QueryRow(${sqlLiteral}${queryParams}).Scan(${scanParams})
 \tif err != nil {
@@ -206,7 +223,9 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) error {
 
     // Prepare params
     let funcParams = `${QueryableParam} ${QueryableType}`;
-    const paramInfos = action.columns.map(c => ParamInfo.fromColumn(dialect, c));
+    const paramInfos = action.columns.map(c =>
+      ParamInfo.fromColumn(dialect, c),
+    );
     funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join('');
     const queryParams = paramInfos.map(p => `, ${p.name}`).join('');
     code += `// ${actionName} ...
@@ -222,6 +241,33 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) error {
 
     // Return the result
     code += `\treturn nil
+}
+`;
+    return code;
+  }
+
+  private delete(io: DeleteIO): string {
+    const { dialect, tableClassType } = this;
+    const { action } = io;
+    const actionName = action.name;
+
+    let code = '';
+
+    // Prepare params
+    let funcParams = `${QueryableParam} ${QueryableType}`;
+    const paramInfos = ParamInfo.fromSQLArray(
+      dialect,
+      io.where ? [io.where] : [],
+    );
+    funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join('');
+    const queryParams = paramInfos.map(p => `, ${p.name}`).join('');
+    code += `// ${actionName} ...
+func (da *${tableClassType}) ${actionName}(${funcParams}) error {
+`;
+    // Body
+    const sqlLiteral = go.makeStringLiteral(io.sql);
+    code += `\tresult, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParams})
+\treturn sqlx.CheckOneRowAffectedWithError(result, err)
 }
 `;
     return code;

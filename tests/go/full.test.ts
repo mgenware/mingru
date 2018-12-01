@@ -16,8 +16,14 @@ test('Single action', async () => {
 test('Multiple actions', async () => {
   const ta = newTA(post);
   ta.select('PostTitle', post.id, post.title);
-  ta.select('PostInfo', post.id, post.title, post.user_id, post.user_id.join(user).url_name);
+  ta.select(
+    'PostInfo',
+    post.id,
+    post.title,
+    post.user_id,
+    post.user_id.join(user).url_name,
+  );
   ta.update('PostTitle').set(post.title, dd.sql`${dd.input(post.title)}`);
-  ta.delete('Title').where(dd.sql`${post.id} = ${dd.input(post.id)}`);
+  ta.delete('ByID').where(dd.sql`${post.id} = ${dd.input(post.id)}`);
   await testBuildFullAsync(ta, 'full/multipleActions');
 });

@@ -7,16 +7,22 @@ const readFileAsync = promisify(readFile);
 
 const dialect = new mr.MySQL();
 
-export async function testBuildAsync(ta: dd.TableActionCollection, path: string) {
+export async function testBuildAsync(
+  ta: dd.TableActionCollection,
+  path: string,
+) {
   path = nodepath.resolve(nodepath.join('tests/go/dest', path + '.go'));
   const content = await readFileAsync(path, 'utf8');
   const builder = new mr.Builder(ta, dialect);
   let actual = builder.build(true);
-  actual = `import "github.com/mgenware/go-packagex/database/sqlx"\n\n${actual}`;
+  actual = `import "github.com/mgenware/go-packagex/database/sqlx"\n${actual}`;
   expect(actual).toBe(content);
 }
 
-export async function testBuildFullAsync(ta: dd.TableActionCollection, path: string) {
+export async function testBuildFullAsync(
+  ta: dd.TableActionCollection,
+  path: string,
+) {
   path = nodepath.resolve(nodepath.join('tests/go/dest', path + '.go'));
   const content = await readFileAsync(path, 'utf8');
   const builder = new mr.Builder(ta, dialect);

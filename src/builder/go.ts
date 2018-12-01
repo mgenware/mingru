@@ -3,10 +3,7 @@ import * as dd from 'dd-models';
 export class InstanceVariable {
   name: string;
 
-  constructor(
-    name: string,
-    public type: string,
-  ) {
+  constructor(name: string, public type: string) {
     this.name = dd.utils.capitalizeColumnName(name);
   }
 }
@@ -29,7 +26,6 @@ type ${typeName} struct {
 
 export function sep(s: string): string {
   return `// ------------ ${s} ------------
-
 `;
 }
 
