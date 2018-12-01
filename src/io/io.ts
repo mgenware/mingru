@@ -1,5 +1,6 @@
 import * as dd from 'dd-models';
 import Dialect from '../dialect';
+import { throwIfFalsy } from 'throw-if-arg-empty';
 
 export const MainAlias = '_main';
 
@@ -12,20 +13,24 @@ export class JoinIO {
     public localColumn: dd.ColumnBase,
     public remoteTable: string,
     public remoteColumn: dd.ColumnBase,
-  ) { }
+  ) {}
 
   toSQL(dialect: Dialect): string {
     const e = dialect.escape;
     // Note that localTable is not used here, we use MainAlias as local table alias
-    return `INNER JOIN ${e(this.remoteTable)} AS ${e(this.tableAlias)} ON ${e(this.tableAlias)}.${e(this.remoteColumn.__name)} = ${e(MainAlias)}.${e(this.localColumn.__name)}`;
+    return `INNER JOIN ${e(this.remoteTable)} AS ${e(this.tableAlias)} ON ${e(
+      this.tableAlias,
+    )}.${e(this.remoteColumn.__name)} = ${e(MainAlias)}.${e(
+      this.localColumn.__name,
+    )}`;
   }
 }
 
 export class TableIO {
-  constructor(
-    public table: dd.Table,
-    public sql: string,
-  ) { }
+  constructor(public table: dd.Table, public sql: string) {
+    throwIfFalsy(table, 'table');
+    throwIfFalsy(sql, 'sql');
+  }
 }
 
 export class ColumnIO {
@@ -33,13 +38,17 @@ export class ColumnIO {
     public col: dd.ColumnBase,
     public sql: string,
     public varName: string,
-  ) { }
+  ) {
+    throwIfFalsy(col, 'col');
+    throwIfFalsy(sql, 'sql');
+    throwIfFalsy(varName, 'varName');
+  }
 }
 
 export class SQLIO {
-  constructor(
-    public sql: dd.SQL,
-  ) { }
+  constructor(public sql: dd.SQL) {
+    throwIfFalsy(sql, 'sql');
+  }
 
   toSQL(dialect: Dialect): string {
     const { sql } = this;
@@ -67,16 +76,13 @@ export class SQLIO {
 
 export class SetterIO {
   static fromSetter(setter: dd.ColumnSetter): SetterIO {
-    return new SetterIO(
-      setter.column,
-      new SQLIO(setter.sql),
-    );
+    return new SetterIO(setter.column, new SQLIO(setter.sql));
   }
 
-  constructor(
-    public col: dd.ColumnBase,
-    public sql: SQLIO,
-  ) { }
+  constructor(public col: dd.ColumnBase, public sql: SQLIO) {
+    throwIfFalsy(col, 'col');
+    throwIfFalsy(sql, 'sql');
+  }
 }
 
 export class SelectIO {
@@ -86,7 +92,12 @@ export class SelectIO {
     public cols: ColumnIO[],
     public from: TableIO,
     public where: SQLIO | null,
-  ) {}
+  ) {
+    throwIfFalsy(action, 'action');
+    throwIfFalsy(sql, 'sql');
+    throwIfFalsy(cols, 'cols');
+    throwIfFalsy(from, 'from');
+  }
 }
 
 export class UpdateIO {
@@ -95,8 +106,13 @@ export class UpdateIO {
     public sql: string,
     public table: TableIO,
     public setters: SetterIO[],
-    public where: SQLIO,
-  ) { }
+    public where: SQLIO | null,
+  ) {
+    throwIfFalsy(action, 'action');
+    throwIfFalsy(sql, 'sql');
+    throwIfFalsy(table, 'table');
+    throwIfFalsy(setters, 'setters');
+  }
 }
 
 export class InsertIO {
@@ -104,7 +120,11 @@ export class InsertIO {
     public action: dd.InsertAction,
     public sql: string,
     public table: TableIO,
-  ) { }
+  ) {
+    throwIfFalsy(action, 'action');
+    throwIfFalsy(sql, 'sql');
+    throwIfFalsy(table, 'table');
+  }
 }
 
 export class DeleteIO {
@@ -112,6 +132,10 @@ export class DeleteIO {
     public action: dd.DeleteAction,
     public sql: string,
     public table: TableIO,
-    public where: SQLIO,
-  ) { }
+    public where: SQLIO | null,
+  ) {
+    throwIfFalsy(action, 'action');
+    throwIfFalsy(sql, 'sql');
+    throwIfFalsy(table, 'table');
+  }
 }

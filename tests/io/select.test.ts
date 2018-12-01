@@ -12,6 +12,7 @@ test('Basic', () => {
   const v = actions.select('t', user.id, user.url_name);
   const io = mr.io.toSelectIO(v, dialect);
 
+  expect(io).toBeInstanceOf(mr.io.SelectIO);
   expect(io.sql).toBe('SELECT `id`, `url_name` FROM `user`');
   expect(io.from).toBeInstanceOf(mr.io.TableIO);
   expect(io.where).toBeNull();

@@ -4,10 +4,7 @@ import Dialect from '../dialect';
 import * as io from './io';
 
 export class UpdateProcessor {
-  constructor(
-    public action: dd.UpdateAction,
-    public dialect: Dialect,
-  ) {
+  constructor(public action: dd.UpdateAction, public dialect: Dialect) {
     throwIfFalsy(action, 'action');
     throwIfFalsy(dialect, 'dialect');
   }
@@ -25,10 +22,15 @@ export class UpdateProcessor {
     sql += ' SET ';
 
     const setterIOs = action.setters.map(s => io.SetterIO.fromSetter(s));
-    sql += setterIOs.map(s => `${dialect.escapeColumn(s.col)} = ${s.sql.toSQL(dialect)}`).join(', ');
+    sql += setterIOs
+      .map(s => `${dialect.escapeColumn(s.col)} = ${s.sql.toSQL(dialect)}`)
+      .join(', ');
 
     // where
-    const whereIO = new io.SQLIO(action.whereSQL as dd.SQL);
+    const whereIO = action.whereSQL ? new io.SQLIO(action.whereSQL) : null;
+    if (whereIO) {
+      sql += ` WHERE ${whereIO.toSQL(dialect)}`;
+    }
     return new io.UpdateIO(action, sql, fromIO, setterIOs, whereIO);
   }
 

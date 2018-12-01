@@ -4,10 +4,7 @@ import Dialect from '../dialect';
 import * as io from './io';
 
 export class DeleteProcessor {
-  constructor(
-    public action: dd.DeleteAction,
-    public dialect: Dialect,
-  ) {
+  constructor(public action: dd.DeleteAction, public dialect: Dialect) {
     throwIfFalsy(action, 'action');
     throwIfFalsy(dialect, 'dialect');
   }
@@ -22,7 +19,10 @@ export class DeleteProcessor {
     sql += fromIO.sql;
 
     // where
-    const whereIO = new io.SQLIO(action.whereSQL as dd.SQL);
+    const whereIO = action.whereSQL ? new io.SQLIO(action.whereSQL) : null;
+    if (whereIO) {
+      sql += ` WHERE ${whereIO.toSQL(dialect)}`;
+    }
     return new io.DeleteIO(action, sql, fromIO, whereIO);
   }
 
