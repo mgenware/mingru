@@ -9,16 +9,16 @@ function newTA(table: dd.Table): dd.TableActionCollection {
   return dd.actions(table);
 }
 
-test('Basic', async () => {
+test('Select', async () => {
   const ta = newTA(post);
   ta.select('t', post.id, post.title);
-  await testBuildAsync(ta, 'select/basic');
+  await testBuildAsync(ta, 'select/select');
 });
 
 test('Select all', async () => {
   const ta = newTA(post);
   ta.selectAll('t', post.id, post.title);
-  await testBuildAsync(ta, 'select/basicAll');
+  await testBuildAsync(ta, 'select/selectAll');
 });
 
 test('Where', async () => {

@@ -34,5 +34,4 @@ test('Update with where', () => {
   const io = mr.io.toUpdateIO(v, dialect);
 
   expect(io.sql).toBe('UPDATE `post` SET `title` = "haha" WHERE `id` = 1');
-  expect(io.table).toBeInstanceOf(mr.io.TableIO);
 });

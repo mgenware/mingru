@@ -12,5 +12,5 @@ test('Basic', async () => {
     .set(post.title, dd.sql`"haha"`)
     .set(post.content, dd.sql`${dd.input(post.content)}`)
     .set(post.cmtCount, dd.sql`${post.cmtCount} + 1`);
-  await testBuildAsync(ta, 'update/basic');
+  await testBuildAsync(ta, 'update/update');
 });
