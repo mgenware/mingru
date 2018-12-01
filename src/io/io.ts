@@ -106,3 +106,12 @@ export class InsertIO {
     public table: TableIO,
   ) { }
 }
+
+export class DeleteIO {
+  constructor(
+    public action: dd.DeleteAction,
+    public sql: string,
+    public table: TableIO,
+    public where: SQLIO,
+  ) { }
+}

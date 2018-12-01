@@ -6,3 +6,7 @@
 [![Node.js Version](http://img.shields.io/node/v/mingru.svg?style=flat-square)](https://nodejs.org/en/)
 
 Convert [dd-models](https://github.com/mgenware/dd-models) to Go code.
+
+Goals:
+* No performance penalty: mingru is an SQL builder, not ORM.
+* Strongly typed: uses TypeScript to define models and actions(views).
