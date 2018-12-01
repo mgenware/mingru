@@ -23,35 +23,44 @@ test('Select all', async () => {
 
 test('Where', async () => {
   const ta = newTA(post);
-  ta.select('t', post.id, post.title).where(dd.sql`${post.id} = ${dd.input(post.id)}`);
+  ta.select('t', post.id, post.title).where(
+    dd.sql`${post.id} = ${dd.input(post.id)}`,
+  );
   await testBuildAsync(ta, 'select/where');
 });
 
 test('WhereAll', async () => {
   const ta = newTA(post);
-  ta.selectAll('t', post.id, post.title).where(dd.sql`${post.id} = ${dd.input(post.id)}`);
+  ta.selectAll('t', post.id, post.title).where(
+    dd.sql`${post.id} = ${dd.input(post.id)}`,
+  );
   await testBuildAsync(ta, 'select/whereAll');
 });
 
 test('Where: multiple cols', async () => {
   const ta = newTA(post);
-  ta.select('t', post.id, post.title).where(dd.sql`${post.id} = ${dd.input(post.id)} && ${post.title} != ${dd.input(post.title)}`);
+  ta.select('t', post.id, post.title).where(
+    dd.sql`${post.id} = ${dd.input(post.id)} && ${post.title} != ${dd.input(
+      post.title,
+    )}`,
+  );
   await testBuildAsync(ta, 'select/whereMultipleCols');
 });
 
 test('Custom params', async () => {
   const ta = newTA(post);
-  ta.select('t', post.id, post.title).where(dd.sql`${post.id} = ${dd.input(post.id, 'id')} && raw_name = ${dd.input('string', 'name')}`);
+  ta.select('t', post.id, post.title).where(
+    dd.sql`${post.id} = ${dd.input(post.id, 'id')} && raw_name = ${dd.input(
+      'string',
+      'name',
+    )}`,
+  );
   await testBuildAsync(ta, 'select/customParams');
 });
 
 test('Basic join', async () => {
   const ta = newTA(post);
-  ta.select(
-      't',
-      post.user_id.join(user).url_name,
-      post.title,
-    );
+  ta.select('t', post.user_id.join(user).url_name, post.title);
   await testBuildAsync(ta, 'select/joinBasic');
 });
 

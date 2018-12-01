@@ -4,7 +4,11 @@ import { SQLIO } from '../io/io';
 
 export default class ParamInfo {
   static fromColumn(dialect: Dialect, col: dd.ColumnBase): ParamInfo {
-    return new ParamInfo(col.__name, dialect.goType(col.__getTargetColumn()), col);
+    return new ParamInfo(
+      col.__name,
+      dialect.goType(col.__getTargetColumn()),
+      col,
+    );
   }
 
   static fromSQLArray(dialect: Dialect, sqls: SQLIO[]): ParamInfo[] {
@@ -29,6 +33,6 @@ export default class ParamInfo {
   constructor(
     public name: string,
     public type: TypeBridge,
-    public rawObject: dd.InputParam|dd.ColumnBase,
-  ) { }
+    public rawObject: dd.InputParam | dd.ColumnBase,
+  ) {}
 }

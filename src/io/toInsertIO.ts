@@ -4,10 +4,7 @@ import Dialect from '../dialect';
 import * as io from './io';
 
 export class InsertProcessor {
-  constructor(
-    public action: dd.InsertAction,
-    public dialect: Dialect,
-  ) {
+  constructor(public action: dd.InsertAction, public dialect: Dialect) {
     throwIfFalsy(action, 'action');
     throwIfFalsy(dialect, 'dialect');
   }

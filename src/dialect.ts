@@ -4,9 +4,9 @@ import * as dd from 'dd-models';
 export class TypeBridge {
   constructor(
     public type: string,
-    public importPath: string|null,
+    public importPath: string | null,
     public isSystemImport: boolean,
-  ) { }
+  ) {}
 
   toString(): string {
     return this.type;
@@ -34,7 +34,7 @@ export class Dialect {
     return this.escape(table.__name);
   }
 
-  inputPlaceholder(_: dd.InputParam|null): string {
+  inputPlaceholder(_: dd.InputParam | null): string {
     return '?';
   }
 }
