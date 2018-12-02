@@ -694,10 +694,10 @@ data-urls@^1.0.0:
     whatwg-mimetype "^2.1.0"
     whatwg-url "^7.0.0"
 
-dd-models@^0.0.35:
-  version "0.0.35"
-  resolved "https://registry.yarnpkg.com/dd-models/-/dd-models-0.0.35.tgz#c719b8bd9cfe923e5c892677c4c572d0df9c7588"
-  integrity sha512-C00c7rx8wKbf51scnrpxI1D6yvgkMlFMwQ2wKFe9OaxATaPLdD6sdAhzwkvhF7BwA68BVKKU5SMUpGVXdQE7Cw==
+dd-models@^0.0.37:
+  version "0.0.37"
+  resolved "https://registry.yarnpkg.com/dd-models/-/dd-models-0.0.37.tgz#0b38c062a59fb8b402af646041a3685f1263b135"
+  integrity sha512-RAiSw3mM+bM/o8JfdzTIiBc1T9A832aLwbtOxry0fb7uD/qBXs9iGfGwXLo2XHvJCYiUy/q2U5f/bJtcHWQ5JQ==
   dependencies:
     lodash.camelcase "^4.3.0"
     lodash.snakecase "^4.1.1"
@@ -2204,6 +2204,21 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
+m-fs@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/m-fs/-/m-fs-2.0.0.tgz#52e2c4974245d65afc8d9d0ce31e91622d6cba15"
+  integrity sha512-3NMkA+2LKe5aWFw8FaWPfwJtSw07v/M8HhRAu9ABilpRFYJR1VzhBG1fFoIMsF7O0h9GY0UWq/gRZX9ms/OYyA==
+  dependencies:
+    make-dir "^1.3.0"
+    node-filter-async "^1.0.1"
+
+make-dir@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/make-dir/-/make-dir-1.3.0.tgz#79c1033b80515bd6d24ec9933e860ca75ee27f0c"
+  integrity sha512-2w31R7SJtieJJnQtGc7RVL2StM2vGYVfqUOvUDxH6bC6aJTxPxTF0GnIgCyu7tjockiUWAYQRbxa7vKn34s5sQ==
+  dependencies:
+    pify "^3.0.0"
+
 makeerror@1.0.x:
   version "1.0.11"
   resolved "https://registry.yarnpkg.com/makeerror/-/makeerror-1.0.11.tgz#e01a5c9109f2af79660e4e8b9587790184f5a96c"
@@ -2399,6 +2414,11 @@ needle@^2.2.1:
     debug "^2.1.2"
     iconv-lite "^0.4.4"
     sax "^1.2.4"
+
+node-filter-async@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/node-filter-async/-/node-filter-async-1.0.1.tgz#5fdf8fb9f7cedd6fda2900d374241ed659a9aafa"
+  integrity sha512-TZPxjE55hBe/vUaS+Jlwj9qFVTj2YSLRaiLDU/MlYCnLErdPpBFA6ZZwLprghfoPXpsSmVMmCwKUD3HUCnxtgQ==
 
 node-int64@^0.4.0:
   version "0.4.0"
@@ -2700,6 +2720,11 @@ pify@^2.0.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/pify/-/pify-2.3.0.tgz#ed141a6ac043a849ea588498e7dca8b15330e90c"
   integrity sha1-7RQaasBDqEnqWISY59yosVMw6Qw=
+
+pify@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/pify/-/pify-3.0.0.tgz#e5a4acd2c101fdf3d9a4d07f0dbc4db49dd28176"
+  integrity sha1-5aSs0sEB/fPZpNB/DbxNtJ3SgXY=
 
 pinkie-promise@^2.0.0:
   version "2.0.1"

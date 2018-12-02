@@ -43,7 +43,8 @@
     "typescript": "^3.1.6"
   },
   "dependencies": {
-    "dd-models": "^0.0.35",
+    "dd-models": "^0.0.37",
+    "m-fs": "^2.0.0",
     "throw-if-arg-empty": "^1.0.1",
     "to-type-string": "^1.0.0"
   }

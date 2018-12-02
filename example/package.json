@@ -5,6 +5,9 @@
   "author": "Mgen",
   "license": "MIT",
   "private": true,
+  "scripts": {
+    "build": "ts-node mingru"
+  },
   "devDependencies": {
     "ts-node": "^7.0.1"
   }
