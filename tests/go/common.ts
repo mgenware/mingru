@@ -44,7 +44,7 @@ export async function testBuildToDirAsync(
   const tmpDir = tempy.directory();
   await mr.build(taList, dialect, tmpDir);
   for (const file of files) {
-    const actual = await nodepath.join(tmpDir, file);
+    const actual = await nodepath.join(tmpDir, file + '.go');
     const expected = await nodepath.join(
       nodepath.resolve(nodepath.join(DestDataDir, 'build', expectedDir)),
       file + '.go',

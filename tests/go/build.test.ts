@@ -1,7 +1,6 @@
 import * as dd from 'dd-models';
 import user from '../models/user';
 import post from '../models/post';
-import cmtReply from '../models/cmtReply';
 import { newTA, testBuildToDirAsync } from './common';
 
 test('Single table', async () => {
@@ -20,33 +19,22 @@ test('Single table', async () => {
 });
 
 test('Multiple tables', async () => {
-  const postTA = newTA(post);
-  postTA.select('PostTitle', post.id, post.title);
+  const userTA = dd.actions(user);
+  userTA.select('Profile', user.display_name, user.sig);
+  userTA.update('Profile').set(user.sig, user.sig.isEqualToInput());
+  userTA.delete('ByID').where(user.id.isEqualToInput());
+
+  const postTA = dd.actions(post);
   postTA.select(
     'PostInfo',
     post.id,
-    post.title,
-    post.user_id,
+    post.content,
     post.user_id.join(user).url_name,
   );
-  postTA.update('PostTitle').set(post.title, dd.sql`${dd.input(post.title)}`);
-  postTA.delete('ByID').where(dd.sql`${post.id} = ${dd.input(post.id)}`);
+  postTA.update('Content').set(post.content, post.content.isEqualToInput());
+  postTA.delete('ByID').where(post.id.isEqualToInput());
 
-  const rplTA = newTA(cmtReply);
-  rplTA.select(
-    'Replies',
-    cmtReply.id,
-    cmtReply.user_id.join(user).url_name,
-    cmtReply.to_user_id.join(user).url_name,
-  );
-  rplTA
-    .update('User')
-    .set(cmtReply.user_id, dd.sql`${dd.input(cmtReply.user_id)}`);
-  rplTA.delete('ByID').where(dd.sql`${cmtReply.id} = ${dd.input(cmtReply.id)}`);
+  const actions = [userTA, postTA];
 
-  await testBuildToDirAsync(
-    [postTA, rplTA],
-    ['Post', 'PostCmtRpl'],
-    'multipleTables',
-  );
+  await testBuildToDirAsync(actions, ['Post', 'User'], 'multipleTables');
 });
