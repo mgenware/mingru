@@ -6,7 +6,7 @@ import { testBuildFullAsync, newTA } from './common';
 test('Single action', async () => {
   const ta = newTA(post);
   ta.select('t', post.id, post.title);
-  await testBuildFullAsync(ta, 'full/singleAction');
+  await testBuildFullAsync(ta, 'goBuilder/singleAction');
 });
 
 test('Multiple actions', async () => {
@@ -21,5 +21,5 @@ test('Multiple actions', async () => {
   );
   ta.update('PostTitle').set(post.title, dd.sql`${dd.input(post.title)}`);
   ta.delete('ByID').where(dd.sql`${post.id} = ${dd.input(post.id)}`);
-  await testBuildFullAsync(ta, 'full/multipleActions');
+  await testBuildFullAsync(ta, 'goBuilder/multipleActions');
 });
