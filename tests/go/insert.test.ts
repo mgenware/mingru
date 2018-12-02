@@ -1,13 +1,8 @@
-import * as dd from 'dd-models';
 import post from '../models/post';
-import { testBuildAsync } from './common';
+import { testBuildAsync, newTA } from './common';
 
-function newTA(table: dd.Table): dd.TableActionCollection {
-  return dd.actions(table);
-}
-
-test('Basic', async () => {
+test('Insert', async () => {
   const ta = newTA(post);
   ta.insert('t', post.title, post.user_id);
-  await testBuildAsync(ta, 'insert/basic');
+  await testBuildAsync(ta, 'insert/insert');
 });

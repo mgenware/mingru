@@ -29,3 +29,7 @@ export async function testBuildFullAsync(
   const actual = builder.build();
   expect(actual).toBe(content);
 }
+
+export function newTA(table: dd.Table): dd.TableActionCollection {
+  return dd.actions(table);
+}

@@ -1,11 +1,7 @@
 import * as dd from 'dd-models';
 import user from '../models/user';
 import post from '../models/post';
-import { testBuildFullAsync } from './common';
-
-function newTA(table: dd.Table): dd.TableActionCollection {
-  return dd.actions(table);
-}
+import { testBuildFullAsync, newTA } from './common';
 
 test('Single action', async () => {
   const ta = newTA(post);

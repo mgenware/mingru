@@ -3,11 +3,7 @@ import post from '../models/post';
 import cmt from '../models/cmt';
 import rpl from '../models/cmtReply';
 import user from '../models/user';
-import { testBuildAsync } from './common';
-
-function newTA(table: dd.Table): dd.TableActionCollection {
-  return dd.actions(table);
-}
+import { testBuildAsync, newTA } from './common';
 
 test('Select', async () => {
   const ta = newTA(post);

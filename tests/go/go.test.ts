@@ -1,10 +1,6 @@
 import * as dd from 'dd-models';
 import post from '../models/post';
-import { testBuildAsync } from './common';
-
-function newTA(table: dd.Table): dd.TableActionCollection {
-  return dd.actions(table);
-}
+import { testBuildAsync, newTA } from './common';
 
 test('Escape string', async () => {
   const ta = newTA(post);

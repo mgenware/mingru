@@ -1,12 +1,8 @@
 import * as dd from 'dd-models';
 import post from '../models/post';
-import { testBuildAsync } from './common';
+import { testBuildAsync, newTA } from './common';
 
-function newTA(table: dd.Table): dd.TableActionCollection {
-  return dd.actions(table);
-}
-
-test('Basic', async () => {
+test('Update', async () => {
   const ta = newTA(post);
   ta.update('t')
     .set(post.title, dd.sql`"haha"`)
