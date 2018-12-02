@@ -1,0 +1,1 @@
+import * as mr from '../';

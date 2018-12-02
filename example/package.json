@@ -1,0 +1,11 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "main": "mingru.ts",
+  "author": "Mgen",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "ts-node": "^7.0.1"
+  }
+}
