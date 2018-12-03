@@ -33,17 +33,17 @@
     "trailingComma": "all"
   },
   "devDependencies": {
-    "@types/jest": "^23.3.9",
-    "@types/node": "^10.12.2",
+    "@types/jest": "^23.3.10",
+    "@types/node": "^10.12.11",
     "@types/tempy": "^0.2.0",
     "jest": "^23.6.0",
     "rimraf": "^2.6.2",
     "tempy": "^0.2.1",
     "tslint": "^5.11.0",
-    "typescript": "^3.1.6"
+    "typescript": "^3.2.1"
   },
   "dependencies": {
-    "dd-models": "^0.0.37",
+    "dd-models": "^0.0.38",
     "m-fs": "^2.0.0",
     "throw-if-arg-empty": "^1.0.1",
     "to-type-string": "^1.0.0"
