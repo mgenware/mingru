@@ -6,7 +6,9 @@ const userTA = dd.actions(user);
 // Get profile info (display_name, sig)
 userTA.select('Profile', user.display_name, user.sig);
 // Update profile info
-userTA.update('Profile').set(user.sig, user.sig.isEqualToInput());
+userTA.update('Profile')
+  .setToInput(user.display_name) // Set display_name
+  .setToInput(user.sig); // Set sig
 // Delete by ID
 userTA.delete('ByID').where(user.id.isEqualToInput());
 
@@ -19,7 +21,7 @@ postTA.select(
   post.user_id.join(user).url_name,
 );
 // Update content
-postTA.update('Content').set(post.content, post.content.isEqualToInput());
+postTA.update('Content').setToInput(post.content);
 // Delete by ID
 postTA.delete('ByID').where(post.id.isEqualToInput());
 
