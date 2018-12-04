@@ -1,7 +1,6 @@
 import { Dialect, TypeBridge } from '../dialect';
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import toTypeString from 'to-type-string';
 
 // Not needed by now
 // const NullBool = 'NullBool';
@@ -65,10 +64,17 @@ export default class MySQL extends Dialect {
         }
       }
     }
-    throw new Error(`Type not supported: ${toTypeString(column.types)}`);
+    throw new Error(`Type not supported: ${this.inspectTypes(column.types)}`);
   }
 
   as(sql: string, name: string): string {
     return `${sql} AS ${this.escape(name)}`;
+  }
+
+  private inspectTypes(types: Set<string>): string {
+    if (!types) {
+      return 'null';
+    }
+    return `"${[...types].join()}"`;
   }
 }

@@ -69,6 +69,10 @@ test('DT', () => {
   }
 });
 
+test('DT (not supported)', () => {
+  expect(() => dialect.goType(new dd.Column('_HAHA_'))).toThrow('"_HAHA_"');
+});
+
 test('as', () => {
   expect(dialect.as('abc', 'def')).toBe('abc AS `def`');
 });
