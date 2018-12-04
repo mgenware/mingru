@@ -38,7 +38,6 @@ test('DT (nullable)', () => {
     // Time
     [dd.datetime(), 'mysql.NullTime', MySqlPkg],
     [dd.date(), 'mysql.NullTime', MySqlPkg],
-    [dd.time(), 'mysql.NullTime', MySqlPkg],
   ];
 
   for (const t of tests) {
@@ -66,7 +65,6 @@ test('DT', () => {
     // Time
     [dd.datetime().notNull, 'time.Time', TimePkg],
     [dd.date().notNull, 'time.Time', TimePkg],
-    [dd.time().notNull, 'time.Time', TimePkg],
   ];
 
   for (const t of tests) {

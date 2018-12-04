@@ -8,6 +8,13 @@ class Post extends dd.Table {
   user_id = user.id;
   reviewer_id = user.id;
   cmtCount = dd.setName('cmt_c', dd.unsignedInt(0).notNull);
+
+  datetime = dd.datetime().notNull;
+  date = dd.date().notNull;
+  time = dd.time().notNull;
+  n_datetime = dd.datetime();
+  n_date = dd.date();
+  n_time = dd.time();
 }
 
 export default dd.table(Post);

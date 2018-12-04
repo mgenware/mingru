@@ -21,7 +21,11 @@ function timeType(): TypeBridge {
 }
 
 function nullTimeType(): TypeBridge {
-  return new TypeBridge('mysql.NullTime', 'github.com/go-sql-driver/mysql', false);
+  return new TypeBridge(
+    'mysql.NullTime',
+    'github.com/go-sql-driver/mysql',
+    false,
+  );
 }
 
 export default class MySQL extends Dialect {
@@ -72,8 +76,7 @@ export default class MySQL extends Dialect {
         }
 
         case DT.datetime:
-        case DT.date:
-        case DT.time: {
+        case DT.date: {
           if (nullable) {
             return nullTimeType();
           }
