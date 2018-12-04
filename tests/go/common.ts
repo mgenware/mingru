@@ -40,9 +40,10 @@ export async function testBuildToDirAsync(
   taList: dd.TableActionCollection[],
   files: string[],
   expectedDir: string,
+  option?: mr.IBuildOption,
 ) {
   const tmpDir = tempy.directory();
-  await mr.build(taList, dialect, tmpDir);
+  await mr.build(taList, dialect, tmpDir, option);
   for (const file of files) {
     const actual = await nodepath.join(tmpDir, file + '.go');
     const expected = await nodepath.join(
