@@ -46,3 +46,11 @@ test('Custom package name', async () => {
     packageName: 'haha',
   });
 });
+
+test('imports (nullable)', async () => {
+  const ta = newTA(post);
+  ta.select('PostTitle', post.id, post.title);
+  await testBuildToDirAsync([ta], ['Post'], 'customPackageName', {
+    packageName: 'haha',
+  });
+});

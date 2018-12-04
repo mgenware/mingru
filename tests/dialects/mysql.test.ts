@@ -5,19 +5,16 @@ import * as dd from 'dd-models';
 // const NullFloat64 = 'sql.NullFloat64';
 const NullInt64 = 'sql.NullInt64';
 const NullString = 'sql.NullString';
-const SqlPackage = 'database/sql';
+const SqlPkg = 'database/sql';
+const MySqlPkg = 'github.com/go-sql-driver/mysql';
+const TimePkg = 'time';
 
 const dialect = new mr.MySQL();
 
-function testNullableType(col: dd.Column, type: string) {
+function testType(col: dd.Column, type: string, pkg: string | null) {
   const tb = dialect.goType(col);
   expect(tb.type).toBe(type);
-  expect(tb.importPath).toBe(SqlPackage);
-}
-
-function testType(col: dd.Column, type: string) {
-  const tb = dialect.goType(col);
-  expect(tb.type).toBe(type);
+  expect(tb.importPath).toBe(pkg);
 }
 
 test('escape', () => {
@@ -27,45 +24,53 @@ test('escape', () => {
 test('DT (nullable)', () => {
   const tests: Array<Array<unknown>> = [
     // Integer
-    [dd.int(), NullInt64],
-    [dd.unsignedInt(), NullInt64],
-    [dd.bigInt(), NullInt64],
-    [dd.unsignedBigInt(), NullInt64],
-    [dd.smallInt(), NullInt64],
-    [dd.unsignedSmallInt(), NullInt64],
-    [dd.tinyInt(), NullInt64],
-    [dd.unsignedTinyInt(), NullInt64],
+    [dd.int(), NullInt64, SqlPkg],
+    [dd.unsignedInt(), NullInt64, SqlPkg],
+    [dd.bigInt(), NullInt64, SqlPkg],
+    [dd.unsignedBigInt(), NullInt64, SqlPkg],
+    [dd.smallInt(), NullInt64, SqlPkg],
+    [dd.unsignedSmallInt(), NullInt64, SqlPkg],
+    [dd.tinyInt(), NullInt64, SqlPkg],
+    [dd.unsignedTinyInt(), NullInt64, SqlPkg],
     // String
-    [dd.varChar(10), NullString],
-    [dd.char(10), NullString],
+    [dd.varChar(10), NullString, SqlPkg],
+    [dd.char(10), NullString, SqlPkg],
+    // Time
+    [dd.datetime(), 'mysql.NullTime', MySqlPkg],
+    [dd.date(), 'mysql.NullTime', MySqlPkg],
+    [dd.time(), 'mysql.NullTime', MySqlPkg],
   ];
 
   for (const t of tests) {
-    testNullableType(t[0] as dd.Column, t[1] as string);
+    testType(t[0] as dd.Column, t[1] as string, t[2] as string | null);
   }
 });
 
 test('DT', () => {
   const tests: Array<Array<unknown>> = [
     // PK
-    [dd.pk(), 'uint64'],
+    [dd.pk(), 'uint64', null],
     // Integer
-    [dd.int().notNull, 'int'],
-    [dd.unsignedInt().notNull, 'uint'],
-    [dd.bigInt().notNull, 'int64'],
-    [dd.unsignedBigInt().notNull, 'uint64'],
-    [dd.pk().notNull, 'uint64'],
-    [dd.smallInt().notNull, 'int16'],
-    [dd.unsignedSmallInt().notNull, 'uint16'],
-    [dd.tinyInt().notNull, 'int8'],
-    [dd.unsignedTinyInt().notNull, 'uint8'],
+    [dd.int().notNull, 'int', null],
+    [dd.unsignedInt().notNull, 'uint', null],
+    [dd.bigInt().notNull, 'int64', null],
+    [dd.unsignedBigInt().notNull, 'uint64', null],
+    [dd.pk().notNull, 'uint64', null],
+    [dd.smallInt().notNull, 'int16', null],
+    [dd.unsignedSmallInt().notNull, 'uint16', null],
+    [dd.tinyInt().notNull, 'int8', null],
+    [dd.unsignedTinyInt().notNull, 'uint8', null],
     // String
-    [dd.varChar(10).notNull, 'string'],
-    [dd.char(10).notNull, 'string'],
+    [dd.varChar(10).notNull, 'string', null],
+    [dd.char(10).notNull, 'string', null],
+    // Time
+    [dd.datetime().notNull, 'time.Time', TimePkg],
+    [dd.date().notNull, 'time.Time', TimePkg],
+    [dd.time().notNull, 'time.Time', TimePkg],
   ];
 
   for (const t of tests) {
-    testType(t[0] as dd.Column, t[1] as string);
+    testType(t[0] as dd.Column, t[1] as string, t[2] as string | null);
   }
 });
 

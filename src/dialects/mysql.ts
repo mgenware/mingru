@@ -16,6 +16,14 @@ function nullType(type: string): TypeBridge {
   return new TypeBridge(`sql.${type}`, 'database/sql', true);
 }
 
+function timeType(): TypeBridge {
+  return new TypeBridge('time.Time', 'time', true);
+}
+
+function nullTimeType(): TypeBridge {
+  return new TypeBridge('mysql.NullTime', 'github.com/go-sql-driver/mysql', false);
+}
+
 export default class MySQL extends Dialect {
   escape(name: string): string {
     throwIfFalsy(name, 'name');
@@ -61,6 +69,15 @@ export default class MySQL extends Dialect {
             return nullType(NullString);
           }
           return sysType('string');
+        }
+
+        case DT.datetime:
+        case DT.date:
+        case DT.time: {
+          if (nullable) {
+            return nullTimeType();
+          }
+          return timeType();
         }
       }
     }
