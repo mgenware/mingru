@@ -46,7 +46,10 @@ function formatImports(imports: string[]): string {
   if (!imports || !imports.length) {
     return '';
   }
-  return imports.map(s => `\t${s}\n`).join('');
+  return imports
+    .sort()
+    .map(s => `\t${s}\n`)
+    .join('');
 }
 
 export function makeImports(system: string[], user: string[]): string {

@@ -17,6 +17,7 @@ export async function testBuildAsync(
   let actual = builder.build(true);
   actual = `import "github.com/mgenware/go-packagex/database/sqlx"\n${actual}`;
   expect(actual).toBe(content);
+  return builder;
 }
 
 export async function testBuildFullAsync(

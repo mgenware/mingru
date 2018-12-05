@@ -1,5 +1,5 @@
-import { SelectIO, UpdateIO, InsertIO, DeleteIO } from '../io/io';
-import Dialect from '../dialect';
+import { SelectIO, UpdateIO, InsertIO, DeleteIO, SQLIO } from '../io/io';
+import Dialect, { TypeBridge } from '../dialect';
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import toTypeString from 'to-type-string';
@@ -20,12 +20,10 @@ function joinParams(arr: string[]): string {
 }
 
 export default class GoBuilder {
-  memberNames: Set<string> = new Set<string>();
-
-  private tableClassObject: string;
-  private tableClassType: string;
-  private sysImports: string[] = [];
-  private userImports: string[] = [];
+  tableClassObject: string;
+  tableClassType: string;
+  sysImports = new Set<string>();
+  userImports = new Set<string>();
 
   constructor(
     public tableActions: dd.TableActionCollection,
@@ -39,7 +37,7 @@ export default class GoBuilder {
     this.tableClassType = `TableType${capTableName}`;
     this.tableClassObject = capTableName;
 
-    this.userImports.push(defs.SQLXPath);
+    this.userImports.add(defs.SQLXPath);
   }
 
   build(actionsOnly?: boolean): string {
@@ -58,7 +56,8 @@ export default class GoBuilder {
     body += this.buildActions();
 
     // Add imports
-    code = code + go.makeImports(this.sysImports, this.userImports) + body;
+    code =
+      code + go.makeImports([...this.sysImports], [...this.userImports]) + body;
     return code;
   }
 
@@ -129,8 +128,7 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
 
     // Collect params info, used to generate function header, e.g. `(queryable sqlx.Queryable, id uint64, name string)`.
     let funcParams = `${QueryableParam} ${QueryableType}`;
-    const paramInfos = ParamInfo.fromSQLArray(
-      dialect,
+    const paramInfos = this.recordParamsFromSQLArray(
       io.where ? [io.where] : [],
     );
     funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join('');
@@ -184,7 +182,7 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) (${
   }
 
   private update(io: UpdateIO): string {
-    const { dialect, tableClassType } = this;
+    const { tableClassType } = this;
     const { action } = io;
     const actionName = action.name;
 
@@ -193,7 +191,7 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) (${
     // Prepare params
     let funcParams = `${QueryableParam} ${QueryableType}`;
     const setterSQLs = io.setters.map(setter => setter.sql);
-    const paramInfos = ParamInfo.fromSQLArray(dialect, setterSQLs);
+    const paramInfos = this.recordParamsFromSQLArray(setterSQLs);
     funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join('');
     const queryParams = paramInfos.map(p => `, ${p.name}`).join('');
     code += `// ${actionName} ...
@@ -215,7 +213,7 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) error {
   }
 
   private insert(io: InsertIO): string {
-    const { dialect, tableClassType } = this;
+    const { tableClassType } = this;
     const { action } = io;
     const actionName = action.name;
 
@@ -223,9 +221,7 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) error {
 
     // Prepare params
     let funcParams = `${QueryableParam} ${QueryableType}`;
-    const paramInfos = action.columns.map(c =>
-      ParamInfo.fromColumn(dialect, c),
-    );
+    const paramInfos = action.columns.map(this.recordParamFromColumn);
     funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join('');
     const queryParams = paramInfos.map(p => `, ${p.name}`).join('');
     code += `// ${actionName} ...
@@ -247,7 +243,7 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) error {
   }
 
   private delete(io: DeleteIO): string {
-    const { dialect, tableClassType } = this;
+    const { tableClassType } = this;
     const { action } = io;
     const actionName = action.name;
 
@@ -255,8 +251,7 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) error {
 
     // Prepare params
     let funcParams = `${QueryableParam} ${QueryableType}`;
-    const paramInfos = ParamInfo.fromSQLArray(
-      dialect,
+    const paramInfos = this.recordParamsFromSQLArray(
       io.where ? [io.where] : [],
     );
     funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join('');
@@ -271,5 +266,32 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) error {
 }
 `;
     return code;
+  }
+
+  // This will add the import path to current context
+  private recordParamsFromSQLArray(sqls: SQLIO[]): ParamInfo[] {
+    const params = ParamInfo.fromSQLArray(this.dialect, sqls);
+    for (const param of params) {
+      this.addTypeBridge(param.type);
+    }
+    return params;
+  }
+
+  // This will add the import path to current context
+  private recordParamFromColumn(col: dd.ColumnBase): ParamInfo {
+    const result = ParamInfo.fromColumn(this.dialect, col);
+    this.addTypeBridge(result.type);
+    return result;
+  }
+
+  private addTypeBridge(bridge: TypeBridge) {
+    if (!bridge.importPath) {
+      return;
+    }
+    if (bridge.isSystemImport) {
+      this.sysImports.add(bridge.importPath);
+    } else {
+      this.userImports.add(bridge.importPath);
+    }
   }
 }

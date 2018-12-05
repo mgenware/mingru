@@ -49,10 +49,13 @@ test('Custom package name', async () => {
 
 test('imports (datetime and nullable datetime)', async () => {
   const ta = newTA(post);
-  ta.selectAll('T', post.datetime, post.date, post.time);
-  ta.update('T')
+  ta.selectAll('Times', post.datetime, post.date);
+  ta.selectAll('NullableTimes', post.n_datetime, post.n_date);
+  ta.update('Times')
+    .setToInput(post.datetime)
+    .setToInput(post.date);
+  ta.update('NullableTimes')
     .setToInput(post.n_datetime)
-    .setToInput(post.n_date)
-    .setToInput(post.n_time);
+    .setToInput(post.n_date);
   await testBuildToDirAsync([ta], ['Post'], 'importDatetimeNullable');
 });
