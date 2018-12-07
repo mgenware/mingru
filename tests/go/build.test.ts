@@ -21,7 +21,7 @@ test('Single table', async () => {
 test('Multiple tables', async () => {
   const userTA = dd.actions(user);
   userTA.select('Profile', user.display_name, user.sig);
-  userTA.update('Profile').set(user.sig, user.sig.isEqualToInput());
+  userTA.update('Profile').setToInput(user.sig);
   userTA.delete('ByID').where(user.id.isEqualToInput());
 
   const postTA = dd.actions(post);
