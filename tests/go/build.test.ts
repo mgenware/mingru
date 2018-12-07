@@ -41,21 +41,15 @@ test('Multiple tables', async () => {
 
 test('Custom package name', async () => {
   const ta = newTA(post);
-  ta.selectAll('PostTitle', post.id, post.title);
+  ta.select('PostTitle', post.id, post.title);
   await testBuildToDirAsync([ta], ['Post'], 'customPackageName', {
     packageName: 'haha',
   });
 });
 
-test('imports (datetime and nullable datetime)', async () => {
+test('Extra imports (select)', async () => {
   const ta = newTA(post);
   ta.selectAll('Times', post.datetime, post.date);
   ta.selectAll('NullableTimes', post.n_datetime, post.n_date);
-  ta.update('Times')
-    .setToInput(post.datetime)
-    .setToInput(post.date);
-  ta.update('NullableTimes')
-    .setToInput(post.n_datetime)
-    .setToInput(post.n_date);
-  await testBuildToDirAsync([ta], ['Post'], 'importDatetimeNullable');
+  await testBuildToDirAsync([ta], ['Post'], 'extraImportsSelect');
 });

@@ -122,6 +122,7 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
     for (const col of io.cols) {
       const fieldName = col.varName;
       const fieldType = dialect.goType(col.col.__getTargetColumn());
+      this.addTypeBridge(fieldType);
       selectedFields.push(new go.InstanceVariable(fieldName, fieldType.type));
     }
     code += go.struct(resultType, selectedFields);
@@ -221,7 +222,9 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) error {
 
     // Prepare params
     let funcParams = `${QueryableParam} ${QueryableType}`;
-    const paramInfos = action.columns.map(this.recordParamFromColumn);
+    const paramInfos = action.columns.map(col =>
+      this.recordParamFromColumn(col),
+    );
     funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join('');
     const queryParams = paramInfos.map(p => `, ${p.name}`).join('');
     code += `// ${actionName} ...

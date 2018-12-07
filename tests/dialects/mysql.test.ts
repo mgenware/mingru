@@ -5,9 +5,9 @@ import * as dd from 'dd-models';
 // const NullFloat64 = 'sql.NullFloat64';
 const NullInt64 = 'sql.NullInt64';
 const NullString = 'sql.NullString';
-const SqlPkg = 'database/sql';
-const MySqlPkg = 'github.com/go-sql-driver/mysql';
-const TimePkg = 'time';
+const SqlPkg = '"database/sql"';
+const MySqlPkg = '"github.com/go-sql-driver/mysql"';
+const TimePkg = '"time"';
 
 const dialect = new mr.MySQL();
 

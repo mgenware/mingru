@@ -1,6 +1,8 @@
 package da
 
 import (
+	"database/sql"
+
 	"github.com/mgenware/go-packagex/database/sqlx"
 )
 
