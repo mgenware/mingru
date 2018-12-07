@@ -3,7 +3,6 @@ package da
 import (
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/mgenware/go-packagex/database/sqlx"
 )
 
@@ -47,8 +46,8 @@ func (da *TableTypePost) SelectTimes(queryable sqlx.Queryable) ([]*SelectTimesRe
 
 // SelectNullableTimesResult ...
 type SelectNullableTimesResult struct {
-	PostNDatetime mysql.NullTime
-	PostNDate     mysql.NullTime
+	PostNDatetime *time.Time
+	PostNDate     *time.Time
 }
 
 // SelectNullableTimes ...

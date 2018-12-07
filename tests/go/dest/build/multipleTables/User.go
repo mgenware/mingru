@@ -1,8 +1,6 @@
 package da
 
 import (
-	"database/sql"
-
 	"github.com/mgenware/go-packagex/database/sqlx"
 )
 
@@ -18,7 +16,7 @@ var User = &TableTypeUser{}
 // SelectProfileResult ...
 type SelectProfileResult struct {
 	UserDisplayName string
-	UserSig         sql.NullString
+	UserSig         *string
 }
 
 // SelectProfile ...
@@ -32,8 +30,8 @@ func (da *TableTypeUser) SelectProfile(queryable sqlx.Queryable) (*SelectProfile
 }
 
 // UpdateProfile ...
-func (da *TableTypeUser) UpdateProfile(queryable sqlx.Queryable, userSig sql.NullString) error {
-	_, err := queryable.Exec("UPDATE `user` SET `sig` = `sig` = ?", userSig)
+func (da *TableTypeUser) UpdateProfile(queryable sqlx.Queryable, userSig *string) error {
+	_, err := queryable.Exec("UPDATE `user` SET `sig` = ?", userSig)
 	if err != nil {
 		return err
 	}

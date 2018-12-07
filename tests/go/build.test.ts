@@ -53,3 +53,14 @@ test('Extra imports (select)', async () => {
   ta.selectAll('NullableTimes', post.n_datetime, post.n_date);
   await testBuildToDirAsync([ta], ['Post'], 'extraImportsSelect');
 });
+
+test('Extra imports (update)', async () => {
+  const ta = newTA(post);
+  ta.update('Times')
+    .setToInput(post.datetime)
+    .setToInput(post.date);
+  ta.update('NullableTimes')
+    .setToInput(post.n_datetime)
+    .setToInput(post.n_date);
+  await testBuildToDirAsync([ta], ['Post'], 'extraImportsUpdate');
+});
