@@ -251,7 +251,7 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) `;
 
     // Return the result
     if (action.fetchInsertedID) {
-      code += '\treturn sqlx.GetLastInsertIDUint64WithError(res, err)';
+      code += '\treturn sqlx.GetLastInsertIDUint64WithError(result, err)';
     } else {
       code += '\treturn err';
     }
