@@ -48,12 +48,9 @@ func (da *TableTypePost) SelectPostInfo(queryable sqlx.Queryable) (*SelectPostIn
 }
 
 // UpdatePostTitle ...
-func (da *TableTypePost) UpdatePostTitle(queryable sqlx.Queryable, postTitle string) error {
-	_, err := queryable.Exec("UPDATE `post` SET `title` = ?", postTitle)
-	if err != nil {
-		return err
-	}
-	return nil
+func (da *TableTypePost) UpdatePostTitle(queryable sqlx.Queryable, postTitle string) (int, error) {
+	result, err := queryable.Exec("UPDATE `post` SET `title` = ?", postTitle)
+	return sqlx.GetRowsAffectedIntWithError(result, err)
 }
 
 // DeleteByID ...

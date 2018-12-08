@@ -114,7 +114,7 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
     const { dialect, tableClassType } = this;
     const actionName = io.action.name;
     const resultType = `${actionName}Result`;
-    const selectAll = io.action.selectAll;
+    const selectAll = io.action.isSelectAll;
 
     let code = '';
     // Collect selected columns info, used to generate result type and params passed to `Scan`.
@@ -196,20 +196,27 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) (${
     funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join('');
     const queryParams = paramInfos.map(p => `, ${p.name}`).join('');
     code += `// ${actionName} ...
-func (da *${tableClassType}) ${actionName}(${funcParams}) error {
-`;
+func (da *${tableClassType}) ${actionName}(${funcParams}) `;
+    // Return type is determined by checkRowsAffected
+    if (action.checkAffectedRows) {
+      code += 'error';
+    } else {
+      code += '(int, error)';
+    }
+    code += ' {\n';
+
     // Body
     const sqlLiteral = go.makeStringLiteral(io.sql);
-    code += `\t_, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParams})
-\tif err != nil {
-\t\treturn err
-\t}
+    code += `\tresult, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParams})
 `;
 
     // Return the result
-    code += `\treturn nil
-}
-`;
+    if (action.checkAffectedRows) {
+      code += '\treturn sqlx.CheckOneRowAffectedWithError(result, err)';
+    } else {
+      code += '\treturn sqlx.GetRowsAffectedIntWithError(result, err)';
+    }
+    code += '\n}\n';
     return code;
   }
 
@@ -260,14 +267,26 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) error {
     funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join('');
     const queryParams = paramInfos.map(p => `, ${p.name}`).join('');
     code += `// ${actionName} ...
-func (da *${tableClassType}) ${actionName}(${funcParams}) error {
-`;
+func (da *${tableClassType}) ${actionName}(${funcParams}) `;
+    // Return type is determined by checkRowsAffected
+    if (action.checkAffectedRows) {
+      code += 'error';
+    } else {
+      code += '(int, error)';
+    }
+    code += ' {\n';
+
     // Body
     const sqlLiteral = go.makeStringLiteral(io.sql);
     code += `\tresult, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParams})
-\treturn sqlx.CheckOneRowAffectedWithError(result, err)
-}
 `;
+    // Return the result
+    if (action.checkAffectedRows) {
+      code += '\treturn sqlx.CheckOneRowAffectedWithError(result, err)';
+    } else {
+      code += '\treturn sqlx.GetRowsAffectedIntWithError(result, err)';
+    }
+    code += '\n}\n';
     return code;
   }
 

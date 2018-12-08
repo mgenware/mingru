@@ -31,12 +31,9 @@ func (da *TableTypePost) SelectPostInfo(queryable sqlx.Queryable) (*SelectPostIn
 }
 
 // UpdateContent ...
-func (da *TableTypePost) UpdateContent(queryable sqlx.Queryable, postContent string) error {
-	_, err := queryable.Exec("UPDATE `post` SET `content` = `content` = ?", postContent)
-	if err != nil {
-		return err
-	}
-	return nil
+func (da *TableTypePost) UpdateContent(queryable sqlx.Queryable, postContent string) (int, error) {
+	result, err := queryable.Exec("UPDATE `post` SET `content` = `content` = ?", postContent)
+	return sqlx.GetRowsAffectedIntWithError(result, err)
 }
 
 // DeleteByID ...

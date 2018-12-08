@@ -30,12 +30,9 @@ func (da *TableTypeUser) SelectProfile(queryable sqlx.Queryable) (*SelectProfile
 }
 
 // UpdateProfile ...
-func (da *TableTypeUser) UpdateProfile(queryable sqlx.Queryable, userSig *string) error {
-	_, err := queryable.Exec("UPDATE `user` SET `sig` = ?", userSig)
-	if err != nil {
-		return err
-	}
-	return nil
+func (da *TableTypeUser) UpdateProfile(queryable sqlx.Queryable, userSig *string) (int, error) {
+	result, err := queryable.Exec("UPDATE `user` SET `sig` = ?", userSig)
+	return sqlx.GetRowsAffectedIntWithError(result, err)
 }
 
 // DeleteByID ...

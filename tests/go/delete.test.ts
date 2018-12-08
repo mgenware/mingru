@@ -13,3 +13,9 @@ test('Delete with where', async () => {
   ta.delete('t').where(dd.sql`${post.user_id} = ${dd.input(post.user_id)}`);
   await testBuildAsync(ta, 'delete/deleteWithWhere');
 });
+
+test('Delete row', async () => {
+  const ta = newTA(post);
+  ta.deleteRow('t');
+  await testBuildAsync(ta, 'delete/deleteRow');
+});

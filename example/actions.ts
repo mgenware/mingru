@@ -6,11 +6,12 @@ const userTA = dd.actions(user);
 // Get profile info (display_name, sig)
 userTA.select('Profile', user.display_name, user.sig);
 // Update profile info
-userTA.update('Profile')
+userTA
+  .update('Profile')
   .setToInput(user.display_name) // Set display_name
   .setToInput(user.sig); // Set sig
 // Delete by ID
-userTA.delete('ByID').where(user.id.isEqualToInput());
+userTA.deleteRow('ByID').where(user.id.isEqualToInput());
 
 const postTA = dd.actions(post);
 // Get post info
@@ -23,6 +24,6 @@ postTA.select(
 // Update content
 postTA.update('Content').setToInput(post.content);
 // Delete by ID
-postTA.delete('ByID').where(post.id.isEqualToInput());
+postTA.deleteRow('ByID').where(post.id.isEqualToInput());
 
 export default [userTA, postTA];
