@@ -229,26 +229,33 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) `;
 
     // Prepare params
     let funcParams = `${QueryableParam} ${QueryableType}`;
-    const paramInfos = action.columns.map(col =>
-      this.recordParamFromColumn(col),
-    );
+    const paramInfos = io.setters.map(s => this.recordParamFromColumn(s.col));
     funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join('');
     const queryParams = paramInfos.map(p => `, ${p.name}`).join('');
     code += `// ${actionName} ...
-func (da *${tableClassType}) ${actionName}(${funcParams}) error {
-`;
+func (da *${tableClassType}) ${actionName}(${funcParams}) `;
+    // Return type is determined by fetchInsertedID
+    if (action.fetchInsertedID) {
+      code += '(uint64, error)';
+    } else {
+      code += 'error';
+    }
+    code += ' {\n';
+
     // Body
     const sqlLiteral = go.makeStringLiteral(io.sql);
-    code += `\t_, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParams})
-\tif err != nil {
-\t\treturn err
-\t}
+    code += `\t${
+      action.fetchInsertedID ? 'result' : '_'
+    }, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParams})
 `;
 
     // Return the result
-    code += `\treturn nil
-}
-`;
+    if (action.fetchInsertedID) {
+      code += '\treturn sqlx.GetLastInsertIDUint64WithError(res, err)';
+    } else {
+      code += '\treturn err';
+    }
+    code += '\n}\n';
     return code;
   }
 

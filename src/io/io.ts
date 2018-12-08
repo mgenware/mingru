@@ -75,8 +75,11 @@ export class SQLIO {
 }
 
 export class SetterIO {
-  static fromSetter(setter: dd.ColumnSetter): SetterIO {
-    return new SetterIO(setter.column, new SQLIO(setter.sql));
+  static fromMap(map: Map<dd.ColumnBase, dd.SQL>): SetterIO[] {
+    return Array.from(
+      map,
+      ([key, value]) => new SetterIO(key, new SQLIO(value)),
+    );
   }
 
   constructor(public col: dd.ColumnBase, public sql: SQLIO) {
@@ -120,6 +123,7 @@ export class InsertIO {
     public action: dd.InsertAction,
     public sql: string,
     public table: TableIO,
+    public setters: SetterIO[],
   ) {
     throwIfFalsy(action, 'action');
     throwIfFalsy(sql, 'sql');

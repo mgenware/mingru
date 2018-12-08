@@ -19,14 +19,21 @@ export class InsertProcessor {
     sql += tableIO.sql;
 
     // columns
-    const colNames = action.columns.map(c => dialect.escape(c.__name));
+    const { columnValueMap } = action;
+    if (!columnValueMap.size) {
+      throw new Error(
+        `The insert action "${action}" does not have any setters`,
+      );
+    }
+    const setters = io.SetterIO.fromMap(columnValueMap);
+    const colNames = setters.map(s => dialect.escape(s.col.__name));
     sql += ` (${colNames.join(', ')})`;
 
     // values
-    const colValues = action.columns.map(_ => dialect.inputPlaceholder(null));
+    const colValues = setters.map(s => s.sql.toSQL(dialect));
     sql += ` VALUES (${colValues.join(', ')})`;
 
-    return new io.InsertIO(action, sql, tableIO);
+    return new io.InsertIO(action, sql, tableIO, setters);
   }
 
   private handleFrom(table: dd.Table): io.TableIO {

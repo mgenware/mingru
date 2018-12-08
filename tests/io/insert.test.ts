@@ -4,9 +4,9 @@ import post from '../models/post';
 
 const dialect = new mr.MySQL();
 
-test('Basic', () => {
+test('Insert', () => {
   const actions = dd.actions(post);
-  const v = actions.insert('t', post.title, post.user_id);
+  const v = actions.insert('t').setInputs(post.title, post.user_id);
   const io = mr.io.toInsertIO(v, dialect);
 
   expect(io).toBeInstanceOf(mr.io.InsertIO);

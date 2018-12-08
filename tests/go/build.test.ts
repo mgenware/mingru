@@ -21,7 +21,7 @@ test('Single table', async () => {
 test('Multiple tables', async () => {
   const userTA = dd.actions(user);
   userTA.select('Profile', user.display_name, user.sig);
-  userTA.update('Profile').setToInput(user.sig);
+  userTA.update('Profile').setInputs(user.sig);
   userTA.deleteOne('ByID').where(user.id.isEqualToInput());
 
   const postTA = dd.actions(post);
@@ -45,22 +45,4 @@ test('Custom package name', async () => {
   await testBuildToDirAsync([ta], ['Post'], 'customPackageName', {
     packageName: 'haha',
   });
-});
-
-test('Extra imports (select)', async () => {
-  const ta = newTA(post);
-  ta.selectAll('Times', post.datetime, post.date);
-  ta.selectAll('NullableTimes', post.n_datetime, post.n_date);
-  await testBuildToDirAsync([ta], ['Post'], 'extraImportsSelect');
-});
-
-test('Extra imports (update)', async () => {
-  const ta = newTA(post);
-  ta.update('Times')
-    .setToInput(post.datetime)
-    .setToInput(post.date);
-  ta.update('NullableTimes')
-    .setToInput(post.n_datetime)
-    .setToInput(post.n_date);
-  await testBuildToDirAsync([ta], ['Post'], 'extraImportsUpdate');
 });

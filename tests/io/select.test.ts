@@ -7,7 +7,7 @@ import rpl from '../models/cmtReply';
 
 const dialect = new mr.MySQL();
 
-test('Basic', () => {
+test('Select', () => {
   const actions = dd.actions(user);
   const v = actions.select('t', user.id, user.url_name);
   const io = mr.io.toSelectIO(v, dialect);
