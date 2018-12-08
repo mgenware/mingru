@@ -3,27 +3,29 @@ import user from './models/user';
 import post from './models/post';
 
 const userTA = dd.actions(user);
-// Get profile info (display_name, sig)
-userTA.select('Profile', user.display_name, user.sig);
-// Update profile info
+// Select a single row by ID
+userTA
+  .select('Profile', user.display_name, user.sig)
+  .where(user.id.toInputSQL());
+// Update a row
 userTA
   .update('Profile')
-  .setToInput(user.display_name) // Set display_name
-  .setToInput(user.sig); // Set sig
-// Delete by ID
-userTA.deleteRow('ByID').where(user.id.isEqualToInput());
+  .setInputs(user.display_name, user.sig)
+  .where(user.id.toInputSQL());
+// Delete a row by ID
+userTA.deleteOne('ByID').where(user.id.isEqualToInput());
 
 const postTA = dd.actions(post);
-// Get post info
 postTA.select(
   'PostInfo',
   post.id,
   post.content,
   post.user_id.join(user).url_name,
 );
-// Update content
-postTA.update('Content').setToInput(post.content);
-// Delete by ID
-postTA.deleteRow('ByID').where(post.id.isEqualToInput());
+postTA
+  .update('Content')
+  .setInputs(post.content)
+  .where(post.id.toInputSQL());
+postTA.deleteOne('ByID').where(post.id.isEqualToInput());
 
 export default [userTA, postTA];
