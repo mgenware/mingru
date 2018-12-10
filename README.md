@@ -44,9 +44,9 @@ userTA
   .setInputs(user.display_name, user.sig)
   .where(user.id.toInputSQL());
 // Delete a row by ID
-userTA.deleteOne('ByID').where(user.id.isEqualToInput());
+userTA.deleteOne('ByID').byID();
 
-export userTA;
+export [userTA];
 ```
 
 3. Generate Go code from actions(`User.go`):

@@ -13,7 +13,7 @@ userTA
   .setInputs(user.display_name, user.sig)
   .where(user.id.toInputSQL());
 // Delete a row by ID
-userTA.deleteOne('ByID').where(user.id.isEqualToInput());
+userTA.deleteOne('ByID').byID();
 
 const postTA = dd.actions(post);
 postTA.select(
@@ -26,6 +26,6 @@ postTA
   .update('Content')
   .setInputs(post.content)
   .where(post.id.toInputSQL());
-postTA.deleteOne('ByID').where(post.id.isEqualToInput());
+postTA.deleteOne('ByID').byID();
 
 export default [userTA, postTA];
