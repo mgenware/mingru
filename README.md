@@ -8,11 +8,17 @@
 Convert [dd-models](https://github.com/mgenware/dd-models) to Go code.
 
 Goals:
-* No performance penalty: mingru is an SQL builder, not ORM.
-* Strongly typed: uses TypeScript to define models and actions(views).
+
+* Provides a data access layer **without extra performance penalty at runtime**
+* Everything is **strongly typed**
+* The project currently focuses on Go and MySQL/MariaDB
+
+To achieve the these goals, mingru is built as a SQL builder and uses TypeScript to define and convert database models, see [FAQ](#faq) below for more details.
 
 ## Hello World
-1. Defining database models, e.g. a simple user table, with ID, display name, URL name and signature.
+
+1. Declaring database models, e.g. a simple user table, with ID, display name, URL name and signature.
+
 ```ts
 import * as dd from 'dd-models';
 
@@ -27,6 +33,7 @@ export default dd.table(User);
 ```
 
 2. Adding actions:
+
 ```ts
 import * as dd from 'dd-models';
 // Import the user model
@@ -49,7 +56,8 @@ userTA.deleteOne('ByID').byID();
 export [userTA];
 ```
 
-3. Generate Go code from actions(`User.go`):
+3. Converting actions to Go code:
+
 ```go
 package da
 
@@ -93,4 +101,52 @@ func (da *TableTypeUser) DeleteByID(queryable sqlx.Queryable, userID uint64) err
 	result, err := queryable.Exec("DELETE FROM `user` WHERE `id` = ?", userID)
 	return sqlx.CheckOneRowAffectedWithError(result, err)
 }
+```
+
+## FAQ
+
+### Why rely on Node.js/TypeScript? why not use Go to generate Go code?
+
+Great question, I've thought about it from the very beginning, the problem of Go is that, it cannot offer a way to declare models in a strongly typed way, for example, this is how a model looks like in a Go-based library:
+
+```go
+type User struct {
+  lib.Model           `table:"users"`
+  ID        int64     `pk:"autoincr"`
+  Username  string
+  Email     string
+  Password  string
+  CreatedAt time.Time
+}
+```
+
+It uses Go struct field tags to inject model info. Belows are models of mingru in TypeScript:
+
+```ts
+// User.ts
+import * as dd from 'dd-models';
+
+class User extends dd.Table {
+  id = dd.pk();
+  display_name = dd.varChar(200).notNull;
+  url_name = dd.varChar(200).notNull;
+  sig = dd.text();
+}
+
+export default dd.table(User);
+
+// Post.ts
+import * as dd from 'dd-models';
+import user from './user';
+
+class Post extends dd.Table {
+  id = dd.pk();
+  // Foreign key to user.id
+  user_id = user.id;
+  title = dd.varChar(500).notNull;
+  content = dd.text().notNull;
+  cmtCount = dd.setName('cmt_c', dd.unsignedInt(0).notNull);
+}
+
+export default dd.table(Post);
 ```
