@@ -32,6 +32,9 @@
     "singleQuote": true,
     "trailingComma": "all"
   },
+  "peerDependencies": {
+    "dd-models": "^0.4.0"
+  },
   "devDependencies": {
     "@types/jest": "^23.3.10",
     "@types/node": "^10.12.12",
@@ -43,7 +46,6 @@
     "typescript": "^3.2.2"
   },
   "dependencies": {
-    "dd-models": "^0.4.0",
     "m-fs": "^2.0.0",
     "throw-if-arg-empty": "^1.0.1",
     "to-type-string": "^1.0.0"
