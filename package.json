@@ -40,12 +40,14 @@
     "rimraf": "^2.6.2",
     "tempy": "^0.2.1",
     "tslint": "^5.11.0",
-    "typescript": "^3.2.2",
-    "dd-models": "^0.4.0"
+    "typescript": "^3.2.2"
   },
   "dependencies": {
     "m-fs": "^2.0.0",
     "throw-if-arg-empty": "^1.0.1",
     "to-type-string": "^1.0.0"
+  },
+  "peerDependencies": {
+    "dd-models": "^0.4.0"
   }
 }
