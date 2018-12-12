@@ -31,12 +31,18 @@ test('Where', async () => {
   await testBuildAsync(ta, 'select/where');
 });
 
-test('WhereAll', async () => {
+test('Select all, where', async () => {
   const ta = newTA(post);
   ta.selectAll('t', post.id, post.title).where(
     dd.sql`${post.id} = ${dd.input(post.id)}`,
   );
   await testBuildAsync(ta, 'select/whereAll');
+});
+
+test('Select field, where', async () => {
+  const ta = newTA(post);
+  ta.selectField('t', post.user_id).byID();
+  await testBuildAsync(ta, 'select/whereField');
 });
 
 test('Where: multiple cols', async () => {

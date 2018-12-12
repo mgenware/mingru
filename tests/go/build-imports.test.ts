@@ -19,6 +19,12 @@ test('Select (where)', async () => {
   await testBuildToDirAsync([ta], ['Post'], 'extraImportsSelectWhere');
 });
 
+test('Select field', async () => {
+  const ta = newTA(post);
+  ta.selectField('Time', post.n_datetime);
+  await testBuildToDirAsync([ta], ['Post'], 'extraImportsSelectField');
+});
+
 test('Update', async () => {
   const ta = newTA(post);
   ta.update('Times').setInputs(post.datetime, post.date);

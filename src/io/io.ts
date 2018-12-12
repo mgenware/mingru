@@ -1,6 +1,7 @@
 import * as dd from 'dd-models';
 import Dialect from '../dialect';
 import { throwIfFalsy } from 'throw-if-arg-empty';
+import toTypeString from 'to-type-string';
 
 export const MainAlias = '_main';
 
@@ -70,7 +71,7 @@ export class SQLIO {
     if (param instanceof dd.InputParam) {
       return dialect.inputPlaceholder(param as dd.InputParam);
     }
-    throw new Error(`Unsupported type of dd.SQLParam: ${param}`);
+    throw new Error(`Unsupported type of dd.SQLParam: ${toTypeString(param)}`);
   }
 }
 
