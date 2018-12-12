@@ -32,9 +32,6 @@
     "singleQuote": true,
     "trailingComma": "all"
   },
-  "peerDependencies": {
-    "dd-models": "^0.4.0"
-  },
   "devDependencies": {
     "@types/jest": "^23.3.10",
     "@types/node": "^10.12.12",
@@ -43,7 +40,8 @@
     "rimraf": "^2.6.2",
     "tempy": "^0.2.1",
     "tslint": "^5.11.0",
-    "typescript": "^3.2.2"
+    "typescript": "^3.2.2",
+    "dd-models": "^0.4.0"
   },
   "dependencies": {
     "m-fs": "^2.0.0",
