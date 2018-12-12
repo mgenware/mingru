@@ -17,6 +17,12 @@ test('Select all', async () => {
   await testBuildAsync(ta, 'select/selectAll');
 });
 
+test('Select field', async () => {
+  const ta = newTA(post);
+  ta.selectField('t', post.title);
+  await testBuildAsync(ta, 'select/selectField');
+});
+
 test('Where', async () => {
   const ta = newTA(post);
   ta.select('t', post.id, post.title).where(

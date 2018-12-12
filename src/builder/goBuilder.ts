@@ -112,9 +112,11 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
 
   private select(io: SelectIO): string {
     const { dialect, tableClassType } = this;
-    const actionName = io.action.name;
-    const resultType = `${actionName}Result`;
-    const selectAll = io.action.isSelectAll;
+    const { action } = io;
+
+    const actionName = action.name;
+    // The struct type of result, null if isSelectField is true
+    const resultType = action.isSelectField ? '' : `${actionName}Result`;
 
     let code = '';
     // Collect selected columns info, used to generate result type and params passed to `Scan`.
@@ -125,7 +127,21 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
       this.addTypeBridge(fieldType);
       selectedFields.push(new go.InstanceVariable(fieldName, fieldType.type));
     }
-    code += go.struct(resultType, selectedFields);
+
+    if (resultType) {
+      code += go.struct(resultType, selectedFields);
+    }
+
+    // The return type of the function
+    let returnType: string;
+    if (action.isSelectField) {
+      // selectedFields are guaranteed not empty, cuz the action ctor will throw on empty columns
+      returnType = selectedFields[0].type;
+    } else if (action.isSelectAll) {
+      returnType = `[]*${resultType}`;
+    } else {
+      returnType = `*${resultType}`;
+    }
 
     // Collect params info, used to generate function header, e.g. `(queryable sqlx.Queryable, id uint64, name string)`.
     let funcParams = `${QueryableParam} ${QueryableType}`;
@@ -136,13 +152,11 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
     const queryParams = paramInfos.map(p => `, ${p.name}`).join('');
 
     code += `// ${actionName} ...
-func (da *${tableClassType}) ${actionName}(${funcParams}) (${
-      selectAll ? `[]*${resultType}` : `*${resultType}`
-    }, error) {
+func (da *${tableClassType}) ${actionName}(${funcParams}) (${returnType}, error) {
 `;
 
     const sqlLiteral = go.makeStringLiteral(io.sql);
-    if (selectAll) {
+    if (action.isSelectAll) {
       const scanParams = joinParams(selectedFields.map(p => `&item.${p.name}`));
       // > call Query
       code += `\trows, err := ${QueryableParam}.Query(${sqlLiteral}${queryParams})
@@ -165,11 +179,21 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) (${
 \t}
 `;
     } else {
-      const scanParams = joinParams(
-        selectedFields.map(p => `&${ResultVar}.${p.name}`),
-      );
-      code += `\t${go.pointerVar(ResultVar, resultType)}
-\terr := ${QueryableParam}.QueryRow(${sqlLiteral}${queryParams}).Scan(${scanParams})
+      let scanParams: string;
+      // Declare the result variable
+      if (action.isSelectField) {
+        scanParams = `&${ResultVar}`;
+        code += `\tvar ${ResultVar} ${returnType}`;
+      } else {
+        scanParams = joinParams(
+          selectedFields.map(p => `&${ResultVar}.${p.name}`),
+        );
+        code += `\t${go.pointerVar(ResultVar, resultType)}`;
+      }
+      code += '\n';
+
+      // Call query func
+      code += `\terr := ${QueryableParam}.QueryRow(${sqlLiteral}${queryParams}).Scan(${scanParams})
 \tif err != nil {
 \t\treturn nil, err
 \t}
@@ -207,14 +231,13 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) `;
 
     // Body
     const sqlLiteral = go.makeStringLiteral(io.sql);
-    code += `\tresult, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParams})
-`;
+    code += `\t${ResultVar}, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParams})\n`;
 
     // Return the result
     if (action.checkAffectedRows) {
-      code += '\treturn sqlx.CheckOneRowAffectedWithError(result, err)';
+      code += `\treturn sqlx.CheckOneRowAffectedWithError(${ResultVar}, err)`;
     } else {
-      code += '\treturn sqlx.GetRowsAffectedIntWithError(result, err)';
+      code += `\treturn sqlx.GetRowsAffectedIntWithError(${ResultVar}, err)`;
     }
     code += '\n}\n';
     return code;
@@ -251,7 +274,7 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) `;
 
     // Return the result
     if (action.fetchInsertedID) {
-      code += '\treturn sqlx.GetLastInsertIDUint64WithError(result, err)';
+      code += `\treturn sqlx.GetLastInsertIDUint64WithError(${ResultVar}, err)`;
     } else {
       code += '\treturn err';
     }
@@ -285,13 +308,12 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) `;
 
     // Body
     const sqlLiteral = go.makeStringLiteral(io.sql);
-    code += `\tresult, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParams})
-`;
+    code += `\t${ResultVar}, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParams})\n`;
     // Return the result
     if (action.checkAffectedRows) {
-      code += '\treturn sqlx.CheckOneRowAffectedWithError(result, err)';
+      code += `\treturn sqlx.CheckOneRowAffectedWithError(${ResultVar}, err)`;
     } else {
-      code += '\treturn sqlx.GetRowsAffectedIntWithError(result, err)';
+      code += `\treturn sqlx.GetRowsAffectedIntWithError(${ResultVar}, err)`;
     }
     code += '\n}\n';
     return code;
