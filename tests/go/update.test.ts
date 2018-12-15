@@ -11,11 +11,20 @@ test('Update', async () => {
   await testBuildAsync(ta, 'update/update');
 });
 
-test('Update', async () => {
+test('UpdateOne', async () => {
   const ta = newTA(post);
   ta.updateOne('t')
     .set(post.title, dd.sql`"haha"`)
     .set(post.content, dd.sql`${dd.input(post.content)}`)
     .set(post.cmtCount, dd.sql`${post.cmtCount} + 1`);
-  await testBuildAsync(ta, 'update/checkAffectedRows');
+  await testBuildAsync(ta, 'update/updateOne');
+});
+
+test('Update with where', async () => {
+  const ta = newTA(post);
+  ta.updateOne('t')
+    .set(post.title, dd.sql`"haha"`)
+    .set(post.content, post.content.toInputSQL())
+    .byID();
+  await testBuildAsync(ta, 'update/updateWithWhere');
 });

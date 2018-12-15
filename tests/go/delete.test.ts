@@ -14,8 +14,8 @@ test('Delete with where', async () => {
   await testBuildAsync(ta, 'delete/deleteWithWhere');
 });
 
-test('Delete row', async () => {
+test('DeleteOne', async () => {
   const ta = newTA(post);
   ta.deleteOne('t');
-  await testBuildAsync(ta, 'delete/deleteRow');
+  await testBuildAsync(ta, 'delete/deleteOne');
 });
