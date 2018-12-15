@@ -1,18 +1,28 @@
 import * as dd from 'dd-models';
 import { Dialect, TypeBridge } from '../dialect';
 import { SQLIO } from '../io/io';
+import NameContext from '../lib/nameContext';
 
-export default class ParamInfo {
-  static fromColumn(dialect: Dialect, col: dd.ColumnBase): ParamInfo {
-    return new ParamInfo(
+export default class VarInfo {
+  static fromColumn(
+    dialect: Dialect,
+    col: dd.ColumnBase,
+    nameContext: NameContext,
+  ): VarInfo {
+    return new VarInfo(
       col.__name,
+      nameContext,
       dialect.goType(col.__getTargetColumn()),
       col,
     );
   }
 
-  static fromSQLArray(dialect: Dialect, sqls: SQLIO[]): ParamInfo[] {
-    const res: ParamInfo[] = [];
+  static fromSQLArray(
+    dialect: Dialect,
+    sqls: SQLIO[],
+    nameContext: NameContext,
+  ): VarInfo[] {
+    const res: VarInfo[] = [];
     for (const sql of sqls) {
       for (const element of sql.sql.elements) {
         if (element instanceof dd.InputParam) {
@@ -23,16 +33,21 @@ export default class ParamInfo {
           } else {
             type = new TypeBridge(input.type as string, null, false);
           }
-          res.push(new ParamInfo(input.name, type, input));
+          res.push(new VarInfo(input.name, nameContext, type, input));
         }
       }
     }
     return res;
   }
 
+  name: string;
+
   constructor(
-    public name: string,
+    name: string,
+    nameContext: NameContext,
     public type: TypeBridge,
     public rawObject: dd.InputParam | dd.ColumnBase,
-  ) {}
+  ) {
+    this.name = nameContext.get(name);
+  }
 }

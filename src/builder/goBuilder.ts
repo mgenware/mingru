@@ -1,4 +1,11 @@
-import { SelectIO, UpdateIO, InsertIO, DeleteIO, SQLIO } from '../io/io';
+import {
+  SelectIO,
+  UpdateIO,
+  InsertIO,
+  DeleteIO,
+  SQLIO,
+  SetterIO,
+} from '../io/io';
 import Dialect, { TypeBridge } from '../dialect';
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
@@ -7,9 +14,10 @@ import toSelectIO from '../io/toSelectIO';
 import toUpdateIO from '../io/toUpdateIO';
 import toInsertIO from '../io/toInsertIO';
 import toDeleteIO from '../io/toDeleteIO';
-import ParamInfo from './paramInfo';
+import VarInfo from './varInfo';
 import * as go from './go';
 import * as defs from './defs';
+import NameContext from '../lib/nameContext';
 
 const QueryableParam = 'queryable';
 const QueryableType = 'sqlx.Queryable';
@@ -144,22 +152,21 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
     }
 
     // Collect params info, used to generate function header, e.g. `(queryable sqlx.Queryable, id uint64, name string)`.
-    let funcParams = `${QueryableParam} ${QueryableType}`;
-    const paramInfos = this.recordParamsFromSQLArray(
-      io.where ? [io.where] : [],
-    );
-    funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join('');
-    const queryParams = paramInfos.map(p => `, ${p.name}`).join('');
+    let funcParamsCode = `${QueryableParam} ${QueryableType}`;
+    const varContext = new NameContext();
+    const selectedVars = this.whereToVars(io.where, varContext);
+    funcParamsCode += selectedVars.map(p => `, ${p.name} ${p.type}`).join('');
+    const queryParamsCode = selectedVars.map(p => `, ${p.name}`).join('');
 
     code += `// ${actionName} ...
-func (da *${tableClassType}) ${actionName}(${funcParams}) (${returnType}, error) {
+func (da *${tableClassType}) ${actionName}(${funcParamsCode}) (${returnType}, error) {
 `;
 
     const sqlLiteral = go.makeStringLiteral(io.sql);
     if (action.isSelectAll) {
       const scanParams = joinParams(selectedFields.map(p => `&item.${p.name}`));
       // > call Query
-      code += `\trows, err := ${QueryableParam}.Query(${sqlLiteral}${queryParams})
+      code += `\trows, err := ${QueryableParam}.Query(${sqlLiteral}${queryParamsCode})
 \tif err != nil {
 \t\treturn nil, err
 \t}
@@ -193,7 +200,7 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) (${returnType}, error)
       code += '\n';
 
       // Call query func
-      code += `\terr := ${QueryableParam}.QueryRow(${sqlLiteral}${queryParams}).Scan(${scanParams})
+      code += `\terr := ${QueryableParam}.QueryRow(${sqlLiteral}${queryParamsCode}).Scan(${scanParams})
 \tif err != nil {
 \t\treturn nil, err
 \t}
@@ -214,13 +221,21 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) (${returnType}, error)
     let code = '';
 
     // Prepare params
-    let funcParams = `${QueryableParam} ${QueryableType}`;
-    const setterSQLs = io.setters.map(setter => setter.sql);
-    const paramInfos = this.recordParamsFromSQLArray(setterSQLs);
-    funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join('');
-    const queryParams = paramInfos.map(p => `, ${p.name}`).join('');
+    let funcParamsCode = `${QueryableParam} ${QueryableType}`;
+    const varContext = new NameContext();
+    // Note: WHERE vars takes precedence over setter vars, e.g. UPDATE id = ? WHERE id = ? would produces func with params like (id, id2) where id is for WHERE, id2 for setter
+    const whereVars = this.whereToVars(io.where, varContext);
+    const setterVars = this.settersToVars(io.setters, varContext);
+
+    // For func params, WHERE vars are put before setter vars
+    const funcParams = [...whereVars, ...setterVars];
+    // For query call arguments, WHERE vars are put behind setter vars
+    const queryParams = [...setterVars, ...whereVars];
+
+    funcParamsCode += funcParams.map(p => `, ${p.name} ${p.type}`).join('');
+    const queryParamsCode = queryParams.map(p => `, ${p.name}`).join('');
     code += `// ${actionName} ...
-func (da *${tableClassType}) ${actionName}(${funcParams}) `;
+func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
     // Return type is determined by checkRowsAffected
     if (action.checkAffectedRows) {
       code += 'error';
@@ -231,7 +246,7 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) `;
 
     // Body
     const sqlLiteral = go.makeStringLiteral(io.sql);
-    code += `\t${ResultVar}, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParams})\n`;
+    code += `\t${ResultVar}, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParamsCode})\n`;
 
     // Return the result
     if (action.checkAffectedRows) {
@@ -251,12 +266,13 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) `;
     let code = '';
 
     // Prepare params
-    let funcParams = `${QueryableParam} ${QueryableType}`;
-    const paramInfos = io.setters.map(s => this.recordParamFromColumn(s.col));
-    funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join('');
-    const queryParams = paramInfos.map(p => `, ${p.name}`).join('');
+    let funcParamsCode = `${QueryableParam} ${QueryableType}`;
+    const varContext = new NameContext();
+    const setterVars = this.settersToVars(io.setters, varContext);
+    funcParamsCode += setterVars.map(p => `, ${p.name} ${p.type}`).join('');
+    const queryParamsCode = setterVars.map(p => `, ${p.name}`).join('');
     code += `// ${actionName} ...
-func (da *${tableClassType}) ${actionName}(${funcParams}) `;
+func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
     // Return type is determined by fetchInsertedID
     if (action.fetchInsertedID) {
       code += '(uint64, error)';
@@ -269,7 +285,7 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) `;
     const sqlLiteral = go.makeStringLiteral(io.sql);
     code += `\t${
       action.fetchInsertedID ? 'result' : '_'
-    }, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParams})
+    }, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParamsCode})
 `;
 
     // Return the result
@@ -290,14 +306,13 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) `;
     let code = '';
 
     // Prepare params
-    let funcParams = `${QueryableParam} ${QueryableType}`;
-    const paramInfos = this.recordParamsFromSQLArray(
-      io.where ? [io.where] : [],
-    );
-    funcParams += paramInfos.map(p => `, ${p.name} ${p.type}`).join('');
-    const queryParams = paramInfos.map(p => `, ${p.name}`).join('');
+    let funcParamsCode = `${QueryableParam} ${QueryableType}`;
+    const varContext = new NameContext();
+    const whereVars = this.whereToVars(io.where, varContext);
+    funcParamsCode += whereVars.map(p => `, ${p.name} ${p.type}`).join('');
+    const queryParamsCode = whereVars.map(p => `, ${p.name}`).join('');
     code += `// ${actionName} ...
-func (da *${tableClassType}) ${actionName}(${funcParams}) `;
+func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
     // Return type is determined by checkRowsAffected
     if (action.checkAffectedRows) {
       code += 'error';
@@ -308,7 +323,7 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) `;
 
     // Body
     const sqlLiteral = go.makeStringLiteral(io.sql);
-    code += `\t${ResultVar}, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParams})\n`;
+    code += `\t${ResultVar}, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParamsCode})\n`;
     // Return the result
     if (action.checkAffectedRows) {
       code += `\treturn sqlx.CheckOneRowAffectedWithError(${ResultVar}, err)`;
@@ -319,20 +334,23 @@ func (da *${tableClassType}) ${actionName}(${funcParams}) `;
     return code;
   }
 
-  // This will add the import path to current context
-  private recordParamsFromSQLArray(sqls: SQLIO[]): ParamInfo[] {
-    const params = ParamInfo.fromSQLArray(this.dialect, sqls);
+  private whereToVars(where: SQLIO | null, context: NameContext): VarInfo[] {
+    if (!where) {
+      return [];
+    }
+    return this.sqlsToVars([where], context);
+  }
+
+  private settersToVars(setters: SetterIO[], context: NameContext): VarInfo[] {
+    return this.sqlsToVars(setters.map(s => s.sql), context);
+  }
+
+  private sqlsToVars(sqls: SQLIO[], context: NameContext): VarInfo[] {
+    const params = VarInfo.fromSQLArray(this.dialect, sqls, context);
     for (const param of params) {
       this.addTypeBridge(param.type);
     }
     return params;
-  }
-
-  // This will add the import path to current context
-  private recordParamFromColumn(col: dd.ColumnBase): ParamInfo {
-    const result = ParamInfo.fromColumn(this.dialect, col);
-    this.addTypeBridge(result.type);
-    return result;
   }
 
   private addTypeBridge(bridge: TypeBridge) {

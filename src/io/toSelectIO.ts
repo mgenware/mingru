@@ -2,14 +2,15 @@ import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
 import * as io from './io';
+import NameContext from '../lib/nameContext';
 
 export class SelectProcessor {
   jcMap = new Map<string, io.JoinIO>();
   joins: io.JoinIO[] = [];
-  // This makes sure all join table alias names are unique
+  // Make sure all join table alias names are unique
   joinedTableCounter = 0;
-  // This makes sure all selected column names are unique
-  joinedColumnNameMap: { [k: string]: number } = {};
+  // Make sure all selected column names are unique
+  selectedNameContext = new NameContext();
 
   constructor(public action: dd.SelectAction, public dialect: Dialect) {
     throwIfFalsy(action, 'action');
@@ -122,15 +123,7 @@ export class SelectProcessor {
   }
 
   private nextSelectedName(name: string): string {
-    const { joinedColumnNameMap } = this;
-    let result = name;
-    if (!joinedColumnNameMap[name]) {
-      joinedColumnNameMap[name] = 2;
-    } else {
-      result = name + joinedColumnNameMap[name];
-      joinedColumnNameMap[name] += 1;
-    }
-    return result;
+    return this.selectedNameContext.get(name);
   }
 
   private handleStandardColumn(

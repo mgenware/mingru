@@ -25,6 +25,10 @@ test('Update with where', async () => {
   ta.updateOne('t')
     .set(post.title, dd.sql`"haha"`)
     .set(post.content, post.content.toInputSQL())
-    .byID();
+    .where(
+      dd.sql`${post.id} = ${post.id.toInput()} AND ${
+        post.content
+      } = ${post.content.toInput()}`,
+    );
   await testBuildAsync(ta, 'update/updateWithWhere');
 });
