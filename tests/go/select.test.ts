@@ -99,7 +99,7 @@ test('AS', async () => {
   await testBuildAsync(ta, 'select/joinAs');
 });
 
-test('Duplicate selected names', async () => {
+test('Selected name collisions', async () => {
   const ta = newTA(post);
   ta.select(
     't',
@@ -113,5 +113,5 @@ test('Duplicate selected names', async () => {
     post.user_id.join(user).url_name,
     post.user_id.join(user).url_name.as('a'),
   );
-  await testBuildAsync(ta, 'select/joinDup');
+  await testBuildAsync(ta, 'select/selectedNameCollisions');
 });

@@ -154,9 +154,9 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
     // Collect params info, used to generate function header, e.g. `(queryable sqlx.Queryable, id uint64, name string)`.
     let funcParamsCode = `${QueryableParam} ${QueryableType}`;
     const varContext = new NameContext();
-    const selectedVars = this.whereToVars(io.where, varContext);
-    funcParamsCode += selectedVars.map(p => `, ${p.name} ${p.type}`).join('');
-    const queryParamsCode = selectedVars.map(p => `, ${p.name}`).join('');
+    const whereVars = this.whereToVars(io.where, varContext);
+    funcParamsCode += whereVars.map(p => `, ${p.name} ${p.type}`).join('');
+    const queryParamsCode = whereVars.map(p => `, ${p.name}`).join('');
 
     code += `// ${actionName} ...
 func (da *${tableClassType}) ${actionName}(${funcParamsCode}) (${returnType}, error) {

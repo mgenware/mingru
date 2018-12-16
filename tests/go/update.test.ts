@@ -40,3 +40,14 @@ test('Update with non-input setters', async () => {
     .set(post.content, post.content.toInputSQL());
   await testBuildAsync(ta, 'update/updateWithNonInputSetters');
 });
+
+test('Duplicate names in where and setters', async () => {
+  const ta = newTA(post);
+  ta.update('t')
+    .set(post.content, post.content.toInputSQL())
+    .set(post.title, dd.sql`"haha"`)
+    .where(
+      dd.sql`${post.title.isEqualToInput()} AND ${post.content.isEqualToInput()}`,
+    );
+  await testBuildAsync(ta, 'update/updateWithDupVars');
+});
