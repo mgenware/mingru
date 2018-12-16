@@ -32,3 +32,11 @@ test('Update with where', async () => {
     );
   await testBuildAsync(ta, 'update/updateWithWhere');
 });
+
+test('Update with non-input setters', async () => {
+  const ta = newTA(post);
+  ta.updateOne('t')
+    .set(post.title, dd.sql`"haha"`)
+    .set(post.content, post.content.toInputSQL());
+  await testBuildAsync(ta, 'update/updateWithNonInputSetters');
+});
