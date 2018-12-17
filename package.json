@@ -19,11 +19,12 @@
     "test": "yarn run clean && yarn run compile && yarn run lint && yarn run t",
     "t": "jest --verbose=false",
     "build": "yarn test",
-    "compile": "tsc -b tests",
-    "dev": "yarn run clean && tsc -b tests -w",
+    "compile": "yarn run pi && tsc -b tests",
+    "dev": "yarn run clean && yarn run pi && tsc -b tests -w",
     "prepublishOnly": "yarn run test",
     "lint": "tslint --project tsconfig.json --config tslint.json",
-    "clean": "rimraf dist && rimraf dist_tests"
+    "clean": "rimraf dist && rimraf dist_tests",
+    "pi": "yarn add dd-models -P"
   },
   "engines": {
     "node": ">=8.0.0"
