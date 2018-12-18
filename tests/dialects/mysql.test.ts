@@ -53,3 +53,10 @@ test('DT (not supported)', () => {
 test('as', () => {
   expect(dialect.as('abc', 'def')).toBe('abc AS `def`');
 });
+
+test('Current date/time', () => {
+  expect(dialect.currentDate()).toBe('CURDATE()');
+  expect(dialect.currentTime()).toBe('CURTIME()');
+  expect(dialect.currentDateTime()).toBe('NOW()');
+  expect(dialect.currentTimestamp()).toBe('NOW()');
+});

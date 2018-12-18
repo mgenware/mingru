@@ -29,6 +29,22 @@ export default class MySQL extends Dialect {
     return `${sql} AS ${this.escape(name)}`;
   }
 
+  currentDate(): string {
+    return 'CURDATE()';
+  }
+
+  currentTime(): string {
+    return 'CURTIME()';
+  }
+
+  currentDateTime(): string {
+    return 'NOW()';
+  }
+
+  currentTimestamp(): string {
+    return 'NOW()';
+  }
+
   private goTypeNonNull(column: dd.Column): TypeBridge {
     const DT = dd.dt;
     const unsigned = column.props.unsigned;

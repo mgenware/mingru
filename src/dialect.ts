@@ -37,6 +37,22 @@ export class Dialect {
   inputPlaceholder(_: dd.InputParam | null): string {
     return '?';
   }
+
+  currentDate(): string {
+    throw new Error('Not implemented yet');
+  }
+
+  currentTime(): string {
+    throw new Error('Not implemented yet');
+  }
+
+  currentDateTime(): string {
+    throw new Error('Not implemented yet');
+  }
+
+  currentTimestamp(): string {
+    throw new Error('Not implemented yet');
+  }
 }
 
 export default Dialect;
