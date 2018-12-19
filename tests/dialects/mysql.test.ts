@@ -20,27 +20,27 @@ test('DT', () => {
     // PK
     [dd.pk(), 'uint64', null],
     // Integer
-    [dd.int().notNull, 'int', null],
-    [dd.unsignedInt().notNull, 'uint', null],
-    [dd.bigInt().notNull, 'int64', null],
-    [dd.unsignedBigInt().notNull, 'uint64', null],
-    [dd.smallInt().notNull, 'int16', null],
-    [dd.unsignedSmallInt().notNull, 'uint16', null],
-    [dd.tinyInt().notNull, 'int8', null],
-    [dd.unsignedTinyInt().notNull, 'uint8', null],
+    [dd.int(), 'int', null],
+    [dd.unsignedInt(), 'uint', null],
+    [dd.bigInt(), 'int64', null],
+    [dd.unsignedBigInt(), 'uint64', null],
+    [dd.smallInt(), 'int16', null],
+    [dd.unsignedSmallInt(), 'uint16', null],
+    [dd.tinyInt(), 'int8', null],
+    [dd.unsignedTinyInt(), 'uint8', null],
     // String
-    [dd.varChar(10).notNull, 'string', null],
-    [dd.char(10).notNull, 'string', null],
+    [dd.varChar(10), 'string', null],
+    [dd.char(10), 'string', null],
     // Time
-    [dd.datetime().notNull, 'time.Time', TimePkg],
-    [dd.date().notNull, 'time.Time', TimePkg],
+    [dd.datetime(), 'time.Time', TimePkg],
+    [dd.date(), 'time.Time', TimePkg],
   ];
 
   for (const t of tests) {
     const column = t[0] as dd.Column;
     testType(column, t[1] as string, t[2] as string | null);
     if (!column.props.pk) {
-      column.props.notNull = false;
+      column.props.nullable = true;
       testType(column, ('*' + t[1]) as string, t[2] as string | null);
     }
   }

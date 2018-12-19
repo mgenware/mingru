@@ -19,7 +19,7 @@ export default class MySQL extends Dialect {
   goType(column: dd.Column): TypeBridge {
     throwIfFalsy(column, 'column');
     const bridge = this.goTypeNonNull(column);
-    if (!column.props.notNull) {
+    if (column.props.nullable) {
       bridge.type = '*' + bridge.type;
     }
     return bridge;
