@@ -54,9 +54,14 @@ test('as', () => {
   expect(dialect.as('abc', 'def')).toBe('abc AS `def`');
 });
 
-test('Current date/time', () => {
-  expect(dialect.currentDate()).toBe('CURDATE()');
-  expect(dialect.currentTime()).toBe('CURTIME()');
-  expect(dialect.currentDateTime()).toBe('NOW()');
-  expect(dialect.currentTimestamp()).toBe('NOW()');
+test('SQL calls', () => {
+  expect(dialect.sqlCall(new dd.SQLCall(dd.SQLCallType.dateNow))).toBe(
+    'CURDATE()',
+  );
+  expect(dialect.sqlCall(new dd.SQLCall(dd.SQLCallType.timeNow))).toBe(
+    'CURTIME()',
+  );
+  expect(dialect.sqlCall(new dd.SQLCall(dd.SQLCallType.datetimeNow))).toBe(
+    'NOW()',
+  );
 });

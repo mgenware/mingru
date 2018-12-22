@@ -25,13 +25,13 @@ export default class VarInfo {
     const res: VarInfo[] = [];
     for (const sql of sqls) {
       for (const element of sql.sql.elements) {
-        if (element instanceof dd.InputParam) {
-          const input = element as dd.InputParam;
+        if (element.type === dd.SQLElementType.input) {
+          const input = element.toInput();
           let type: TypeBridge;
-          if (input.type instanceof dd.Column) {
-            type = dialect.goType(input.type as dd.Column);
+          if (input.typeObject instanceof dd.Column) {
+            type = dialect.goType(input.typeObject as dd.Column);
           } else {
-            type = new TypeBridge(input.type as string, null, false);
+            type = new TypeBridge(input.typeObject as string, null, false);
           }
           res.push(new VarInfo(input.name, nameContext, type, input));
         }
@@ -46,7 +46,7 @@ export default class VarInfo {
     name: string,
     nameContext: NameContext,
     public type: TypeBridge,
-    public rawObject: dd.InputParam | dd.ColumnBase,
+    public rawObject: dd.SQLInput | dd.ColumnBase,
   ) {
     this.name = nameContext.get(name);
   }

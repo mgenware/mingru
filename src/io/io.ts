@@ -55,23 +55,37 @@ export class SQLIO {
     const { sql } = this;
     let res = '';
     for (const element of sql.elements) {
-      if (typeof element === 'string') {
-        res += element as string;
-      } else {
-        res += this.handleParam(element as dd.SQLParam, dialect);
-      }
+      res += this.handleElement(element, dialect);
     }
     return res;
   }
 
-  private handleParam(param: dd.SQLParam, dialect: Dialect): string {
-    if (param instanceof dd.ColumnBase) {
-      return dialect.escapeColumn(param as dd.ColumnBase);
+  private handleElement(element: dd.SQLElement, dialect: Dialect): string {
+    switch (element.type) {
+      case dd.SQLElementType.rawString: {
+        return element.toRawString();
+      }
+
+      case dd.SQLElementType.column: {
+        return dialect.escapeColumn(element.toColumn());
+      }
+
+      case dd.SQLElementType.call: {
+        return dialect.sqlCall(element.toCall());
+      }
+
+      case dd.SQLElementType.input: {
+        return dialect.inputPlaceholder(element.toInput());
+      }
+
+      default: {
+        throw new Error(
+          `Unsupported type of dd.SQLElement: ${
+            element.type
+          }, value: "${toTypeString(element)}"`,
+        );
+      }
     }
-    if (param instanceof dd.InputParam) {
-      return dialect.inputPlaceholder(param as dd.InputParam);
-    }
-    throw new Error(`Unsupported type of dd.SQLParam: ${toTypeString(param)}`);
   }
 }
 

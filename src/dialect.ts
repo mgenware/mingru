@@ -34,23 +34,11 @@ export class Dialect {
     return this.escape(table.__name);
   }
 
-  inputPlaceholder(_: dd.InputParam | null): string {
+  inputPlaceholder(_: dd.SQLInput | null): string {
     return '?';
   }
 
-  currentDate(): string {
-    throw new Error('Not implemented yet');
-  }
-
-  currentTime(): string {
-    throw new Error('Not implemented yet');
-  }
-
-  currentDateTime(): string {
-    throw new Error('Not implemented yet');
-  }
-
-  currentTimestamp(): string {
+  sqlCall(_: dd.SQLCall): string {
     throw new Error('Not implemented yet');
   }
 }

@@ -29,20 +29,17 @@ export default class MySQL extends Dialect {
     return `${sql} AS ${this.escape(name)}`;
   }
 
-  currentDate(): string {
-    return 'CURDATE()';
-  }
-
-  currentTime(): string {
-    return 'CURTIME()';
-  }
-
-  currentDateTime(): string {
-    return 'NOW()';
-  }
-
-  currentTimestamp(): string {
-    return 'NOW()';
+  sqlCall(call: dd.SQLCall): string {
+    switch (call.type) {
+      case dd.SQLCallType.datetimeNow:
+        return 'NOW()';
+      case dd.SQLCallType.dateNow:
+        return 'CURDATE()';
+      case dd.SQLCallType.timeNow:
+        return 'CURTIME()';
+      default:
+        throw new Error(`Unsupported type of call "${call.type}"`);
+    }
   }
 
   private goTypeNonNull(column: dd.Column): TypeBridge {

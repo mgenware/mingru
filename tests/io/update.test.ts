@@ -20,7 +20,7 @@ test('Update', () => {
   expect(io.table).toBeInstanceOf(mr.io.TableIO);
   expect(io.setters.length).toBe(3);
   expect(io.setters[0].col).toBe(post.title);
-  expect(io.setters[0].sql.sql.elements[0]).toBe('"haha"');
+  expect(io.setters[0].sql.sql.toString()).toBe('"haha"');
   expect(io.setters[1].col).toBe(post.content);
   expect(io.setters[2].col).toBe(post.cmtCount);
 });
