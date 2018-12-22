@@ -13,3 +13,9 @@ test('Columns and escape strings', () => {
   expect(io).toBeInstanceOf(mr.io.SQLIO);
   expect(io.toSQL(dialect)).toBe('abc "aaa" `user_id` `url_name`');
 });
+
+test('SQL calls', () => {
+  const sql = dd.sql`${post.datetime} = ${dd.datetimeNow()}`;
+  const io = new mr.io.SQLIO(sql);
+  expect(io.toSQL(dialect)).toBe('`datetime` = NOW()');
+});
