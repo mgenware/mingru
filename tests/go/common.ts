@@ -14,7 +14,7 @@ export async function testBuildAsync(
   path = nodepath.resolve(nodepath.join(DestDataDir, path + '.go'));
   const content = await mfs.readFileAsync(path, 'utf8');
   const builder = new mr.Builder(ta, dialect);
-  let actual = builder.build(true);
+  let actual = builder.build(true, true);
   actual = `import "github.com/mgenware/go-packagex/database/sqlx"\n${actual}`;
   expect(actual).toBe(content);
   return builder;
@@ -27,7 +27,7 @@ export async function testBuildFullAsync(
   path = nodepath.resolve(nodepath.join(DestDataDir, path + '.go'));
   const content = await mfs.readFileAsync(path, 'utf8');
   const builder = new mr.Builder(ta, dialect);
-  const actual = builder.build();
+  const actual = builder.build(false, true);
   expect(actual).toBe(content);
 }
 
@@ -43,8 +43,10 @@ export async function testBuildToDirAsync(
   expectedDir: string,
   option?: mr.IBuildOption,
 ) {
+  const opt = option || {};
+  opt.noFileHeader = true;
   const tmpDir = tempy.directory();
-  await mr.build(taList, dialect, tmpDir, option);
+  await mr.build(taList, dialect, tmpDir, opt);
   for (const file of files) {
     const actual = await nodepath.join(tmpDir, file + '.go');
     const expected = await nodepath.join(
