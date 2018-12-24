@@ -2,6 +2,7 @@ import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
 import * as io from './io';
+import dtDefault from '../builder/dtDefault';
 
 export class InsertProcessor {
   constructor(public action: dd.InsertAction, public dialect: Dialect) {
@@ -12,20 +13,82 @@ export class InsertProcessor {
   convert(): io.InsertIO {
     let sql = 'INSERT INTO ';
     const { action, dialect } = this;
-    const table = action.table as dd.Table;
+    const { columnValueMap, withDefaults, table } = action;
 
     // table
     const tableIO = this.handleFrom(table);
     sql += tableIO.sql;
 
     // columns
-    const { columnValueMap } = action;
     if (!columnValueMap.size) {
       throw new Error(
         `The insert action "${action}" does not have any setters`,
       );
     }
     const setters = io.SetterIO.fromMap(columnValueMap);
+
+    // Try to set the remaining columns to defaults if withDefaults is true
+    if (withDefaults) {
+      for (const _col of Object.values(table)) {
+        const col = _col as dd.ColumnBase;
+        if (columnValueMap.get(col)) {
+          continue;
+        }
+
+        const colName = col.__name;
+        let value: string;
+        switch (col.__type) {
+          case dd.ColumnBaseType.Joined:
+            throw new Error(
+              `Unexpected JoinedColumn in InsertAction, column name: "${colName}"`,
+            );
+
+          case dd.ColumnBaseType.Selected:
+            throw new Error(
+              `Unexpected SelectedColumn in InsertAction, column name: "${colName}"`,
+            );
+
+          case dd.ColumnBaseType.Foreign:
+            throw new Error(
+              `Cannot set a default value for a foreign column, column "${colName}"`,
+            );
+
+          case dd.ColumnBaseType.Full: {
+            const fullColumn = col as dd.Column;
+            // Skip PKs
+            if (fullColumn.props.pk) {
+              continue;
+            }
+
+            const { props } = fullColumn;
+            if (props.default) {
+              value = (props.default as object).toString();
+            } else if (fullColumn.props.nullable) {
+              value = 'NULL';
+            } else {
+              const type = fullColumn.types.values().next().value;
+              const def = dtDefault(type);
+              if (def === null) {
+                throw new Error(
+                  `Cannot determine the default value of type "${type}" at column ${colName}`,
+                );
+              }
+              value = (def as object).toString();
+            }
+            break;
+          }
+
+          default:
+            throw new Error(
+              `Unexpected column type in InsertAction, column name: "${
+                col.__name
+              }", type "${col.__type}"`,
+            );
+        }
+        setters.push(new io.SetterIO(col, new io.SQLIO(dd.sql`${value}`)));
+      }
+    }
+
     const colNames = setters.map(s => dialect.escape(s.col.__name));
     sql += ` (${colNames.join(', ')})`;
 

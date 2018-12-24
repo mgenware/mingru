@@ -39,3 +39,5 @@ export class io {
   static toInsertIO = toInsertIO;
   static toDeleteIO = toDeleteIO;
 }
+
+export { default as dtDefault } from './builder/dtDefault';

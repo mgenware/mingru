@@ -21,3 +21,9 @@ test('Insert with non-input setters', async () => {
     .set(post.content, dd.sql`"haha"`);
   await testBuildAsync(ta, 'insert/insertWithNonInputSetters');
 });
+
+test('Default values', async () => {
+  const ta = newTA(post);
+  ta.insert('t').setInputs(post.title, post.user_id);
+  await testBuildAsync(ta, 'insert/insert');
+});
