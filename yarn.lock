@@ -694,10 +694,10 @@ data-urls@^1.0.0:
     whatwg-mimetype "^2.1.0"
     whatwg-url "^7.0.0"
 
-dd-models@^0.6.3:
-  version "0.6.3"
-  resolved "https://registry.yarnpkg.com/dd-models/-/dd-models-0.6.3.tgz#72dfc2e3a2080f123f26f14da15cfeeb0e043b5c"
-  integrity sha512-KIV67l9xdhtyh8RuUIEaQBbsPJxg8Q6HctnnrWXx/hjd6cTUN8SFIKmCXQflpDD08qeUaJtrWnDqkG2Ccm4mFw==
+dd-models@^0.6.4:
+  version "0.6.4"
+  resolved "https://registry.yarnpkg.com/dd-models/-/dd-models-0.6.4.tgz#4724dd1a2d138bce9378634f798d33639612beb3"
+  integrity sha512-vLaPNlY3EZqgqmqt5Wu6QKXKeDA0E6oHLggVQsT9TNwE46Q3ogWIX0lqjQ5pV6tuxDmiQHzEhhvKcHIdTHuRrQ==
   dependencies:
     lodash.camelcase "^4.3.0"
     lodash.snakecase "^4.1.1"
@@ -3220,6 +3220,11 @@ sprintf-js@~1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha1-BOaSb2YolTVPPdAVIDYzuFcpfiw=
+
+sql-escape-string@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/sql-escape-string/-/sql-escape-string-1.1.0.tgz#fe744b8514868c0eb4bfb9e4a989271d40f30eb9"
+  integrity sha1-/nRLhRSGjA60v7nkqYknHUDzDrk=
 
 sshpk@^1.7.0:
   version "1.15.1"

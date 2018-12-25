@@ -1,6 +1,6 @@
 import * as mr from '../../';
 import * as dd from 'dd-models';
-import post from '../models/post';
+import cols from '../models/cols';
 
 const dialect = new mr.MySQL();
 
@@ -27,12 +27,12 @@ test('dtDefault', () => {
   }
 });
 
-test('', () => {
-  const actions = dd.actions(post);
-  const v = actions.insert('t').setInputs(post.title, post.user_id);
+test('insertWithDefaults', () => {
+  const actions = dd.actions(cols);
+  const v = actions.insertWithDefaults('t').setInputs(cols.fk);
   const io = mr.io.toInsertIO(v, dialect);
 
-  expect(io).toBeInstanceOf(mr.io.InsertIO);
-  expect(io.sql).toBe('INSERT INTO `post` (`title`, `user_id`) VALUES (?, ?)');
-  expect(io.table).toBeInstanceOf(mr.io.TableIO);
+  expect(io.sql).toBe(
+    "INSERT INTO `cols` (`fk`, `text`, `int`, `nullable`, `def_int`, `def_var_char`, `def_time`) VALUES (?, '', 0, NULL, -3, '一二', CURTIME())",
+  );
 });

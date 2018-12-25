@@ -1,6 +1,8 @@
 import { Dialect, TypeBridge } from '../dialect';
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
+import toTypeString from 'to-type-string';
+const escapeString = require('sql-escape-string');
 
 function sysType(type: string): TypeBridge {
   return new TypeBridge(type, null, true);
@@ -14,6 +16,27 @@ export default class MySQL extends Dialect {
   escape(name: string): string {
     throwIfFalsy(name, 'name');
     return '`' + name + '`';
+  }
+
+  encode(value: unknown): string {
+    if (value === undefined) {
+      throw new Error('value is undefined');
+    }
+    if (value === null) {
+      return 'NULL';
+    }
+    if (typeof value === 'boolean' || typeof value === 'number') {
+      return `${+(value as number)}`;
+    }
+    if (typeof value === 'string') {
+      return escapeString(value);
+    }
+    if (typeof value === 'object') {
+      if (value instanceof dd.SQLCall) {
+        return this.sqlCall(value as dd.SQLCall);
+      }
+    }
+    throw new Error(`Unsupported type of object "${toTypeString(value)}"`);
   }
 
   goType(column: dd.Column): TypeBridge {

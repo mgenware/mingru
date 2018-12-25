@@ -3,6 +3,7 @@ import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
 import * as io from './io';
 import dtDefault from '../builder/dtDefault';
+import toTypeString from 'to-type-string';
 
 export class InsertProcessor {
   constructor(public action: dd.InsertAction, public dialect: Dialect) {
@@ -29,10 +30,16 @@ export class InsertProcessor {
 
     // Try to set the remaining columns to defaults if withDefaults is true
     if (withDefaults) {
-      for (const _col of Object.values(table)) {
-        const col = _col as dd.ColumnBase;
+      dd.Table.forEach(table, col => {
+        if (col instanceof dd.ColumnBase === false) {
+          throw new Error(
+            `Expected a ColumnBase object, got "${toTypeString(
+              col,
+            )}" on table "${toTypeString(table)}"`,
+          );
+        }
         if (columnValueMap.get(col)) {
-          continue;
+          return;
         }
 
         const colName = col.__name;
@@ -57,12 +64,12 @@ export class InsertProcessor {
             const fullColumn = col as dd.Column;
             // Skip PKs
             if (fullColumn.props.pk) {
-              continue;
+              return;
             }
 
             const { props } = fullColumn;
             if (props.default) {
-              value = (props.default as object).toString();
+              value = dialect.encode(props.default);
             } else if (fullColumn.props.nullable) {
               value = 'NULL';
             } else {
@@ -73,7 +80,7 @@ export class InsertProcessor {
                   `Cannot determine the default value of type "${type}" at column ${colName}`,
                 );
               }
-              value = (def as object).toString();
+              value = dialect.encode(def);
             }
             break;
           }
@@ -82,11 +89,11 @@ export class InsertProcessor {
             throw new Error(
               `Unexpected column type in InsertAction, column name: "${
                 col.__name
-              }", type "${col.__type}"`,
+              }", type "${toTypeString(col)}"`,
             );
         }
         setters.push(new io.SetterIO(col, new io.SQLIO(dd.sql`${value}`)));
-      }
+      });
     }
 
     const colNames = setters.map(s => dialect.escape(s.col.__name));

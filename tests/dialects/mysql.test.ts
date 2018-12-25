@@ -65,3 +65,23 @@ test('SQL calls', () => {
     'NOW()',
   );
 });
+
+test('encode', () => {
+  // null
+  expect(dialect.encode(null)).toBe('NULL');
+  // number
+  expect(dialect.encode(-32)).toBe('-32');
+  // boolean
+  expect(dialect.encode(true)).toBe('1');
+  expect(dialect.encode(false)).toBe('0');
+  // string
+  expect(dialect.encode('a 123 🛋')).toBe("'a 123 🛋'"); // tslint:disable-line
+  expect(dialect.encode('')).toBe("''"); // tslint:disable-line
+  expect(dialect.encode('\'"\\')).toBe("'''\"\\'"); // tslint:disable-line
+  // SQLCall
+  expect(dialect.encode(dd.datetimeNow())).toBe('NOW()');
+  // undefined
+  expect(() => dialect.encode(undefined)).toThrow();
+  // Others
+  expect(() => dialect.encode([])).toThrow();
+});

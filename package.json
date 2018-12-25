@@ -45,10 +45,11 @@
   },
   "dependencies": {
     "m-fs": "^2.0.0",
+    "sql-escape-string": "^1.1.0",
     "throw-if-arg-empty": "^1.0.1",
     "to-type-string": "^1.0.0"
   },
   "peerDependencies": {
-    "dd-models": "^0.6.3"
+    "dd-models": "^0.6.4"
   }
 }

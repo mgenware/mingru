@@ -18,6 +18,10 @@ export class Dialect {
     throw new Error('Not implemented yet');
   }
 
+  encode(_: unknown): string {
+    throw new Error('Not implemented yet');
+  }
+
   goType(_: dd.Column): TypeBridge {
     throw new Error('Not implemented yet');
   }
