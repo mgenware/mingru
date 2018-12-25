@@ -75,6 +75,7 @@ export class InsertProcessor {
             } else {
               const type = fullColumn.types.values().next().value;
               const def = dtDefault(type);
+              // tslint:disable-next-line
               if (def === null) {
                 throw new Error(
                   `Cannot determine the default value of type "${type}" at column ${colName}`,

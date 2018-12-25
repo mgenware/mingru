@@ -18,19 +18,24 @@ export default class MySQL extends Dialect {
     return '`' + name + '`';
   }
 
-  encode(value: unknown): string {
+  encode(value: unknown | undefined): string {
+    // tslint:disable-next-line
     if (value === undefined) {
       throw new Error('value is undefined');
     }
+    // tslint:disable-next-line
     if (value === null) {
       return 'NULL';
     }
+    // tslint:disable-next-line
     if (typeof value === 'boolean' || typeof value === 'number') {
       return `${+(value as number)}`;
     }
+    // tslint:disable-next-line
     if (typeof value === 'string') {
       return escapeString(value);
     }
+    // tslint:disable-next-line
     if (typeof value === 'object') {
       if (value instanceof dd.SQLCall) {
         return this.sqlCall(value as dd.SQLCall);
