@@ -3,7 +3,7 @@ import * as dd from 'dd-models';
 import user from '../models/user';
 import post from '../models/post';
 import cmt from '../models/cmt';
-import rpl from '../models/cmtReply';
+import rpl from '../models/postReply';
 
 const dialect = new mr.MySQL();
 

@@ -1,7 +1,7 @@
 import * as dd from 'dd-models';
 import post from '../models/post';
 import cmt from '../models/cmt';
-import rpl from '../models/cmtReply';
+import rpl from '../models/postReply';
 import user from '../models/user';
 import { testBuildAsync, newTA } from './common';
 

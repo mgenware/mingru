@@ -25,7 +25,9 @@ export default async function buildAsync(
     tableActionList.map(async action => {
       const builder = new GoBuilder(action, dialect, opts.packageName);
       const code = builder.build(false, !!opts.noFileHeader);
-      const fileName = dd.utils.capitalizeColumnName(action.table.__name);
+      const fileName = dd.utils.capitalizeFirstLetter(
+        dd.utils.toCamelCase(action.table.__name),
+      );
       const outFile = nodepath.join(outDir, fileName + '.go');
       await mfs.writeFileAsync(outFile, code, 'utf8');
     }),

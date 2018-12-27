@@ -1,6 +1,7 @@
 import * as dd from 'dd-models';
 import user from '../models/user';
 import post from '../models/post';
+import postReply from '../models/postReply';
 import { newTA, testBuildToDirAsync } from './common';
 
 test('Single table', async () => {
@@ -45,4 +46,10 @@ test('Custom package name', async () => {
   await testBuildToDirAsync([ta], ['Post'], 'customPackageName', {
     packageName: 'haha',
   });
+});
+
+test('Table name', async () => {
+  const ta = newTA(postReply);
+  ta.insertOne('PostReply').setInputs(postReply.to_user_id, postReply.user_id);
+  await testBuildToDirAsync([ta], ['PostCmtRpl'], 'tableName');
 });
