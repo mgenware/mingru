@@ -16,7 +16,7 @@ test('Delete', () => {
 
 test('Delete with where', () => {
   const actions = dd.actions(post);
-  const v = actions.update('t').where(dd.sql`${post.id} = 1`);
+  const v = actions.delete('t').where(dd.sql`${post.id} = 1`);
   const io = mr.io.toDeleteIO(v, dialect);
 
   expect(io.sql).toBe('DELETE FROM `post` WHERE `id` = 1');
