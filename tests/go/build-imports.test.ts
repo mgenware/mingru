@@ -27,8 +27,8 @@ test('Select field', async () => {
 
 test('Update', async () => {
   const ta = newTA(post);
-  ta.update('Times').setInputs(post.datetime, post.date);
-  ta.update('NullableTimes').setInputs(post.n_datetime, post.n_date);
+  ta.updateAll('Times').setInputs(post.datetime, post.date);
+  ta.updateAll('NullableTimes').setInputs(post.n_datetime, post.n_date);
   await testBuildToDirAsync([ta], ['Post'], 'extraImportsUpdate');
 });
 

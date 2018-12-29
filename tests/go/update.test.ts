@@ -7,7 +7,8 @@ test('Update', async () => {
   ta.update('t')
     .set(post.title, dd.sql`"haha"`)
     .set(post.content, dd.sql`${dd.input(post.content)}`)
-    .set(post.cmtCount, dd.sql`${post.cmtCount} + 1`);
+    .set(post.cmtCount, dd.sql`${post.cmtCount} + 1`)
+    .byID();
   await testBuildAsync(ta, 'update/update');
 });
 
@@ -16,7 +17,8 @@ test('UpdateOne', async () => {
   ta.updateOne('t')
     .set(post.title, dd.sql`"haha"`)
     .set(post.content, dd.sql`${dd.input(post.content)}`)
-    .set(post.cmtCount, dd.sql`${post.cmtCount} + 1`);
+    .set(post.cmtCount, dd.sql`${post.cmtCount} + 1`)
+    .byID();
   await testBuildAsync(ta, 'update/updateOne');
 });
 
@@ -35,7 +37,7 @@ test('Update with where', async () => {
 
 test('Update with non-input setters', async () => {
   const ta = newTA(post);
-  ta.updateOne('t')
+  ta.updateAll('t')
     .set(post.title, dd.sql`"haha"`)
     .set(post.content, post.content.toInputSQL());
   await testBuildAsync(ta, 'update/updateWithNonInputSetters');

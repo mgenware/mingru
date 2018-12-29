@@ -14,6 +14,12 @@ export class DeleteProcessor {
     const { action, dialect } = this;
     const table = action.table as dd.Table;
 
+    if (!action.whereSQL && !action.deleteAll) {
+      throw new Error(
+        "You can only call deleteAll to build the action if you don't have a WHERE clause",
+      );
+    }
+
     // table
     const fromIO = this.handleFrom(table);
     sql += fromIO.sql;

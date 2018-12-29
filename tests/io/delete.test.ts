@@ -6,11 +6,11 @@ const dialect = new mr.MySQL();
 
 test('Delete', () => {
   const actions = dd.actions(post);
-  const v = actions.delete('t');
+  const v = actions.delete('t').byID();
   const io = mr.io.toDeleteIO(v, dialect);
 
   expect(io).toBeInstanceOf(mr.io.DeleteIO);
-  expect(io.sql).toBe('DELETE FROM `post`');
+  expect(io.sql).toBe('DELETE FROM `post` WHERE `id` = ?');
   expect(io.table).toBeInstanceOf(mr.io.TableIO);
 });
 
@@ -20,4 +20,10 @@ test('Delete with where', () => {
   const io = mr.io.toDeleteIO(v, dialect);
 
   expect(io.sql).toBe('DELETE FROM `post` WHERE `id` = 1');
+});
+
+test('Error on empty where', () => {
+  const actions = dd.actions(post);
+  const v = actions.delete('t');
+  expect(() => mr.io.toDeleteIO(v, dialect)).toThrow('deleteAll');
 });

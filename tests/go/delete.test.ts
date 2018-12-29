@@ -4,7 +4,7 @@ import { testBuildAsync, newTA } from './common';
 
 test('Delete', async () => {
   const ta = newTA(post);
-  ta.delete('t');
+  ta.delete('t').byID();
   await testBuildAsync(ta, 'delete/delete');
 });
 
@@ -16,6 +16,6 @@ test('Delete with where', async () => {
 
 test('DeleteOne', async () => {
   const ta = newTA(post);
-  ta.deleteOne('t');
+  ta.deleteOne('t').byID();
   await testBuildAsync(ta, 'delete/deleteOne');
 });

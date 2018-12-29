@@ -10,12 +10,13 @@ test('Update', () => {
     .update('t')
     .set(post.title, dd.sql`"haha"`)
     .set(post.content, dd.sql`${dd.input(post.content)}`)
-    .set(post.cmtCount, dd.sql`${post.cmtCount} + 1`);
+    .set(post.cmtCount, dd.sql`${post.cmtCount} + 1`)
+    .byID();
   const io = mr.io.toUpdateIO(v, dialect);
 
   expect(io).toBeInstanceOf(mr.io.UpdateIO);
   expect(io.sql).toBe(
-    'UPDATE `post` SET `title` = "haha", `content` = ?, `cmt_c` = `cmt_c` + 1',
+    'UPDATE `post` SET `title` = "haha", `content` = ?, `cmt_c` = `cmt_c` + 1 WHERE `id` = ?',
   );
   expect(io.table).toBeInstanceOf(mr.io.TableIO);
   expect(io.setters.length).toBe(3);
@@ -34,4 +35,10 @@ test('Update with where', () => {
   const io = mr.io.toUpdateIO(v, dialect);
 
   expect(io.sql).toBe('UPDATE `post` SET `title` = "haha" WHERE `id` = 1');
+});
+
+test('Error on empty where', () => {
+  const actions = dd.actions(post);
+  const v = actions.update('t').set(post.title, dd.sql`"haha"`);
+  expect(() => mr.io.toUpdateIO(v, dialect)).toThrow('updateAll');
 });

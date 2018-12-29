@@ -14,7 +14,7 @@ test('Single table', async () => {
     post.user_id,
     post.user_id.join(user).url_name,
   );
-  ta.update('PostTitle').set(post.title, dd.sql`${dd.input(post.title)}`);
+  ta.updateAll('PostTitle').set(post.title, dd.sql`${dd.input(post.title)}`);
   ta.deleteOne('ByID').where(dd.sql`${post.id} = ${dd.input(post.id)}`);
   await testBuildToDirAsync([ta], ['Post'], 'singleTable');
 });
@@ -22,7 +22,7 @@ test('Single table', async () => {
 test('Multiple tables', async () => {
   const userTA = dd.actions(user);
   userTA.select('Profile', user.display_name, user.sig);
-  userTA.update('Profile').setInputs(user.sig);
+  userTA.updateAll('Profile').setInputs(user.sig);
   userTA.deleteOne('ByID').where(user.id.isEqualToInput());
 
   const postTA = dd.actions(post);
@@ -32,7 +32,7 @@ test('Multiple tables', async () => {
     post.content,
     post.user_id.join(user).url_name,
   );
-  postTA.update('Content').set(post.content, post.content.isEqualToInput());
+  postTA.updateAll('Content').set(post.content, post.content.isEqualToInput());
   postTA.deleteOne('ByID').where(post.id.isEqualToInput());
 
   const actions = [userTA, postTA];
