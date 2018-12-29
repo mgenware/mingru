@@ -50,6 +50,6 @@
     "to-type-string": "^1.0.0"
   },
   "peerDependencies": {
-    "dd-models": "^0.6.4"
+    "dd-models": "^0.7.0"
   }
 }
