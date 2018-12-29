@@ -137,3 +137,8 @@ test('Duplicate selected names', () => {
   expect(cols[i++].varName).toBe('postUserUrlName2');
   expect(cols[i++].varName).toBe('a4');
 });
+
+test('Select nothing', () => {
+  const actions = dd.actions(user);
+  expect(() => actions.select('t')).toThrow('empty');
+});

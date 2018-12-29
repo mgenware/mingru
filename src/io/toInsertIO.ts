@@ -20,7 +20,7 @@ export class InsertProcessor {
     const tableIO = this.handleFrom(table);
     sql += tableIO.sql;
 
-    // columns
+    // setters
     if (!columnValueMap.size) {
       throw new Error(
         `The insert action "${action}" does not have any setters`,

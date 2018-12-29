@@ -28,3 +28,10 @@ test('Insert inputs and values', () => {
   );
   expect(io.table).toBeInstanceOf(mr.io.TableIO);
 });
+
+test('No setters', () => {
+  const actions = dd.actions(post);
+  expect(() => mr.io.toInsertIO(actions.insert('t'), dialect)).toThrow(
+    'setter',
+  );
+});

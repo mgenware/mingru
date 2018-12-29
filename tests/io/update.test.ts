@@ -42,3 +42,10 @@ test('Error on empty where', () => {
   const v = actions.update('t').set(post.title, dd.sql`"haha"`);
   expect(() => mr.io.toUpdateIO(v, dialect)).toThrow('updateAll');
 });
+
+test('No setters', () => {
+  const actions = dd.actions(post);
+  expect(() => mr.io.toUpdateIO(actions.updateAll('t'), dialect)).toThrow(
+    'setter',
+  );
+});
