@@ -16,7 +16,9 @@ export class DeleteProcessor {
 
     if (!action.whereSQL && !action.deleteAll) {
       throw new Error(
-        "You can only call deleteAll to build the action if you don't have a WHERE clause",
+        `You have to call deleteAll to build an action without a WHERE clause, action name: "${
+          action.name
+        }"`,
       );
     }
 

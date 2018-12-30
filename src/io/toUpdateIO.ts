@@ -16,7 +16,9 @@ export class UpdateProcessor {
 
     if (!action.whereSQL && !action.updateAll) {
       throw new Error(
-        "You can only call updateAll to build the action if you don't have a WHERE clause",
+        `You have to call updateAll to build an action without a WHERE clause, action name: "${
+          action.name
+        }"`,
       );
     }
 
