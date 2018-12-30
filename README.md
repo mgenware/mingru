@@ -120,7 +120,7 @@ Example:
 ```ts
 // mingru.ts
 import * as mr from 'mingru';
-// Import you model actions
+// Import your model actions
 import userTA from './models/userTA';
 
 (async () => {
