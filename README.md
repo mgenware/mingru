@@ -92,6 +92,29 @@ func (da *TableTypeUser) UpdateUserProfile(queryable sqlx.Queryable, userID uint
 func (da *TableTypeUser) DeleteByID(queryable sqlx.Queryable, userID uint64) error
 ```
 
+### Step 4: Using the generated code in your Go project
+
+```go
+func main() {
+	// Open a DB connection on localhost
+	db, err := sql.Open("mysql", "root:123456@/test")
+	if err != nil {
+		panic(err)
+	}
+
+	// Select all user profiles
+	users, err := da.User.SelectAllUserProfiles(db)
+	if err != nil {
+		panic(err)
+	}
+
+	// Loop through the result
+	for _, u := range users {
+		fmt.Printf("ID: %v, Name: %v, Sig: %v\n", u.UserID, u.UserName, u.UserSig)
+	}
+}
+```
+
 # Usage
 
 ## Defining Models
