@@ -115,13 +115,15 @@ func main() {
 }
 ```
 
-# Usage
 
-## Defining Models
 
-mingru converts [dd-models](https://github.com/mgenware/dd-models) to Go code, please refer to [dd-models docs](https://github.com/mgenware/dd-models) for details.
+## Usage
 
-## Generating Go Code
+### Defining Models
+
+mingru converts [dd-models](https://github.com/mgenware/dd-models) to Go code, to learn how to define models, refer to [dd-models docs](https://github.com/mgenware/dd-models).
+
+### Generating Go Code
 
 Once you are familiar with [dd-models](https://github.com/mgenware/dd-models), you can import your actions, and use `mingru.build` along with a dialect to generate Go code:
 
@@ -166,7 +168,7 @@ It's also recommended to use `ts-node` and add build command to `package.json` s
 
 Now you can build your project using `yarn build`.
 
-## More examples
+### More examples
 For a more detailed and runnable example, visit [mingru-go-example](https://github.com/mgenware/mingru-go-example)
 
 ## FAQ
