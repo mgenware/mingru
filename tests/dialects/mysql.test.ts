@@ -66,22 +66,20 @@ test('SQL calls', () => {
   );
 });
 
-test('encode', () => {
+test('translate', () => {
   // null
-  expect(dialect.encode(null)).toBe('NULL');
+  expect(dialect.translate(null)).toBe('NULL');
   // number
-  expect(dialect.encode(-32)).toBe('-32');
+  expect(dialect.translate(-32)).toBe('-32');
   // boolean
-  expect(dialect.encode(true)).toBe('1');
-  expect(dialect.encode(false)).toBe('0');
+  expect(dialect.translate(true)).toBe('1');
+  expect(dialect.translate(false)).toBe('0');
   // string
-  expect(dialect.encode('a 123 🛋')).toBe("'a 123 🛋'"); // tslint:disable-line
-  expect(dialect.encode('')).toBe("''"); // tslint:disable-line
-  expect(dialect.encode('\'"\\')).toBe("'''\"\\'"); // tslint:disable-line
-  // SQLCall
-  expect(dialect.encode(dd.datetimeNow())).toBe('NOW()');
+  expect(dialect.translate('a 123 🛋')).toBe("'a 123 🛋'"); // tslint:disable-line
+  expect(dialect.translate('')).toBe("''"); // tslint:disable-line
+  expect(dialect.translate('\'"\\')).toBe("'''\"\\'"); // tslint:disable-line
   // undefined
-  expect(() => dialect.encode(undefined)).toThrow();
+  expect(() => dialect.translate(undefined)).toThrow();
   // Others
-  expect(() => dialect.encode([])).toThrow();
+  expect(() => dialect.translate([])).toThrow();
 });

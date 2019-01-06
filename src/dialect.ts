@@ -18,7 +18,8 @@ export class Dialect {
     throw new Error('Not implemented yet');
   }
 
-  encode(_: unknown): string {
+  // Translates a JavaScript object to SQL equivalent
+  translate(_: unknown): string {
     throw new Error('Not implemented yet');
   }
 

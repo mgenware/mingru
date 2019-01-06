@@ -69,7 +69,12 @@ export class InsertProcessor {
 
             const { props } = fullColumn;
             if (props.default) {
-              value = dialect.encode(props.default);
+              if (props.default instanceof dd.SQL) {
+                const valueIO = new io.SQLIO(props.default as dd.SQL);
+                value = valueIO.toSQL(dialect);
+              } else {
+                value = dialect.translate(props.default);
+              }
             } else if (fullColumn.props.nullable) {
               value = 'NULL';
             } else {
@@ -81,7 +86,7 @@ export class InsertProcessor {
                   `Cannot determine the default value of type "${type}" at column ${colName}`,
                 );
               }
-              value = dialect.encode(def);
+              value = dialect.translate(def);
             }
             break;
           }
