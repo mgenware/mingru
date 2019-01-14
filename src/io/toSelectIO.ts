@@ -3,9 +3,18 @@ import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
 import * as io from './io';
 import NameContext from '../lib/nameContext';
+import toTypeString from 'to-type-string';
+import { Column } from 'dd-models';
+
+// Used internally in SelectProcessor to save an SQL of a selected column associated with an alias.
+class ColumnSQL {
+  constructor(public sql: string, public alias: string) {}
+}
 
 export class SelectProcessor {
+  // Tracks all processed joins, when processing a new join, we can reuse the JoinIO if it already exists
   jcMap = new Map<string, io.JoinIO>();
+  // All processed joins
   joins: io.JoinIO[] = [];
   // Make sure all join table alias names are unique
   joinedTableCounter = 0;
@@ -21,12 +30,25 @@ export class SelectProcessor {
     let sql = 'SELECT ';
     const { action } = this;
     const { columns, table: from } = action;
-    const hasJoin = columns.some(c => c instanceof dd.JoinedColumn);
+    const hasJoin = columns.some(selectedCol => {
+      let col: dd.Column | null = null;
+      if (selectedCol instanceof dd.Column) {
+        col = selectedCol as dd.Column;
+      } else if (selectedCol instanceof dd.SelectedColumn) {
+        col = this.getColumnFromSelectedColumn(
+          selectedCol as dd.SelectedColumn,
+        );
+      }
+      if (col) {
+        return col.props.isJoinedColumn();
+      }
+      return false;
+    });
 
     // Process columns
-    const colIOs: io.ColumnIO[] = [];
+    const colIOs: io.SelectedColumnIO[] = [];
     for (const col of columns) {
-      const selIO = this.handleSelect(col, hasJoin);
+      const selIO = this.handleSelectedColumn(col, hasJoin);
       colIOs.push(selIO);
     }
     sql += colIOs.map(c => c.sql).join(', ');
@@ -61,60 +83,116 @@ export class SelectProcessor {
     return new io.TableIO(table, sql);
   }
 
-  private handleSelect(col: dd.ColumnBase, hasJoin: boolean): io.ColumnIO {
-    let alias: string | null = null;
-    if (col instanceof dd.SelectedColumn) {
-      const selectedCol = col as dd.SelectedColumn;
-      alias = selectedCol.selectedName;
-      // Reset the column to the underlying column of SelectedColumn.
-      col = selectedCol.column;
+  private getColumnFromSelectedColumn(sc: dd.SelectedColumn): dd.Column | null {
+    if (sc.core instanceof dd.Column) {
+      return sc.core as dd.Column;
     }
-    if (col instanceof dd.JoinedColumn) {
-      return this.handleJoinedColumn(col as dd.JoinedColumn, alias);
+    // return the first column in the SQL expression
+    for (const element of (sc.core as dd.SQL).elements) {
+      if (element.type === dd.SQLElementType.column) {
+        return element.toColumn();
+      }
     }
-    return this.handleStandardColumn(col, hasJoin, alias);
+    return null;
   }
 
-  private handleJoin(jc: dd.JoinedColumn): io.JoinIO {
-    const result = this.jcMap.get(jc.joinPath);
+  private handleSelectedColumn(
+    sc: dd.SelectedColumn,
+    hasJoin: boolean,
+  ): io.SelectedColumnIO {
+    const { dialect } = this;
+    const col = this.getColumnFromSelectedColumn(sc);
+    if (col) {
+      const colSQL = this.handleColumn(col, hasJoin);
+      if (sc.core instanceof dd.Column) {
+        // Pure column-based selected column
+        return new io.SelectedColumnIO(sc, colSQL.sql, colSQL.alias);
+      }
+
+      const rawExpr = sc.core as dd.SQL;
+      const exprIO = new io.SQLIO(rawExpr);
+      // Expression with embedded column
+      const sql = exprIO.toSQL(dialect, element => {
+        if (element.value === col) {
+          return colSQL.sql;
+        }
+        return null;
+      });
+      // SelectedColumn.alias takes precedence over colSQL.alias
+      return new io.SelectedColumnIO(sc, sql, sc.selectedName || colSQL.alias);
+    } else {
+      // Expression with no columns inside
+      const rawExpr = sc.core as dd.SQL;
+      const exprIO = new io.SQLIO(rawExpr);
+      const sql = exprIO.toSQL(dialect);
+      return new io.SelectedColumnIO(sc, sql, sc.selectedName);
+    }
+  }
+
+  private handleJoinRecursively(jc: dd.Column): io.JoinIO {
+    const table = jc.props.castToJoinedTable();
+    const result = this.jcMap.get(table.keyPath);
     if (result) {
       return result;
     }
 
     let localTableName: string;
-    const { localColumn, remoteColumn } = jc;
-    if (localColumn instanceof dd.JoinedColumn) {
-      const srcIO = this.handleJoin(jc.localColumn as dd.JoinedColumn);
+    const { srcColumn, destColumn } = table;
+    if (srcColumn.props.isJoinedColumn()) {
+      const srcIO = this.handleJoinRecursively(srcColumn);
       localTableName = srcIO.tableAlias;
     } else {
-      localTableName = localColumn.tableName;
+      localTableName = srcColumn.props.tableName();
     }
 
     const joinIO = new io.JoinIO(
-      jc.joinPath,
+      table.keyPath,
       this.nextJoinedTableName(),
       localTableName,
-      localColumn,
-      remoteColumn.tableName,
-      remoteColumn,
+      srcColumn,
+      destColumn.props.tableName(),
+      destColumn,
     );
-    this.jcMap.set(jc.joinPath, joinIO);
+    this.jcMap.set(table.keyPath, joinIO);
     this.joins.push(joinIO);
     return joinIO;
   }
 
-  private handleJoinedColumn(
-    jc: dd.JoinedColumn,
-    presetAlias: string | null,
-  ): io.ColumnIO {
-    const joinIO = this.handleJoin(jc);
+  private handleColumn(col: dd.Column, hasJoin: boolean): ColumnSQL {
     const { dialect } = this;
     const e = dialect.escape;
-    const sql = `${e(joinIO.tableAlias)}.${e(jc.selectedColumn.__name)}`;
-    const alias = this.nextSelectedName(
-      presetAlias ? presetAlias : jc.__getInputName(),
-    );
-    return new io.ColumnIO(jc, dialect.as(sql, alias), alias);
+    // Check for joined column
+    if (col.props.isJoinedColumn()) {
+      const joinIO = this.handleJoinRecursively(col);
+      if (!col.props.mirroredColumn) {
+        throw new Error(
+          `Internal error: unexpected empty mirroredColumn in joined column "${toTypeString(
+            col,
+          )}"`,
+        );
+      }
+      const sql = `${e(joinIO.tableAlias)}.${e(
+        col.props.mirroredColumn.props.name,
+      )}`;
+      const alias = this.nextSelectedName(col.props.inputName());
+      return new ColumnSQL(dialect.as(sql, alias), alias);
+    } else {
+      // Normal column
+      let sql = '';
+      if (hasJoin) {
+        sql = `${e(io.MainAlias)}.`;
+      }
+      sql += e(col.props.name);
+
+      let alias: string;
+      if (hasJoin) {
+        alias = this.nextSelectedName(col.props.inputName());
+        sql = dialect.as(sql, alias);
+      } else {
+        alias = this.nextSelectedName(col.props.inputName());
+      }
+      return new ColumnSQL(sql, alias);
+    }
   }
 
   private nextJoinedTableName(): string {
@@ -124,31 +202,6 @@ export class SelectProcessor {
 
   private nextSelectedName(name: string): string {
     return this.selectedNameContext.get(name);
-  }
-
-  private handleStandardColumn(
-    col: dd.ColumnBase,
-    hasJoin: boolean,
-    presetAlias: string | null,
-  ): io.ColumnIO {
-    const { dialect } = this;
-    const e = dialect.escape;
-    let sql = '';
-    if (hasJoin) {
-      sql = `${e(io.MainAlias)}.`;
-    }
-    sql += e(col.__name);
-
-    let alias: string;
-    if (presetAlias || hasJoin) {
-      alias = this.nextSelectedName(
-        presetAlias ? presetAlias : col.__getInputName(),
-      );
-      sql = dialect.as(sql, alias);
-    } else {
-      alias = this.nextSelectedName(col.__getInputName());
-    }
-    return new io.ColumnIO(col, sql, alias);
   }
 }
 

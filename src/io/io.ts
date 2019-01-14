@@ -11,9 +11,9 @@ export class JoinIO {
     public tableAlias: string,
     // Note that localTable can also be an alias of another join
     public localTable: string,
-    public localColumn: dd.ColumnBase,
+    public localColumn: dd.Column,
     public remoteTable: string,
-    public remoteColumn: dd.ColumnBase,
+    public remoteColumn: dd.Column,
   ) {}
 
   toSQL(dialect: Dialect): string {
@@ -21,8 +21,8 @@ export class JoinIO {
     // Note that localTable is not used here, we use MainAlias as local table alias
     return `INNER JOIN ${e(this.remoteTable)} AS ${e(this.tableAlias)} ON ${e(
       this.tableAlias,
-    )}.${e(this.remoteColumn.__name)} = ${e(MainAlias)}.${e(
-      this.localColumn.__name,
+    )}.${e(this.remoteColumn.props.name)} = ${e(MainAlias)}.${e(
+      this.localColumn.props.name,
     )}`;
   }
 }
@@ -34,15 +34,15 @@ export class TableIO {
   }
 }
 
-export class ColumnIO {
+export class SelectedColumnIO {
   constructor(
-    public col: dd.ColumnBase,
+    public selectedColumn: dd.SelectedColumn,
     public sql: string,
-    public varName: string,
+    public alias: string,
   ) {
-    throwIfFalsy(col, 'col');
+    throwIfFalsy(selectedColumn, 'selectedColumn');
     throwIfFalsy(sql, 'sql');
-    throwIfFalsy(varName, 'varName');
+    throwIfFalsy(alias, 'alias');
   }
 }
 
@@ -51,11 +51,18 @@ export class SQLIO {
     throwIfFalsy(sql, 'sql');
   }
 
-  toSQL(dialect: Dialect): string {
+  toSQL(
+    dialect: Dialect,
+    cb?: (element: dd.SQLElement) => string | null,
+  ): string {
     const { sql } = this;
     let res = '';
     for (const element of sql.elements) {
-      res += this.handleElement(element, dialect);
+      let cbRes: string | null = null;
+      if (cb) {
+        cbRes = cb(element);
+      }
+      res += cbRes === null ? this.handleElement(element, dialect) : cbRes;
     }
     return res;
   }
@@ -90,14 +97,14 @@ export class SQLIO {
 }
 
 export class SetterIO {
-  static fromMap(map: Map<dd.ColumnBase, dd.SQL>): SetterIO[] {
+  static fromMap(map: Map<dd.Column, dd.SQL>): SetterIO[] {
     return Array.from(
       map,
       ([key, value]) => new SetterIO(key, new SQLIO(value)),
     );
   }
 
-  constructor(public col: dd.ColumnBase, public sql: SQLIO) {
+  constructor(public col: dd.Column, public sql: SQLIO) {
     throwIfFalsy(col, 'col');
     throwIfFalsy(sql, 'sql');
   }
@@ -107,7 +114,7 @@ export class SelectIO {
   constructor(
     public action: dd.SelectAction,
     public sql: string,
-    public cols: ColumnIO[],
+    public cols: SelectedColumnIO[],
     public from: TableIO,
     public where: SQLIO | null,
   ) {

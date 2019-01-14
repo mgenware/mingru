@@ -137,7 +137,7 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
     // Collect selected columns info, used to generate result type and params passed to `Scan`.
     const selectedFields: go.InstanceVariable[] = [];
     for (const col of io.cols) {
-      const fieldName = col.varName;
+      const fieldName = col.alias;
       const fieldType = dialect.goType(col.col.__getTargetColumn());
       this.addTypeBridge(fieldType);
       selectedFields.push(new go.InstanceVariable(fieldName, fieldType.type));

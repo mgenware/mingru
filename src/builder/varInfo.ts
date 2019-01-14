@@ -6,15 +6,10 @@ import NameContext from '../lib/nameContext';
 export default class VarInfo {
   static fromColumn(
     dialect: Dialect,
-    col: dd.ColumnBase,
+    col: dd.Column,
     nameContext: NameContext,
   ): VarInfo {
-    return new VarInfo(
-      col.__name,
-      nameContext,
-      dialect.goType(col.__getTargetColumn()),
-      col,
-    );
+    return new VarInfo(col.props.name, nameContext, dialect.goType(col), col);
   }
 
   static fromSQLArray(
@@ -46,7 +41,7 @@ export default class VarInfo {
     name: string,
     nameContext: NameContext,
     public type: TypeBridge,
-    public rawObject: dd.SQLInput | dd.ColumnBase,
+    public rawObject: dd.SQLInput | dd.Column,
   ) {
     this.name = nameContext.get(name);
   }
