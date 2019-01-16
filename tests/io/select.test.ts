@@ -127,15 +127,15 @@ test('Duplicate selected names', () => {
   const io = mr.io.toSelectIO(v, dialect);
   const { cols } = io;
   let i = 0;
-  expect(cols[i++].varName).toBe('postTitle');
-  expect(cols[i++].varName).toBe('postTitle2');
-  expect(cols[i++].varName).toBe('a');
-  expect(cols[i++].varName).toBe('postTitle3');
-  expect(cols[i++].varName).toBe('a2');
-  expect(cols[i++].varName).toBe('a3');
-  expect(cols[i++].varName).toBe('postUserUrlName');
-  expect(cols[i++].varName).toBe('postUserUrlName2');
-  expect(cols[i++].varName).toBe('a4');
+  expect(cols[i++].alias).toBe('postTitle');
+  expect(cols[i++].alias).toBe('postTitle2');
+  expect(cols[i++].alias).toBe('a');
+  expect(cols[i++].alias).toBe('postTitle3');
+  expect(cols[i++].alias).toBe('a2');
+  expect(cols[i++].alias).toBe('a3');
+  expect(cols[i++].alias).toBe('postUserUrlName');
+  expect(cols[i++].alias).toBe('postUserUrlName2');
+  expect(cols[i++].alias).toBe('a4');
 });
 
 test('Select nothing', () => {
