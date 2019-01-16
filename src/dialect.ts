@@ -23,7 +23,7 @@ export class Dialect {
     throw new Error('Not implemented yet');
   }
 
-  goType(_: dd.Column): TypeBridge {
+  goType(_: dd.ColumnProps): TypeBridge {
     throw new Error('Not implemented yet');
   }
 
@@ -31,8 +31,8 @@ export class Dialect {
     throw new Error('Not implemented yet');
   }
 
-  escapeColumn(column: dd.ColumnBase): string {
-    return this.escape(column.__name);
+  escapeColumn(column: dd.Column): string {
+    return this.escape(column.props.name);
   }
 
   escapeTable(table: dd.Table): string {

@@ -8,7 +8,7 @@ import toUpdateIO from './io/toUpdateIO';
 import toInsertIO from './io/toInsertIO';
 import toDeleteIO from './io/toDeleteIO';
 import {
-  ColumnIO,
+  SelectedColumnIO,
   JoinIO,
   MainAlias,
   SQLIO,
@@ -22,7 +22,7 @@ import {
 
 // tslint:disable-next-line
 export class io {
-  static ColumnIO = ColumnIO;
+  static SelectedColumnIO = SelectedColumnIO;
   static JoinIO = JoinIO;
   static MainAlias = MainAlias;
   static SQLIO = SQLIO;

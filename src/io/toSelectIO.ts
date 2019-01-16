@@ -4,7 +4,6 @@ import Dialect from '../dialect';
 import * as io from './io';
 import NameContext from '../lib/nameContext';
 import toTypeString from 'to-type-string';
-import { Column } from 'dd-models';
 
 // Used internally in SelectProcessor to save an SQL of a selected column associated with an alias.
 class ColumnSQL {
@@ -30,17 +29,10 @@ export class SelectProcessor {
     let sql = 'SELECT ';
     const { action } = this;
     const { columns, table: from } = action;
-    const hasJoin = columns.some(selectedCol => {
-      let col: dd.Column | null = null;
-      if (selectedCol instanceof dd.Column) {
-        col = selectedCol as dd.Column;
-      } else if (selectedCol instanceof dd.SelectedColumn) {
-        col = this.getColumnFromSelectedColumn(
-          selectedCol as dd.SelectedColumn,
-        );
-      }
-      if (col) {
-        return col.props.isJoinedColumn();
+    const hasJoin = columns.some(sCol => {
+      const [col] = this.fetchColumns(sCol);
+      if (col && col.props.isJoinedColumn()) {
+        return true;
       }
       return false;
     });
@@ -83,35 +75,65 @@ export class SelectProcessor {
     return new io.TableIO(table, sql);
   }
 
-  private getColumnFromSelectedColumn(sc: dd.SelectedColumn): dd.Column | null {
-    if (sc.core instanceof dd.Column) {
-      return sc.core as dd.Column;
+  // Column = sc is a column || extracted from calculated column
+  // Calculated column = sc is a calculated column
+  private fetchColumns(
+    sCol: dd.SelectActionColumns,
+  ): [dd.Column | null, dd.CalculatedColumn | null] {
+    // If user uses a column directly
+    if (sCol instanceof dd.Column) {
+      return [sCol as dd.Column, null];
     }
-    // return the first column in the SQL expression
-    for (const element of (sc.core as dd.SQL).elements) {
+    // If user uses a renamed column (a CalculatedColumn with core = column, and selectedName = newName)
+    const cc = sCol as dd.CalculatedColumn;
+    if (cc.core instanceof dd.Column) {
+      return [cc.core as dd.Column, cc];
+    }
+    // Now, CalculatedColumn.core is an SQL expression. Try to extract a column from it.
+    for (const element of (cc.core as dd.SQL).elements) {
       if (element.type === dd.SQLElementType.column) {
-        return element.toColumn();
+        return [element.toColumn(), cc];
       }
     }
-    return null;
+    return [null, cc];
   }
 
   private handleSelectedColumn(
-    sc: dd.SelectedColumn,
+    sCol: dd.SelectActionColumns,
     hasJoin: boolean,
   ): io.SelectedColumnIO {
     const { dialect } = this;
-    const col = this.getColumnFromSelectedColumn(sc);
+    const [col, calcCol] = this.fetchColumns(sCol);
     if (col) {
       const colSQL = this.handleColumn(col, hasJoin);
-      if (sc.core instanceof dd.Column) {
+      if (!calcCol) {
         // Pure column-based selected column
-        return new io.SelectedColumnIO(sc, colSQL.sql, colSQL.alias);
+        return new io.SelectedColumnIO(
+          sCol,
+          colSQL.sql,
+          colSQL.alias,
+          col,
+          null,
+        );
       }
 
-      const rawExpr = sc.core as dd.SQL;
+      // CalculatedColumn with .core is a column (a renamed column)
+      if (calcCol.core instanceof dd.Column) {
+        // Use CalculatedColumn.selectedName as alias
+        return new io.SelectedColumnIO(
+          sCol,
+          colSQL.sql,
+          calcCol.selectedName,
+          col,
+          null,
+        );
+      }
+
+      // Here, we have a CalculatedColumn.core is an expression with a column inside
+      const rawExpr = calcCol.core as dd.SQL;
       const exprIO = new io.SQLIO(rawExpr);
-      // Expression with embedded column
+      // Replace the column with SQL only (no alias).
+      // Imagine new CalculatedColumn(dd.sql`COUNT(${col.as('a')})`, 'b'), the embedded column would be interpreted as `'col' AS 'a'`, but it really should be `COUNT('col') AS 'b'`, so this step replace the embedded with the SQL without its attached alias.
       const sql = exprIO.toSQL(dialect, element => {
         if (element.value === col) {
           return colSQL.sql;
@@ -119,13 +141,37 @@ export class SelectProcessor {
         return null;
       });
       // SelectedColumn.alias takes precedence over colSQL.alias
-      return new io.SelectedColumnIO(sc, sql, sc.selectedName || colSQL.alias);
+      return new io.SelectedColumnIO(
+        sCol,
+        sql,
+        calcCol.selectedName || colSQL.alias,
+        col,
+        null,
+      );
     } else {
+      if (!calcCol) {
+        throw new Error(
+          `Unexpected null calculated column from selected column "${sCol}"`,
+        );
+      }
       // Expression with no columns inside
-      const rawExpr = sc.core as dd.SQL;
+      const rawExpr = calcCol.core as dd.SQL;
       const exprIO = new io.SQLIO(rawExpr);
       const sql = exprIO.toSQL(dialect);
-      return new io.SelectedColumnIO(sc, sql, sc.selectedName);
+      if (!sCol.props) {
+        throw new Error(
+          `Column props is required for a "${toTypeString(
+            sCol,
+          )}" without any embedded columns`,
+        );
+      }
+      return new io.SelectedColumnIO(
+        sCol,
+        sql,
+        calcCol.selectedName,
+        null,
+        sCol.props,
+      );
     }
   }
 

@@ -36,13 +36,29 @@ export class TableIO {
 
 export class SelectedColumnIO {
   constructor(
-    public selectedColumn: dd.SelectedColumn,
+    public selectedColumn: dd.SelectActionColumns,
     public sql: string,
     public alias: string,
+    public column: dd.Column | null,
+    public externalProps: dd.ColumnProps | null,
   ) {
     throwIfFalsy(selectedColumn, 'selectedColumn');
     throwIfFalsy(sql, 'sql');
     throwIfFalsy(alias, 'alias');
+  }
+
+  getColumnProps(): dd.ColumnProps {
+    if (this.column) {
+      return this.column.props;
+    }
+    if (!this.externalProps) {
+      throw new Error(
+        `No column props found on column "${toTypeString(
+          this.selectedColumn,
+        )}", SQL: "${this.sql}"`,
+      );
+    }
+    return this.externalProps;
   }
 }
 
