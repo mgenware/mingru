@@ -6,11 +6,11 @@ type SelectTResult struct {
 	PostTitle2       string
 	A                string
 	PostTitle3       string
-	A2               string
-	A3               uint64
+	A                string
+	A                uint64
 	PostUserUrlName  string
 	PostUserUrlName2 string
-	A4               string
+	A                string
 }
 
 // SelectT ...

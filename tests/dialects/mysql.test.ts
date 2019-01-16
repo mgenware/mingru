@@ -47,7 +47,7 @@ test('DT', () => {
 });
 
 test('DT (not supported)', () => {
-  const props = new dd.ColumnProps(new Set<string>('_HAHA_'));
+  const props = new dd.ColumnProps(new Set<string>(['_HAHA_']));
   expect(() => dialect.goType(props)).toThrow('"_HAHA_"');
 });
 
