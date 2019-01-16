@@ -105,7 +105,11 @@ export class SelectProcessor {
     const { dialect } = this;
     const [col, calcCol] = this.fetchColumns(sCol);
     if (col) {
-      const colSQL = this.handleColumn(col, hasJoin);
+      const colSQL = this.handleColumn(
+        col,
+        hasJoin,
+        calcCol ? calcCol.selectedName : null,
+      );
       if (!calcCol) {
         // Pure column-based selected column
         return new io.SelectedColumnIO(
@@ -204,9 +208,14 @@ export class SelectProcessor {
     return joinIO;
   }
 
-  private handleColumn(col: dd.Column, hasJoin: boolean): ColumnSQL {
+  private handleColumn(
+    col: dd.Column,
+    hasJoin: boolean,
+    userAlias: string | null, // if an user alias is set, we don't need to guess the input name just use it as alias
+  ): ColumnSQL {
     const { dialect } = this;
     const e = dialect.escape;
+    const alias = userAlias || this.nextSelectedName(col.props.inputName());
     // Check for joined column
     if (col.props.isJoinedColumn()) {
       const joinIO = this.handleJoinRecursively(col);
@@ -220,7 +229,6 @@ export class SelectProcessor {
       const sql = `${e(joinIO.tableAlias)}.${e(
         col.props.mirroredColumn.props.name,
       )}`;
-      const alias = this.nextSelectedName(col.props.inputName());
       return new ColumnSQL(dialect.as(sql, alias), alias);
     } else {
       // Normal column
@@ -230,12 +238,8 @@ export class SelectProcessor {
       }
       sql += e(col.props.name);
 
-      let alias: string;
       if (hasJoin) {
-        alias = this.nextSelectedName(col.props.inputName());
         sql = dialect.as(sql, alias);
-      } else {
-        alias = this.nextSelectedName(col.props.inputName());
       }
       return new ColumnSQL(sql, alias);
     }

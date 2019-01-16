@@ -131,11 +131,11 @@ test('Duplicate selected names', () => {
   expect(cols[i++].alias).toBe('postTitle2');
   expect(cols[i++].alias).toBe('a');
   expect(cols[i++].alias).toBe('postTitle3');
-  expect(cols[i++].alias).toBe('a2');
-  expect(cols[i++].alias).toBe('a3');
+  expect(cols[i++].alias).toBe('a');
+  expect(cols[i++].alias).toBe('a');
   expect(cols[i++].alias).toBe('postUserUrlName');
   expect(cols[i++].alias).toBe('postUserUrlName2');
-  expect(cols[i++].alias).toBe('a4');
+  expect(cols[i++].alias).toBe('a');
 });
 
 test('Select nothing', () => {
