@@ -37,14 +37,21 @@ export class TableIO {
 export class SelectedColumnIO {
   constructor(
     public selectedColumn: dd.SelectActionColumns,
-    public sql: string,
-    public alias: string,
+    public valueSQL: string,
+    public alias: string | null,
     public column: dd.Column | null,
     public externalProps: dd.ColumnProps | null,
   ) {
     throwIfFalsy(selectedColumn, 'selectedColumn');
-    throwIfFalsy(sql, 'sql');
+    throwIfFalsy(valueSQL, 'valueSQL');
     throwIfFalsy(alias, 'alias');
+  }
+
+  sql(dialect: Dialect): string {
+    if (!this.alias) {
+      return this.valueSQL;
+    }
+    return dialect.as(this.valueSQL, this.alias);
   }
 
   getColumnProps(): dd.ColumnProps {

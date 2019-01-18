@@ -115,3 +115,23 @@ test('Selected name collisions', async () => {
   );
   await testBuildAsync(ta, 'select/selectedNameCollisions');
 });
+
+test('Calculated columns', async () => {
+  const ta = newTA(post);
+  ta.select(
+    't',
+    new dd.CalculatedColumn(
+      dd.sql`raw expr`,
+      'a',
+      new dd.ColumnProps(new Set<string>([dd.dt.bigInt])),
+    ),
+    new dd.CalculatedColumn(dd.sql`xyz(${post.n_date})`, 'b'),
+    new dd.CalculatedColumn(
+      dd.sql`xyz(${post.user_id.join(user).display_name})`,
+      'c',
+    ),
+    new dd.CalculatedColumn(post.n_date, 'd'),
+    new dd.CalculatedColumn(post.user_id.join(user).display_name, 'e'),
+  );
+  await testBuildAsync(ta, 'select/calculatedColumns');
+});
