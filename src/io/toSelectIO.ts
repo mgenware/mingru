@@ -7,7 +7,7 @@ import toTypeString from 'to-type-string';
 
 // Used internally in SelectProcessor to save an SQL of a selected column associated with an alias.
 class ColumnSQL {
-  constructor(public sql: string, public alias: string) {}
+  constructor(public sql: string, public inputName: string, public alias: string|null) {}
 }
 
 export class SelectProcessor {
@@ -115,6 +115,7 @@ export class SelectProcessor {
         return new io.SelectedColumnIO(
           sCol,
           colSQL.sql,
+          colSQL.inputName,
           colSQL.alias,
           col,
           null,
@@ -127,6 +128,7 @@ export class SelectProcessor {
         return new io.SelectedColumnIO(
           sCol,
           colSQL.sql,
+          colSQL.inputName,
           calcCol.selectedName,
           col,
           null,
@@ -148,6 +150,7 @@ export class SelectProcessor {
       return new io.SelectedColumnIO(
         sCol,
         sql,
+        colSQL.inputName,
         calcCol.selectedName || colSQL.alias,
         col,
         null,
@@ -172,7 +175,8 @@ export class SelectProcessor {
       return new io.SelectedColumnIO(
         sCol,
         sql,
-        calcCol.selectedName,
+        calcCol.selectedName, // inputName
+        calcCol.selectedName, // alias
         null,
         sCol.props,
       );
@@ -211,11 +215,11 @@ export class SelectProcessor {
   private handleColumn(
     col: dd.Column,
     hasJoin: boolean,
-    userAlias: string | null, // if an user alias is set, we don't need to guess the input name just use it as alias
+    alias: string | null, // if an user alias is present, we don't need to guess the input name just use it as alias
   ): ColumnSQL {
     const { dialect } = this;
     const e = dialect.escape;
-    const alias = userAlias || this.nextSelectedName(col.props.inputName());
+    const inputName = alias || this.nextSelectedName(col.props.inputName());
     // Check for joined column
     if (col.props.isJoinedColumn()) {
       const joinIO = this.handleJoinRecursively(col);
@@ -229,19 +233,16 @@ export class SelectProcessor {
       const sql = `${e(joinIO.tableAlias)}.${e(
         col.props.mirroredColumn.props.name,
       )}`;
-      return new ColumnSQL(dialect.as(sql, alias), alias);
+      return new ColumnSQL(sql, inputName, alias);
     } else {
       // Normal column
       let sql = '';
       if (hasJoin) {
+        // Each column must have a prefix in a SQL with joins
         sql = `${e(io.MainAlias)}.`;
       }
       sql += e(col.props.name);
-
-      if (hasJoin) {
-        sql = dialect.as(sql, alias);
-      }
-      return new ColumnSQL(sql, alias);
+      return new ColumnSQL(sql, inputName, alias);
     }
   }
 

@@ -38,13 +38,13 @@ export class SelectedColumnIO {
   constructor(
     public selectedColumn: dd.SelectActionColumns,
     public valueSQL: string,
+    public intputName: string, // Equals to alias if it's not null
     public alias: string | null,
     public column: dd.Column | null,
     public externalProps: dd.ColumnProps | null,
   ) {
     throwIfFalsy(selectedColumn, 'selectedColumn');
     throwIfFalsy(valueSQL, 'valueSQL');
-    throwIfFalsy(alias, 'alias');
   }
 
   sql(dialect: Dialect): string {
