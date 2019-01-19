@@ -47,11 +47,11 @@ export class SelectedColumnIO {
     throwIfFalsy(valueSQL, 'valueSQL');
   }
 
-  sql(dialect: Dialect): string {
-    if (!this.alias) {
-      return this.valueSQL;
+  sql(dialect: Dialect, hasJoin: boolean): string {
+    if (hasJoin || this.alias) {
+      return dialect.as(this.valueSQL, this.alias || this.intputName);
     }
-    return dialect.as(this.valueSQL, this.alias);
+    return this.valueSQL;
   }
 
   getColumnProps(): dd.ColumnProps {

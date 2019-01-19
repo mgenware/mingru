@@ -7,7 +7,11 @@ import toTypeString from 'to-type-string';
 
 // Used internally in SelectProcessor to save an SQL of a selected column associated with an alias.
 class ColumnSQL {
-  constructor(public sql: string, public inputName: string, public alias: string|null) {}
+  constructor(
+    public sql: string,
+    public inputName: string,
+    public alias: string | null,
+  ) {}
 }
 
 export class SelectProcessor {
@@ -43,7 +47,7 @@ export class SelectProcessor {
       const selIO = this.handleSelectedColumn(col, hasJoin);
       colIOs.push(selIO);
     }
-    sql += colIOs.map(c => c.sql).join(', ');
+    sql += colIOs.map(c => c.sql(this.dialect, hasJoin)).join(', ');
 
     // from
     const fromIO = this.handleFrom(from as dd.Table, hasJoin);
