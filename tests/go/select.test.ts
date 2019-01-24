@@ -135,3 +135,12 @@ test('Calculated columns', async () => {
   );
   await testBuildAsync(ta, 'select/calculatedColumns');
 });
+
+test('Calculated columns (count)', async () => {
+  const ta = newTA(post);
+  ta.select(
+    't',
+    dd.select(dd.count(post.user_id.join(user).display_name), 'e'),
+  );
+  await testBuildAsync(ta, 'select/calculatedColumnsCount');
+});

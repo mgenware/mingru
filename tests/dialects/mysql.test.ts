@@ -56,15 +56,11 @@ test('as', () => {
 });
 
 test('SQL calls', () => {
-  expect(dialect.sqlCall(new dd.SQLCall(dd.SQLCallType.dateNow))).toBe(
-    'CURDATE()',
-  );
-  expect(dialect.sqlCall(new dd.SQLCall(dd.SQLCallType.timeNow))).toBe(
-    'CURTIME()',
-  );
-  expect(dialect.sqlCall(new dd.SQLCall(dd.SQLCallType.datetimeNow))).toBe(
-    'NOW()',
-  );
+  const t = dialect.sqlCall;
+  expect(t(dd.SQLCallType.dateNow)).toBe('CURDATE');
+  expect(t(dd.SQLCallType.timeNow)).toBe('CURTIME');
+  expect(t(dd.SQLCallType.datetimeNow)).toBe('NOW');
+  expect(t(dd.SQLCallType.count)).toBe('COUNT');
 });
 
 test('translate', () => {

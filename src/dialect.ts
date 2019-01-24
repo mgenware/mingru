@@ -43,7 +43,7 @@ export class Dialect {
     return '?';
   }
 
-  sqlCall(_: dd.SQLCall): string {
+  sqlCall(_: dd.SQLCallType): string {
     throw new Error('Not implemented yet');
   }
 }

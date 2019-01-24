@@ -51,16 +51,18 @@ export default class MySQL extends Dialect {
     return `${sql} AS ${this.escape(name)}`;
   }
 
-  sqlCall(call: dd.SQLCall): string {
-    switch (call.type) {
+  sqlCall(type: dd.SQLCallType): string {
+    switch (type) {
       case dd.SQLCallType.datetimeNow:
-        return 'NOW()';
+        return 'NOW';
       case dd.SQLCallType.dateNow:
-        return 'CURDATE()';
+        return 'CURDATE';
       case dd.SQLCallType.timeNow:
-        return 'CURTIME()';
+        return 'CURTIME';
+      case dd.SQLCallType.count:
+        return 'COUNT';
       default:
-        throw new Error(`Unsupported type of call "${call.type}"`);
+        throw new Error(`Unsupported type of call "${type}"`);
     }
   }
 

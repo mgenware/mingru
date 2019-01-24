@@ -101,7 +101,12 @@ export class SQLIO {
       }
 
       case dd.SQLElementType.call: {
-        return dialect.sqlCall(element.toCall());
+        const call = element.toCall();
+        const name = dialect.sqlCall(call.type);
+        const params = call.params.length
+          ? call.params.map(p => new SQLIO(p).toSQL(dialect)).join(', ')
+          : '';
+        return `${name}(${params})`;
       }
 
       case dd.SQLElementType.input: {
