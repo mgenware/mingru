@@ -9,12 +9,7 @@ export default class VarInfo {
     col: dd.Column,
     nameContext: NameContext,
   ): VarInfo {
-    return new VarInfo(
-      col.props.name,
-      nameContext,
-      dialect.goType(col.props),
-      col,
-    );
+    return new VarInfo(col.name, nameContext, dialect.goType(col.type), col);
   }
 
   static fromSQLArray(
@@ -29,7 +24,7 @@ export default class VarInfo {
           const input = element.toInput();
           let type: TypeBridge;
           if (input.typeObject instanceof dd.Column) {
-            type = dialect.goType((input.typeObject as dd.Column).props);
+            type = dialect.goType((input.typeObject as dd.Column).type);
           } else {
             type = new TypeBridge(input.typeObject as string, null, false);
           }

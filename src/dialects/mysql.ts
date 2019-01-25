@@ -38,10 +38,10 @@ export default class MySQL extends Dialect {
     throw new Error(`Unsupported type of object "${toTypeString(value)}"`);
   }
 
-  goType(props: dd.ColumnProps): TypeBridge {
-    throwIfFalsy(props, 'props');
-    const bridge = this.goTypeNonNull(props);
-    if (props.nullable) {
+  goType(type: dd.ColumnType): TypeBridge {
+    throwIfFalsy(type, 'type');
+    const bridge = this.goTypeNonNull(type);
+    if (type.nullable) {
       bridge.type = '*' + bridge.type;
     }
     return bridge;
@@ -66,10 +66,10 @@ export default class MySQL extends Dialect {
     }
   }
 
-  private goTypeNonNull(props: dd.ColumnProps): TypeBridge {
+  private goTypeNonNull(colType: dd.ColumnType): TypeBridge {
     const DT = dd.dt;
-    const unsigned = props.unsigned;
-    for (const type of props.types) {
+    const unsigned = colType.unsigned;
+    for (const type of colType.types) {
       switch (type) {
         case DT.bigInt: {
           return sysType(unsigned ? 'uint64' : 'int64');
@@ -95,10 +95,10 @@ export default class MySQL extends Dialect {
         }
       }
     }
-    throw new Error(`Type not supported: ${this.inspectTypes(props.types)}`);
+    throw new Error(`Type not supported: ${this.inspectTypes(colType.types)}`);
   }
 
-  private inspectTypes(types: Set<string>): string {
+  private inspectTypes(types: string[]): string {
     if (types instanceof Set === false) {
       return toTypeString(types);
     }

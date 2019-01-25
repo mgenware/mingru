@@ -35,36 +35,35 @@ export class InsertProcessor {
           return;
         }
 
-        const { props } = col;
-        const colName = props.name;
-        if (props.isJoinedColumn()) {
+        const colName = col.name;
+        if (col.isJoinedColumn()) {
           throw new Error(
             `Unexpected JoinedColumn in InsertAction, column name: "${colName}"`,
           );
         }
-        if (props.foreignColumn) {
+        if (col.foreignColumn) {
           throw new Error(
             `Cannot set a default value for a foreign column, column "${colName}"`,
           );
         }
 
         // Skip PKs
-        if (props.pk) {
+        if (col.type.pk) {
           return;
         }
 
         let value: string;
-        if (props.default) {
-          if (props.default instanceof dd.SQL) {
-            const valueIO = new io.SQLIO(props.default as dd.SQL);
+        if (col.default) {
+          if (col.default instanceof dd.SQL) {
+            const valueIO = new io.SQLIO(col.default as dd.SQL);
             value = valueIO.toSQL(dialect);
           } else {
-            value = dialect.translate(props.default);
+            value = dialect.translate(col.default);
           }
-        } else if (props.nullable) {
+        } else if (col.type.nullable) {
           value = 'NULL';
         } else {
-          const type = props.types.values().next().value;
+          const type = col.type.types[0];
           const def = dtDefault(type);
           // tslint:disable-next-line
           if (def === null) {
@@ -79,7 +78,7 @@ export class InsertProcessor {
       });
     }
 
-    const colNames = setters.map(s => dialect.escape(s.col.props.name));
+    const colNames = setters.map(s => dialect.escape(s.col.name));
     sql += ` (${colNames.join(', ')})`;
 
     // values

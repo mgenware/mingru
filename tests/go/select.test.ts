@@ -123,7 +123,7 @@ test('Calculated columns', async () => {
     new dd.CalculatedColumn(
       dd.sql`raw expr`,
       'a',
-      new dd.ColumnProps(new Set<string>([dd.dt.bigInt])),
+      new dd.ColumnType([dd.dt.bigInt]),
     ),
     new dd.CalculatedColumn(dd.sql`xyz(${post.n_date})`, 'b'),
     new dd.CalculatedColumn(

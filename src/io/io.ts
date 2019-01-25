@@ -21,8 +21,8 @@ export class JoinIO {
     // Note that localTable is not used here, we use MainAlias as local table alias
     return `INNER JOIN ${e(this.remoteTable)} AS ${e(this.tableAlias)} ON ${e(
       this.tableAlias,
-    )}.${e(this.remoteColumn.props.name)} = ${e(MainAlias)}.${e(
-      this.localColumn.props.name,
+    )}.${e(this.remoteColumn.name)} = ${e(MainAlias)}.${e(
+      this.localColumn.name,
     )}`;
   }
 }
@@ -41,7 +41,7 @@ export class SelectedColumnIO {
     public intputName: string, // Equals to alias if it's not null
     public alias: string | null,
     public column: dd.Column | null,
-    public externalProps: dd.ColumnProps | null,
+    public externalType: dd.ColumnType | null,
   ) {
     throwIfFalsy(selectedColumn, 'selectedColumn');
     throwIfFalsy(valueSQL, 'valueSQL');
@@ -54,18 +54,18 @@ export class SelectedColumnIO {
     return this.valueSQL;
   }
 
-  getColumnProps(): dd.ColumnProps {
+  getColumnType(): dd.ColumnType {
     if (this.column) {
-      return this.column.props;
+      return this.column.type;
     }
-    if (!this.externalProps) {
+    if (!this.externalType) {
       throw new Error(
         `No column props found on column "${toTypeString(
           this.selectedColumn,
         )}", SQL: "${this.sql}"`,
       );
     }
-    return this.externalProps;
+    return this.externalType;
   }
 }
 

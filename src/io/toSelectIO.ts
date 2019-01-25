@@ -35,7 +35,7 @@ export class SelectProcessor {
     const { columns, table: from } = action;
     const hasJoin = columns.some(sCol => {
       const [col] = this.fetchColumns(sCol);
-      if (col && col.props.isJoinedColumn()) {
+      if (col && col.isJoinedColumn()) {
         return true;
       }
       return false;
@@ -169,9 +169,9 @@ export class SelectProcessor {
       const rawExpr = calcCol.core as dd.SQL;
       const exprIO = new io.SQLIO(rawExpr);
       const sql = exprIO.toSQL(dialect);
-      if (!sCol.props) {
+      if (!sCol.type) {
         throw new Error(
-          `Column props is required for a "${toTypeString(
+          `Column type is required for a "${toTypeString(
             sCol,
           )}" without any embedded columns`,
         );
@@ -182,13 +182,13 @@ export class SelectProcessor {
         calcCol.selectedName, // inputName
         calcCol.selectedName, // alias
         null,
-        sCol.props,
+        sCol.type,
       );
     }
   }
 
   private handleJoinRecursively(jc: dd.Column): io.JoinIO {
-    const table = jc.props.castToJoinedTable();
+    const table = jc.castToJoinedTable();
     const result = this.jcMap.get(table.keyPath);
     if (result) {
       return result;
@@ -196,11 +196,11 @@ export class SelectProcessor {
 
     let localTableName: string;
     const { srcColumn, destColumn } = table;
-    if (srcColumn.props.isJoinedColumn()) {
+    if (srcColumn.isJoinedColumn()) {
       const srcIO = this.handleJoinRecursively(srcColumn);
       localTableName = srcIO.tableAlias;
     } else {
-      localTableName = srcColumn.props.tableName();
+      localTableName = srcColumn.tableName();
     }
 
     const joinIO = new io.JoinIO(
@@ -208,7 +208,7 @@ export class SelectProcessor {
       this.nextJoinedTableName(),
       localTableName,
       srcColumn,
-      destColumn.props.tableName(),
+      destColumn.tableName(),
       destColumn,
     );
     this.jcMap.set(table.keyPath, joinIO);
@@ -223,20 +223,18 @@ export class SelectProcessor {
   ): ColumnSQL {
     const { dialect } = this;
     const e = dialect.escape;
-    const inputName = alias || this.nextSelectedName(col.props.inputName());
+    const inputName = alias || this.nextSelectedName(col.inputName());
     // Check for joined column
-    if (col.props.isJoinedColumn()) {
+    if (col.isJoinedColumn()) {
       const joinIO = this.handleJoinRecursively(col);
-      if (!col.props.mirroredColumn) {
+      if (!col.mirroredColumn) {
         throw new Error(
           `Internal error: unexpected empty mirroredColumn in joined column "${toTypeString(
             col,
           )}"`,
         );
       }
-      const sql = `${e(joinIO.tableAlias)}.${e(
-        col.props.mirroredColumn.props.name,
-      )}`;
+      const sql = `${e(joinIO.tableAlias)}.${e(col.mirroredColumn.name)}`;
       return new ColumnSQL(sql, inputName, alias);
     } else {
       // Normal column
@@ -245,7 +243,7 @@ export class SelectProcessor {
         // Each column must have a prefix in a SQL with joins
         sql = `${e(io.MainAlias)}.`;
       }
-      sql += e(col.props.name);
+      sql += e(col.name);
       return new ColumnSQL(sql, inputName, alias);
     }
   }
