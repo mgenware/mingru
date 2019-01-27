@@ -38,7 +38,7 @@ export class SelectedColumnIO {
   constructor(
     public selectedColumn: dd.SelectActionColumns,
     public valueSQL: string,
-    public intputName: string, // Equals to alias if it's not null
+    public inputName: string, // Equals to alias if it's not null
     public alias: string | null,
     public column: dd.Column | null,
     public resultType: dd.ColumnType | null, // Available when we can guess the evaluated type, e.g. an expression containing only one column or SQLCall
@@ -49,7 +49,7 @@ export class SelectedColumnIO {
 
   sql(dialect: Dialect, hasJoin: boolean): string {
     if (hasJoin || this.alias) {
-      return dialect.as(this.valueSQL, this.alias || this.intputName);
+      return dialect.as(this.valueSQL, this.alias || this.inputName);
     }
     return this.valueSQL;
   }
