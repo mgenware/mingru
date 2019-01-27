@@ -1,7 +1,7 @@
 package da
 
 import (
-	"github.com/mgenware/go-packagex/database/sqlx"
+	"github.com/mgenware/go-packagex/dbx"
 )
 
 // TableTypePost ...
@@ -21,7 +21,7 @@ type SelectPostInfoResult struct {
 }
 
 // SelectPostInfo ...
-func (da *TableTypePost) SelectPostInfo(queryable sqlx.Queryable) (*SelectPostInfoResult, error) {
+func (da *TableTypePost) SelectPostInfo(queryable dbx.Queryable) (*SelectPostInfoResult, error) {
 	result := &SelectPostInfoResult{}
 	err := queryable.QueryRow("SELECT `_main`.`id` AS `postID`, `_main`.`content` AS `postContent`, `_join_1`.`url_name` AS `postUserUrlName` FROM `post` AS `_main` INNER JOIN `user` AS `_join_1` ON `_join_1`.`id` = `_main`.`user_id`").Scan(&result.PostID, &result.PostContent, &result.PostUserUrlName)
 	if err != nil {
@@ -31,13 +31,13 @@ func (da *TableTypePost) SelectPostInfo(queryable sqlx.Queryable) (*SelectPostIn
 }
 
 // UpdateContent ...
-func (da *TableTypePost) UpdateContent(queryable sqlx.Queryable, postContent string) (int, error) {
+func (da *TableTypePost) UpdateContent(queryable dbx.Queryable, postContent string) (int, error) {
 	result, err := queryable.Exec("UPDATE `post` SET `content` = `content` = ?", postContent)
-	return sqlx.GetRowsAffectedIntWithError(result, err)
+	return dbx.GetRowsAffectedIntWithError(result, err)
 }
 
 // DeleteByID ...
-func (da *TableTypePost) DeleteByID(queryable sqlx.Queryable, postID uint64) error {
+func (da *TableTypePost) DeleteByID(queryable dbx.Queryable, postID uint64) error {
 	result, err := queryable.Exec("DELETE FROM `post` WHERE `id` = ?", postID)
-	return sqlx.CheckOneRowAffectedWithError(result, err)
+	return dbx.CheckOneRowAffectedWithError(result, err)
 }

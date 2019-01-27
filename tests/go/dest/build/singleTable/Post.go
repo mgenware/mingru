@@ -1,7 +1,7 @@
 package da
 
 import (
-	"github.com/mgenware/go-packagex/database/sqlx"
+	"github.com/mgenware/go-packagex/dbx"
 )
 
 // TableTypePost ...
@@ -20,7 +20,7 @@ type SelectPostTitleResult struct {
 }
 
 // SelectPostTitle ...
-func (da *TableTypePost) SelectPostTitle(queryable sqlx.Queryable) (*SelectPostTitleResult, error) {
+func (da *TableTypePost) SelectPostTitle(queryable dbx.Queryable) (*SelectPostTitleResult, error) {
 	result := &SelectPostTitleResult{}
 	err := queryable.QueryRow("SELECT `id`, `title` FROM `post`").Scan(&result.PostID, &result.PostTitle)
 	if err != nil {
@@ -38,7 +38,7 @@ type SelectPostInfoResult struct {
 }
 
 // SelectPostInfo ...
-func (da *TableTypePost) SelectPostInfo(queryable sqlx.Queryable) (*SelectPostInfoResult, error) {
+func (da *TableTypePost) SelectPostInfo(queryable dbx.Queryable) (*SelectPostInfoResult, error) {
 	result := &SelectPostInfoResult{}
 	err := queryable.QueryRow("SELECT `_main`.`id` AS `postID`, `_main`.`title` AS `postTitle`, `_main`.`user_id` AS `postUserID`, `_join_1`.`url_name` AS `postUserUrlName` FROM `post` AS `_main` INNER JOIN `user` AS `_join_1` ON `_join_1`.`id` = `_main`.`user_id`").Scan(&result.PostID, &result.PostTitle, &result.PostUserID, &result.PostUserUrlName)
 	if err != nil {
@@ -48,13 +48,13 @@ func (da *TableTypePost) SelectPostInfo(queryable sqlx.Queryable) (*SelectPostIn
 }
 
 // UpdatePostTitle ...
-func (da *TableTypePost) UpdatePostTitle(queryable sqlx.Queryable, postTitle string) (int, error) {
+func (da *TableTypePost) UpdatePostTitle(queryable dbx.Queryable, postTitle string) (int, error) {
 	result, err := queryable.Exec("UPDATE `post` SET `title` = ?", postTitle)
-	return sqlx.GetRowsAffectedIntWithError(result, err)
+	return dbx.GetRowsAffectedIntWithError(result, err)
 }
 
 // DeleteByID ...
-func (da *TableTypePost) DeleteByID(queryable sqlx.Queryable, postID uint64) error {
+func (da *TableTypePost) DeleteByID(queryable dbx.Queryable, postID uint64) error {
 	result, err := queryable.Exec("DELETE FROM `post` WHERE `id` = ?", postID)
-	return sqlx.CheckOneRowAffectedWithError(result, err)
+	return dbx.CheckOneRowAffectedWithError(result, err)
 }

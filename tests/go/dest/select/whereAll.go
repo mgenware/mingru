@@ -1,4 +1,4 @@
-import "github.com/mgenware/go-packagex/database/sqlx"
+import "github.com/mgenware/go-packagex/dbx"
 
 // SelectTResult ...
 type SelectTResult struct {
@@ -7,7 +7,7 @@ type SelectTResult struct {
 }
 
 // SelectT ...
-func (da *TableTypePost) SelectT(queryable sqlx.Queryable, postID uint64) ([]*SelectTResult, error) {
+func (da *TableTypePost) SelectT(queryable dbx.Queryable, postID uint64) ([]*SelectTResult, error) {
 	rows, err := queryable.Query("SELECT `id`, `title` FROM `post` WHERE `id` = ?", postID)
 	if err != nil {
 		return nil, err

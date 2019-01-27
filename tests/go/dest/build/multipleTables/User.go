@@ -1,7 +1,7 @@
 package da
 
 import (
-	"github.com/mgenware/go-packagex/database/sqlx"
+	"github.com/mgenware/go-packagex/dbx"
 )
 
 // TableTypeUser ...
@@ -20,7 +20,7 @@ type SelectProfileResult struct {
 }
 
 // SelectProfile ...
-func (da *TableTypeUser) SelectProfile(queryable sqlx.Queryable) (*SelectProfileResult, error) {
+func (da *TableTypeUser) SelectProfile(queryable dbx.Queryable) (*SelectProfileResult, error) {
 	result := &SelectProfileResult{}
 	err := queryable.QueryRow("SELECT `display_name`, `sig` FROM `user`").Scan(&result.UserDisplayName, &result.UserSig)
 	if err != nil {
@@ -30,13 +30,13 @@ func (da *TableTypeUser) SelectProfile(queryable sqlx.Queryable) (*SelectProfile
 }
 
 // UpdateProfile ...
-func (da *TableTypeUser) UpdateProfile(queryable sqlx.Queryable, userSig *string) (int, error) {
+func (da *TableTypeUser) UpdateProfile(queryable dbx.Queryable, userSig *string) (int, error) {
 	result, err := queryable.Exec("UPDATE `user` SET `sig` = ?", userSig)
-	return sqlx.GetRowsAffectedIntWithError(result, err)
+	return dbx.GetRowsAffectedIntWithError(result, err)
 }
 
 // DeleteByID ...
-func (da *TableTypeUser) DeleteByID(queryable sqlx.Queryable, userID uint64) error {
+func (da *TableTypeUser) DeleteByID(queryable dbx.Queryable, userID uint64) error {
 	result, err := queryable.Exec("DELETE FROM `user` WHERE `id` = ?", userID)
-	return sqlx.CheckOneRowAffectedWithError(result, err)
+	return dbx.CheckOneRowAffectedWithError(result, err)
 }

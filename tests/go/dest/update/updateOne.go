@@ -1,7 +1,7 @@
-import "github.com/mgenware/go-packagex/database/sqlx"
+import "github.com/mgenware/go-packagex/dbx"
 
 // UpdateT ...
-func (da *TableTypePost) UpdateT(queryable sqlx.Queryable, postID uint64, postContent string) error {
+func (da *TableTypePost) UpdateT(queryable dbx.Queryable, postID uint64, postContent string) error {
 	result, err := queryable.Exec("UPDATE `post` SET `title` = \"haha\", `content` = ?, `cmt_c` = `cmt_c` + 1 WHERE `id` = ?", postContent, postID)
-	return sqlx.CheckOneRowAffectedWithError(result, err)
+	return dbx.CheckOneRowAffectedWithError(result, err)
 }

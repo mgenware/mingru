@@ -15,7 +15,7 @@ export async function testBuildAsync(
   const content = await mfs.readFileAsync(path, 'utf8');
   const builder = new mr.Builder(ta, dialect);
   let actual = builder.build(true, true);
-  actual = `import "github.com/mgenware/go-packagex/database/sqlx"\n${actual}`;
+  actual = `import "github.com/mgenware/go-packagex/dbx"\n${actual}`;
   expect(actual).toBe(content);
   return builder;
 }

@@ -1,7 +1,7 @@
-import "github.com/mgenware/go-packagex/database/sqlx"
+import "github.com/mgenware/go-packagex/dbx"
 
 // DeleteT ...
-func (da *TableTypePost) DeleteT(queryable sqlx.Queryable, postID uint64) (int, error) {
+func (da *TableTypePost) DeleteT(queryable dbx.Queryable, postID uint64) (int, error) {
 	result, err := queryable.Exec("DELETE FROM `post` WHERE `id` = ?", postID)
-	return sqlx.GetRowsAffectedIntWithError(result, err)
+	return dbx.GetRowsAffectedIntWithError(result, err)
 }

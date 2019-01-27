@@ -3,7 +3,7 @@ package da
 import (
 	"time"
 
-	"github.com/mgenware/go-packagex/database/sqlx"
+	"github.com/mgenware/go-packagex/dbx"
 )
 
 // TableTypePost ...
@@ -16,7 +16,7 @@ var Post = &TableTypePost{}
 // ------------ Actions ------------
 
 // DeleteTimes ...
-func (da *TableTypePost) DeleteTimes(queryable sqlx.Queryable, postNDatetime *time.Time, postNDate *time.Time) error {
+func (da *TableTypePost) DeleteTimes(queryable dbx.Queryable, postNDatetime *time.Time, postNDate *time.Time) error {
 	result, err := queryable.Exec("DELETE FROM `post` WHERE `n_datetime` = ? OR `n_date` = ?", postNDatetime, postNDate)
-	return sqlx.CheckOneRowAffectedWithError(result, err)
+	return dbx.CheckOneRowAffectedWithError(result, err)
 }

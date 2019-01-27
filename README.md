@@ -75,7 +75,7 @@ type SelectUserProfileResult struct {
 	UserSig  *string
 }
 // SelectUserProfile ...
-func (da *TableTypeUser) SelectUserProfile(queryable sqlx.Queryable, userID uint64) (*SelectUserProfileResult, error)
+func (da *TableTypeUser) SelectUserProfile(queryable dbx.Queryable, userID uint64) (*SelectUserProfileResult, error)
 // SelectAllUserProfilesResult ...
 type SelectAllUserProfilesResult struct {
 	UserID   uint64
@@ -83,13 +83,13 @@ type SelectAllUserProfilesResult struct {
 	UserSig  *string
 }
 // SelectAllUserProfiles ...
-func (da *TableTypeUser) SelectAllUserProfiles(queryable sqlx.Queryable) ([]*SelectAllUserProfilesResult, error)
+func (da *TableTypeUser) SelectAllUserProfiles(queryable dbx.Queryable) ([]*SelectAllUserProfilesResult, error)
 // SelectSig ...
-func (da *TableTypeUser) SelectSig(queryable sqlx.Queryable, userID uint64) (*string, error)
+func (da *TableTypeUser) SelectSig(queryable dbx.Queryable, userID uint64) (*string, error)
 // UpdateUserProfile ...
-func (da *TableTypeUser) UpdateUserProfile(queryable sqlx.Queryable, userID uint64, userName string, userSig *string) error
+func (da *TableTypeUser) UpdateUserProfile(queryable dbx.Queryable, userID uint64, userName string, userSig *string) error
 // DeleteByID ...
-func (da *TableTypeUser) DeleteByID(queryable sqlx.Queryable, userID uint64) error
+func (da *TableTypeUser) DeleteByID(queryable dbx.Queryable, userID uint64) error
 ```
 
 ### Step 4: Using the generated code in your Go project

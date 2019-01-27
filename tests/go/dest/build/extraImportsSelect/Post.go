@@ -3,7 +3,7 @@ package da
 import (
 	"time"
 
-	"github.com/mgenware/go-packagex/database/sqlx"
+	"github.com/mgenware/go-packagex/dbx"
 )
 
 // TableTypePost ...
@@ -22,7 +22,7 @@ type SelectTimesResult struct {
 }
 
 // SelectTimes ...
-func (da *TableTypePost) SelectTimes(queryable sqlx.Queryable) ([]*SelectTimesResult, error) {
+func (da *TableTypePost) SelectTimes(queryable dbx.Queryable) ([]*SelectTimesResult, error) {
 	rows, err := queryable.Query("SELECT `datetime`, `date` FROM `post`")
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ type SelectNullableTimesResult struct {
 }
 
 // SelectNullableTimes ...
-func (da *TableTypePost) SelectNullableTimes(queryable sqlx.Queryable) ([]*SelectNullableTimesResult, error) {
+func (da *TableTypePost) SelectNullableTimes(queryable dbx.Queryable) ([]*SelectNullableTimesResult, error) {
 	rows, err := queryable.Query("SELECT `n_datetime`, `n_date` FROM `post`")
 	if err != nil {
 		return nil, err

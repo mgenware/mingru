@@ -1,7 +1,7 @@
 package haha
 
 import (
-	"github.com/mgenware/go-packagex/database/sqlx"
+	"github.com/mgenware/go-packagex/dbx"
 )
 
 // TableTypePost ...
@@ -20,7 +20,7 @@ type SelectPostTitleResult struct {
 }
 
 // SelectPostTitle ...
-func (da *TableTypePost) SelectPostTitle(queryable sqlx.Queryable) (*SelectPostTitleResult, error) {
+func (da *TableTypePost) SelectPostTitle(queryable dbx.Queryable) (*SelectPostTitleResult, error) {
 	result := &SelectPostTitleResult{}
 	err := queryable.QueryRow("SELECT `id`, `title` FROM `post`").Scan(&result.PostID, &result.PostTitle)
 	if err != nil {
