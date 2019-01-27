@@ -47,8 +47,8 @@ test('DT', () => {
 });
 
 test('DT (not supported)', () => {
-  const props = new dd.ColumnType(['_HAHA_']);
-  expect(() => dialect.goType(props)).toThrow('"_HAHA_"');
+  const props = new dd.ColumnType(['type1', 'type2']);
+  expect(() => dialect.goType(props)).toThrow('type2');
 });
 
 test('as', () => {

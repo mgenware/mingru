@@ -99,12 +99,9 @@ export default class MySQL extends Dialect {
   }
 
   private inspectTypes(types: string[]): string {
-    if (types instanceof Set === false) {
-      return toTypeString(types);
-    }
     if (!types) {
       return 'null';
     }
-    return `"${[...types].join(', ')}"`;
+    return `[${types.join()}]`;
   }
 }
