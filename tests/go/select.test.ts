@@ -129,7 +129,7 @@ test('Calculated columns', async () => {
     new dd.CalculatedColumn(
       dd.sql`xyz(${post.n_date})`,
       'b',
-      new dd.ColumnType(dd.dt.datetime),
+      new dd.ColumnType(dd.dt.smallInt),
     ),
     new dd.CalculatedColumn(
       dd.sql`xyz(${post.user_id.join(user).display_name})`,
@@ -137,7 +137,6 @@ test('Calculated columns', async () => {
       new dd.ColumnType(dd.dt.int),
     ),
     // Auto detected types
-    new dd.CalculatedColumn(post.n_date, 'd'),
     new dd.CalculatedColumn(post.user_id.join(user).display_name, 'e'),
     new dd.CalculatedColumn(dd.count(post.datetime), 'count'),
   );
