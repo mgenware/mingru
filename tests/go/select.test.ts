@@ -120,27 +120,26 @@ test('Calculated columns', async () => {
   const ta = newTA(post);
   ta.select(
     't',
+    // User specified types
     new dd.CalculatedColumn(
       dd.sql`raw expr`,
       'a',
-      new dd.ColumnType([dd.dt.bigInt]),
+      new dd.ColumnType(dd.dt.bigInt),
     ),
-    new dd.CalculatedColumn(dd.sql`xyz(${post.n_date})`, 'b'),
+    new dd.CalculatedColumn(
+      dd.sql`xyz(${post.n_date})`,
+      'b',
+      new dd.ColumnType(dd.dt.datetime),
+    ),
     new dd.CalculatedColumn(
       dd.sql`xyz(${post.user_id.join(user).display_name})`,
       'c',
+      new dd.ColumnType(dd.dt.int),
     ),
+    // Auto detected types
     new dd.CalculatedColumn(post.n_date, 'd'),
     new dd.CalculatedColumn(post.user_id.join(user).display_name, 'e'),
+    new dd.CalculatedColumn(dd.count(post.datetime), 'count'),
   );
   await testBuildAsync(ta, 'select/calculatedColumns');
-});
-
-test('Calculated columns (count)', async () => {
-  const ta = newTA(post);
-  ta.select(
-    't',
-    dd.select(dd.count(post.user_id.join(user).display_name), 'e'),
-  );
-  await testBuildAsync(ta, 'select/calculatedColumnsCount');
 });

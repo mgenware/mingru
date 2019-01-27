@@ -41,7 +41,7 @@ export class SelectedColumnIO {
     public intputName: string, // Equals to alias if it's not null
     public alias: string | null,
     public column: dd.Column | null,
-    public externalType: dd.ColumnType | null,
+    public resultType: dd.ColumnType | null, // Available when we can guess the evaluated type, e.g. an expression containing only one column or SQLCall
   ) {
     throwIfFalsy(selectedColumn, 'selectedColumn');
     throwIfFalsy(valueSQL, 'valueSQL');
@@ -54,18 +54,18 @@ export class SelectedColumnIO {
     return this.valueSQL;
   }
 
-  getColumnType(): dd.ColumnType {
-    if (this.column) {
-      return this.column.type;
+  getResultType(): dd.ColumnType {
+    if (this.resultType) {
+      return this.resultType;
     }
-    if (!this.externalType) {
+    if (!this.selectedColumn.type) {
       throw new Error(
-        `No column props found on column "${toTypeString(
+        `No column type found on column "${toTypeString(
           this.selectedColumn,
-        )}", SQL: "${this.sql}"`,
+        )}", SQL: "${this.valueSQL.toString()}"`,
       );
     }
-    return this.externalType;
+    return this.selectedColumn.type;
   }
 }
 

@@ -4,6 +4,7 @@ import Dialect from '../dialect';
 import * as io from './io';
 import NameContext from '../lib/nameContext';
 import toTypeString from 'to-type-string';
+import { ColumnType } from 'dd-models';
 
 // Used internally in SelectProcessor to save an SQL of a selected column associated with an alias.
 class ColumnSQL {
@@ -83,23 +84,43 @@ export class SelectProcessor {
   // Calculated column = sc is a calculated column
   private fetchColumns(
     sCol: dd.SelectActionColumns,
-  ): [dd.Column | null, dd.CalculatedColumn | null] {
+  ): [dd.Column | null, dd.CalculatedColumn | null, dd.ColumnType | null] {
     // If user uses a column directly
     if (sCol instanceof dd.Column) {
-      return [sCol as dd.Column, null];
+      const col = sCol as dd.Column;
+      return [col, null, col.type];
     }
     // If user uses a renamed column (a CalculatedColumn with core = column, and selectedName = newName)
     const cc = sCol as dd.CalculatedColumn;
     if (cc.core instanceof dd.Column) {
-      return [cc.core as dd.Column, cc];
+      const col = cc.core as dd.Column;
+      return [col, cc, col.type];
     }
     // Now, CalculatedColumn.core is an SQL expression. Try to extract a column from it.
-    for (const element of (cc.core as dd.SQL).elements) {
+    let column: dd.Column | null = null;
+    const sql = cc.core as dd.SQL;
+    for (const element of sql.elements) {
       if (element.type === dd.SQLElementType.column) {
-        return [element.toColumn(), cc];
+        column = element.toColumn();
+        break;
       }
     }
-    return [null, cc];
+    // In this case, we can guess the result type in case user specified type is not present
+    const resultType = this.guessColumnType(sql);
+    return [column, cc, resultType];
+  }
+
+  private guessColumnType(sql: dd.SQL): ColumnType | null {
+    if (sql.elements.length === 1) {
+      const first = sql.elements[0];
+      if (first.type === dd.SQLElementType.column) {
+        return first.toColumn().type;
+      }
+      if (first.type === dd.SQLElementType.call) {
+        return first.toCall().returnType;
+      }
+    }
+    return null;
   }
 
   private handleSelectedColumn(
@@ -107,7 +128,7 @@ export class SelectProcessor {
     hasJoin: boolean,
   ): io.SelectedColumnIO {
     const { dialect } = this;
-    const [col, calcCol] = this.fetchColumns(sCol);
+    const [col, calcCol, resultType] = this.fetchColumns(sCol);
     if (col) {
       const colSQL = this.handleColumn(
         col,
@@ -122,7 +143,7 @@ export class SelectProcessor {
           colSQL.inputName,
           colSQL.alias,
           col,
-          null,
+          resultType,
         );
       }
 
@@ -135,7 +156,7 @@ export class SelectProcessor {
           colSQL.inputName,
           calcCol.selectedName,
           col,
-          null,
+          resultType,
         );
       }
 
@@ -157,7 +178,7 @@ export class SelectProcessor {
         colSQL.inputName,
         calcCol.selectedName || colSQL.alias,
         col,
-        null,
+        resultType,
       );
     } else {
       if (!calcCol) {
@@ -169,7 +190,8 @@ export class SelectProcessor {
       const rawExpr = calcCol.core as dd.SQL;
       const exprIO = new io.SQLIO(rawExpr);
       const sql = exprIO.toSQL(dialect);
-      if (!sCol.type) {
+      // If we cannot guess the result type (`resultType` is null), and neither does a user specified type (`type` is null) exists, we throw cuz we cannot determine the result type
+      if (!resultType && !sCol.type) {
         throw new Error(
           `Column type is required for a "${toTypeString(
             sCol,
@@ -182,7 +204,7 @@ export class SelectProcessor {
         calcCol.selectedName, // inputName
         calcCol.selectedName, // alias
         null,
-        sCol.type,
+        resultType,
       );
     }
   }

@@ -20,7 +20,7 @@
     "t": "jest --verbose=false",
     "build": "yarn test",
     "compile": "yarn run pi && tsc -b tests",
-    "dev": "yarn run clean && yarn run pi && tsc -b tests -w",
+    "dev": "yarn run clean && tsc -b tests -w",
     "prepublishOnly": "yarn run test",
     "lint": "tslint --project tsconfig.json --config tslint.json",
     "clean": "rimraf dist && rimraf dist_tests",
@@ -32,6 +32,9 @@
   "prettier": {
     "singleQuote": true,
     "trailingComma": "all"
+  },
+  "jest": {
+    "moduleFileExtensions": ["js"]
   },
   "devDependencies": {
     "@types/jest": "^23.3.13",

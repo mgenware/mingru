@@ -138,7 +138,7 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
     const selectedFields: go.InstanceVariable[] = [];
     for (const col of io.cols) {
       const fieldName = col.intputName;
-      const fieldType = dialect.goType(col.getColumnType());
+      const fieldType = dialect.goType(col.getResultType());
       this.addTypeBridge(fieldType);
       selectedFields.push(new go.InstanceVariable(fieldName, fieldType.type));
     }
