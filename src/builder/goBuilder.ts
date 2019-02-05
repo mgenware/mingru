@@ -34,14 +34,14 @@ function joinParams(arr: string[]): string {
   return arr.join(', ');
 }
 
-export default class GoBuilder {
+export default class GoBuilder<T extends dd.Table> {
   tableClassObject: string;
   tableClassType: string;
   sysImports = new Set<string>();
   userImports = new Set<string>();
 
   constructor(
-    public tableActions: dd.TableActionCollection,
+    public tableActions: dd.TableActionCollection<T>,
     public dialect: Dialect,
     public packageName = 'da',
   ) {
@@ -83,7 +83,7 @@ export default class GoBuilder {
       code += '\n';
       switch (action.type) {
         case dd.ActionType.select: {
-          const io = toSelectIO(action as dd.SelectAction, dialect);
+          const io = toSelectIO(action as dd.SelectAction<T>, dialect);
           code += this.select(io);
           break;
         }
@@ -125,7 +125,7 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
     return code;
   }
 
-  private select(io: SelectIO): string {
+  private select(io: SelectIO<T>): string {
     const { dialect, tableClassType } = this;
     const { action } = io;
 

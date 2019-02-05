@@ -4,7 +4,6 @@ import Dialect from '../dialect';
 import * as io from './io';
 import NameContext from '../lib/nameContext';
 import toTypeString from 'to-type-string';
-import { ColumnType } from 'dd-models';
 
 // Used internally in SelectProcessor to save an SQL of a selected column associated with an alias.
 class ColumnSQL {
@@ -15,7 +14,7 @@ class ColumnSQL {
   ) {}
 }
 
-export class SelectProcessor {
+export class SelectProcessor<T extends dd.Table> {
   // Tracks all processed joins, when processing a new join, we can reuse the JoinIO if it already exists
   jcMap = new Map<string, io.JoinIO>();
   // All processed joins
@@ -25,12 +24,12 @@ export class SelectProcessor {
   // Make sure all selected column names are unique
   selectedNameContext = new NameContext();
 
-  constructor(public action: dd.SelectAction, public dialect: Dialect) {
+  constructor(public action: dd.SelectAction<T>, public dialect: Dialect) {
     throwIfFalsy(action, 'action');
     throwIfFalsy(dialect, 'dialect');
   }
 
-  convert(): io.SelectIO {
+  convert(): io.SelectIO<T> {
     let sql = 'SELECT ';
     const { action } = this;
     const { columns, table: from } = action;
@@ -97,20 +96,14 @@ export class SelectProcessor {
       return [col, cc, col.type];
     }
     // Now, CalculatedColumn.core is an SQL expression. Try to extract a column from it.
-    let column: dd.Column | null = null;
     const sql = cc.core as dd.SQL;
-    for (const element of sql.elements) {
-      if (element.type === dd.SQLElementType.column) {
-        column = element.toColumn();
-        break;
-      }
-    }
+    const column = sql.findColumn();
     // In this case, we can guess the result type in case user specified type is not present
     const resultType = this.guessColumnType(sql);
     return [column, cc, resultType];
   }
 
-  private guessColumnType(sql: dd.SQL): ColumnType | null {
+  private guessColumnType(sql: dd.SQL): dd.ColumnType | null {
     if (sql.elements.length === 1) {
       const first = sql.elements[0];
       if (first.type === dd.SQLElementType.column) {
@@ -280,10 +273,10 @@ export class SelectProcessor {
   }
 }
 
-export default function selectIO(
-  action: dd.SelectAction,
+export default function selectIO<T extends dd.Table>(
+  action: dd.SelectAction<T>,
   dialect: Dialect,
-): io.SelectIO {
+): io.SelectIO<T> {
   const pro = new SelectProcessor(action, dialect);
   return pro.convert();
 }

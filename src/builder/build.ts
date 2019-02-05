@@ -11,7 +11,7 @@ export interface IBuildOption {
 }
 
 export default async function buildAsync(
-  tableActionList: dd.TableActionCollection[],
+  tableActionList: Array<dd.TableActionCollection<dd.Table>>,
   dialect: Dialect,
   outDir: string,
   options?: IBuildOption,

@@ -8,7 +8,7 @@ const dialect = new mr.MySQL();
 const DestDataDir = 'tests/go/dest';
 
 export async function testBuildAsync(
-  ta: dd.TableActionCollection,
+  ta: dd.TableActionCollection<dd.Table>,
   path: string,
 ) {
   path = nodepath.resolve(nodepath.join(DestDataDir, path + '.go'));
@@ -21,7 +21,7 @@ export async function testBuildAsync(
 }
 
 export async function testBuildFullAsync(
-  ta: dd.TableActionCollection,
+  ta: dd.TableActionCollection<dd.Table>,
   path: string,
 ) {
   path = nodepath.resolve(nodepath.join(DestDataDir, path + '.go'));
@@ -38,7 +38,7 @@ export async function testFilesAsync(a: string, b: string) {
 }
 
 export async function testBuildToDirAsync(
-  taList: dd.TableActionCollection[],
+  taList: Array<dd.TableActionCollection<dd.Table>>,
   files: string[],
   expectedDir: string,
   option?: mr.IBuildOption,
@@ -57,6 +57,6 @@ export async function testBuildToDirAsync(
   }
 }
 
-export function newTA(table: dd.Table): dd.TableActionCollection {
+export function newTA(table: dd.Table): dd.TableActionCollection<dd.Table> {
   return dd.actions(table);
 }

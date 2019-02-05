@@ -13,25 +13,25 @@ export class InsertProcessor {
   convert(): io.InsertIO {
     let sql = 'INSERT INTO ';
     const { action, dialect } = this;
-    const { columnValueMap, withDefaults, table } = action;
+    const { setters: actionSetters, withDefaults, table } = action;
 
     // table
     const tableIO = this.handleFrom(table);
     sql += tableIO.sql;
 
     // setters
-    if (!columnValueMap.size) {
+    if (!actionSetters.size) {
       throw new Error(
         `The insert action "${action}" does not have any setters`,
       );
     }
-    const setters = io.SetterIO.fromMap(columnValueMap);
+    const setters = io.SetterIO.fromMap(actionSetters);
 
     // Try to set the remaining columns to defaults if withDefaults is true
     if (withDefaults) {
       dd.enumerateColumns(table, col => {
         // If already set, return
-        if (columnValueMap.get(col)) {
+        if (actionSetters.get(col)) {
           return;
         }
 

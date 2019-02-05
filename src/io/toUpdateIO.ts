@@ -23,8 +23,8 @@ export class UpdateProcessor {
     }
 
     // setters
-    const { columnValueMap } = action;
-    if (!columnValueMap.size) {
+    const { setters } = action;
+    if (!setters.size) {
       throw new Error(
         `The update action "${action}" does not have any setters`,
       );
@@ -34,7 +34,7 @@ export class UpdateProcessor {
     const fromIO = this.handleFrom(table);
     sql += `${fromIO.sql} SET `;
 
-    const setterIOs = io.SetterIO.fromMap(columnValueMap);
+    const setterIOs = io.SetterIO.fromMap(setters);
     sql += setterIOs
       .map(s => `${dialect.escapeColumn(s.col)} = ${s.sql.toSQL(dialect)}`)
       .join(', ');

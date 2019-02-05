@@ -138,9 +138,9 @@ export class SetterIO {
   }
 }
 
-export class SelectIO {
+export class SelectIO<T extends dd.Table> {
   constructor(
-    public action: dd.SelectAction,
+    public action: dd.SelectAction<T>,
     public sql: string,
     public cols: SelectedColumnIO[],
     public from: TableIO,
