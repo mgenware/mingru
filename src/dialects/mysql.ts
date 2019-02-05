@@ -61,6 +61,8 @@ export default class MySQL extends Dialect {
         return 'CURTIME';
       case dd.SQLCallType.count:
         return 'COUNT';
+      case dd.SQLCallType.coalesce:
+        return 'COALESCE';
       default:
         throw new Error(`Unsupported type of call "${type}"`);
     }

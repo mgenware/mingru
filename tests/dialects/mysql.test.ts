@@ -61,6 +61,7 @@ test('SQL calls', () => {
   expect(t(dd.SQLCallType.timeNow)).toBe('CURTIME');
   expect(t(dd.SQLCallType.datetimeNow)).toBe('NOW');
   expect(t(dd.SQLCallType.count)).toBe('COUNT');
+  expect(t(dd.SQLCallType.coalesce)).toBe('COALESCE');
 });
 
 test('translate', () => {

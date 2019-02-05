@@ -4,7 +4,7 @@ export class InstanceVariable {
   name: string;
 
   constructor(name: string, public type: string) {
-    this.name = dd.utils.capitalizeColumnName(name);
+    this.name = dd.utils.capitalizeColumnName(dd.utils.toCamelCase(name));
   }
 }
 
