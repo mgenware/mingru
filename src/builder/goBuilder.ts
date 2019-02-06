@@ -129,9 +129,13 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
     const { dialect, tableClassType } = this;
     const { action } = io;
 
+    const tableName = dd.utils.toPascalCase(action.table.__name);
     const actionName = action.name;
     // The struct type of result, null if isSelectField is true
-    const resultType = action.isSelectField ? '' : `${actionName}Result`;
+    // Table name is prefixed cuz class names are in global namespace (unlike instance methods which is scoped to a class)
+    const resultType = action.isSelectField
+      ? ''
+      : `${tableName}Table${actionName}Result`;
 
     let code = '';
     // Collect selected columns info, used to generate result type and params passed to `Scan`.
