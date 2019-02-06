@@ -16,7 +16,7 @@ test('Single table', async () => {
   );
   ta.updateAll('PostTitle').set(post.title, dd.sql`${dd.input(post.title)}`);
   ta.deleteOne('ByID').where(dd.sql`${post.id} = ${dd.input(post.id)}`);
-  await testBuildToDirAsync([ta], ['Post'], 'singleTable');
+  await testBuildToDirAsync([ta], ['post'], 'singleTable');
 });
 
 test('Multiple tables', async () => {
@@ -37,13 +37,13 @@ test('Multiple tables', async () => {
 
   const actions = [userTA, postTA];
 
-  await testBuildToDirAsync(actions, ['Post', 'User'], 'multipleTables');
+  await testBuildToDirAsync(actions, ['post', 'User'], 'multipleTables');
 });
 
 test('Custom package name', async () => {
   const ta = newTA(post);
   ta.select('PostTitle', post.id, post.title);
-  await testBuildToDirAsync([ta], ['Post'], 'customPackageName', {
+  await testBuildToDirAsync([ta], ['post'], 'customPackageName', {
     packageName: 'haha',
   });
 });
@@ -51,5 +51,5 @@ test('Custom package name', async () => {
 test('Table name', async () => {
   const ta = newTA(postReply);
   ta.insertOne('PostReply').setInputs(postReply.to_user_id, postReply.user_id);
-  await testBuildToDirAsync([ta], ['PostCmtRpl'], 'tableName');
+  await testBuildToDirAsync([ta], ['post_cmt_rpl'], 'tableName');
 });

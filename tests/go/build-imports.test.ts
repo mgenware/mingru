@@ -6,7 +6,7 @@ test('Select', async () => {
   const ta = newTA(post);
   ta.selectAll('Times', post.datetime, post.date);
   ta.selectAll('NullableTimes', post.n_datetime, post.n_date);
-  await testBuildToDirAsync([ta], ['Post'], 'extraImportsSelect');
+  await testBuildToDirAsync([ta], ['post'], 'extraImportsSelect');
 });
 
 test('Select (where)', async () => {
@@ -16,20 +16,20 @@ test('Select (where)', async () => {
       post.n_date
     } = ${post.n_date.toInput()}`,
   );
-  await testBuildToDirAsync([ta], ['Post'], 'extraImportsSelectWhere');
+  await testBuildToDirAsync([ta], ['post'], 'extraImportsSelectWhere');
 });
 
 test('Select field', async () => {
   const ta = newTA(post);
   ta.selectField('Time', post.n_datetime);
-  await testBuildToDirAsync([ta], ['Post'], 'extraImportsSelectField');
+  await testBuildToDirAsync([ta], ['post'], 'extraImportsSelectField');
 });
 
 test('Update', async () => {
   const ta = newTA(post);
   ta.updateAll('Times').setInputs(post.datetime, post.date);
   ta.updateAll('NullableTimes').setInputs(post.n_datetime, post.n_date);
-  await testBuildToDirAsync([ta], ['Post'], 'extraImportsUpdate');
+  await testBuildToDirAsync([ta], ['post'], 'extraImportsUpdate');
 });
 
 test('Update (where)', async () => {
@@ -41,7 +41,7 @@ test('Update (where)', async () => {
         post.n_date
       } = ${post.n_date.toInput()}`,
     );
-  await testBuildToDirAsync([ta], ['Post'], 'extraImportsUpdateWhere');
+  await testBuildToDirAsync([ta], ['post'], 'extraImportsUpdateWhere');
 });
 
 test('Delete (where)', async () => {
@@ -51,11 +51,11 @@ test('Delete (where)', async () => {
       post.n_date
     } = ${post.n_date.toInput()}`,
   );
-  await testBuildToDirAsync([ta], ['Post'], 'extraImportsDeleteWhere');
+  await testBuildToDirAsync([ta], ['post'], 'extraImportsDeleteWhere');
 });
 
 test('Insert', async () => {
   const ta = newTA(post);
   ta.insertOne('Times').setInputs(post.datetime, post.n_datetime);
-  await testBuildToDirAsync([ta], ['Post'], 'extraImportsInsert');
+  await testBuildToDirAsync([ta], ['post'], 'extraImportsInsert');
 });
