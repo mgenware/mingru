@@ -65,7 +65,8 @@ export class SelectProcessor<T extends dd.Table> {
     let whereIO: io.SQLIO | null = null;
     if (action.whereSQL) {
       whereIO = new io.SQLIO(action.whereSQL);
-      sql += ' WHERE ' + whereIO.toSQL(this.dialect);
+      sql +=
+        ' WHERE ' + whereIO.toSQL(this.dialect, this.getJoinPathToNameMap());
     }
 
     return new io.SelectIO(this.action, sql, colIOs, fromIO, whereIO);
@@ -159,7 +160,7 @@ export class SelectProcessor<T extends dd.Table> {
       const exprIO = new io.SQLIO(rawExpr);
       // Replace the column with SQL only (no alias).
       // Imagine new CalculatedColumn(dd.sql`COUNT(${col.as('a')})`, 'b'), the embedded column would be interpreted as `'col' AS 'a'`, but it really should be `COUNT('col') AS 'b'`, so this step replace the embedded with the SQL without its attached alias.
-      const sql = exprIO.toSQL(dialect, element => {
+      const sql = exprIO.toSQL(dialect, undefined, element => {
         if (element.value === col) {
           return colSQL.sql;
         }

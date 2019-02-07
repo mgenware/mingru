@@ -73,7 +73,7 @@ export class SQLIO {
 
   toSQL(
     dialect: Dialect,
-    columnPrefix: Map<string, string> | null,
+    columnPrefixMap?: Map<string, string>,
     cb?: (element: dd.SQLElement) => string | null,
   ): string {
     const { sql } = this;
@@ -85,7 +85,7 @@ export class SQLIO {
       }
       res +=
         cbRes === null
-          ? this.handleElement(element, dialect, columnPrefix)
+          ? this.handleElement(element, dialect, columnPrefixMap)
           : cbRes;
     }
     return res;
@@ -94,7 +94,7 @@ export class SQLIO {
   private handleElement(
     element: dd.SQLElement,
     dialect: Dialect,
-    columnPrefix: Map<string, string> | null,
+    columnPrefixMap: Map<string, string> | undefined,
   ): string {
     switch (element.type) {
       case dd.SQLElementType.rawString: {
@@ -104,10 +104,24 @@ export class SQLIO {
       case dd.SQLElementType.column: {
         const col = element.toColumn();
         let value = dialect.escapeColumn(col);
-        if (columnPrefix) {
-          co;
-          const table = columnPrefix.get();
+        if (columnPrefixMap) {
+          // if columnPrefix is present, we'll add a table alias to this column
+          if (col.isJoinedColumn()) {
+            const jt = col.table as dd.JoinedTable;
+            const joinPath = jt.keyPath;
+            const resolvedAlias = columnPrefixMap.get(joinPath);
+            if (!resolvedAlias) {
+              throw new Error(
+                `Column path ”${joinPath}“ does not have a associated value in column alias map`,
+              );
+            }
+            value = `${dialect.escape(resolvedAlias)}.${value}`;
+          } else {
+            // Use table name as alias
+            value = `${dialect.escape(col.tableName())}.${value}`;
+          }
         }
+        return value;
       }
 
       case dd.SQLElementType.call: {
