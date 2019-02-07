@@ -73,6 +73,7 @@ export class SQLIO {
 
   toSQL(
     dialect: Dialect,
+    columnPrefix: Map<string, string> | null,
     cb?: (element: dd.SQLElement) => string | null,
   ): string {
     const { sql } = this;
@@ -82,19 +83,31 @@ export class SQLIO {
       if (cb) {
         cbRes = cb(element);
       }
-      res += cbRes === null ? this.handleElement(element, dialect) : cbRes;
+      res +=
+        cbRes === null
+          ? this.handleElement(element, dialect, columnPrefix)
+          : cbRes;
     }
     return res;
   }
 
-  private handleElement(element: dd.SQLElement, dialect: Dialect): string {
+  private handleElement(
+    element: dd.SQLElement,
+    dialect: Dialect,
+    columnPrefix: Map<string, string> | null,
+  ): string {
     switch (element.type) {
       case dd.SQLElementType.rawString: {
         return element.toRawString();
       }
 
       case dd.SQLElementType.column: {
-        return dialect.escapeColumn(element.toColumn());
+        const col = element.toColumn();
+        let value = dialect.escapeColumn(col);
+        if (columnPrefix) {
+          co;
+          const table = columnPrefix.get();
+        }
       }
 
       case dd.SQLElementType.call: {

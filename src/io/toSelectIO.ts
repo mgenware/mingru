@@ -15,7 +15,7 @@ class ColumnSQL {
 }
 
 export class SelectProcessor<T extends dd.Table> {
-  // Tracks all processed joins, when processing a new join, we can reuse the JoinIO if it already exists
+  // Tracks all processed joins, when processing a new join, we can reuse the JoinIO if it already exists (K: join path, V: JoinIO)
   jcMap = new Map<string, io.JoinIO>();
   // All processed joins
   joins: io.JoinIO[] = [];
@@ -271,6 +271,14 @@ export class SelectProcessor<T extends dd.Table> {
 
   private nextSelectedName(name: string): string {
     return this.selectedNameContext.get(name);
+  }
+
+  private getJoinPathToNameMap(): Map<string, string> {
+    const map = new Map<string, string>();
+    this.jcMap.forEach((value, key) => {
+      map.set(key, value.tableAlias);
+    });
+    return map;
   }
 }
 
