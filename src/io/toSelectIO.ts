@@ -53,13 +53,6 @@ export class SelectProcessor<T extends dd.Table> {
     const fromIO = this.handleFrom(from as dd.Table, hasJoin);
     sql += ' ' + fromIO.sql;
 
-    // where
-    let whereIO: io.SQLIO | null = null;
-    if (action.whereSQL) {
-      whereIO = new io.SQLIO(action.whereSQL);
-      sql += ' WHERE ' + whereIO.toSQL(this.dialect);
-    }
-
     // joins
     if (hasJoin) {
       for (const join of this.joins) {
@@ -67,6 +60,14 @@ export class SelectProcessor<T extends dd.Table> {
         sql += ' ' + joinSQL;
       }
     }
+
+    // where
+    let whereIO: io.SQLIO | null = null;
+    if (action.whereSQL) {
+      whereIO = new io.SQLIO(action.whereSQL);
+      sql += ' WHERE ' + whereIO.toSQL(this.dialect);
+    }
+
     return new io.SelectIO(this.action, sql, colIOs, fromIO, whereIO);
   }
 
@@ -74,7 +75,7 @@ export class SelectProcessor<T extends dd.Table> {
     const e = this.dialect.escape;
     let sql = `FROM ${e(table.__name)}`;
     if (hasJoin) {
-      sql += ' AS ' + e(io.MainAlias);
+      sql += ' AS ' + e(table.__name);
     }
     return new io.TableIO(table, sql);
   }
@@ -256,7 +257,7 @@ export class SelectProcessor<T extends dd.Table> {
       let sql = '';
       if (hasJoin) {
         // Each column must have a prefix in a SQL with joins
-        sql = `${e(io.MainAlias)}.`;
+        sql = `${e(col.tableName())}.`;
       }
       sql += e(col.name);
       return new ColumnSQL(sql, inputName, alias);
@@ -265,7 +266,7 @@ export class SelectProcessor<T extends dd.Table> {
 
   private nextJoinedTableName(): string {
     this.joinedTableCounter++;
-    return `_join_${this.joinedTableCounter}`;
+    return `join_${this.joinedTableCounter}`;
   }
 
   private nextSelectedName(name: string): string {
