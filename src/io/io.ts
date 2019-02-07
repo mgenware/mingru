@@ -3,8 +3,6 @@ import Dialect from '../dialect';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import toTypeString from 'to-type-string';
 
-export const MainAlias = '_main';
-
 export class JoinIO {
   constructor(
     public path: string,
@@ -18,10 +16,9 @@ export class JoinIO {
 
   toSQL(dialect: Dialect): string {
     const e = dialect.escape;
-    // Note that localTable is not used here, we use MainAlias as local table alias
     return `INNER JOIN ${e(this.remoteTable)} AS ${e(this.tableAlias)} ON ${e(
       this.tableAlias,
-    )}.${e(this.remoteColumn.name)} = ${e(MainAlias)}.${e(
+    )}.${e(this.remoteColumn.name)} = ${e(this.localColumn.tableName())}.${e(
       this.localColumn.name,
     )}`;
   }

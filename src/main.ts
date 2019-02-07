@@ -10,7 +10,6 @@ import toDeleteIO from './io/toDeleteIO';
 import {
   SelectedColumnIO,
   JoinIO,
-  MainAlias,
   SQLIO,
   SetterIO,
   TableIO,
@@ -24,7 +23,6 @@ import {
 export class io {
   static SelectedColumnIO = SelectedColumnIO;
   static JoinIO = JoinIO;
-  static MainAlias = MainAlias;
   static SQLIO = SQLIO;
   static SetterIO = SetterIO;
   static TableIO = TableIO;
