@@ -13,15 +13,15 @@ var User = &TableTypeUser{}
 
 // ------------ Actions ------------
 
-// SelectProfileResult ...
-type SelectProfileResult struct {
+// UserTableSelectProfileResult ...
+type UserTableSelectProfileResult struct {
 	UserDisplayName string
 	UserSig         *string
 }
 
 // SelectProfile ...
-func (da *TableTypeUser) SelectProfile(queryable dbx.Queryable) (*SelectProfileResult, error) {
-	result := &SelectProfileResult{}
+func (da *TableTypeUser) SelectProfile(queryable dbx.Queryable) (*UserTableSelectProfileResult, error) {
+	result := &UserTableSelectProfileResult{}
 	err := queryable.QueryRow("SELECT `display_name`, `sig` FROM `user`").Scan(&result.UserDisplayName, &result.UserSig)
 	if err != nil {
 		return nil, err

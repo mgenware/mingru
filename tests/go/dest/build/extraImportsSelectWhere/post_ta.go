@@ -15,22 +15,22 @@ var Post = &TableTypePost{}
 
 // ------------ Actions ------------
 
-// SelectTimesResult ...
-type SelectTimesResult struct {
+// PostTableSelectTimesResult ...
+type PostTableSelectTimesResult struct {
 	PostDatetime time.Time
 	PostDate     time.Time
 }
 
 // SelectTimes ...
-func (da *TableTypePost) SelectTimes(queryable dbx.Queryable, postNDatetime *time.Time, postNDate *time.Time) ([]*SelectTimesResult, error) {
+func (da *TableTypePost) SelectTimes(queryable dbx.Queryable, postNDatetime *time.Time, postNDate *time.Time) ([]*PostTableSelectTimesResult, error) {
 	rows, err := queryable.Query("SELECT `datetime`, `date` FROM `post` WHERE `n_datetime` = ? OR `n_date` = ?", postNDatetime, postNDate)
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*SelectTimesResult, 0)
+	result := make([]*PostTableSelectTimesResult, 0)
 	defer rows.Close()
 	for rows.Next() {
-		item := &SelectTimesResult{}
+		item := &PostTableSelectTimesResult{}
 		err = rows.Scan(&item.PostDatetime, &item.PostDate)
 		if err != nil {
 			return nil, err

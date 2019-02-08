@@ -19,7 +19,7 @@ test('Multiple actions', async () => {
     post.user_id,
     post.user_id.join(user).url_name,
   );
-  ta.update('PostTitle').set(post.title, dd.sql`${dd.input(post.title)}`);
+  ta.updateAll('PostTitle').set(post.title, dd.sql`${dd.input(post.title)}`);
   ta.delete('ByID').where(dd.sql`${post.id} = ${dd.input(post.id)}`);
   await testBuildFullAsync(ta, 'goBuilder/multipleActions');
 });

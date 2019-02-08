@@ -13,15 +13,15 @@ var Post = &TableTypePost{}
 
 // ------------ Actions ------------
 
-// SelectTResult ...
-type SelectTResult struct {
+// PostTableSelectTResult ...
+type PostTableSelectTResult struct {
 	PostID    uint64
 	PostTitle string
 }
 
 // SelectT ...
-func (da *TableTypePost) SelectT(queryable dbx.Queryable) (*SelectTResult, error) {
-	result := &SelectTResult{}
+func (da *TableTypePost) SelectT(queryable dbx.Queryable) (*PostTableSelectTResult, error) {
+	result := &PostTableSelectTResult{}
 	err := queryable.QueryRow("SELECT `id`, `title` FROM `post`").Scan(&result.PostID, &result.PostTitle)
 	if err != nil {
 		return nil, err

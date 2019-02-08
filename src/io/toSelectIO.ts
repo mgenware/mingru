@@ -66,7 +66,8 @@ export class SelectProcessor<T extends dd.Table> {
     if (action.whereSQL) {
       whereIO = new io.SQLIO(action.whereSQL);
       sql +=
-        ' WHERE ' + whereIO.toSQL(this.dialect, this.getJoinPathToNameMap());
+        ' WHERE ' +
+        whereIO.toSQL(this.dialect, this.getJoinPathToNameMap() || undefined);
     }
 
     return new io.SelectIO(this.action, sql, colIOs, fromIO, whereIO);
@@ -274,12 +275,12 @@ export class SelectProcessor<T extends dd.Table> {
     return this.selectedNameContext.get(name);
   }
 
-  private getJoinPathToNameMap(): Map<string, string> {
+  private getJoinPathToNameMap(): Map<string, string> | null {
     const map = new Map<string, string>();
     this.jcMap.forEach((value, key) => {
       map.set(key, value.tableAlias);
     });
-    return map;
+    return map.size ? map : null;
   }
 }
 
