@@ -2,8 +2,8 @@ import "github.com/mgenware/go-packagex/dbx"
 
 // PostTableSelectTResult ...
 type PostTableSelectTResult struct {
-	PostID    uint64
-	PostTitle string
+	ID    uint64
+	Title string
 }
 
 // SelectT ...

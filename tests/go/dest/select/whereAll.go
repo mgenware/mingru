@@ -2,13 +2,13 @@ import "github.com/mgenware/go-packagex/dbx"
 
 // PostTableSelectTResult ...
 type PostTableSelectTResult struct {
-	PostID    uint64
-	PostTitle string
+	ID    uint64
+	Title string
 }
 
 // SelectT ...
-func (da *TableTypePost) SelectT(queryable dbx.Queryable, postID uint64) ([]*PostTableSelectTResult, error) {
-	rows, err := queryable.Query("SELECT `id`, `title` FROM `post` WHERE `id` = ?", postID)
+func (da *TableTypePost) SelectT(queryable dbx.Queryable, id uint64) ([]*PostTableSelectTResult, error) {
+	rows, err := queryable.Query("SELECT `id`, `title` FROM `post` WHERE `id` = ?", id)
 	if err != nil {
 		return nil, err
 	}
@@ -16,7 +16,7 @@ func (da *TableTypePost) SelectT(queryable dbx.Queryable, postID uint64) ([]*Pos
 	defer rows.Close()
 	for rows.Next() {
 		item := &PostTableSelectTResult{}
-		err = rows.Scan(&item.PostID, &item.PostTitle)
+		err = rows.Scan(&item.ID, &item.Title)
 		if err != nil {
 			return nil, err
 		}

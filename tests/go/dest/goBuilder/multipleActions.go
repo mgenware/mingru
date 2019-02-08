@@ -15,8 +15,8 @@ var Post = &TableTypePost{}
 
 // PostTableSelectPostTitleResult ...
 type PostTableSelectPostTitleResult struct {
-	PostID    uint64
-	PostTitle string
+	ID    uint64
+	Title string
 }
 
 // SelectPostTitle ...
