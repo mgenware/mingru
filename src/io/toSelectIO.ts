@@ -87,6 +87,9 @@ export class SelectProcessor<T extends dd.Table> {
   private fetchColumns(
     sCol: dd.SelectActionColumns,
   ): [dd.Column | null, dd.CalculatedColumn | null, dd.ColumnType | null] {
+    if (!sCol) {
+      throw new Error(`Unexpected null column at fetchColumns`);
+    }
     // If user uses a column directly
     if (sCol instanceof dd.Column) {
       const col = sCol as dd.Column;
