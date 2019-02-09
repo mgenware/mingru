@@ -9,7 +9,7 @@ type PostTableSelectTResult struct {
 // SelectT ...
 func (da *TableTypePost) SelectT(queryable dbx.Queryable) (*PostTableSelectTResult, error) {
 	result := &PostTableSelectTResult{}
-	err := queryable.QueryRow("SELECT `id`, `title` FROM `post` WHERE `title` = \"\\\\a\\\"\"").Scan(&result.PostID, &result.PostTitle)
+	err := queryable.QueryRow("SELECT `id`, `title` FROM `post` WHERE `title` = \"\\\\a\\\"\"").Scan(&result.ID, &result.Title)
 	if err != nil {
 		return nil, err
 	}

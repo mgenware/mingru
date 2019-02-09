@@ -17,13 +17,13 @@ var Post = &TableTypePost{}
 
 // PostTableSelectTimesResult ...
 type PostTableSelectTimesResult struct {
-	PostDatetime time.Time
-	PostDate     time.Time
+	Datetime time.Time
+	Date     time.Time
 }
 
 // SelectTimes ...
-func (da *TableTypePost) SelectTimes(queryable dbx.Queryable, postNDatetime *time.Time, postNDate *time.Time) ([]*PostTableSelectTimesResult, error) {
-	rows, err := queryable.Query("SELECT `datetime`, `date` FROM `post` WHERE `n_datetime` = ? OR `n_date` = ?", postNDatetime, postNDate)
+func (da *TableTypePost) SelectTimes(queryable dbx.Queryable, nDatetime *time.Time, nDate *time.Time) ([]*PostTableSelectTimesResult, error) {
+	rows, err := queryable.Query("SELECT `datetime`, `date` FROM `post` WHERE `n_datetime` = ? OR `n_date` = ?", nDatetime, nDate)
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +31,7 @@ func (da *TableTypePost) SelectTimes(queryable dbx.Queryable, postNDatetime *tim
 	defer rows.Close()
 	for rows.Next() {
 		item := &PostTableSelectTimesResult{}
-		err = rows.Scan(&item.PostDatetime, &item.PostDate)
+		err = rows.Scan(&item.Datetime, &item.Date)
 		if err != nil {
 			return nil, err
 		}

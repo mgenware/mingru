@@ -17,8 +17,8 @@ var Post = &TableTypePost{}
 
 // PostTableSelectTimesResult ...
 type PostTableSelectTimesResult struct {
-	PostDatetime time.Time
-	PostDate     time.Time
+	Datetime time.Time
+	Date     time.Time
 }
 
 // SelectTimes ...
@@ -31,7 +31,7 @@ func (da *TableTypePost) SelectTimes(queryable dbx.Queryable) ([]*PostTableSelec
 	defer rows.Close()
 	for rows.Next() {
 		item := &PostTableSelectTimesResult{}
-		err = rows.Scan(&item.PostDatetime, &item.PostDate)
+		err = rows.Scan(&item.Datetime, &item.Date)
 		if err != nil {
 			return nil, err
 		}
@@ -46,8 +46,8 @@ func (da *TableTypePost) SelectTimes(queryable dbx.Queryable) ([]*PostTableSelec
 
 // PostTableSelectNullableTimesResult ...
 type PostTableSelectNullableTimesResult struct {
-	PostNDatetime *time.Time
-	PostNDate     *time.Time
+	NDatetime *time.Time
+	NDate     *time.Time
 }
 
 // SelectNullableTimes ...
@@ -60,7 +60,7 @@ func (da *TableTypePost) SelectNullableTimes(queryable dbx.Queryable) ([]*PostTa
 	defer rows.Close()
 	for rows.Next() {
 		item := &PostTableSelectNullableTimesResult{}
-		err = rows.Scan(&item.PostNDatetime, &item.PostNDate)
+		err = rows.Scan(&item.NDatetime, &item.NDate)
 		if err != nil {
 			return nil, err
 		}

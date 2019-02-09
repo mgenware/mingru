@@ -22,7 +22,7 @@ type PostTableSelectPostTitleResult struct {
 // SelectPostTitle ...
 func (da *TableTypePost) SelectPostTitle(queryable dbx.Queryable) (*PostTableSelectPostTitleResult, error) {
 	result := &PostTableSelectPostTitleResult{}
-	err := queryable.QueryRow("SELECT `id`, `title` FROM `post`").Scan(&result.PostID, &result.PostTitle)
+	err := queryable.QueryRow("SELECT `id`, `title` FROM `post`").Scan(&result.ID, &result.Title)
 	if err != nil {
 		return nil, err
 	}
@@ -31,16 +31,16 @@ func (da *TableTypePost) SelectPostTitle(queryable dbx.Queryable) (*PostTableSel
 
 // PostTableSelectPostInfoResult ...
 type PostTableSelectPostInfoResult struct {
-	PostID          uint64
-	PostTitle       string
-	PostUserID      uint64
-	PostUserUrlName string
+	ID          uint64
+	Title       string
+	UserID      uint64
+	UserUrlName string
 }
 
 // SelectPostInfo ...
 func (da *TableTypePost) SelectPostInfo(queryable dbx.Queryable) (*PostTableSelectPostInfoResult, error) {
 	result := &PostTableSelectPostInfoResult{}
-	err := queryable.QueryRow("SELECT `post`.`id` AS `postID`, `post`.`title` AS `postTitle`, `post`.`user_id` AS `postUserID`, `join_1`.`url_name` AS `postUserUrlName` FROM `post` AS `post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `post`.`user_id`").Scan(&result.PostID, &result.PostTitle, &result.PostUserID, &result.PostUserUrlName)
+	err := queryable.QueryRow("SELECT `post`.`id` AS `id`, `post`.`title` AS `title`, `post`.`user_id` AS `userID`, `join_1`.`url_name` AS `userUrlName` FROM `post` AS `post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `post`.`user_id`").Scan(&result.ID, &result.Title, &result.UserID, &result.UserUrlName)
 	if err != nil {
 		return nil, err
 	}
@@ -48,13 +48,13 @@ func (da *TableTypePost) SelectPostInfo(queryable dbx.Queryable) (*PostTableSele
 }
 
 // UpdatePostTitle ...
-func (da *TableTypePost) UpdatePostTitle(queryable dbx.Queryable, postTitle string) (int, error) {
-	result, err := queryable.Exec("UPDATE `post` SET `title` = ?", postTitle)
+func (da *TableTypePost) UpdatePostTitle(queryable dbx.Queryable, title string) (int, error) {
+	result, err := queryable.Exec("UPDATE `post` SET `title` = ?", title)
 	return dbx.GetRowsAffectedIntWithError(result, err)
 }
 
 // DeleteByID ...
-func (da *TableTypePost) DeleteByID(queryable dbx.Queryable, postID uint64) error {
-	result, err := queryable.Exec("DELETE FROM `post` WHERE `id` = ?", postID)
+func (da *TableTypePost) DeleteByID(queryable dbx.Queryable, id uint64) error {
+	result, err := queryable.Exec("DELETE FROM `post` WHERE `id` = ?", id)
 	return dbx.CheckOneRowAffectedWithError(result, err)
 }

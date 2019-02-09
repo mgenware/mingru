@@ -16,7 +16,7 @@ var Post = &TableTypePost{}
 // ------------ Actions ------------
 
 // DeleteTimes ...
-func (da *TableTypePost) DeleteTimes(queryable dbx.Queryable, postNDatetime *time.Time, postNDate *time.Time) error {
-	result, err := queryable.Exec("DELETE FROM `post` WHERE `n_datetime` = ? OR `n_date` = ?", postNDatetime, postNDate)
+func (da *TableTypePost) DeleteTimes(queryable dbx.Queryable, nDatetime *time.Time, nDate *time.Time) error {
+	result, err := queryable.Exec("DELETE FROM `post` WHERE `n_datetime` = ? OR `n_date` = ?", nDatetime, nDate)
 	return dbx.CheckOneRowAffectedWithError(result, err)
 }

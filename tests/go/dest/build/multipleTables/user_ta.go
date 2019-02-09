@@ -15,14 +15,14 @@ var User = &TableTypeUser{}
 
 // UserTableSelectProfileResult ...
 type UserTableSelectProfileResult struct {
-	UserDisplayName string
-	UserSig         *string
+	DisplayName string
+	Sig         *string
 }
 
 // SelectProfile ...
 func (da *TableTypeUser) SelectProfile(queryable dbx.Queryable) (*UserTableSelectProfileResult, error) {
 	result := &UserTableSelectProfileResult{}
-	err := queryable.QueryRow("SELECT `display_name`, `sig` FROM `user`").Scan(&result.UserDisplayName, &result.UserSig)
+	err := queryable.QueryRow("SELECT `display_name`, `sig` FROM `user`").Scan(&result.DisplayName, &result.Sig)
 	if err != nil {
 		return nil, err
 	}
@@ -30,13 +30,13 @@ func (da *TableTypeUser) SelectProfile(queryable dbx.Queryable) (*UserTableSelec
 }
 
 // UpdateProfile ...
-func (da *TableTypeUser) UpdateProfile(queryable dbx.Queryable, userSig *string) (int, error) {
-	result, err := queryable.Exec("UPDATE `user` SET `sig` = ?", userSig)
+func (da *TableTypeUser) UpdateProfile(queryable dbx.Queryable, sig *string) (int, error) {
+	result, err := queryable.Exec("UPDATE `user` SET `sig` = ?", sig)
 	return dbx.GetRowsAffectedIntWithError(result, err)
 }
 
 // DeleteByID ...
-func (da *TableTypeUser) DeleteByID(queryable dbx.Queryable, userID uint64) error {
-	result, err := queryable.Exec("DELETE FROM `user` WHERE `id` = ?", userID)
+func (da *TableTypeUser) DeleteByID(queryable dbx.Queryable, id uint64) error {
+	result, err := queryable.Exec("DELETE FROM `user` WHERE `id` = ?", id)
 	return dbx.CheckOneRowAffectedWithError(result, err)
 }
