@@ -142,3 +142,16 @@ test('Calculated columns', async () => {
   );
   await testBuildAsync(ta, 'select/calculatedColumns');
 });
+
+test('Modified DB names', async () => {
+  const ta = newTA(post);
+  ta.select(
+    't',
+    post.cmtCount,
+    post.m_user_id,
+    post.m_user_id.as('a'),
+    post.m_user_id.join(user).follower_count,
+    post.m_user_id.join(user).follower_count.as('fc'),
+  );
+  await testBuildAsync(ta, 'select/modifiedDBNames');
+});

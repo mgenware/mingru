@@ -6,6 +6,7 @@ class User extends dd.Table {
   display_name = dd.varChar(100);
   sig = dd.varChar(300).nullable;
   age = dd.int(0);
+  follower_count = dd.varChar(300).setDBName('follower_c').nullable;
 }
 
 export default dd.table(User);

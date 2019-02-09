@@ -19,7 +19,7 @@ export class JoinIO {
     return `INNER JOIN ${e(this.remoteTable)} AS ${e(this.tableAlias)} ON ${e(
       this.tableAlias,
     )}.${e(this.remoteColumn.name)} = ${e(this.localColumn.tableName())}.${e(
-      this.localColumn.name,
+      this.localColumn.getDBName(),
     )}`;
   }
 }

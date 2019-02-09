@@ -32,7 +32,7 @@ export class Dialect {
   }
 
   escapeColumn(column: dd.Column): string {
-    return this.escape(column.dbName || column.name);
+    return this.escape(column.getDBName());
   }
 
   escapeTable(table: dd.Table): string {

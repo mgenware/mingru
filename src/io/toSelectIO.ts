@@ -252,7 +252,9 @@ export class SelectProcessor<T extends dd.Table> {
           )}"`,
         );
       }
-      const sql = `${e(joinIO.tableAlias)}.${e(col.mirroredColumn.name)}`;
+      const sql = `${e(joinIO.tableAlias)}.${e(
+        col.mirroredColumn.getDBName(),
+      )}`;
       return new ColumnSQL(sql, inputName, alias);
     } else {
       // Normal column
@@ -261,7 +263,7 @@ export class SelectProcessor<T extends dd.Table> {
         // Each column must have a prefix in a SQL with joins
         sql = `${e(col.tableName())}.`;
       }
-      sql += e(col.name);
+      sql += e(col.getDBName());
       return new ColumnSQL(sql, inputName, alias);
     }
   }

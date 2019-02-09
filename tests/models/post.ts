@@ -15,6 +15,7 @@ class Post extends dd.Table {
   n_datetime = dd.datetime().nullable;
   n_date = dd.date().nullable;
   n_time = dd.time().nullable;
+  m_user_id = dd.fk(user.id).setDBName('my_user_id');
 }
 
 export default dd.table(Post);
