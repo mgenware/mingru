@@ -29,6 +29,8 @@ const FileHeader = ` /${'*'.repeat(HeaderRepeatCount)}
  ${'*'.repeat(HeaderRepeatCount)}/
 
 `;
+const Limit = 'limit';
+const Offset = 'offset';
 
 function joinParams(arr: string[]): string {
   return arr.join(', ');
@@ -131,6 +133,7 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
 
     const tableName = dd.utils.toPascalCase(action.table.__name);
     const actionName = action.name;
+    const { pagination } = action;
     // The struct type of result, null if isSelectField is true
     // Table name is prefixed cuz class names are in global namespace (unlike instance methods which is scoped to a class)
     const resultType = action.isSelectField
@@ -167,13 +170,21 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
     const varContext = new NameContext();
     const whereVars = this.whereToVars(io.where, varContext);
     funcParamsCode += whereVars.map(p => `, ${p.name} ${p.type}`).join('');
-    const queryParamsCode = whereVars.map(p => `, ${p.name}`).join('');
+    let queryParamsCode = whereVars.map(p => `, ${p.name}`).join('');
+    if (pagination) {
+      funcParamsCode += `, ${Limit}, ${Offset} int`;
+      queryParamsCode += `, ${Limit}, ${Offset}`;
+    }
 
     code += `// ${actionName} ...
 func (da *${tableClassType}) ${actionName}(${funcParamsCode}) (${returnType}, error) {
 `;
 
-    const sqlLiteral = go.makeStringLiteral(io.sql);
+    let sqlSource = io.sql;
+    if (pagination) {
+      sqlSource += ' LIMIT ? OFFSET ?';
+    }
+    const sqlLiteral = go.makeStringLiteral(sqlSource);
     if (action.isSelectAll) {
       const scanParams = joinParams(selectedFields.map(p => `&item.${p.name}`));
       // > call Query
@@ -181,7 +192,7 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) (${returnType}, er
 \tif err != nil {
 \t\treturn nil, err
 \t}
-\t${go.makeArray(ResultVar, `*${resultType}`)}
+\t${go.makeArray(ResultVar, `*${resultType}`, 0, pagination ? Limit : 0)}
 \tdefer rows.Close()
 \tfor rows.Next() {
 \t\t${go.pointerVar('item', resultType)}

@@ -37,9 +37,15 @@ export function pointerVar(name: string, typeName: string): string {
   return `${name} := ${newPointer(typeName)}`;
 }
 
-export function makeArray(name: string, type: string, size?: number): string {
+export function makeArray(
+  name: string,
+  type: string,
+  size?: number | string,
+  capacity?: number | string,
+): string {
   size = size || 0;
-  return `${name} := make([]${type}, ${size})`;
+  const capacityParam = capacity ? `, ${capacity}` : '';
+  return `${name} := make([]${type}, ${size}${capacityParam})`;
 }
 
 function formatImports(imports: string[]): string {

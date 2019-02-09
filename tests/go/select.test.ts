@@ -155,3 +155,17 @@ test('Modified DB names', async () => {
   );
   await testBuildAsync(ta, 'select/modifiedDBNames');
 });
+
+test('Select all, paginate', async () => {
+  const ta = newTA(post);
+  ta.selectAll('t', post.id, post.title).paginate();
+  await testBuildAsync(ta, 'select/selectAllPaginate');
+});
+
+test('Select all, paginate, where', async () => {
+  const ta = newTA(post);
+  ta.selectAll('t', post.id, post.title)
+    .byID()
+    .paginate();
+  await testBuildAsync(ta, 'select/selectAllPaginateWithWhere');
+});
