@@ -26,7 +26,7 @@ test('Update with where', async () => {
   const ta = newTA(post);
   ta.updateOne('t')
     .set(post.title, dd.sql`"haha"`)
-    .set(post.content, post.content.toInputSQL())
+    .set(post.content, post.content.toInput())
     .where(
       dd.sql`${post.id} = ${post.id.toInput()} AND ${
         post.content
@@ -39,14 +39,14 @@ test('Update with non-input setters', async () => {
   const ta = newTA(post);
   ta.updateAll('t')
     .set(post.title, dd.sql`"haha"`)
-    .set(post.content, post.content.toInputSQL());
+    .set(post.content, post.content.toInput());
   await testBuildAsync(ta, 'update/updateWithNonInputSetters');
 });
 
 test('Duplicate names in where and setters', async () => {
   const ta = newTA(post);
   ta.update('t')
-    .set(post.content, post.content.toInputSQL())
+    .set(post.content, post.content.toInput())
     .set(post.title, dd.sql`"haha"`)
     .where(
       dd.sql`${post.title.isEqualToInput()} AND ${post.content.isEqualToInput()}`,
