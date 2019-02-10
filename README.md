@@ -7,12 +7,10 @@
 
 Convert [dd-models](https://github.com/mgenware/dd-models) to Go code.
 
-An SQL builder for Go (golang), leveraging the power of TypeScript to define and convert database models to Go code.
-
 Goals:
 
-* Builds code with raw SQL, provides **low performance overhead at runtime**
-* Must be **strongly typed**
+* **No performance penalty at runtime**, SQL builder, not an ORM
+* **Strongly typed models** models are defined in TypeScript not Go
 * Currently focuses on Go and MySQL/MariaDB
 
 See [FAQ](#faq) below for more details.
