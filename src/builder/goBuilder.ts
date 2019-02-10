@@ -208,6 +208,7 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) (${returnType}, er
 \t}
 `;
     } else {
+      // select/selectField
       let scanParams: string;
       // Declare the result variable
       if (action.isSelectField) {
@@ -219,12 +220,14 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) (${returnType}, er
         );
         code += `\t${go.pointerVar(ResultVar, resultType)}`;
       }
+      // For selectField, we return the default value, for select, return nil
+      const resultVarOnError = action.isSelectField ? 'result' : 'nil';
       code += '\n';
 
       // Call query func
       code += `\terr := ${QueryableParam}.QueryRow(${sqlLiteral}${queryParamsCode}).Scan(${scanParams})
 \tif err != nil {
-\t\treturn nil, err
+\t\treturn ${resultVarOnError}, err
 \t}
 `;
     }
