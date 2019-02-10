@@ -10,7 +10,7 @@ Convert [dd-models](https://github.com/mgenware/dd-models) to Go code.
 Goals:
 
 * **No performance penalty at runtime**, SQL builder, not an ORM
-* **Strongly typed models** models are defined in TypeScript not Go
+* **Strongly typed models**, models are defined in TypeScript not Go
 * Currently focuses on Go and MySQL/MariaDB
 
 See [FAQ](#faq) below for more details.
