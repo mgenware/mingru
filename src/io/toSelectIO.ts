@@ -15,6 +15,7 @@ class ColumnSQL {
 }
 
 export class SelectProcessor<T extends dd.Table> {
+  hasJoin = false;
   // Tracks all processed joins, when processing a new join, we can reuse the JoinIO if it already exists (K: join path, V: JoinIO)
   jcMap = new Map<string, io.JoinIO>();
   // All processed joins
@@ -33,7 +34,7 @@ export class SelectProcessor<T extends dd.Table> {
     let sql = 'SELECT ';
     const { action } = this;
     const { columns, table: from } = action;
-    const hasJoin = columns.some(sCol => {
+    this.hasJoin = columns.some(sCol => {
       const [col] = this.fetchColumns(sCol);
       if (col && col.isJoinedColumn()) {
         return true;
@@ -44,17 +45,17 @@ export class SelectProcessor<T extends dd.Table> {
     // Process columns
     const colIOs: io.SelectedColumnIO[] = [];
     for (const col of columns) {
-      const selIO = this.handleSelectedColumn(col, hasJoin);
+      const selIO = this.handleSelectedColumn(col);
       colIOs.push(selIO);
     }
-    sql += colIOs.map(c => c.sql(this.dialect, hasJoin)).join(', ');
+    sql += colIOs.map(c => c.sql(this.dialect, this.hasJoin)).join(', ');
 
     // from
-    const fromIO = this.handleFrom(from as dd.Table, hasJoin);
+    const fromIO = this.handleFrom(from as dd.Table);
     sql += ' ' + fromIO.sql;
 
     // joins
-    if (hasJoin) {
+    if (this.hasJoin) {
       for (const join of this.joins) {
         const joinSQL = join.toSQL(this.dialect);
         sql += ' ' + joinSQL;
@@ -67,16 +68,43 @@ export class SelectProcessor<T extends dd.Table> {
       whereIO = new io.SQLIO(action.whereSQL);
       sql +=
         ' WHERE ' +
-        whereIO.toSQL(this.dialect, this.getJoinPathToNameMap() || undefined);
+        whereIO.toSQL(this.dialect, ele => {
+          if (ele.type === dd.SQLElementType.column) {
+            return this.getColumnSQL(ele.toColumn());
+          }
+          return null;
+        });
     }
 
     return new io.SelectIO(this.action, sql, colIOs, fromIO, whereIO);
   }
 
-  private handleFrom(table: dd.Table, hasJoin: boolean): io.TableIO {
+  private getColumnSQL(col: dd.Column): string {
+    const { dialect } = this;
+    let value = dialect.escapeColumn(col);
+    if (this.hasJoin) {
+      if (col.isJoinedColumn()) {
+        const jt = col.table as dd.JoinedTable;
+        const joinPath = jt.keyPath;
+        const join = this.jcMap.get(joinPath);
+        if (!join) {
+          throw new Error(
+            `Column path ”${joinPath}“ does not have a associated value in column alias map`,
+          );
+        }
+        value = `${dialect.escape(join.tableAlias)}.${value}`;
+      } else {
+        // Use table name as alias
+        value = `${dialect.escape(col.tableName())}.${value}`;
+      }
+    }
+    return value;
+  }
+
+  private handleFrom(table: dd.Table): io.TableIO {
     const e = this.dialect.escape;
     let sql = `FROM ${e(table.__name)}`;
-    if (hasJoin) {
+    if (this.hasJoin) {
       sql += ' AS ' + e(table.__name);
     }
     return new io.TableIO(table, sql);
@@ -124,14 +152,12 @@ export class SelectProcessor<T extends dd.Table> {
 
   private handleSelectedColumn(
     sCol: dd.SelectActionColumns,
-    hasJoin: boolean,
   ): io.SelectedColumnIO {
     const { dialect } = this;
     const [col, calcCol, resultType] = this.fetchColumns(sCol);
     if (col) {
       const colSQL = this.handleColumn(
         col,
-        hasJoin,
         calcCol ? calcCol.selectedName : null,
       );
       if (!calcCol) {
@@ -164,7 +190,7 @@ export class SelectProcessor<T extends dd.Table> {
       const exprIO = new io.SQLIO(rawExpr);
       // Replace the column with SQL only (no alias).
       // Imagine new CalculatedColumn(dd.sql`COUNT(${col.as('a')})`, 'b'), the embedded column would be interpreted as `'col' AS 'a'`, but it really should be `COUNT('col') AS 'b'`, so this step replace the embedded with the SQL without its attached alias.
-      const sql = exprIO.toSQL(dialect, undefined, element => {
+      const sql = exprIO.toSQL(dialect, element => {
         if (element.value === col) {
           return colSQL.sql;
         }
@@ -239,7 +265,6 @@ export class SelectProcessor<T extends dd.Table> {
 
   private handleColumn(
     col: dd.Column,
-    hasJoin: boolean,
     alias: string | null, // if an user alias is present, we don't need to guess the input name just use it as alias
   ): ColumnSQL {
     const { dialect } = this;
@@ -262,7 +287,7 @@ export class SelectProcessor<T extends dd.Table> {
     } else {
       // Normal column
       let sql = '';
-      if (hasJoin) {
+      if (this.hasJoin) {
         // Each column must have a prefix in a SQL with joins
         sql = `${e(col.tableName())}.`;
       }
@@ -278,14 +303,6 @@ export class SelectProcessor<T extends dd.Table> {
 
   private nextSelectedName(name: string): string {
     return this.selectedNameContext.get(name);
-  }
-
-  private getJoinPathToNameMap(): Map<string, string> | null {
-    const map = new Map<string, string>();
-    this.jcMap.forEach((value, key) => {
-      map.set(key, value.tableAlias);
-    });
-    return map.size ? map : null;
   }
 }
 
