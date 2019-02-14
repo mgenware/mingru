@@ -76,7 +76,36 @@ export class SelectProcessor<T extends dd.Table> {
         });
     }
 
+    // order by
+    let orderBySQL = '';
+    if (action.orderByColumns.length) {
+      orderBySQL = action.orderByColumns
+        .map(oCol => {
+          let s = this.getOrderByColumnSQL(oCol);
+          if (oCol.desc) {
+            s += ' DESC';
+          }
+          return s;
+        })
+        .join(', ');
+    }
+    sql += orderBySQL;
+
     return new io.SelectIO(this.action, sql, colIOs, fromIO, whereIO);
+  }
+
+  private getOrderByColumnSQL(col: dd.ColumnName): string {
+    const { dialect } = this;
+    if (typeof col === 'string') {
+      return dialect.escape(col as string);
+    }
+    if (col instanceof dd.Column) {
+      return this.getColumnSQL(col as dd.Column);
+    }
+    if (col instanceof dd.CalculatedColumn) {
+      return dialect.escape((col as dd.CalculatedColumn).selectedName);
+    }
+    throw new Error(`Unsupported orderBy column "${toTypeString(col)}"`);
   }
 
   private getColumnSQL(col: dd.Column): string {
