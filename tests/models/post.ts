@@ -7,7 +7,7 @@ class Post extends dd.Table {
   content = dd.varChar(100);
   user_id = user.id;
   reviewer_id = user.id;
-  cmtCount = dd.unsignedInt(0).setDBName('cmt_c');
+  cmtCount = dd.uInt(0).setDBName('cmt_c');
 
   datetime = dd.datetime();
   date = dd.date();

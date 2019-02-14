@@ -21,13 +21,13 @@ test('DT', () => {
     [dd.pk(), 'uint64', null],
     // Integer
     [dd.int(), 'int', null],
-    [dd.unsignedInt(), 'uint', null],
+    [dd.uInt(), 'uint', null],
     [dd.bigInt(), 'int64', null],
-    [dd.unsignedBigInt(), 'uint64', null],
+    [dd.uBigInt(), 'uint64', null],
     [dd.smallInt(), 'int16', null],
-    [dd.unsignedSmallInt(), 'uint16', null],
+    [dd.uSmallInt(), 'uint16', null],
     [dd.tinyInt(), 'int8', null],
-    [dd.unsignedTinyInt(), 'uint8', null],
+    [dd.uTinyInt(), 'uint8', null],
     // String
     [dd.varChar(10), 'string', null],
     [dd.char(10), 'string', null],
