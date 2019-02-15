@@ -39,6 +39,17 @@ test('Select all, where', async () => {
   await testBuildAsync(ta, 'select/whereAll');
 });
 
+test('Select all, where, orderBy', async () => {
+  const ta = newTA(post);
+  const cc = dd.select('RAND()', 'n', new dd.ColumnType(dd.dt.int));
+  ta.selectAll('t', post.id, cc, post.title)
+    .where(dd.sql`${post.id} = ${dd.input(post.id)}`)
+    .orderBy(post.title)
+    .orderBy(cc)
+    .orderByDesc(post.title);
+  await testBuildAsync(ta, 'select/whereAllOrderBy');
+});
+
 test('Select field, where', async () => {
   const ta = newTA(post);
   ta.selectField('t', post.user_id).byID();

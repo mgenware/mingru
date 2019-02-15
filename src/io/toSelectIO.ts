@@ -94,8 +94,9 @@ export class SelectProcessor<T extends dd.Table> {
     return new io.SelectIO(this.action, sql, colIOs, fromIO, whereIO);
   }
 
-  private getOrderByColumnSQL(col: dd.ColumnName): string {
+  private getOrderByColumnSQL(nCol: dd.ColumnName): string {
     const { dialect } = this;
+    const col = nCol.column;
     if (typeof col === 'string') {
       return dialect.escape(col as string);
     }
