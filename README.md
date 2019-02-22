@@ -7,6 +7,8 @@
 
 Convert [dd-models](https://github.com/mgenware/dd-models) to Go code.
 
+**All APIs are subject to change before 1.0.0**
+
 Goals:
 
 * **No performance penalty at runtime**, SQL builder, not an ORM
