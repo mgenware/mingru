@@ -18,6 +18,7 @@ import VarInfo from './varInfo';
 import * as go from './go';
 import * as defs from './defs';
 import NameContext from '../lib/nameContext';
+import Logger from '../logger';
 
 const HeaderRepeatCount = 90;
 const QueryableParam = 'queryable';
@@ -45,6 +46,7 @@ export default class GoBuilder<T extends dd.Table> {
   constructor(
     public tableActions: dd.TableActionCollection<T>,
     public dialect: Dialect,
+    public logger: Logger,
     public packageName = 'da',
   ) {
     throwIfFalsy(tableActions, 'tableActions');
@@ -82,6 +84,7 @@ export default class GoBuilder<T extends dd.Table> {
     const { dialect } = this;
     let code = '';
     for (const action of this.tableActions.map.values()) {
+      this.logger.debug(`Building action "${action.name}"`);
       code += '\n';
       switch (action.type) {
         case dd.ActionType.select: {

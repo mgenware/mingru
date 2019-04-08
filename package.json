@@ -20,7 +20,7 @@
     "t": "jest --verbose=false",
     "build": "yarn test",
     "compile": "tsc -b tests",
-    "dev": "yarn run clean && tsc -b tests -w",
+    "dev": "yarn run clean && yarn run pi && tsc -b tests -w",
     "prepublishOnly": "yarn run test",
     "lint": "tslint --project tsconfig.json --config tslint.json",
     "clean": "del-cli dist && del-cli dist_tests",
@@ -50,6 +50,7 @@
     "typescript": "^3.4.2"
   },
   "dependencies": {
+    "chalk": "^2.4.2",
     "del": "^4.1.0",
     "m-fs": "^2.1.0",
     "sql-escape-string": "^1.1.0",

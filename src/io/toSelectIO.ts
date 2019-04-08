@@ -153,6 +153,11 @@ export class SelectProcessor<T extends dd.Table> {
       const col = sCol as dd.Column;
       return [col, null, col.type];
     }
+    if (sCol instanceof dd.CalculatedColumn === false) {
+      throw new Error(
+        `Expected an "CalculatedColumn", got ${toTypeString(sCol)}`,
+      );
+    }
     // If user uses a renamed column (a CalculatedColumn with core = column, and selectedName = newName)
     const cc = sCol as dd.CalculatedColumn;
     if (cc.core instanceof dd.Column) {

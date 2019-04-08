@@ -1,6 +1,7 @@
 export { default as MySQL } from './dialects/mysql';
 export { default as Builder } from './builder/goBuilder';
 export { default as build, IBuildOption } from './builder/build';
+export { default as Logger } from './logger';
 
 // IOs
 import toSelectIO from './io/toSelectIO';
