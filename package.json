@@ -39,6 +39,7 @@
     ]
   },
   "devDependencies": {
+    "@types/glob": "^7.1.1",
     "@types/jest": "^24.0.0",
     "@types/node": "^10.12.21",
     "@types/tempy": "^0.2.0",
@@ -49,6 +50,7 @@
     "typescript": "^3.3.1"
   },
   "dependencies": {
+    "del": "^4.1.0",
     "m-fs": "^2.0.0",
     "sql-escape-string": "^1.1.0",
     "throw-if-arg-empty": "^1.0.1",
