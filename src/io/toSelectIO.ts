@@ -159,6 +159,9 @@ export class SelectProcessor<T extends dd.Table> {
       const col = cc.core as dd.Column;
       return [col, cc, col.type];
     }
+    if (cc.core instanceof dd.SQL === false) {
+      throw new Error(`Expected an "SQL" object, got ${toTypeString(cc.core)}`);
+    }
     // Now, CalculatedColumn.core is an SQL expression. Try to extract a column from it.
     const sql = cc.core as dd.SQL;
     const column = sql.findColumn();
