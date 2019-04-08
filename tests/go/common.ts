@@ -45,6 +45,7 @@ export async function testBuildToDirAsync(
 ) {
   const opt = option || {};
   opt.noFileHeader = true;
+  opt.noOutput = true;
   const tmpDir = tempy.directory();
   await mr.build(taList, dialect, tmpDir, opt);
   for (const file of files) {

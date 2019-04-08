@@ -10,6 +10,15 @@ export interface IBuildOption {
   packageName?: string;
   noFileHeader?: boolean;
   cleanBuild?: boolean;
+  noOutput?: boolean;
+}
+
+function output(opt: IBuildOption, s: string) {
+  if (opt.noOutput) {
+    return;
+  }
+  // tslint:disable-next-line no-console
+  console.log(s);
 }
 
 export default async function buildAsync(
@@ -24,15 +33,13 @@ export default async function buildAsync(
   const opts = options || {};
 
   if (opts.cleanBuild) {
-    // tslint:disable-next-line no-console
-    console.log(`🧹  Cleaning directory "${outDir}"`);
+    output(opts, `🧹  Cleaning directory "${outDir}"`);
     await del(outDir, { force: true });
   }
 
   await Promise.all(
     tableActionList.map(async action => {
-      // tslint:disable-next-line no-console
-      console.log(`🚙  Building table "${action.table.__name}"`);
+      output(opts, `🚙  Building table "${action.table.__name}"`);
       const builder = new GoBuilder(action, dialect, opts.packageName);
       const code = builder.build(false, !!opts.noFileHeader);
       const fileName = dd.utils.toSnakeCase(action.table.__name) + '_ta'; // Add a "_ta" suffix to table actions file
@@ -40,6 +47,5 @@ export default async function buildAsync(
       await mfs.writeFileAsync(outFile, code, 'utf8');
     }),
   );
-  // tslint:disable-next-line no-console
-  console.log(`🎉  Build succeeded`);
+  output(opts, `🎉  Build succeeded`);
 }
