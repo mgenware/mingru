@@ -16,7 +16,7 @@ test('escape', () => {
 });
 
 test('DT', () => {
-  const tests: Array<Array<unknown>> = [
+  const tests: Array<[dd.Column, string, unknown]> = [
     // PK
     [dd.pk(), 'uint64', null],
     // Integer
