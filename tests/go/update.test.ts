@@ -53,3 +53,13 @@ test('Duplicate names in where and setters', async () => {
     );
   await testBuildAsync(ta, 'update/updateWithDupVars');
 });
+
+test('Custom DB column name', async () => {
+  const ta = newTA(post);
+  ta.update('t')
+    .set(post.title, dd.sql`"haha"`)
+    .set(post.content, dd.sql`${dd.input(post.content)}`)
+    .set(post.cmtCount, dd.sql`${post.cmtCount} + 1`)
+    .byID();
+  await testBuildAsync(ta, 'update/customName');
+});
