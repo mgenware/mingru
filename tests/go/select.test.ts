@@ -154,11 +154,11 @@ test('Calculated columns', async () => {
   await testBuildAsync(ta, 'select/calculatedColumns');
 });
 
-test('Modified DB names', async () => {
+test('Custom DB names', async () => {
   const ta = newTA(post);
   ta.select(
     't',
-    post.cmtCount,
+    post.cmtCount, // cmtCount is set to cmt_c in models via `setDBName`
     post.m_user_id,
     post.m_user_id.as('a'),
     post.m_user_id.join(user).follower_count,

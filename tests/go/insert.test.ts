@@ -28,3 +28,9 @@ test('insertWithDefaults', async () => {
   ta.insertWithDefaults('t').setInputs(cols.fk);
   await testBuildAsync(ta, 'insert/insertWithDefaults');
 });
+
+test('Custom DB name', async () => {
+  const ta = newTA(post);
+  ta.insert('t').setInputs(post.title, post.cmtCount);
+  await testBuildAsync(ta, 'insert/customDBName');
+});

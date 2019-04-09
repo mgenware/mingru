@@ -78,7 +78,7 @@ export class InsertProcessor {
       });
     }
 
-    const colNames = setters.map(s => dialect.escape(s.col.name));
+    const colNames = setters.map(s => dialect.escape(s.col.getDBName()));
     sql += ` (${colNames.join(', ')})`;
 
     // values

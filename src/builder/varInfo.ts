@@ -9,7 +9,13 @@ export default class VarInfo {
     col: dd.Column,
     nameContext: NameContext,
   ): VarInfo {
-    return new VarInfo(col.name, nameContext, dialect.goType(col.type), col);
+    return new VarInfo(
+      col.name,
+      col.getDBName(),
+      nameContext,
+      dialect.goType(col.type),
+      col,
+    );
   }
 
   static fromSQLArray(
@@ -28,7 +34,9 @@ export default class VarInfo {
           } else {
             type = new TypeBridge(input.typeObject as string, null, false);
           }
-          res.push(new VarInfo(input.name, nameContext, type, input));
+          res.push(
+            new VarInfo(input.name, input.name, nameContext, type, input),
+          );
         }
       }
     }
@@ -38,7 +46,8 @@ export default class VarInfo {
   name: string;
 
   constructor(
-    name: string,
+    name: string, // Name defined in TS model
+    public dbName: string, // Raw DB column name
     nameContext: NameContext,
     public type: TypeBridge,
     public rawObject: dd.SQLInput | dd.Column,
