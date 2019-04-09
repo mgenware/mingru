@@ -1,6 +1,6 @@
 {
   "name": "mingru",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "SQL Generator for dd-models",
   "main": "dist/main.js",
   "types": "dist/main.d.ts",
