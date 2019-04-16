@@ -16,7 +16,7 @@ export async function testBuildAsync(
   const logger = new mr.Logger(false);
   const builder = new mr.Builder(ta, dialect, logger);
   let actual = builder.build(true, true);
-  actual = `import "github.com/mgenware/go-packagex/dbx"\n${actual}`;
+  actual = `import "github.com/mgenware/go-packagex/v5/dbx"\n${actual}`;
   expect(actual).toBe(content);
   return builder;
 }

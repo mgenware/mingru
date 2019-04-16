@@ -1,4 +1,4 @@
-import "github.com/mgenware/go-packagex/dbx"
+import "github.com/mgenware/go-packagex/v5/dbx"
 
 // UpdateT ...
 func (da *TableTypePost) UpdateT(queryable dbx.Queryable, id uint64, content string) (int, error) {

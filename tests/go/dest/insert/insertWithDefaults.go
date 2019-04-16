@@ -1,4 +1,4 @@
-import "github.com/mgenware/go-packagex/dbx"
+import "github.com/mgenware/go-packagex/v5/dbx"
 
 // InsertT ...
 func (da *TableTypeCols) InsertT(queryable dbx.Queryable, fk uint64) error {

@@ -1,4 +1,4 @@
-import "github.com/mgenware/go-packagex/dbx"
+import "github.com/mgenware/go-packagex/v5/dbx"
 
 // DeleteT ...
 func (da *TableTypePost) DeleteT(queryable dbx.Queryable, id uint64) error {

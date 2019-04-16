@@ -1,4 +1,4 @@
-import "github.com/mgenware/go-packagex/dbx"
+import "github.com/mgenware/go-packagex/v5/dbx"
 
 // SelectT ...
 func (da *TableTypePost) SelectT(queryable dbx.Queryable, id uint64) (uint64, error) {

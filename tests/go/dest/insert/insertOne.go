@@ -1,4 +1,4 @@
-import "github.com/mgenware/go-packagex/dbx"
+import "github.com/mgenware/go-packagex/v5/dbx"
 
 // InsertT ...
 func (da *TableTypePost) InsertT(queryable dbx.Queryable, title string, userID uint64) (uint64, error) {
