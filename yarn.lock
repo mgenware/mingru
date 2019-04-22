@@ -1014,16 +1014,6 @@ data-urls@^1.0.0:
     whatwg-mimetype "^2.2.0"
     whatwg-url "^7.0.0"
 
-dd-models@^0.11.0:
-  version "0.11.0"
-  resolved "https://registry.yarnpkg.com/dd-models/-/dd-models-0.11.0.tgz#0d2eef66930e8e6c45d0157827a2f06b17f555fe"
-  integrity sha512-3MzNjLKbv1aV6E3CyVala0hGskM2K7HPX34Kviq26V9WmdSSgAVTJDfNxfSTSAx5dHmqfSGYp2twv8aZxoD6Uw==
-  dependencies:
-    lodash.camelcase "^4.3.0"
-    lodash.snakecase "^4.1.1"
-    throw-if-arg-empty "^1.0.1"
-    to-type-string "^1.0.0"
-
 debug@^2.1.2, debug@^2.2.0, debug@^2.3.3:
   version "2.6.9"
   resolved "https://registry.yarnpkg.com/debug/-/debug-2.6.9.tgz#5d128515df134ff327e90a4c93f4e077a536341f"
@@ -2649,16 +2639,6 @@ locate-path@^3.0.0:
     p-locate "^3.0.0"
     path-exists "^3.0.0"
 
-lodash.camelcase@^4.3.0:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/lodash.camelcase/-/lodash.camelcase-4.3.0.tgz#b28aa6288a2b9fc651035c7711f65ab6190331a6"
-  integrity sha1-soqmKIorn8ZRA1x3EfZathkDMaY=
-
-lodash.snakecase@^4.1.1:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/lodash.snakecase/-/lodash.snakecase-4.1.1.tgz#39d714a35357147837aefd64b5dcbb16becd8f8d"
-  integrity sha1-OdcUo1NXFHg3rv1ktdy7Fr7Nj40=
-
 lodash.sortby@^4.7.0:
   version "4.7.0"
   resolved "https://registry.yarnpkg.com/lodash.sortby/-/lodash.sortby-4.7.0.tgz#edd14c824e2cc9c1e0b0a1b42bb5210516a42438"
@@ -4028,11 +4008,6 @@ throat@^4.0.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/throat/-/throat-4.1.0.tgz#89037cbc92c56ab18926e6ba4cbb200e15672a6a"
   integrity sha1-iQN8vJLFarGJJua6TLsgDhVnKmo=
-
-throw-if-arg-empty@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/throw-if-arg-empty/-/throw-if-arg-empty-1.0.1.tgz#df0b2ca09dd9d9a18132c6e652af4d601aa94316"
-  integrity sha512-TwMXozqaGgl18FVWpjBKuEead42hFSduxIPsv4OLWlj2EVc6Sm1mcrjLNLUw8S+mVM/nNItr2kWIYeHd/t/r0w==
 
 throw-if-arg-empty@^2.0.1:
   version "2.0.1"
