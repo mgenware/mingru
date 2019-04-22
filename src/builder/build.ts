@@ -15,12 +15,12 @@ export interface IBuildOption {
 }
 
 export default async function buildAsync(
-  tableActionList: Array<dd.TableActionCollection<dd.Table>>,
+  taList: dd.TA[],
   dialect: Dialect,
   outDir: string,
   options?: IBuildOption,
 ) {
-  throwIfFalsy(tableActionList, 'tableActionList');
+  throwIfFalsy(taList, 'tableActionList');
   throwIfFalsy(dialect, 'dialect');
   throwIfFalsy(outDir, 'outDir');
   const opts = options || {};
@@ -32,11 +32,11 @@ export default async function buildAsync(
   }
 
   await Promise.all(
-    tableActionList.map(async action => {
-      logger.info(`🚙  Building table "${action.table.__name}"`);
-      const builder = new GoBuilder(action, dialect, logger, opts.packageName);
+    taList.map(async ta => {
+      logger.info(`🚙  Building table "${ta.__table.__name}"`);
+      const builder = new GoBuilder(ta, dialect, logger, opts.packageName);
       const code = builder.build(false, !!opts.noFileHeader);
-      const fileName = dd.utils.toSnakeCase(action.table.__name) + '_ta'; // Add a "_ta" suffix to table actions file
+      const fileName = dd.utils.toSnakeCase(ta.__table.__name) + '_ta'; // Add a "_ta" suffix to table actions file
       const outFile = nodepath.join(outDir, fileName + '.go');
       await mfs.writeFileAsync(outFile, code, 'utf8');
     }),

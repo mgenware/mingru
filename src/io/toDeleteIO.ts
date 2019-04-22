@@ -12,12 +12,12 @@ export class DeleteProcessor {
   convert(): io.DeleteIO {
     let sql = 'DELETE FROM ';
     const { action, dialect } = this;
-    const table = action.table as dd.Table;
+    const table = action.__table as dd.Table;
 
-    if (!action.whereSQL && !action.deleteAll) {
+    if (!action.whereSQL && !action.allowNoWhere) {
       throw new Error(
-        `You have to call deleteAll to build an action without a WHERE clause, action name: "${
-          action.name
+        `You have to call unsafeDeleteAll to build an action without a WHERE clause, action name: "${
+          action.__name
         }"`,
       );
     }

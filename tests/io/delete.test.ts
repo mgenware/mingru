@@ -5,8 +5,11 @@ import post from '../models/post';
 const dialect = new mr.MySQL();
 
 test('Delete', () => {
-  const actions = dd.actions(post);
-  const v = actions.delete('t').byID();
+  class PostTA extends dd.TA {
+    t = dd.unsafeDeleteAll().byID();
+  }
+  const postTA = dd.ta(post, PostTA);
+  const v = postTA.t;
   const io = mr.io.toDeleteIO(v, dialect);
 
   expect(io).toBeInstanceOf(mr.io.DeleteIO);
@@ -15,15 +18,12 @@ test('Delete', () => {
 });
 
 test('Delete with where', () => {
-  const actions = dd.actions(post);
-  const v = actions.delete('t').where(dd.sql`${post.id} = 1`);
+  class PostTA extends dd.TA {
+    t = dd.unsafeDeleteAll().where(dd.sql`${post.id} = 1`);
+  }
+  const postTA = dd.ta(post, PostTA);
+  const v = postTA.t;
   const io = mr.io.toDeleteIO(v, dialect);
 
   expect(io.sql).toBe('DELETE FROM `post` WHERE `id` = 1');
-});
-
-test('Error on empty where', () => {
-  const actions = dd.actions(post);
-  const v = actions.delete('t');
-  expect(() => mr.io.toDeleteIO(v, dialect)).toThrow('deleteAll');
 });

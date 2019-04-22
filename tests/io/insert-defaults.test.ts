@@ -28,8 +28,11 @@ test('dtDefault', () => {
 });
 
 test('insertWithDefaults', () => {
-  const actions = dd.actions(cols);
-  const v = actions.insertWithDefaults('t').setInputs(cols.fk);
+  class ColsTA extends dd.TA {
+    insertT = dd.insertWithDefaults().setInputs(cols.fk);
+  }
+  const ta = dd.ta(cols, ColsTA);
+  const v = ta.insertT;
   const io = mr.io.toInsertIO(v, dialect);
 
   expect(io.sql).toBe(

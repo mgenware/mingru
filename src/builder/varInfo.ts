@@ -10,7 +10,7 @@ export default class VarInfo {
     nameContext: NameContext,
   ): VarInfo {
     return new VarInfo(
-      col.name,
+      col.__name,
       col.getDBName(),
       nameContext,
       dialect.goType(col.type),

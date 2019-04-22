@@ -7,10 +7,7 @@ import * as mfs from 'm-fs';
 const dialect = new mr.MySQL();
 const DestDataDir = 'tests/go/dest';
 
-export async function testBuildAsync(
-  ta: dd.TableActionCollection<dd.Table>,
-  path: string,
-) {
+export async function testBuildAsync(ta: dd.TA, path: string) {
   path = nodepath.resolve(nodepath.join(DestDataDir, path + '.go'));
   const content = await mfs.readFileAsync(path, 'utf8');
   const logger = new mr.Logger(false);
@@ -21,10 +18,7 @@ export async function testBuildAsync(
   return builder;
 }
 
-export async function testBuildFullAsync(
-  ta: dd.TableActionCollection<dd.Table>,
-  path: string,
-) {
+export async function testBuildFullAsync(ta: dd.TA, path: string) {
   path = nodepath.resolve(nodepath.join(DestDataDir, path + '.go'));
   const content = await mfs.readFileAsync(path, 'utf8');
   const logger = new mr.Logger(false);
@@ -40,7 +34,7 @@ export async function testFilesAsync(a: string, b: string) {
 }
 
 export async function testBuildToDirAsync(
-  taList: Array<dd.TableActionCollection<dd.Table>>,
+  taList: dd.TA[],
   files: string[],
   expectedDir: string,
   option?: mr.IBuildOption,
@@ -58,8 +52,4 @@ export async function testBuildToDirAsync(
     );
     await testFilesAsync(actual, expected);
   }
-}
-
-export function newTA(table: dd.Table): dd.TableActionCollection<dd.Table> {
-  return dd.actions(table);
 }

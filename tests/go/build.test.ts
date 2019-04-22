@@ -2,54 +2,68 @@ import * as dd from 'dd-models';
 import user from '../models/user';
 import post from '../models/post';
 import postReply from '../models/postReply';
-import { newTA, testBuildToDirAsync } from './common';
+import { testBuildToDirAsync } from './common';
 
 test('Single table', async () => {
-  const ta = newTA(post);
-  ta.select('PostTitle', post.id, post.title);
-  ta.select(
-    'PostInfo',
-    post.id,
-    post.title,
-    post.user_id,
-    post.user_id.join(user).url_name,
-  );
-  ta.updateAll('PostTitle').set(post.title, dd.sql`${dd.input(post.title)}`);
-  ta.deleteOne('ByID').where(dd.sql`${post.id} = ${dd.input(post.id)}`);
+  class PostTA extends dd.TA {
+    selectPostTitle = dd.select(post.id, post.title);
+    selectPostInfo = dd.select(
+      post.id,
+      post.title,
+      post.user_id,
+      post.user_id.join(user).url_name,
+    );
+    updatePostTitle = dd
+      .unsafeUpdateAll()
+      .set(post.title, dd.sql`${dd.input(post.title)}`);
+    deleteByID = dd
+      .deleteOne()
+      .where(dd.sql`${post.id} = ${dd.input(post.id)}`);
+  }
+  const ta = dd.ta(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'singleTable');
 });
 
 test('Multiple tables', async () => {
-  const userTA = dd.actions(user);
-  userTA.select('Profile', user.display_name, user.sig);
-  userTA.updateAll('Profile').setInputs(user.sig);
-  userTA.deleteOne('ByID').where(user.id.isEqualToInput());
+  class UserTA extends dd.TA {
+    selectProfile = dd.select(user.display_name, user.sig);
+    updateProfile = dd.unsafeUpdateAll().setInputs(user.sig);
+    deleteByID = dd.deleteOne().where(user.id.isEqualToInput());
+  }
+  const userTA = dd.ta(user, UserTA);
 
-  const postTA = dd.actions(post);
-  postTA.select(
-    'PostInfo',
-    post.id,
-    post.content,
-    post.user_id.join(user).url_name,
-  );
-  postTA.updateAll('Content').set(post.content, post.content.isEqualToInput());
-  postTA.deleteOne('ByID').where(post.id.isEqualToInput());
-
+  class PostTA extends dd.TA {
+    selectPostInfo = dd.select(
+      post.id,
+      post.content,
+      post.user_id.join(user).url_name,
+    );
+    updateContent = dd
+      .unsafeUpdateAll()
+      .set(post.content, post.content.isEqualToInput());
+    deleteByID = dd.deleteOne().where(post.id.isEqualToInput());
+  }
+  const postTA = dd.ta(post, PostTA);
   const actions = [userTA, postTA];
-
   await testBuildToDirAsync(actions, ['post', 'User'], 'multipleTables');
 });
 
 test('Custom package name', async () => {
-  const ta = newTA(post);
-  ta.select('PostTitle', post.id, post.title);
+  class PostTA extends dd.TA {
+    selectPostTitle = dd.select(post.id, post.title);
+  }
+  const ta = dd.ta(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'customPackageName', {
     packageName: 'haha',
   });
 });
 
 test('Table name', async () => {
-  const ta = newTA(postReply);
-  ta.insertOne('PostReply').setInputs(postReply.to_user_id, postReply.user_id);
+  class PostRplTA extends dd.TA {
+    insertPostReply = dd
+      .insertOne()
+      .setInputs(postReply.to_user_id, postReply.user_id);
+  }
+  const ta = dd.ta(postReply, PostRplTA);
   await testBuildToDirAsync([ta], ['post_cmt_rpl'], 'tableName');
 });

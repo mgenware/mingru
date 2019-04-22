@@ -5,13 +5,16 @@ import post from '../models/post';
 const dialect = new mr.MySQL();
 
 test('Update', () => {
-  const actions = dd.actions(post);
-  const v = actions
-    .update('t')
-    .set(post.title, dd.sql`"haha"`)
-    .set(post.content, dd.sql`${dd.input(post.content)}`)
-    .set(post.cmtCount, dd.sql`${post.cmtCount} + 1`)
-    .byID();
+  class PostTA extends dd.TA {
+    t = dd
+      .updateSome()
+      .set(post.title, dd.sql`"haha"`)
+      .set(post.content, dd.sql`${dd.input(post.content)}`)
+      .set(post.cmtCount, dd.sql`${post.cmtCount} + 1`)
+      .byID();
+  }
+  const postTA = dd.ta(post, PostTA);
+  const v = postTA.t;
   const io = mr.io.toUpdateIO(v, dialect);
 
   expect(io).toBeInstanceOf(mr.io.UpdateIO);
@@ -27,25 +30,15 @@ test('Update', () => {
 });
 
 test('Update with where', () => {
-  const actions = dd.actions(post);
-  const v = actions
-    .update('t')
-    .set(post.title, dd.sql`"haha"`)
-    .where(dd.sql`${post.id} = 1`);
+  class PostTA extends dd.TA {
+    t = dd
+      .updateOne()
+      .set(post.title, dd.sql`"haha"`)
+      .where(dd.sql`${post.id} = 1`);
+  }
+  const postTA = dd.ta(post, PostTA);
+  const v = postTA.t;
   const io = mr.io.toUpdateIO(v, dialect);
 
   expect(io.sql).toBe('UPDATE `post` SET `title` = "haha" WHERE `id` = 1');
-});
-
-test('Error on empty where', () => {
-  const actions = dd.actions(post);
-  const v = actions.update('t').set(post.title, dd.sql`"haha"`);
-  expect(() => mr.io.toUpdateIO(v, dialect)).toThrow('updateAll');
-});
-
-test('No setters', () => {
-  const actions = dd.actions(post);
-  expect(() => mr.io.toUpdateIO(actions.updateAll('t'), dialect)).toThrow(
-    'setter',
-  );
 });

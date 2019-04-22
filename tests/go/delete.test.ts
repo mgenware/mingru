@@ -1,21 +1,29 @@
 import * as dd from 'dd-models';
 import post from '../models/post';
-import { testBuildAsync, newTA } from './common';
+import { testBuildAsync } from './common';
 
-test('Delete', async () => {
-  const ta = newTA(post);
-  ta.delete('t').byID();
+test('unsafeDeleteAll', async () => {
+  class PostTA extends dd.TA {
+    deleteT = dd.unsafeDeleteAll().byID();
+  }
+  const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'delete/delete');
 });
 
-test('Delete with where', async () => {
-  const ta = newTA(post);
-  ta.delete('t').where(dd.sql`${post.user_id} = ${dd.input(post.user_id)}`);
+test('deleteSome', async () => {
+  class PostTA extends dd.TA {
+    deleteT = dd
+      .deleteSome()
+      .where(dd.sql`${post.user_id} = ${dd.input(post.user_id)}`);
+  }
+  const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'delete/deleteWithWhere');
 });
 
-test('DeleteOne', async () => {
-  const ta = newTA(post);
-  ta.deleteOne('t').byID();
+test('deleteOne', async () => {
+  class PostTA extends dd.TA {
+    deleteT = dd.deleteOne().byID();
+  }
+  const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'delete/deleteOne');
 });

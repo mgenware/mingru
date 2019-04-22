@@ -8,8 +8,11 @@ import rpl from '../models/postReply';
 const dialect = new mr.MySQL();
 
 test('Select', () => {
-  const actions = dd.actions(user);
-  const v = actions.select('t', user.id, user.url_name);
+  class UserTA extends dd.TA {
+    t = dd.select(user.id, user.url_name);
+  }
+  const userTA = dd.ta(user, UserTA);
+  const v = userTA.t;
   const io = mr.io.toSelectIO(v, dialect);
 
   expect(io).toBeInstanceOf(mr.io.SelectIO);
@@ -19,10 +22,11 @@ test('Select', () => {
 });
 
 test('Where', () => {
-  const actions = dd.actions(user);
-  const v = actions
-    .select('t', user.id, user.url_name)
-    .where(dd.sql`${user.id} = 1`);
+  class UserTA extends dd.TA {
+    t = dd.select(user.id, user.url_name).where(dd.sql`${user.id} = 1`);
+  }
+  const userTA = dd.ta(user, UserTA);
+  const v = userTA.t;
   const io = mr.io.toSelectIO(v, dialect);
 
   expect(io.where).toBeInstanceOf(mr.io.SQLIO);
@@ -30,15 +34,17 @@ test('Where', () => {
 });
 
 test('Where and inputs', () => {
-  const actions = dd.actions(user);
-  const v = actions
-    .select('t', user.id, user.url_name)
-    .where(
-      dd.sql`${user.id} = ${dd.input(user.id)} && ${user.url_name} = ${dd.input(
-        'string',
-        'userName',
-      )}`,
-    );
+  class UserTA extends dd.TA {
+    t = dd
+      .select(user.id, user.url_name)
+      .where(
+        dd.sql`${user.id} = ${dd.input(user.id)} && ${
+          user.url_name
+        } = ${dd.input('string', 'userName')}`,
+      );
+  }
+  const userTA = dd.ta(user, UserTA);
+  const v = userTA.t;
   const io = mr.io.toSelectIO(v, dialect);
 
   expect(io.where).toBeInstanceOf(mr.io.SQLIO);
@@ -48,8 +54,11 @@ test('Where and inputs', () => {
 });
 
 test('Basic join', () => {
-  const actions = dd.actions(post);
-  const v = actions.select('t', post.user_id.join(user).url_name, post.title);
+  class PostTA extends dd.TA {
+    t = dd.select(post.user_id.join(user).url_name, post.title);
+  }
+  const postTA = dd.ta(post, PostTA);
+  const v = postTA.t;
   const io = mr.io.toSelectIO(v, dialect);
 
   expect(io.sql).toBe(
@@ -58,13 +67,15 @@ test('Basic join', () => {
 });
 
 test('Multiple cols join', () => {
-  const actions = dd.actions(rpl);
-  const v = actions.select(
-    't',
-    rpl.user_id.join(user).url_name,
-    rpl.user_id.join(user).id,
-    rpl.to_user_id.join(user).url_name,
-  );
+  class RplTA extends dd.TA {
+    t = dd.select(
+      rpl.user_id.join(user).url_name,
+      rpl.user_id.join(user).id,
+      rpl.to_user_id.join(user).url_name,
+    );
+  }
+  const rplTA = dd.ta(rpl, RplTA);
+  const v = rplTA.t;
   const io = mr.io.toSelectIO(v, dialect);
 
   expect(io.sql).toBe(
@@ -73,16 +84,18 @@ test('Multiple cols join', () => {
 });
 
 test('3-table joins', () => {
-  const actions = dd.actions(cmt);
-  const v = actions.select(
-    't',
-    cmt.id,
-    cmt.user_id,
-    cmt.target_id.join(post).title,
-    cmt.target_id.join(post).user_id,
-    cmt.target_id.join(post).user_id.join(user).url_name,
-    cmt.target_id.join(post).user_id.join(user).id,
-  );
+  class CmtTA extends dd.TA {
+    t = dd.select(
+      cmt.id,
+      cmt.user_id,
+      cmt.target_id.join(post).title,
+      cmt.target_id.join(post).user_id,
+      cmt.target_id.join(post).user_id.join(user).url_name,
+      cmt.target_id.join(post).user_id.join(user).id,
+    );
+  }
+  const cmtTA = dd.ta(cmt, CmtTA);
+  const v = cmtTA.t;
   const io = mr.io.toSelectIO(v, dialect);
 
   expect(io.sql).toBe(
@@ -91,18 +104,20 @@ test('3-table joins', () => {
 });
 
 test('AS', () => {
-  const actions = dd.actions(cmt);
-  const v = actions.select(
-    't',
-    cmt.id,
-    cmt.user_id.as('a'),
-    cmt.target_id.join(post).title.as('b'),
-    cmt.target_id.join(post).user_id.join(user).url_name,
-    cmt.target_id
-      .join(post)
-      .user_id.join(user)
-      .url_name.as('c'),
-  );
+  class CmtTA extends dd.TA {
+    t = dd.select(
+      cmt.id,
+      cmt.user_id.as('a'),
+      cmt.target_id.join(post).title.as('b'),
+      cmt.target_id.join(post).user_id.join(user).url_name,
+      cmt.target_id
+        .join(post)
+        .user_id.join(user)
+        .url_name.as('c'),
+    );
+  }
+  const cmtTA = dd.ta(cmt, CmtTA);
+  const v = cmtTA.t;
   const io = mr.io.toSelectIO(v, dialect);
 
   expect(io.sql).toBe(
@@ -111,19 +126,21 @@ test('AS', () => {
 });
 
 test('Duplicate selected names', () => {
-  const actions = dd.actions(post);
-  const v = actions.select(
-    't',
-    post.title,
-    post.title,
-    post.title.as('a'),
-    post.title,
-    post.title.as('a'),
-    post.user_id.as('a'),
-    post.user_id.join(user).url_name,
-    post.user_id.join(user).url_name,
-    post.user_id.join(user).url_name.as('a'),
-  );
+  class PostTA extends dd.TA {
+    t = dd.select(
+      post.title,
+      post.title,
+      post.title.as('a'),
+      post.title,
+      post.title.as('a'),
+      post.user_id.as('a'),
+      post.user_id.join(user).url_name,
+      post.user_id.join(user).url_name,
+      post.user_id.join(user).url_name.as('a'),
+    );
+  }
+  const postTA = dd.ta(post, PostTA);
+  const v = postTA.t;
   const io = mr.io.toSelectIO(v, dialect);
   const { cols } = io;
   let i = 0;
@@ -139,6 +156,10 @@ test('Duplicate selected names', () => {
 });
 
 test('Select nothing', () => {
-  const actions = dd.actions(user);
-  expect(() => actions.select('t')).toThrow('empty');
+  expect(() => {
+    class UserTA extends dd.TA {
+      t = dd.select();
+    }
+    dd.ta(user, UserTA);
+  }).toThrow('empty');
 });

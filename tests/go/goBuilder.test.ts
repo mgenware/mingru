@@ -1,25 +1,32 @@
 import * as dd from 'dd-models';
 import user from '../models/user';
 import post from '../models/post';
-import { testBuildFullAsync, newTA } from './common';
+import { testBuildFullAsync } from './common';
 
 test('Single action', async () => {
-  const ta = newTA(post);
-  ta.select('t', post.id, post.title);
+  class PostTA extends dd.TA {
+    selectT = dd.select(post.id, post.title);
+  }
+  const ta = dd.ta(post, PostTA);
   await testBuildFullAsync(ta, 'goBuilder/singleAction');
 });
 
 test('Multiple actions', async () => {
-  const ta = newTA(post);
-  ta.select('PostTitle', post.id, post.title);
-  ta.select(
-    'PostInfo',
-    post.id,
-    post.title,
-    post.user_id,
-    post.user_id.join(user).url_name,
-  );
-  ta.updateAll('PostTitle').set(post.title, dd.sql`${dd.input(post.title)}`);
-  ta.delete('ByID').where(dd.sql`${post.id} = ${dd.input(post.id)}`);
+  class PostTA extends dd.TA {
+    selectPostTitle = dd.select(post.id, post.title);
+    selectPostInfo = dd.select(
+      post.id,
+      post.title,
+      post.user_id,
+      post.user_id.join(user).url_name,
+    );
+    updatePostTitle = dd
+      .unsafeUpdateAll()
+      .set(post.title, dd.sql`${dd.input(post.title)}`);
+    deleteByID = dd
+      .deleteSome()
+      .where(dd.sql`${post.id} = ${dd.input(post.id)}`);
+  }
+  const ta = dd.ta(post, PostTA);
   await testBuildFullAsync(ta, 'goBuilder/multipleActions');
 });

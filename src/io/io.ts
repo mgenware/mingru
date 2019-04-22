@@ -18,7 +18,7 @@ export class JoinIO {
     const e = dialect.escape;
     return `INNER JOIN ${e(this.remoteTable)} AS ${e(this.tableAlias)} ON ${e(
       this.tableAlias,
-    )}.${e(this.remoteColumn.name)} = ${e(this.localColumn.tableName())}.${e(
+    )}.${e(this.remoteColumn.__name)} = ${e(this.localColumn.tableName())}.${e(
       this.localColumn.getDBName(),
     )}`;
   }
@@ -135,9 +135,9 @@ export class SetterIO {
   }
 }
 
-export class SelectIO<T extends dd.Table> {
+export class SelectIO {
   constructor(
-    public action: dd.SelectAction<T>,
+    public action: dd.SelectAction,
     public sql: string,
     public cols: SelectedColumnIO[],
     public from: TableIO,

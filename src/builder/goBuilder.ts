@@ -37,21 +37,21 @@ function joinParams(arr: string[]): string {
   return arr.join(', ');
 }
 
-export default class GoBuilder<T extends dd.Table> {
+export default class GoBuilder {
   tableClassObject: string;
   tableClassType: string;
   sysImports = new Set<string>();
   userImports = new Set<string>();
 
   constructor(
-    public tableActions: dd.TableActionCollection<T>,
+    public tableActions: dd.TA,
     public dialect: Dialect,
     public logger: Logger,
     public packageName = 'da',
   ) {
     throwIfFalsy(tableActions, 'tableActions');
     const capTableName = dd.utils.capitalizeFirstLetter(
-      dd.utils.toCamelCase(tableActions.table.__name),
+      dd.utils.toCamelCase(tableActions.__table.__name),
     );
     this.tableClassType = `TableType${capTableName}`;
     this.tableClassObject = capTableName;
@@ -83,12 +83,12 @@ export default class GoBuilder<T extends dd.Table> {
   private buildActions(): string {
     const { dialect } = this;
     let code = '';
-    for (const action of this.tableActions.map.values()) {
-      this.logger.debug(`Building action "${action.name}"`);
+    dd.enumerateActions(this.tableActions, action => {
+      this.logger.debug(`Building action "${action.__name}"`);
       code += '\n';
-      switch (action.type) {
+      switch (action.actionType) {
         case dd.ActionType.select: {
-          const io = toSelectIO(action as dd.SelectAction<T>, dialect);
+          const io = toSelectIO(action as dd.SelectAction, dialect);
           code += this.select(io);
           break;
         }
@@ -115,7 +115,7 @@ export default class GoBuilder<T extends dd.Table> {
           throw new Error(`Not supported io object "${toTypeString(action)}"`);
         }
       }
-    }
+    });
     return code;
   }
 
@@ -130,12 +130,12 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
     return code;
   }
 
-  private select(io: SelectIO<T>): string {
+  private select(io: SelectIO): string {
     const { dialect, tableClassType } = this;
     const { action } = io;
 
-    const tableName = dd.utils.toPascalCase(action.table.__name);
-    const actionName = action.name;
+    const tableName = dd.utils.toPascalCase(action.__table.__name);
+    const actionName = this.formatActionName(action.__name);
     const { pagination } = action;
     // The struct type of result, null if isSelectField is true
     // Table name is prefixed cuz class names are in global namespace (unlike instance methods which is scoped to a class)
@@ -244,7 +244,7 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) (${returnType}, er
   private update(io: UpdateIO): string {
     const { tableClassType } = this;
     const { action } = io;
-    const actionName = action.name;
+    const actionName = this.formatActionName(action.__name);
 
     let code = '';
 
@@ -289,7 +289,7 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
   private insert(io: InsertIO): string {
     const { tableClassType } = this;
     const { action } = io;
-    const actionName = action.name;
+    const actionName = this.formatActionName(action.__name);
 
     let code = '';
 
@@ -329,7 +329,7 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
   private delete(io: DeleteIO): string {
     const { tableClassType } = this;
     const { action } = io;
-    const actionName = action.name;
+    const actionName = this.formatActionName(action.__name);
 
     let code = '';
 
@@ -390,5 +390,9 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
     } else {
       this.userImports.add(bridge.importPath);
     }
+  }
+
+  private formatActionName(s: string): string {
+    return dd.utils.capitalizeFirstLetter(s);
   }
 }

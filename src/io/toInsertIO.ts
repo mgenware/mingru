@@ -13,7 +13,7 @@ export class InsertProcessor {
   convert(): io.InsertIO {
     let sql = 'INSERT INTO ';
     const { action, dialect } = this;
-    const { setters: actionSetters, withDefaults, table } = action;
+    const { setters: actionSetters, withDefaults, __table: table } = action;
 
     // table
     const tableIO = this.handleFrom(table);
@@ -35,7 +35,7 @@ export class InsertProcessor {
           return;
         }
 
-        const colName = col.name;
+        const colName = col.__name;
         if (col.isJoinedColumn()) {
           throw new Error(
             `Unexpected JoinedColumn in InsertAction, column name: "${colName}"`,

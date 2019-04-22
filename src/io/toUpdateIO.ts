@@ -12,12 +12,12 @@ export class UpdateProcessor {
   convert(): io.UpdateIO {
     let sql = 'UPDATE ';
     const { action, dialect } = this;
-    const table = action.table as dd.Table;
+    const table = action.__table as dd.Table;
 
-    if (!action.whereSQL && !action.updateAll) {
+    if (!action.whereSQL && !action.allowNoWhere) {
       throw new Error(
-        `You have to call updateAll to build an action without a WHERE clause, action name: "${
-          action.name
+        `You have to call unsafeUpdateAll to build an action without a WHERE clause, action name: "${
+          action.__name
         }"`,
       );
     }
