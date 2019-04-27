@@ -37,11 +37,21 @@ function joinParams(arr: string[]): string {
   return arr.join(', ');
 }
 
+export class ActionResult {
+  constructor(
+    public name: string,
+    public code: string,
+    public returnTypes: string[],
+    public params: VarInfo[],
+  ) {}
+}
+
 export default class GoBuilder {
-  tableClassObject: string;
-  tableClassType: string;
-  sysImports = new Set<string>();
-  userImports = new Set<string>();
+  private tableClassObject: string;
+  private tableClassType: string;
+  private sysImports = new Set<string>();
+  private userImports = new Set<string>();
+  private actionResults: { [name: string]: ActionResult } = {};
 
   constructor(
     public tableActions: dd.TA,
@@ -81,42 +91,45 @@ export default class GoBuilder {
   }
 
   private buildActions(): string {
-    const { dialect } = this;
     let code = '';
     dd.enumerateActions(this.tableActions, action => {
-      this.logger.debug(`Building action "${action.__name}"`);
       code += '\n';
-      switch (action.actionType) {
-        case dd.ActionType.select: {
-          const io = toSelectIO(action as dd.SelectAction, dialect);
-          code += this.select(io);
-          break;
-        }
-
-        case dd.ActionType.update: {
-          const io = toUpdateIO(action as dd.UpdateAction, dialect);
-          code += this.update(io);
-          break;
-        }
-
-        case dd.ActionType.insert: {
-          const io = toInsertIO(action as dd.InsertAction, dialect);
-          code += this.insert(io);
-          break;
-        }
-
-        case dd.ActionType.delete: {
-          const io = toDeleteIO(action as dd.DeleteAction, dialect);
-          code += this.delete(io);
-          break;
-        }
-
-        default: {
-          throw new Error(`Not supported io object "${toTypeString(action)}"`);
-        }
-      }
+      const actionResult = this.processAction(action);
+      this.actionResults[actionResult.name] = actionResult;
+      code += actionResult.code;
     });
     return code;
+  }
+
+  private processAction(action: dd.Action): ActionResult {
+    const { dialect } = this;
+    this.logger.debug(`Building action "${action.__name}"`);
+
+    switch (action.actionType) {
+      case dd.ActionType.select: {
+        const io = toSelectIO(action as dd.SelectAction, dialect);
+        return this.select(io);
+      }
+
+      case dd.ActionType.update: {
+        const io = toUpdateIO(action as dd.UpdateAction, dialect);
+        return this.update(io);
+      }
+
+      case dd.ActionType.insert: {
+        const io = toInsertIO(action as dd.InsertAction, dialect);
+        return this.insert(io);
+      }
+
+      case dd.ActionType.delete: {
+        const io = toDeleteIO(action as dd.DeleteAction, dialect);
+        return this.delete(io);
+      }
+
+      default: {
+        throw new Error(`Not supported io object "${toTypeString(action)}"`);
+      }
+    }
   }
 
   private buildTableObject(): string {
@@ -130,7 +143,7 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
     return code;
   }
 
-  private select(io: SelectIO): string {
+  private select(io: SelectIO): ActionResult {
     const { dialect, tableClassType } = this;
     const { action } = io;
 
@@ -171,16 +184,19 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
     // Collect params info, used to generate function header, e.g. `(queryable dbx.Queryable, id uint64, name string)`.
     let funcParamsCode = `${QueryableParam} ${QueryableType}`;
     const varContext = new NameContext();
-    const whereVars = this.whereToVars(io.where, varContext);
-    funcParamsCode += whereVars.map(p => `, ${p.name} ${p.type}`).join('');
-    let queryParamsCode = whereVars.map(p => `, ${p.name}`).join('');
+    const inputVars = this.whereToVars(io.where, varContext);
+    funcParamsCode += inputVars.map(p => `, ${p.name} ${p.type}`).join('');
+    let queryParamsCode = inputVars.map(p => `, ${p.name}`).join('');
     if (pagination) {
       funcParamsCode += `, ${Limit}, ${Offset} int`;
       queryParamsCode += `, ${Limit}, ${Offset}`;
     }
 
+    const returnTypes = [returnType, 'error'];
     code += `// ${actionName} ...
-func (da *${tableClassType}) ${actionName}(${funcParamsCode}) (${returnType}, error) {
+func (da *${tableClassType}) ${actionName}(${funcParamsCode}) (${returnTypes.join(
+      ', ',
+    )}) {
 `;
 
     let sqlSource = io.sql;
@@ -238,10 +254,10 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) (${returnType}, er
     code += `\treturn ${ResultVar}, nil
 }
 `;
-    return code;
+    return new ActionResult(actionName, code, returnTypes, inputVars);
   }
 
-  private update(io: UpdateIO): string {
+  private update(io: UpdateIO): ActionResult {
     const { tableClassType } = this;
     const { action } = io;
     const actionName = this.formatActionName(action.__name);
@@ -262,13 +278,16 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) (${returnType}, er
 
     funcParamsCode += funcParams.map(p => `, ${p.name} ${p.type}`).join('');
     const queryParamsCode = queryParams.map(p => `, ${p.name}`).join('');
+    let returnTypes: string[];
     code += `// ${actionName} ...
 func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
     // Return type is determined by checkRowsAffected
     if (action.checkAffectedRows) {
-      code += 'error';
+      returnTypes = ['error'];
+      code += returnTypes[0];
     } else {
-      code += '(int, error)';
+      returnTypes = ['int', 'error'];
+      code += `(${returnTypes.join(', ')})`;
     }
     code += ' {\n';
 
@@ -283,10 +302,10 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
       code += `\treturn dbx.GetRowsAffectedIntWithError(${ResultVar}, err)`;
     }
     code += '\n}\n';
-    return code;
+    return new ActionResult(actionName, code, returnTypes, funcParams);
   }
 
-  private insert(io: InsertIO): string {
+  private insert(io: InsertIO): ActionResult {
     const { tableClassType } = this;
     const { action } = io;
     const actionName = this.formatActionName(action.__name);
@@ -296,16 +315,20 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
     // Prepare params
     let funcParamsCode = `${QueryableParam} ${QueryableType}`;
     const varContext = new NameContext();
-    const setterVars = this.settersToVars(io.setters, varContext);
-    funcParamsCode += setterVars.map(p => `, ${p.name} ${p.type}`).join('');
-    const queryParamsCode = setterVars.map(p => `, ${p.name}`).join('');
+    const funcParams = this.settersToVars(io.setters, varContext);
+    funcParamsCode += funcParams.map(p => `, ${p.name} ${p.type}`).join('');
+    const queryParamsCode = funcParams.map(p => `, ${p.name}`).join('');
     code += `// ${actionName} ...
 func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
+
+    let returnTypes: string[];
     // Return type is determined by fetchInsertedID
     if (action.fetchInsertedID) {
-      code += '(uint64, error)';
+      returnTypes = ['uint64', 'error'];
+      code += `(${returnTypes.join(', ')})`;
     } else {
-      code += 'error';
+      returnTypes = ['error'];
+      code += returnTypes[0];
     }
     code += ' {\n';
 
@@ -323,10 +346,10 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
       code += '\treturn err';
     }
     code += '\n}\n';
-    return code;
+    return new ActionResult(actionName, code, returnTypes, funcParams);
   }
 
-  private delete(io: DeleteIO): string {
+  private delete(io: DeleteIO): ActionResult {
     const { tableClassType } = this;
     const { action } = io;
     const actionName = this.formatActionName(action.__name);
@@ -336,16 +359,20 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
     // Prepare params
     let funcParamsCode = `${QueryableParam} ${QueryableType}`;
     const varContext = new NameContext();
-    const whereVars = this.whereToVars(io.where, varContext);
-    funcParamsCode += whereVars.map(p => `, ${p.name} ${p.type}`).join('');
-    const queryParamsCode = whereVars.map(p => `, ${p.name}`).join('');
+    const funcParams = this.whereToVars(io.where, varContext);
+    funcParamsCode += funcParams.map(p => `, ${p.name} ${p.type}`).join('');
+    const queryParamsCode = funcParams.map(p => `, ${p.name}`).join('');
     code += `// ${actionName} ...
 func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
+
+    let returnTypes: string[];
     // Return type is determined by checkRowsAffected
     if (action.checkAffectedRows) {
-      code += 'error';
+      returnTypes = ['error'];
+      code += returnTypes[0];
     } else {
-      code += '(int, error)';
+      returnTypes = ['int', 'error'];
+      code += `(${returnTypes.join(', ')})`;
     }
     code += ' {\n';
 
@@ -359,9 +386,10 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
       code += `\treturn dbx.GetRowsAffectedIntWithError(${ResultVar}, err)`;
     }
     code += '\n}\n';
-    return code;
+    return new ActionResult(actionName, code, returnTypes, funcParams);
   }
 
+  // Extracts all input params from SQL and returns an array of VarInfo.
   private whereToVars(where: SQLIO | null, context: NameContext): VarInfo[] {
     if (!where) {
       return [];
