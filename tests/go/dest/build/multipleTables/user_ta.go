@@ -13,6 +13,12 @@ var User = &TableTypeUser{}
 
 // ------------ Actions ------------
 
+// DeleteByID ...
+func (da *TableTypeUser) DeleteByID(queryable dbx.Queryable, id uint64) error {
+	result, err := queryable.Exec("DELETE FROM `user` WHERE `id` = ?", id)
+	return dbx.CheckOneRowAffectedWithError(result, err)
+}
+
 // UserTableSelectProfileResult ...
 type UserTableSelectProfileResult struct {
 	DisplayName string
@@ -33,10 +39,4 @@ func (da *TableTypeUser) SelectProfile(queryable dbx.Queryable) (*UserTableSelec
 func (da *TableTypeUser) UpdateProfile(queryable dbx.Queryable, sig *string) (int, error) {
 	result, err := queryable.Exec("UPDATE `user` SET `sig` = ?", sig)
 	return dbx.GetRowsAffectedIntWithError(result, err)
-}
-
-// DeleteByID ...
-func (da *TableTypeUser) DeleteByID(queryable dbx.Queryable, id uint64) error {
-	result, err := queryable.Exec("DELETE FROM `user` WHERE `id` = ?", id)
-	return dbx.CheckOneRowAffectedWithError(result, err)
 }

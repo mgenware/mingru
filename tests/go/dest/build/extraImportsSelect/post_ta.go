@@ -15,35 +15,6 @@ var Post = &TableTypePost{}
 
 // ------------ Actions ------------
 
-// PostTableSelectTimesResult ...
-type PostTableSelectTimesResult struct {
-	Datetime time.Time
-	Date     time.Time
-}
-
-// SelectTimes ...
-func (da *TableTypePost) SelectTimes(queryable dbx.Queryable) ([]*PostTableSelectTimesResult, error) {
-	rows, err := queryable.Query("SELECT `datetime`, `date` FROM `post`")
-	if err != nil {
-		return nil, err
-	}
-	result := make([]*PostTableSelectTimesResult, 0)
-	defer rows.Close()
-	for rows.Next() {
-		item := &PostTableSelectTimesResult{}
-		err = rows.Scan(&item.Datetime, &item.Date)
-		if err != nil {
-			return nil, err
-		}
-		result = append(result, item)
-	}
-	err = rows.Err()
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
 // PostTableSelectNullableTimesResult ...
 type PostTableSelectNullableTimesResult struct {
 	NDatetime *time.Time
@@ -61,6 +32,35 @@ func (da *TableTypePost) SelectNullableTimes(queryable dbx.Queryable) ([]*PostTa
 	for rows.Next() {
 		item := &PostTableSelectNullableTimesResult{}
 		err = rows.Scan(&item.NDatetime, &item.NDate)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, item)
+	}
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// PostTableSelectTimesResult ...
+type PostTableSelectTimesResult struct {
+	Datetime time.Time
+	Date     time.Time
+}
+
+// SelectTimes ...
+func (da *TableTypePost) SelectTimes(queryable dbx.Queryable) ([]*PostTableSelectTimesResult, error) {
+	rows, err := queryable.Query("SELECT `datetime`, `date` FROM `post`")
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*PostTableSelectTimesResult, 0)
+	defer rows.Close()
+	for rows.Next() {
+		item := &PostTableSelectTimesResult{}
+		err = rows.Scan(&item.Datetime, &item.Date)
 		if err != nil {
 			return nil, err
 		}

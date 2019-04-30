@@ -13,6 +13,12 @@ var Post = &TableTypePost{}
 
 // ------------ Actions ------------
 
+// DeleteByID ...
+func (da *TableTypePost) DeleteByID(queryable dbx.Queryable, id uint64) error {
+	result, err := queryable.Exec("DELETE FROM `post` WHERE `id` = ?", id)
+	return dbx.CheckOneRowAffectedWithError(result, err)
+}
+
 // PostTableSelectPostInfoResult ...
 type PostTableSelectPostInfoResult struct {
 	ID          uint64
@@ -34,10 +40,4 @@ func (da *TableTypePost) SelectPostInfo(queryable dbx.Queryable) (*PostTableSele
 func (da *TableTypePost) UpdateContent(queryable dbx.Queryable, content string) (int, error) {
 	result, err := queryable.Exec("UPDATE `post` SET `content` = `content` = ?", content)
 	return dbx.GetRowsAffectedIntWithError(result, err)
-}
-
-// DeleteByID ...
-func (da *TableTypePost) DeleteByID(queryable dbx.Queryable, id uint64) error {
-	result, err := queryable.Exec("DELETE FROM `post` WHERE `id` = ?", id)
-	return dbx.CheckOneRowAffectedWithError(result, err)
 }

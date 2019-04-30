@@ -89,12 +89,16 @@ export default class GoBuilder {
 
   private buildActions(): string {
     let code = '';
-    dd.enumerateActions(this.tableActions, action => {
-      code += '\n';
-      const actionResult = this.processAction(action);
-      this.actionResults[actionResult.name] = actionResult;
-      code += actionResult.code;
-    });
+    dd.enumerateActions(
+      this.tableActions,
+      action => {
+        code += '\n';
+        const actionResult = this.processAction(action);
+        this.actionResults[actionResult.name] = actionResult;
+        code += actionResult.code;
+      },
+      { sorted: true },
+    );
     return code;
   }
 
