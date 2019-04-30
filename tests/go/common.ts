@@ -8,23 +8,33 @@ const dialect = new mr.MySQL();
 const DestDataDir = 'tests/go/dest';
 
 export async function testBuildAsync(ta: dd.TA, path: string) {
-  path = nodepath.resolve(nodepath.join(DestDataDir, path + '.go'));
-  const content = await mfs.readFileAsync(path, 'utf8');
+  let content = '';
+  if (path) {
+    path = nodepath.resolve(nodepath.join(DestDataDir, path + '.go'));
+    content = await mfs.readFileAsync(path, 'utf8');
+  }
   const logger = new mr.Logger(false);
   const builder = new mr.Builder(ta, dialect, logger);
   let actual = builder.build(true, true);
   actual = `import "github.com/mgenware/go-packagex/v5/dbx"\n${actual}`;
-  expect(actual).toBe(content);
+  if (path) {
+    expect(actual).toBe(content);
+  }
   return builder;
 }
 
 export async function testBuildFullAsync(ta: dd.TA, path: string) {
-  path = nodepath.resolve(nodepath.join(DestDataDir, path + '.go'));
-  const content = await mfs.readFileAsync(path, 'utf8');
+  let content = '';
+  if (path) {
+    path = nodepath.resolve(nodepath.join(DestDataDir, path + '.go'));
+    content = await mfs.readFileAsync(path, 'utf8');
+  }
   const logger = new mr.Logger(false);
   const builder = new mr.Builder(ta, dialect, logger);
   const actual = builder.build(false, true);
-  expect(actual).toBe(content);
+  if (path) {
+    expect(actual).toBe(content);
+  }
 }
 
 export async function testFilesAsync(a: string, b: string) {

@@ -37,7 +37,7 @@ test('Update with where', async () => {
       .where(
         dd.sql`${post.id} = ${post.id.toInput()} AND ${
           post.content
-        } = ${post.content.toInput()}`,
+        } = ${post.content.toInput('content2')}`,
       );
   }
   const ta = dd.ta(post, PostTA);
@@ -66,7 +66,7 @@ test('Duplicate names in where and setters', async () => {
       );
   }
   const ta = dd.ta(post, PostTA);
-  await testBuildAsync(ta, 'update/updateWithDupVars');
+  expect(testBuildAsync(ta, '')).rejects.toThrow('already exists');
 });
 
 test('Custom DB column name', async () => {

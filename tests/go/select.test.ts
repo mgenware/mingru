@@ -152,7 +152,7 @@ test('Selected name collisions', async () => {
     );
   }
   const ta = dd.ta(post, PostTA);
-  await testBuildAsync(ta, 'select/selectedNameCollisions');
+  expect(testBuildAsync(ta, '')).rejects.toThrow('already exists');
 });
 
 test('Calculated columns', async () => {

@@ -1,15 +1,12 @@
 export default class NameContext {
-  map: { [name: string]: number } = {};
+  private map = new Set<string>();
 
   get(name: string): string {
     const { map } = this;
-    let result = name;
-    if (!map[name]) {
-      map[name] = 2;
-    } else {
-      result = name + map[name];
-      map[name] += 1;
+    if (map.has(name)) {
+      throw new Error(`The name "${name}" already exists`);
     }
-    return result;
+    map.add(name);
+    return name;
   }
 }

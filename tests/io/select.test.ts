@@ -91,7 +91,10 @@ test('3-table joins', () => {
       cmt.target_id.join(post).title,
       cmt.target_id.join(post).user_id,
       cmt.target_id.join(post).user_id.join(user).url_name,
-      cmt.target_id.join(post).user_id.join(user).id,
+      cmt.target_id
+        .join(post)
+        .user_id.join(user)
+        .id.as('TUID2'),
     );
   }
   const cmtTA = dd.ta(cmt, CmtTA);
@@ -99,7 +102,7 @@ test('3-table joins', () => {
   const io = mr.io.toSelectIO(v, dialect);
 
   expect(io.sql).toBe(
-    'SELECT `post_cmt`.`id` AS `id`, `post_cmt`.`user_id` AS `userID`, `join_1`.`title` AS `targetTitle`, `join_1`.`user_id` AS `targetUserID`, `join_2`.`url_name` AS `targetUserUrlName`, `join_2`.`id` AS `targetUserID2` FROM `post_cmt` AS `post_cmt` INNER JOIN `post` AS `join_1` ON `join_1`.`id` = `post_cmt`.`target_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `target`.`user_id`',
+    'SELECT `post_cmt`.`id` AS `id`, `post_cmt`.`user_id` AS `userID`, `join_1`.`title` AS `targetTitle`, `join_1`.`user_id` AS `targetUserID`, `join_2`.`url_name` AS `targetUserUrlName`, `join_2`.`id` AS `TUID2` FROM `post_cmt` AS `post_cmt` INNER JOIN `post` AS `join_1` ON `join_1`.`id` = `post_cmt`.`target_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `target`.`user_id`',
   );
 });
 
@@ -141,18 +144,7 @@ test('Duplicate selected names', () => {
   }
   const postTA = dd.ta(post, PostTA);
   const v = postTA.t;
-  const io = mr.io.toSelectIO(v, dialect);
-  const { cols } = io;
-  let i = 0;
-  expect(cols[i++].inputName).toBe('title');
-  expect(cols[i++].inputName).toBe('title2');
-  expect(cols[i++].alias).toBe('a');
-  expect(cols[i++].inputName).toBe('title3');
-  expect(cols[i++].alias).toBe('a');
-  expect(cols[i++].alias).toBe('a');
-  expect(cols[i++].inputName).toBe('userUrlName');
-  expect(cols[i++].inputName).toBe('userUrlName2');
-  expect(cols[i++].alias).toBe('a');
+  expect(() => mr.io.toSelectIO(v, dialect)).toThrow('already exists');
 });
 
 test('Select nothing', () => {
