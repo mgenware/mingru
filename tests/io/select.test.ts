@@ -83,26 +83,32 @@ test('Multiple cols join', () => {
   );
 });
 
-test('3-table joins', () => {
+test('3-table joins and where', () => {
   class CmtTA extends dd.TA {
-    t = dd.select(
-      cmt.id,
-      cmt.user_id,
-      cmt.target_id.join(post).title,
-      cmt.target_id.join(post).user_id,
-      cmt.target_id.join(post).user_id.join(user).url_name,
-      cmt.target_id
-        .join(post)
-        .user_id.join(user)
-        .id.as('TUID2'),
-    );
+    t = dd
+      .select(
+        cmt.id,
+        cmt.user_id,
+        cmt.target_id.join(post).title,
+        cmt.target_id.join(post).user_id,
+        cmt.target_id.join(post).user_id.join(user).url_name,
+        cmt.target_id
+          .join(post)
+          .user_id.join(user)
+          .id.as('TUID2'),
+      )
+      .where(
+        dd.sql`${cmt.user_id} = 1 AND ${
+          cmt.target_id.join(post).title
+        } = 2 AND ${cmt.target_id.join(post).user_id.join(user).url_name} = 3`,
+      );
   }
   const cmtTA = dd.ta(cmt, CmtTA);
   const v = cmtTA.t;
   const io = mr.io.toSelectIO(v, dialect);
 
   expect(io.sql).toBe(
-    'SELECT `post_cmt`.`id` AS `id`, `post_cmt`.`user_id` AS `userID`, `join_1`.`title` AS `targetTitle`, `join_1`.`user_id` AS `targetUserID`, `join_2`.`url_name` AS `targetUserUrlName`, `join_2`.`id` AS `TUID2` FROM `post_cmt` AS `post_cmt` INNER JOIN `post` AS `join_1` ON `join_1`.`id` = `post_cmt`.`target_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `target`.`user_id`',
+    'SELECT `post_cmt`.`id` AS `id`, `post_cmt`.`user_id` AS `userID`, `join_1`.`title` AS `targetTitle`, `join_1`.`user_id` AS `targetUserID`, `join_2`.`url_name` AS `targetUserUrlName`, `join_2`.`id` AS `TUID2` FROM `post_cmt` AS `post_cmt` INNER JOIN `post` AS `join_1` ON `join_1`.`id` = `post_cmt`.`target_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `target`.`user_id` WHERE `post_cmt`.`user_id` = 1 AND `join_1`.`title` = 2 AND `join_2`.`url_name` = 3',
   );
 });
 
