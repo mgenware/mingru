@@ -19,6 +19,7 @@ import * as go from './go';
 import * as defs from './defs';
 import NameContext from '../lib/nameContext';
 import Logger from '../logger';
+import * as utils from './utils';
 
 const HeaderRepeatCount = 90;
 const QueryableParam = 'queryable';
@@ -60,12 +61,8 @@ export default class GoBuilder {
     public packageName = 'da',
   ) {
     throwIfFalsy(tableActions, 'tableActions');
-    const capTableName = dd.utils.capitalizeFirstLetter(
-      dd.utils.toCamelCase(tableActions.__table.__name),
-    );
-    this.tableClassType = `TableType${capTableName}`;
-    this.tableClassObject = capTableName;
-
+    this.tableClassType = utils.tableToClsName(tableActions.__table);
+    this.tableClassObject = utils.tableToObjName(tableActions.__table);
     this.userImports.add(defs.SQLXPath);
   }
 
@@ -148,7 +145,7 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
     const { action } = io;
 
     const tableName = dd.utils.toPascalCase(action.__table.__name);
-    const actionName = this.formatActionName(action.__name);
+    const actionName = utils.actionToFuncName(action);
     const { pagination } = action;
     // The struct type of result, null if isSelectField is true
     // Table name is prefixed cuz class names are in global namespace (unlike instance methods which is scoped to a class)
@@ -260,7 +257,7 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) (${returnTypes.joi
   private update(io: UpdateIO): ActionResult {
     const { tableClassType } = this;
     const { action } = io;
-    const actionName = this.formatActionName(action.__name);
+    const actionName = utils.actionToFuncName(action);
 
     let code = '';
 
@@ -308,7 +305,7 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
   private insert(io: InsertIO): ActionResult {
     const { tableClassType } = this;
     const { action } = io;
-    const actionName = this.formatActionName(action.__name);
+    const actionName = utils.actionToFuncName(action);
 
     let code = '';
 
@@ -352,7 +349,7 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
   private delete(io: DeleteIO): ActionResult {
     const { tableClassType } = this;
     const { action } = io;
-    const actionName = this.formatActionName(action.__name);
+    const actionName = utils.actionToFuncName(action);
 
     let code = '';
 
@@ -418,9 +415,5 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
     } else {
       this.userImports.add(bridge.importPath);
     }
-  }
-
-  private formatActionName(s: string): string {
-    return dd.utils.capitalizeFirstLetter(s);
   }
 }
