@@ -27,7 +27,7 @@
     "pi": "yarn add dd-models -P"
   },
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=8.6.0"
   },
   "prettier": {
     "singleQuote": true,
