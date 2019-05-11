@@ -24,7 +24,8 @@
     "prepublishOnly": "yarn run test",
     "lint": "tslint --project tsconfig.json --config tslint.json",
     "clean": "del-cli dist && del-cli dist_tests",
-    "pi": "yarn add dd-models -P"
+    "pi": "yarn add dd-models -P",
+    "dev_no_pi": "yarn run clean && tsc -b tests -w"
   },
   "engines": {
     "node": ">=8.6.0"
