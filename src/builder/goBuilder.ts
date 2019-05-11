@@ -1,11 +1,4 @@
-import {
-  SelectIO,
-  UpdateIO,
-  InsertIO,
-  DeleteIO,
-  SQLIO,
-  SetterIO,
-} from '../io/io';
+import { SelectIO, UpdateIO, InsertIO, DeleteIO } from '../io/io';
 import Dialect, { TypeBridge } from '../dialect';
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
@@ -185,7 +178,7 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
     // Collect params info, used to generate function header, e.g. `(queryable dbx.Queryable, id uint64, name string)`.
     let funcParamsCode = `${QueryableParam} ${QueryableType}`;
     const varContext = new NameContext();
-    const inputVars = this.whereToVars(io.where, varContext);
+    const inputVars = this.inputsToVars(varContext, action.getInputs());
     funcParamsCode += inputVars.map(p => `, ${p.name} ${p.type}`).join('');
     let queryParamsCode = inputVars.map(p => `, ${p.name}`).join('');
     if (pagination) {
@@ -268,9 +261,12 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) (${returnTypes.joi
     // Prepare params
     let funcParamsCode = `${QueryableParam} ${QueryableType}`;
     const varContext = new NameContext();
-    // Note: WHERE vars takes precedence over setter vars, e.g. UPDATE id = ? WHERE id = ? would produces func with params like (id, id2) where id is for WHERE, id2 for setter
-    const whereVars = this.whereToVars(io.where, varContext);
-    const setterVars = this.settersToVars(io.setters, varContext);
+    // Note: WHERE vars takes precedence over setter vars,
+    // e.g. UPDATE id = ? WHERE id = ? would produces func with params like (id, id2) where id is for WHERE, id2 for setter
+    const whereVars = action.whereSQL
+      ? this.inputsToVars(varContext, action.whereSQL.inputs)
+      : [];
+    const setterVars = this.inputsToVars(varContext, action.setterInputs);
 
     // For func params, WHERE vars are put before setter vars
     const funcParams = [...whereVars, ...setterVars];
@@ -316,7 +312,7 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
     // Prepare params
     let funcParamsCode = `${QueryableParam} ${QueryableType}`;
     const varContext = new NameContext();
-    const funcParams = this.settersToVars(io.setters, varContext);
+    const funcParams = this.inputsToVars(varContext, action.setterInputs);
     funcParamsCode += funcParams.map(p => `, ${p.name} ${p.type}`).join('');
     const queryParamsCode = funcParams.map(p => `, ${p.name}`).join('');
     code += `// ${actionName} ...
@@ -360,7 +356,9 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
     // Prepare params
     let funcParamsCode = `${QueryableParam} ${QueryableType}`;
     const varContext = new NameContext();
-    const funcParams = this.whereToVars(io.where, varContext);
+    const funcParams = action.whereSQL
+      ? this.inputsToVars(varContext, action.whereSQL.inputs)
+      : [];
     funcParamsCode += funcParams.map(p => `, ${p.name} ${p.type}`).join('');
     const queryParamsCode = funcParams.map(p => `, ${p.name}`).join('');
     code += `// ${actionName} ...
@@ -390,20 +388,11 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
     return new ActionResult(actionName, code, returnTypes, funcParams);
   }
 
-  // Extracts all input params from SQL and returns an array of VarInfo.
-  private whereToVars(where: SQLIO | null, context: NameContext): VarInfo[] {
-    if (!where) {
-      return [];
-    }
-    return this.sqlsToVars([where], context);
-  }
-
-  private settersToVars(setters: SetterIO[], context: NameContext): VarInfo[] {
-    return this.sqlsToVars(setters.map(s => s.sql), context);
-  }
-
-  private sqlsToVars(sqls: SQLIO[], context: NameContext): VarInfo[] {
-    const params = VarInfo.fromSQLArray(this.dialect, sqls, context);
+  private inputsToVars(
+    context: NameContext,
+    inputs: dd.SQLInputList,
+  ): VarInfo[] {
+    const params = VarInfo.fromInputs(this.dialect, context, inputs);
     for (const param of params) {
       this.addTypeBridge(param.type);
     }

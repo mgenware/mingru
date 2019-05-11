@@ -43,6 +43,24 @@ export default class VarInfo {
     return res;
   }
 
+  static fromInputs(
+    dialect: Dialect,
+    nameContext: NameContext,
+    inputs: dd.SQLInputList,
+  ): VarInfo[] {
+    const res: VarInfo[] = [];
+    for (const input of inputs.list) {
+      let type: TypeBridge;
+      if (input.typeObject instanceof dd.Column) {
+        type = dialect.goType((input.typeObject as dd.Column).type);
+      } else {
+        type = new TypeBridge(input.typeObject as string, null, false);
+      }
+      res.push(new VarInfo(input.name, input.name, nameContext, type, input));
+    }
+    return res;
+  }
+
   name: string;
 
   constructor(
