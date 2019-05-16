@@ -312,7 +312,7 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
     // Prepare params
     let funcParamsCode = `${QueryableParam} ${QueryableType}`;
     const varContext = new NameContext();
-    const funcParams = this.inputsToVars(varContext, action.setterInputs);
+    const funcParams = this.inputsToVars(varContext, action.getInputs());
     funcParamsCode += funcParams.map(p => `, ${p.name} ${p.type}`).join('');
     const queryParamsCode = funcParams.map(p => `, ${p.name}`).join('');
     code += `// ${actionName} ...
@@ -356,9 +356,7 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
     // Prepare params
     let funcParamsCode = `${QueryableParam} ${QueryableType}`;
     const varContext = new NameContext();
-    const funcParams = action.whereSQL
-      ? this.inputsToVars(varContext, action.whereSQL.inputs)
-      : [];
+    const funcParams = this.inputsToVars(varContext, action.getInputs());
     funcParamsCode += funcParams.map(p => `, ${p.name} ${p.type}`).join('');
     const queryParamsCode = funcParams.map(p => `, ${p.name}`).join('');
     code += `// ${actionName} ...
@@ -392,6 +390,9 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
     context: NameContext,
     inputs: dd.SQLInputList,
   ): VarInfo[] {
+    if (!inputs.length) {
+      return [];
+    }
     const params = VarInfo.fromInputs(this.dialect, context, inputs);
     for (const param of params) {
       this.addTypeBridge(param.type);
