@@ -83,7 +83,7 @@ test('Multiple cols join and custom table name', () => {
   );
 });
 
-test('Join a table with custom name', () => {
+test('Join a table with custom table name', () => {
   class PostTA extends dd.TA {
     t = dd.select(post.user_id, post.user_id.join(rpl).to_user_id);
   }
@@ -93,6 +93,22 @@ test('Join a table with custom name', () => {
 
   expect(io.sql).toBe(
     'SELECT `post`.`user_id` AS `userID`, `join_1`.`to_user_id` AS `userToUserID` FROM `post` AS `post` INNER JOIN `post_cmt_rpl` AS `join_1` ON `join_1`.`id` = `post`.`user_id`',
+  );
+});
+
+test('Join a table with custom column name', () => {
+  class PostTA extends dd.TA {
+    t = dd.select(
+      post.user_id,
+      post.user_id.join(rpl, rpl.custom_id).to_user_id,
+    );
+  }
+  const postTA = dd.ta(post, PostTA);
+  const v = postTA.t;
+  const io = mr.io.toSelectIO(v, dialect);
+
+  expect(io.sql).toBe(
+    'SELECT `post`.`user_id` AS `userID`, `join_1`.`to_user_id` AS `userToUserID` FROM `post` AS `post` INNER JOIN `post_cmt_rpl` AS `join_1` ON `join_1`.`haha` = `post`.`user_id`',
   );
 });
 
