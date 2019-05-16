@@ -49,7 +49,7 @@ export class UpdateProcessor {
 
   private handleFrom(table: dd.Table): io.TableIO {
     const e = this.dialect.escape;
-    const sql = `${e(table.__name)}`;
+    const sql = `${e(table.getDBName())}`;
     return new io.TableIO(table, sql);
   }
 }

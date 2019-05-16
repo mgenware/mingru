@@ -35,7 +35,7 @@ export class SelectProcessor {
     const { action } = this;
     const { columns, __table: from } = action;
     this.hasJoin = columns.some(sCol => {
-      const [col] = this.fetchColumns(sCol);
+      const [col] = this.analyzeSelectedColumn(sCol);
       if (col && col.isJoinedColumn()) {
         return true;
       }
@@ -133,16 +133,24 @@ export class SelectProcessor {
 
   private handleFrom(table: dd.Table): io.TableIO {
     const e = this.dialect.escape;
-    let sql = `FROM ${e(table.__name)}`;
+    const tableDBName = table.getDBName();
+    const encodedTableName = e(tableDBName);
+    let sql = `FROM ${encodedTableName}`;
     if (this.hasJoin) {
-      sql += ' AS ' + e(table.__name);
+      sql += ' AS ' + encodedTableName;
     }
     return new io.TableIO(table, sql);
   }
 
-  // Column = sc is a column || extracted from calculated column
-  // Calculated column = sc is a calculated column
-  private fetchColumns(
+  /*
+  * Returns:
+  [
+    Column,     // Can be a column from params, or extracted from a renamed raw column, or extracted from the expression of a raw column
+    RawColumn,
+    ColumnType,
+  ]
+  */
+  private analyzeSelectedColumn(
     sCol: dd.SelectActionColumns,
   ): [dd.Column | null, dd.RawColumn | null, dd.ColumnType | null] {
     if (!sCol) {
@@ -157,20 +165,22 @@ export class SelectProcessor {
       throw new Error(`Expected an "RawColumn", got ${toTypeString(sCol)}`);
     }
     // If user uses a renamed column (a RawColumn with core = column, and selectedName = newName)
-    const cc = sCol as dd.RawColumn;
-    if (cc.core instanceof dd.Column) {
-      const col = cc.core as dd.Column;
-      return [col, cc, col.type];
+    const rawCol = sCol as dd.RawColumn;
+    if (rawCol.core instanceof dd.Column) {
+      const col = rawCol.core as dd.Column;
+      return [col, rawCol, col.type];
     }
-    if (cc.core instanceof dd.SQL === false) {
-      throw new Error(`Expected an "SQL" object, got ${toTypeString(cc.core)}`);
+    if (rawCol.core instanceof dd.SQL === false) {
+      throw new Error(
+        `Expected an "SQL" object, got ${toTypeString(rawCol.core)}`,
+      );
     }
     // Now, RawColumn.core is an SQL expression. Try to extract a column from it.
-    const sql = cc.core as dd.SQL;
+    const sql = rawCol.core as dd.SQL;
     const column = sql.findColumn();
     // In this case, we can guess the result type in case user specified type is not present
     const resultType = this.guessColumnType(sql);
-    return [column, cc, resultType];
+    return [column, rawCol, resultType];
   }
 
   private guessColumnType(sql: dd.SQL): dd.ColumnType | null {
@@ -190,7 +200,7 @@ export class SelectProcessor {
     sCol: dd.SelectActionColumns,
   ): io.SelectedColumnIO {
     const { dialect } = this;
-    const [col, calcCol, resultType] = this.fetchColumns(sCol);
+    const [col, calcCol, resultType] = this.analyzeSelectedColumn(sCol);
     if (col) {
       const colSQL = this.handleColumn(
         col,
@@ -325,7 +335,8 @@ export class SelectProcessor {
       let sql = '';
       if (this.hasJoin) {
         // Each column must have a prefix in a SQL with joins
-        sql = `${e(col.tableName())}.`;
+        // NOTE: use table DBName as alias
+        sql = `${e(col.tableName(true))}.`;
       }
       sql += e(col.getDBName());
       return new ColumnSQL(sql, inputName, alias);

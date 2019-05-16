@@ -16,9 +16,10 @@ export class JoinIO {
 
   toSQL(dialect: Dialect): string {
     const e = dialect.escape;
+    const localTableDBName = this.localColumn.tableName(true);
     return `INNER JOIN ${e(this.remoteTable)} AS ${e(this.tableAlias)} ON ${e(
       this.tableAlias,
-    )}.${e(this.remoteColumn.__name)} = ${e(this.localColumn.tableName())}.${e(
+    )}.${e(this.remoteColumn.__name)} = ${e(localTableDBName)}.${e(
       this.localColumn.getDBName(),
     )}`;
   }

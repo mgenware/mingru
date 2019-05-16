@@ -36,7 +36,8 @@ export class DeleteProcessor {
 
   private handleFrom(table: dd.Table): io.TableIO {
     const e = this.dialect.escape;
-    const sql = `${e(table.__name)}`;
+    const encodedTableName = e(table.getDBName());
+    const sql = `${encodedTableName}`;
     return new io.TableIO(table, sql);
   }
 }
