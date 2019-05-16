@@ -989,10 +989,10 @@ data-urls@^1.0.0:
     whatwg-mimetype "^2.2.0"
     whatwg-url "^7.0.0"
 
-dd-models@^0.13.0:
-  version "0.13.0"
-  resolved "https://registry.yarnpkg.com/dd-models/-/dd-models-0.13.0.tgz#67df88818d7c5c2472f2e6e09fbb8eb6feea9044"
-  integrity sha512-b+qFvYBrcU4h0QgbBVL0Asc6EbAbsU93GVu5IqFRsyDX3qMBw3VD0sBIQPu8do8FsyVBjt1IQ4xbMgWnB2bGzA==
+dd-models@^0.14.0:
+  version "0.14.0"
+  resolved "https://registry.yarnpkg.com/dd-models/-/dd-models-0.14.0.tgz#288554c2ab26fa3886c4c4373f9352e4375ecf1c"
+  integrity sha512-3rozUL8grdyfKO1kpoKmKYFbvGQXNHXzde8HZSLZDiCH0SG3BDEzNCwZYheDrxXNXUgKkUjJ4pek8e87gKyPHA==
   dependencies:
     lodash.camelcase "^4.3.0"
     lodash.snakecase "^4.1.1"
