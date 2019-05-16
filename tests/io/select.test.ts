@@ -66,7 +66,7 @@ test('Basic join', () => {
   );
 });
 
-test('Multiple cols join', () => {
+test('Multiple cols join and custom table name', () => {
   class RplTA extends dd.TA {
     t = dd.select(
       rpl.user_id.join(user).url_name,
@@ -80,6 +80,19 @@ test('Multiple cols join', () => {
 
   expect(io.sql).toBe(
     'SELECT `join_1`.`url_name` AS `userUrlName`, `join_1`.`id` AS `userID`, `join_2`.`url_name` AS `toUserUrlName` FROM `post_cmt_rpl` AS `post_cmt_rpl` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `post_cmt_rpl`.`user_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `post_cmt_rpl`.`to_user_id`',
+  );
+});
+
+test('Join a table with custom name', () => {
+  class PostTA extends dd.TA {
+    t = dd.select(post.user_id, post.user_id.join(rpl).to_user_id);
+  }
+  const postTA = dd.ta(post, PostTA);
+  const v = postTA.t;
+  const io = mr.io.toSelectIO(v, dialect);
+
+  expect(io.sql).toBe(
+    'SELECT `post`.`user_id` AS `userID`, `join_1`.`to_user_id` AS `userToUserID` FROM `post` AS `post` INNER JOIN `post_cmt_rpl` AS `join_1` ON `join_1`.`id` = `post`.`user_id`',
   );
 });
 

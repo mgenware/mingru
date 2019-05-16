@@ -989,14 +989,14 @@ data-urls@^1.0.0:
     whatwg-mimetype "^2.2.0"
     whatwg-url "^7.0.0"
 
-dd-models@^0.12.0:
-  version "0.12.0"
-  resolved "https://registry.yarnpkg.com/dd-models/-/dd-models-0.12.0.tgz#2236cb6a20034d8770b11f02351cf5984f339717"
-  integrity sha512-pniFR4I1JTLgETKpi04ucfP1xJAAG1/kq5QCSfCTZdlUaJro5BA4E20GBgaNV4eRT83uQhnNYNQy5Y7qxQWSWA==
+dd-models@^0.13.0:
+  version "0.13.0"
+  resolved "https://registry.yarnpkg.com/dd-models/-/dd-models-0.13.0.tgz#67df88818d7c5c2472f2e6e09fbb8eb6feea9044"
+  integrity sha512-b+qFvYBrcU4h0QgbBVL0Asc6EbAbsU93GVu5IqFRsyDX3qMBw3VD0sBIQPu8do8FsyVBjt1IQ4xbMgWnB2bGzA==
   dependencies:
     lodash.camelcase "^4.3.0"
     lodash.snakecase "^4.1.1"
-    throw-if-arg-empty "^1.0.1"
+    throw-if-arg-empty "^2.0.1"
     to-type-string "^1.0.0"
 
 debug@^2.1.2, debug@^2.2.0, debug@^2.3.3:
@@ -3992,11 +3992,6 @@ throat@^4.0.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/throat/-/throat-4.1.0.tgz#89037cbc92c56ab18926e6ba4cbb200e15672a6a"
   integrity sha1-iQN8vJLFarGJJua6TLsgDhVnKmo=
-
-throw-if-arg-empty@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/throw-if-arg-empty/-/throw-if-arg-empty-1.0.1.tgz#df0b2ca09dd9d9a18132c6e652af4d601aa94316"
-  integrity sha512-TwMXozqaGgl18FVWpjBKuEead42hFSduxIPsv4OLWlj2EVc6Sm1mcrjLNLUw8S+mVM/nNItr2kWIYeHd/t/r0w==
 
 throw-if-arg-empty@^2.0.1:
   version "2.0.1"

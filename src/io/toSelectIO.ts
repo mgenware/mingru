@@ -301,7 +301,7 @@ export class SelectProcessor {
       this.nextJoinedTableName(),
       localTableName,
       srcColumn,
-      destColumn.tableName(),
+      destColumn.tableName(true),
       destColumn,
     );
     this.jcMap.set(table.keyPath, joinIO);
