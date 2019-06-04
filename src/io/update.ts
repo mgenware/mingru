@@ -1,7 +1,38 @@
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
-import * as io from './io';
+import { TableIO, settersToInputs } from './common';
+import { SetterIO } from './coreUpdate';
+import { SQLIO } from './sql';
+import SQLVariableList from './sqlInputList';
+
+export class UpdateIO {
+  // Accumulated inputs (whereInputs + setterInputs)
+  inputs!: SQLVariableList;
+
+  constructor(
+    public action: dd.UpdateAction,
+    public sql: string,
+    public table: TableIO,
+    public setters: SetterIO[],
+    public where: SQLIO | null,
+  ) {
+    throwIfFalsy(action, 'action');
+    throwIfFalsy(sql, 'sql');
+    throwIfFalsy(table, 'table');
+    throwIfFalsy(setters, 'setters');
+
+    const setterInputs = settersToInputs(this.setters);
+    if (this.where) {
+      const inputs = this.where.inputs.copy();
+      inputs.merge(setterInputs);
+      inputs.seal();
+      this.inputs = inputs;
+    } else {
+      this.inputs = setterInputs;
+    }
+  }
+}
 
 export class UpdateProcessor {
   constructor(public action: dd.UpdateAction, public dialect: Dialect) {
@@ -9,7 +40,7 @@ export class UpdateProcessor {
     throwIfFalsy(dialect, 'dialect');
   }
 
-  convert(): io.UpdateIO {
+  convert(): UpdateIO {
     let sql = 'UPDATE ';
     const { action, dialect } = this;
     const table = action.__table as dd.Table;
@@ -34,30 +65,30 @@ export class UpdateProcessor {
     const fromIO = this.handleFrom(table);
     sql += `${fromIO.sql} SET `;
 
-    const setterIOs = io.SetterIO.fromMap(setters);
+    const setterIOs = SetterIO.fromMap(setters);
     sql += setterIOs
       .map(s => `${dialect.escapeColumn(s.col)} = ${s.sql.toSQL(dialect)}`)
       .join(', ');
 
     // where
-    const whereIO = action.whereSQL ? new io.SQLIO(action.whereSQL) : null;
+    const whereIO = action.whereSQL ? new SQLIO(action.whereSQL) : null;
     if (whereIO) {
       sql += ` WHERE ${whereIO.toSQL(dialect)}`;
     }
-    return new io.UpdateIO(action, sql, fromIO, setterIOs, whereIO);
+    return new UpdateIO(action, sql, fromIO, setterIOs, whereIO);
   }
 
-  private handleFrom(table: dd.Table): io.TableIO {
+  private handleFrom(table: dd.Table): TableIO {
     const e = this.dialect.escape;
     const sql = `${e(table.getDBName())}`;
-    return new io.TableIO(table, sql);
+    return new TableIO(table, sql);
   }
 }
 
 export default function updateIO(
   action: dd.UpdateAction,
   dialect: Dialect,
-): io.UpdateIO {
+): UpdateIO {
   const pro = new UpdateProcessor(action, dialect);
   return pro.convert();
 }

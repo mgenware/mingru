@@ -1,8 +1,33 @@
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
-import * as io from './io';
 import dtDefault from '../builder/dtDefault';
+import { TableIO, ActionIO, settersToInputs } from './common';
+import { SetterIO } from './coreUpdate';
+import { SQLIO } from './sql';
+import SQLVariableList from './sqlInputList';
+
+export class InsertIO extends ActionIO {
+  inputs: SQLVariableList;
+
+  constructor(
+    public action: dd.InsertAction,
+    public sql: string,
+    public table: TableIO,
+    public setters: SetterIO[],
+  ) {
+    super();
+    throwIfFalsy(action, 'action');
+    throwIfFalsy(sql, 'sql');
+    throwIfFalsy(table, 'table');
+
+    this.inputs = settersToInputs(this.setters);
+  }
+
+  getInputs(): SQLVariableList {
+    return this.inputs;
+  }
+}
 
 export class InsertProcessor {
   constructor(public action: dd.InsertAction, public dialect: Dialect) {
@@ -10,7 +35,7 @@ export class InsertProcessor {
     throwIfFalsy(dialect, 'dialect');
   }
 
-  convert(): io.InsertIO {
+  convert(): InsertIO {
     let sql = 'INSERT INTO ';
     const { action, dialect } = this;
     const { setters: actionSetters, withDefaults, __table: table } = action;
@@ -25,7 +50,7 @@ export class InsertProcessor {
         `The insert action "${action}" does not have any setters`,
       );
     }
-    const setters = io.SetterIO.fromMap(actionSetters);
+    const setters = SetterIO.fromMap(actionSetters);
 
     // Try to set the remaining columns to defaults if withDefaults is true
     if (withDefaults) {
@@ -55,7 +80,7 @@ export class InsertProcessor {
         let value: string;
         if (col.default) {
           if (col.default instanceof dd.SQL) {
-            const valueIO = new io.SQLIO(col.default as dd.SQL);
+            const valueIO = new SQLIO(col.default as dd.SQL);
             value = valueIO.toSQL(dialect);
           } else {
             value = dialect.translate(col.default);
@@ -74,7 +99,7 @@ export class InsertProcessor {
           value = dialect.translate(def);
         }
 
-        setters.push(new io.SetterIO(col, new io.SQLIO(dd.sql`${value}`)));
+        setters.push(new SetterIO(col, new SQLIO(dd.sql`${value}`)));
       });
     }
 
@@ -85,20 +110,20 @@ export class InsertProcessor {
     const colValues = setters.map(s => s.sql.toSQL(dialect));
     sql += ` VALUES (${colValues.join(', ')})`;
 
-    return new io.InsertIO(action, sql, tableIO, setters);
+    return new InsertIO(action, sql, tableIO, setters);
   }
 
-  private handleFrom(table: dd.Table): io.TableIO {
+  private handleFrom(table: dd.Table): TableIO {
     const e = this.dialect.escape;
     const sql = `${e(table.getDBName())}`;
-    return new io.TableIO(table, sql);
+    return new TableIO(table, sql);
   }
 }
 
 export default function insertIO(
   action: dd.InsertAction,
   dialect: Dialect,
-): io.InsertIO {
+): InsertIO {
   const pro = new InsertProcessor(action, dialect);
   return pro.convert();
 }

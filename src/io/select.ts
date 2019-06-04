@@ -1,9 +1,91 @@
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
-import * as io from './io';
 import NameContext from '../lib/nameContext';
 import toTypeString from 'to-type-string';
+import SQLVariableList from './sqlInputList';
+import { TableIO, ActionIO } from './common';
+import { SQLIO } from './sql';
+
+export class JoinIO {
+  constructor(
+    public path: string,
+    public tableAlias: string,
+    // Note that localTable can also be an alias of another join
+    public localTable: string,
+    public localColumn: dd.Column,
+    public remoteTable: string,
+    public remoteColumn: dd.Column,
+  ) {}
+
+  toSQL(dialect: Dialect): string {
+    const e = dialect.escape;
+    const localTableDBName = this.localColumn.tableName(true);
+    return `INNER JOIN ${e(this.remoteTable)} AS ${e(this.tableAlias)} ON ${e(
+      this.tableAlias,
+    )}.${e(this.remoteColumn.getDBName())} = ${e(localTableDBName)}.${e(
+      this.localColumn.getDBName(),
+    )}`;
+  }
+}
+
+export class SelectedColumnIO {
+  constructor(
+    public selectedColumn: dd.SelectActionColumns,
+    public valueSQL: string,
+    public inputName: string, // Equals to alias if it's not null
+    public alias: string | null,
+    public column: dd.Column | null,
+    public resultType: dd.ColumnType | null, // Available when we can guess the evaluated type, e.g. an expression containing only one column or SQLCall
+  ) {
+    throwIfFalsy(selectedColumn, 'selectedColumn');
+    throwIfFalsy(valueSQL, 'valueSQL');
+  }
+
+  sql(dialect: Dialect, hasJoin: boolean): string {
+    if (hasJoin || this.alias) {
+      return dialect.as(this.valueSQL, this.alias || this.inputName);
+    }
+    return this.valueSQL;
+  }
+
+  getResultType(): dd.ColumnType {
+    if (this.resultType) {
+      return this.resultType;
+    }
+    if (!this.selectedColumn.type) {
+      throw new Error(
+        `No column type found on column "${toTypeString(
+          this.selectedColumn,
+        )}", SQL: "${this.valueSQL.toString()}"`,
+      );
+    }
+    return this.selectedColumn.type;
+  }
+}
+
+export class SelectIO extends ActionIO {
+  constructor(
+    public action: dd.SelectAction,
+    public sql: string,
+    public cols: SelectedColumnIO[],
+    public from: TableIO,
+    public where: SQLIO | null,
+  ) {
+    super();
+    throwIfFalsy(action, 'action');
+    throwIfFalsy(sql, 'sql');
+    throwIfFalsy(cols, 'cols');
+    throwIfFalsy(from, 'from');
+  }
+
+  getInputs(): SQLVariableList {
+    if (!this.where) {
+      return SQLVariableList.empty;
+    }
+    return this.where.inputs;
+  }
+}
 
 // Used internally in SelectProcessor to save an SQL of a selected column associated with an alias.
 class ColumnSQL {

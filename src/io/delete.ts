@@ -1,7 +1,30 @@
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
-import * as io from './io';
+import { TableIO, ActionIO } from './common';
+import { SQLIO } from './sql';
+import SQLVariableList from './sqlInputList';
+
+export class DeleteIO extends ActionIO {
+  constructor(
+    public action: dd.DeleteAction,
+    public sql: string,
+    public table: TableIO,
+    public where: SQLIO | null,
+  ) {
+    super();
+    throwIfFalsy(action, 'action');
+    throwIfFalsy(sql, 'sql');
+    throwIfFalsy(table, 'table');
+  }
+
+  getInputs(): SQLVariableList {
+    if (this.where) {
+      return this.where.inputs;
+    }
+    return SQLVariableList.empty;
+  }
+}
 
 export class DeleteProcessor {
   constructor(public action: dd.DeleteAction, public dialect: Dialect) {
@@ -9,7 +32,7 @@ export class DeleteProcessor {
     throwIfFalsy(dialect, 'dialect');
   }
 
-  convert(): io.DeleteIO {
+  convert(): DeleteIO {
     let sql = 'DELETE FROM ';
     const { action, dialect } = this;
     const table = action.__table as dd.Table;
@@ -27,25 +50,25 @@ export class DeleteProcessor {
     sql += fromIO.sql;
 
     // where
-    const whereIO = action.whereSQL ? new io.SQLIO(action.whereSQL) : null;
+    const whereIO = action.whereSQL ? new SQLIO(action.whereSQL) : null;
     if (whereIO) {
       sql += ` WHERE ${whereIO.toSQL(dialect)}`;
     }
-    return new io.DeleteIO(action, sql, fromIO, whereIO);
+    return new DeleteIO(action, sql, fromIO, whereIO);
   }
 
-  private handleFrom(table: dd.Table): io.TableIO {
+  private handleFrom(table: dd.Table): TableIO {
     const e = this.dialect.escape;
     const encodedTableName = e(table.getDBName());
     const sql = `${encodedTableName}`;
-    return new io.TableIO(table, sql);
+    return new TableIO(table, sql);
   }
 }
 
 export default function deleteIO(
   action: dd.DeleteAction,
   dialect: Dialect,
-): io.DeleteIO {
+): DeleteIO {
   const pro = new DeleteProcessor(action, dialect);
   return pro.convert();
 }

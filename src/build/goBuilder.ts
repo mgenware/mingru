@@ -31,15 +31,6 @@ function joinParams(arr: string[]): string {
   return arr.join(', ');
 }
 
-export class ActionResult {
-  constructor(
-    public name: string,
-    public code: string,
-    public returnTypes: string[],
-    public params: VarInfo[],
-  ) {}
-}
-
 export default class GoBuilder {
   private tableClassObject: string;
   private tableClassType: string;
