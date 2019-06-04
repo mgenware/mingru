@@ -2,7 +2,7 @@ import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
 import { TableIO, ActionIO } from './common';
-import { SQLIO } from './sql';
+import { SQLIO } from './sqlIO';
 import SQLVariableList from './sqlInputList';
 
 export class DeleteIO extends ActionIO {
@@ -26,7 +26,7 @@ export class DeleteIO extends ActionIO {
   }
 }
 
-export class DeleteProcessor {
+class DeleteIOProcessor {
   constructor(public action: dd.DeleteAction, public dialect: Dialect) {
     throwIfFalsy(action, 'action');
     throwIfFalsy(dialect, 'dialect');
@@ -65,10 +65,7 @@ export class DeleteProcessor {
   }
 }
 
-export default function deleteIO(
-  action: dd.DeleteAction,
-  dialect: Dialect,
-): DeleteIO {
-  const pro = new DeleteProcessor(action, dialect);
+export function deleteIO(action: dd.DeleteAction, dialect: Dialect): DeleteIO {
+  const pro = new DeleteIOProcessor(action, dialect);
   return pro.convert();
 }

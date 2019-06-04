@@ -1,24 +1,31 @@
-const emptySQLVariableList = new SQLVariableList();
-emptySQLVariableList.seal();
+import { throwIfFalsy } from 'throw-if-arg-empty';
+import * as dd from 'dd-models';
+
+// tslint:disable-next-line no-any
+let emptySQLVariableList: any = null;
 
 export default class SQLVariableList {
   static get empty(): SQLVariableList {
+    if (!emptySQLVariableList) {
+      emptySQLVariableList = new SQLVariableList();
+      emptySQLVariableList.seal();
+    }
     return emptySQLVariableList;
   }
 
-  list: SQLVariable[] = [];
-  map: { [name: string]: SQLVariable } = {};
+  list: dd.SQLVariable[] = [];
+  map: { [name: string]: dd.SQLVariable } = {};
   sealed = false;
 
   get length(): number {
     return this.list.length;
   }
 
-  getByIndex(index: number): SQLVariable | null {
+  getByIndex(index: number): dd.SQLVariable | null {
     return this.list[index];
   }
 
-  getByName(name: string): SQLVariable | null {
+  getByName(name: string): dd.SQLVariable | null {
     return this.map[name];
   }
 
@@ -26,7 +33,7 @@ export default class SQLVariableList {
     this.sealed = true;
   }
 
-  add(val: SQLVariable) {
+  add(val: dd.SQLVariable) {
     if (this.sealed) {
       throw new Error('InputList is sealed');
     }

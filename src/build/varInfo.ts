@@ -1,7 +1,8 @@
 import * as dd from 'dd-models';
 import { Dialect, TypeBridge } from '../dialect';
-import { SQLIO } from '../io/io';
+import { SQLIO } from '../io/sqlIO';
 import NameContext from '../lib/nameContext';
+import SQLVariableList from '../io/sqlInputList';
 
 export default class VarInfo {
   static fromColumn(
@@ -46,7 +47,7 @@ export default class VarInfo {
   static fromInputs(
     dialect: Dialect,
     nameContext: NameContext,
-    inputs: dd.SQLInputList,
+    inputs: SQLVariableList,
   ): VarInfo[] {
     const res: VarInfo[] = [];
     for (const input of inputs.list) {
@@ -68,7 +69,7 @@ export default class VarInfo {
     public dbName: string, // Raw DB column name
     nameContext: NameContext,
     public type: TypeBridge,
-    public rawObject: dd.SQLInput | dd.Column,
+    public rawObject: dd.SQLVariable | dd.Column,
   ) {
     this.name = nameContext.get(name);
   }

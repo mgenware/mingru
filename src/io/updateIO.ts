@@ -1,14 +1,15 @@
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
-import { TableIO, settersToInputs } from './common';
-import { SetterIO } from './coreUpdate';
-import { SQLIO } from './sql';
+import { TableIO, settersToInputs, ActionIO } from './common';
+import { SetterIO } from './common';
+import { SQLIO } from './sqlIO';
 import SQLVariableList from './sqlInputList';
 
-export class UpdateIO {
+export class UpdateIO extends ActionIO {
   // Accumulated inputs (whereInputs + setterInputs)
-  inputs!: SQLVariableList;
+  inputs: SQLVariableList;
+  setterInputs: SQLVariableList;
 
   constructor(
     public action: dd.UpdateAction,
@@ -17,6 +18,7 @@ export class UpdateIO {
     public setters: SetterIO[],
     public where: SQLIO | null,
   ) {
+    super();
     throwIfFalsy(action, 'action');
     throwIfFalsy(sql, 'sql');
     throwIfFalsy(table, 'table');
@@ -31,10 +33,15 @@ export class UpdateIO {
     } else {
       this.inputs = setterInputs;
     }
+    this.setterInputs = setterInputs;
+  }
+
+  getInputs(): SQLVariableList {
+    return this.inputs;
   }
 }
 
-export class UpdateProcessor {
+class UpdateIOProcessor {
   constructor(public action: dd.UpdateAction, public dialect: Dialect) {
     throwIfFalsy(action, 'action');
     throwIfFalsy(dialect, 'dialect');
@@ -85,10 +92,7 @@ export class UpdateProcessor {
   }
 }
 
-export default function updateIO(
-  action: dd.UpdateAction,
-  dialect: Dialect,
-): UpdateIO {
-  const pro = new UpdateProcessor(action, dialect);
+export function updateIO(action: dd.UpdateAction, dialect: Dialect): UpdateIO {
+  const pro = new UpdateIOProcessor(action, dialect);
   return pro.convert();
 }

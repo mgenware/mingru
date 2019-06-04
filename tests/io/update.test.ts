@@ -1,6 +1,7 @@
 import * as mr from '../../';
 import * as dd from 'dd-models';
 import post from '../models/post';
+import user from '../models/user';
 
 const dialect = new mr.MySQL();
 
@@ -15,13 +16,13 @@ test('Update', () => {
   }
   const postTA = dd.ta(post, PostTA);
   const v = postTA.t;
-  const io = mr.io.toUpdateIO(v, dialect);
+  const io = mr.updateIO(v, dialect);
 
-  expect(io).toBeInstanceOf(mr.io.UpdateIO);
+  expect(io).toBeInstanceOf(mr.UpdateIO);
   expect(io.sql).toBe(
     'UPDATE `post` SET `title` = "haha", `content` = ?, `cmt_c` = `cmt_c` + 1 WHERE `id` = ?',
   );
-  expect(io.table).toBeInstanceOf(mr.io.TableIO);
+  expect(io.table).toBeInstanceOf(mr.TableIO);
   expect(io.setters.length).toBe(3);
   expect(io.setters[0].col).toBe(post.title);
   expect(io.setters[0].sql.sql.toString()).toBe('"haha"');
@@ -38,7 +39,31 @@ test('Update with where', () => {
   }
   const postTA = dd.ta(post, PostTA);
   const v = postTA.t;
-  const io = mr.io.toUpdateIO(v, dialect);
+  const io = mr.updateIO(v, dialect);
 
   expect(io.sql).toBe('UPDATE `post` SET `title` = "haha" WHERE `id` = 1');
+});
+
+test('getInputs', () => {
+  class UserTA extends dd.TA {
+    t = dd
+      .updateSome()
+      .set(user.url_name, dd.sql`${dd.input(user.url_name)}`)
+      .setInputs(user.sig)
+      .set(user.follower_count, dd.sql`${user.follower_count} + 1`)
+      .where(dd.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
+  }
+  const ta = dd.ta(user, UserTA);
+  const v = ta.t;
+  const io = mr.updateIO(v, new mr.MySQL());
+  expect(io.setterInputs.list).toEqual([
+    user.url_name.toInput(),
+    user.sig.toInput(),
+  ]);
+  expect(io.getInputs().list).toEqual([
+    user.id.toInput(),
+    user.url_name.toInput(),
+    user.sig.toInput(),
+  ]);
+  expect(io.getInputs().sealed).toBe(true);
 });

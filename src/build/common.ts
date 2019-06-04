@@ -1,3 +1,5 @@
+import VarInfo from './varInfo';
+
 export class ActionResult {
   constructor(
     public name: string,

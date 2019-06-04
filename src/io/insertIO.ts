@@ -1,10 +1,10 @@
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
-import dtDefault from '../builder/dtDefault';
+import dtDefault from '../build/dtDefault';
 import { TableIO, ActionIO, settersToInputs } from './common';
-import { SetterIO } from './coreUpdate';
-import { SQLIO } from './sql';
+import { SetterIO } from './common';
+import { SQLIO } from './sqlIO';
 import SQLVariableList from './sqlInputList';
 
 export class InsertIO extends ActionIO {
@@ -29,7 +29,7 @@ export class InsertIO extends ActionIO {
   }
 }
 
-export class InsertProcessor {
+export class InsertIOProcessor {
   constructor(public action: dd.InsertAction, public dialect: Dialect) {
     throwIfFalsy(action, 'action');
     throwIfFalsy(dialect, 'dialect');
@@ -120,10 +120,7 @@ export class InsertProcessor {
   }
 }
 
-export default function insertIO(
-  action: dd.InsertAction,
-  dialect: Dialect,
-): InsertIO {
-  const pro = new InsertProcessor(action, dialect);
+export function insertIO(action: dd.InsertAction, dialect: Dialect): InsertIO {
+  const pro = new InsertIOProcessor(action, dialect);
   return pro.convert();
 }

@@ -30,10 +30,6 @@
   "engines": {
     "node": ">=8.6.0"
   },
-  "prettier": {
-    "singleQuote": true,
-    "trailingComma": "all"
-  },
   "jest": {
     "moduleFileExtensions": [
       "js"

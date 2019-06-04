@@ -5,7 +5,7 @@ import NameContext from '../lib/nameContext';
 import toTypeString from 'to-type-string';
 import SQLVariableList from './sqlInputList';
 import { TableIO, ActionIO } from './common';
-import { SQLIO } from './sql';
+import { SQLIO } from './sqlIO';
 
 export class JoinIO {
   constructor(
@@ -96,12 +96,12 @@ class ColumnSQL {
   ) {}
 }
 
-export class SelectProcessor {
+export class SelectIOProcessor {
   hasJoin = false;
   // Tracks all processed joins, when processing a new join, we can reuse the JoinIO if it already exists (K: join path, V: JoinIO)
-  jcMap = new Map<string, io.JoinIO>();
+  jcMap = new Map<string, JoinIO>();
   // All processed joins
-  joins: io.JoinIO[] = [];
+  joins: JoinIO[] = [];
   // Make sure all join table alias names are unique
   joinedTableCounter = 0;
   // Make sure all selected column names are unique
@@ -112,7 +112,7 @@ export class SelectProcessor {
     throwIfFalsy(dialect, 'dialect');
   }
 
-  convert(): io.SelectIO {
+  convert(): SelectIO {
     let sql = 'SELECT ';
     const { action } = this;
     const { columns, __table: from } = action;
@@ -125,7 +125,7 @@ export class SelectProcessor {
     });
 
     // Process columns
-    const colIOs: io.SelectedColumnIO[] = [];
+    const colIOs: SelectedColumnIO[] = [];
     for (const col of columns) {
       const selIO = this.handleSelectedColumn(col);
       colIOs.push(selIO);
@@ -145,9 +145,9 @@ export class SelectProcessor {
     }
 
     // where
-    let whereIO: io.SQLIO | null = null;
+    let whereIO: SQLIO | null = null;
     if (action.whereSQL) {
-      whereIO = new io.SQLIO(action.whereSQL);
+      whereIO = new SQLIO(action.whereSQL);
       sql +=
         ' WHERE ' +
         whereIO.toSQL(this.dialect, ele => {
@@ -173,7 +173,7 @@ export class SelectProcessor {
     }
     sql += orderBySQL;
 
-    return new io.SelectIO(this.action, sql, colIOs, fromIO, whereIO);
+    return new SelectIO(this.action, sql, colIOs, fromIO, whereIO);
   }
 
   private getOrderByColumnSQL(nCol: dd.ColumnName): string {
@@ -213,7 +213,7 @@ export class SelectProcessor {
     return value;
   }
 
-  private handleFrom(table: dd.Table): io.TableIO {
+  private handleFrom(table: dd.Table): TableIO {
     const e = this.dialect.escape;
     const tableDBName = table.getDBName();
     const encodedTableName = e(tableDBName);
@@ -221,7 +221,7 @@ export class SelectProcessor {
     if (this.hasJoin) {
       sql += ' AS ' + encodedTableName;
     }
-    return new io.TableIO(table, sql);
+    return new TableIO(table, sql);
   }
 
   /*
@@ -278,9 +278,7 @@ export class SelectProcessor {
     return null;
   }
 
-  private handleSelectedColumn(
-    sCol: dd.SelectActionColumns,
-  ): io.SelectedColumnIO {
+  private handleSelectedColumn(sCol: dd.SelectActionColumns): SelectedColumnIO {
     const { dialect } = this;
     const [col, calcCol, resultType] = this.analyzeSelectedColumn(sCol);
     if (col) {
@@ -290,7 +288,7 @@ export class SelectProcessor {
       );
       if (!calcCol) {
         // Pure column-based selected column
-        return new io.SelectedColumnIO(
+        return new SelectedColumnIO(
           sCol,
           colSQL.sql,
           colSQL.inputName,
@@ -303,7 +301,7 @@ export class SelectProcessor {
       // RawColumn with .core is a column (a renamed column)
       if (calcCol.core instanceof dd.Column) {
         // Use RawColumn.selectedName as alias
-        return new io.SelectedColumnIO(
+        return new SelectedColumnIO(
           sCol,
           colSQL.sql,
           colSQL.inputName,
@@ -315,7 +313,7 @@ export class SelectProcessor {
 
       // Here, we have a RawColumn.core is an expression with a column inside
       const rawExpr = calcCol.core as dd.SQL;
-      const exprIO = new io.SQLIO(rawExpr);
+      const exprIO = new SQLIO(rawExpr);
       // Replace the column with SQL only (no alias).
       // Imagine new RawColumn(dd.sql`COUNT(${col.as('a')})`, 'b'), the embedded column would be interpreted as `'col' AS 'a'`, but it really should be `COUNT('col') AS 'b'`, so this step replace the embedded with the SQL without its attached alias.
       const sql = exprIO.toSQL(dialect, element => {
@@ -325,7 +323,7 @@ export class SelectProcessor {
         return null;
       });
       // SelectedColumn.alias takes precedence over colSQL.alias
-      return new io.SelectedColumnIO(
+      return new SelectedColumnIO(
         sCol,
         sql,
         colSQL.inputName,
@@ -341,7 +339,7 @@ export class SelectProcessor {
       }
       // Expression with no columns inside
       const rawExpr = calcCol.core as dd.SQL;
-      const exprIO = new io.SQLIO(rawExpr);
+      const exprIO = new SQLIO(rawExpr);
       const sql = exprIO.toSQL(dialect);
       // If we cannot guess the result type (`resultType` is null), and neither does a user specified type (`type` is null) exists, we throw cuz we cannot determine the result type
       if (!resultType && !sCol.type) {
@@ -351,7 +349,7 @@ export class SelectProcessor {
           )}" without any embedded columns`,
         );
       }
-      return new io.SelectedColumnIO(
+      return new SelectedColumnIO(
         sCol,
         sql,
         calcCol.selectedName, // inputName
@@ -362,7 +360,7 @@ export class SelectProcessor {
     }
   }
 
-  private handleJoinRecursively(jc: dd.Column): io.JoinIO {
+  private handleJoinRecursively(jc: dd.Column): JoinIO {
     const table = jc.castToJoinedTable();
     const result = this.jcMap.get(table.keyPath);
     if (result) {
@@ -378,7 +376,7 @@ export class SelectProcessor {
       localTableName = srcColumn.tableName();
     }
 
-    const joinIO = new io.JoinIO(
+    const joinIO = new JoinIO(
       table.keyPath,
       this.nextJoinedTableName(),
       localTableName,
@@ -435,10 +433,7 @@ export class SelectProcessor {
   }
 }
 
-export default function selectIO(
-  action: dd.SelectAction,
-  dialect: Dialect,
-): io.SelectIO {
-  const pro = new SelectProcessor(action, dialect);
+export function selectIO(action: dd.SelectAction, dialect: Dialect): SelectIO {
+  const pro = new SelectIOProcessor(action, dialect);
   return pro.convert();
 }

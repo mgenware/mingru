@@ -1,18 +1,19 @@
-import { SelectIO, UpdateIO, InsertIO, DeleteIO } from '../io/io';
 import Dialect, { TypeBridge } from '../dialect';
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import toTypeString from 'to-type-string';
-import toSelectIO from '../io/toSelectIO';
-import toUpdateIO from '../io/toUpdateIO';
-import toInsertIO from '../io/toInsertIO';
-import toDeleteIO from '../io/toDeleteIO';
+import { selectIO, SelectIO } from '../io/selectIO';
+import { updateIO, UpdateIO } from '../io/updateIO';
+import { insertIO, InsertIO } from '../io/insertIO';
+import { deleteIO, DeleteIO } from '../io/deleteIO';
 import VarInfo from './varInfo';
 import * as go from './go';
 import * as defs from './defs';
 import NameContext from '../lib/nameContext';
 import Logger from '../logger';
 import * as utils from './utils';
+import SQLVariableList from '../io/sqlInputList';
+import { ActionResult } from './common';
 
 const HeaderRepeatCount = 90;
 const QueryableParam = 'queryable';
@@ -92,22 +93,22 @@ export default class GoBuilder {
 
     switch (action.actionType) {
       case dd.ActionType.select: {
-        const io = toSelectIO(action as dd.SelectAction, dialect);
+        const io = selectIO(action as dd.SelectAction, dialect);
         return this.select(io);
       }
 
       case dd.ActionType.update: {
-        const io = toUpdateIO(action as dd.UpdateAction, dialect);
+        const io = updateIO(action as dd.UpdateAction, dialect);
         return this.update(io);
       }
 
       case dd.ActionType.insert: {
-        const io = toInsertIO(action as dd.InsertAction, dialect);
+        const io = insertIO(action as dd.InsertAction, dialect);
         return this.insert(io);
       }
 
       case dd.ActionType.delete: {
-        const io = toDeleteIO(action as dd.DeleteAction, dialect);
+        const io = deleteIO(action as dd.DeleteAction, dialect);
         return this.delete(io);
       }
 
@@ -169,7 +170,7 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
     // Collect params info, used to generate function header, e.g. `(queryable dbx.Queryable, id uint64, name string)`.
     let funcParamsCode = `${QueryableParam} ${QueryableType}`;
     const varContext = new NameContext();
-    const inputVars = this.inputsToVars(varContext, action.getInputs());
+    const inputVars = this.inputsToVars(varContext, io.getInputs());
     funcParamsCode += inputVars.map(p => `, ${p.name} ${p.type}`).join('');
     let queryParamsCode = inputVars.map(p => `, ${p.name}`).join('');
     if (pagination) {
@@ -254,10 +255,10 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) (${returnTypes.joi
     const varContext = new NameContext();
     // Note: WHERE vars takes precedence over setter vars,
     // e.g. UPDATE id = ? WHERE id = ? would produces func with params like (id, id2) where id is for WHERE, id2 for setter
-    const whereVars = action.whereSQL
-      ? this.inputsToVars(varContext, action.whereSQL.inputs)
+    const whereVars = io.where
+      ? this.inputsToVars(varContext, io.where.inputs)
       : [];
-    const setterVars = this.inputsToVars(varContext, action.setterInputs);
+    const setterVars = this.inputsToVars(varContext, io.setterInputs);
 
     // For func params, WHERE vars are put before setter vars
     const funcParams = [...whereVars, ...setterVars];
@@ -303,7 +304,7 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
     // Prepare params
     let funcParamsCode = `${QueryableParam} ${QueryableType}`;
     const varContext = new NameContext();
-    const funcParams = this.inputsToVars(varContext, action.getInputs());
+    const funcParams = this.inputsToVars(varContext, io.getInputs());
     funcParamsCode += funcParams.map(p => `, ${p.name} ${p.type}`).join('');
     const queryParamsCode = funcParams.map(p => `, ${p.name}`).join('');
     code += `// ${actionName} ...
@@ -347,7 +348,7 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
     // Prepare params
     let funcParamsCode = `${QueryableParam} ${QueryableType}`;
     const varContext = new NameContext();
-    const funcParams = this.inputsToVars(varContext, action.getInputs());
+    const funcParams = this.inputsToVars(varContext, io.getInputs());
     funcParamsCode += funcParams.map(p => `, ${p.name} ${p.type}`).join('');
     const queryParamsCode = funcParams.map(p => `, ${p.name}`).join('');
     code += `// ${actionName} ...
@@ -379,7 +380,7 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
 
   private inputsToVars(
     context: NameContext,
-    inputs: dd.SQLInputList,
+    inputs: SQLVariableList,
   ): VarInfo[] {
     if (!inputs.length) {
       return [];

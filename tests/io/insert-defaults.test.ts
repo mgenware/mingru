@@ -33,7 +33,7 @@ test('insertWithDefaults', () => {
   }
   const ta = dd.ta(cols, ColsTA);
   const v = ta.insertT;
-  const io = mr.io.toInsertIO(v, dialect);
+  const io = mr.insertIO(v, dialect);
 
   expect(io.sql).toBe(
     "INSERT INTO `cols` (`fk`, `text`, `int`, `nullable`, `def_int`, `def_var_char`, `def_time`) VALUES (?, '', 0, NULL, -3, '一二', CURTIME())",

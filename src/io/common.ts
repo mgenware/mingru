@@ -1,7 +1,7 @@
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import SQLVariableList from './sqlInputList';
-import { SQLIO } from './sql';
+import { SQLIO } from './sqlIO';
 
 export class TableIO {
   constructor(public table: dd.Table, public sql: string) {

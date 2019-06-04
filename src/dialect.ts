@@ -39,7 +39,7 @@ export class Dialect {
     return this.escape(table.__name);
   }
 
-  inputPlaceholder(_: dd.SQLInput | null): string {
+  inputPlaceholder(_: dd.SQLVariable | null): string {
     return '?';
   }
 

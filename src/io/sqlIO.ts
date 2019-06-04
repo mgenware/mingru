@@ -2,6 +2,7 @@ import SQLVariableList from './sqlInputList';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import * as dd from 'dd-models';
 import Dialect from '../dialect';
+import toTypeString from 'to-type-string';
 
 export class SQLIO {
   inputs = new SQLVariableList();
@@ -65,4 +66,8 @@ export class SQLIO {
       }
     }
   }
+}
+
+export function sqlIO(sql: dd.SQL): SQLIO {
+  return new SQLIO(sql);
 }

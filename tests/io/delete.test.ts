@@ -11,11 +11,11 @@ test('Delete', () => {
   }
   const postTA = dd.ta(post, PostTA);
   const v = postTA.t;
-  const io = mr.io.toDeleteIO(v, dialect);
+  const io = mr.deleteIO(v, dialect);
 
-  expect(io).toBeInstanceOf(mr.io.DeleteIO);
+  expect(io).toBeInstanceOf(mr.DeleteIO);
   expect(io.sql).toBe('DELETE FROM `post` WHERE `id` = ?');
-  expect(io.table).toBeInstanceOf(mr.io.TableIO);
+  expect(io.table).toBeInstanceOf(mr.TableIO);
 });
 
 test('Delete with where', () => {
@@ -24,7 +24,7 @@ test('Delete with where', () => {
   }
   const postTA = dd.ta(post, PostTA);
   const v = postTA.t;
-  const io = mr.io.toDeleteIO(v, dialect);
+  const io = mr.deleteIO(v, dialect);
 
   expect(io.sql).toBe('DELETE FROM `post` WHERE `id` = 1');
 });
@@ -33,12 +33,14 @@ test('getInputs', () => {
   class UserTA extends dd.TA {
     t = dd
       .deleteOne()
-      .where(dd.sql`${user.id.toInput()} ${user.name.toInput()}`);
+      .where(dd.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
   }
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
-  expect(v.getInputs().list).toEqual([user.id.toInput(), user.name.toInput()]);
-  expect(v.getInputs().sealed).toBe(true);
+  const io = mr.deleteIO(v, new mr.MySQL());
+  const inputs = io.getInputs();
+  expect(inputs.list).toEqual([user.id.toInput(), user.url_name.toInput()]);
+  expect(inputs.sealed).toBe(true);
 });
 
 test('getInputs (no WHERE)', () => {
@@ -47,5 +49,7 @@ test('getInputs (no WHERE)', () => {
   }
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
-  expect(v.getInputs().list.length).toBe(0);
+  const io = mr.deleteIO(v, new mr.MySQL());
+  const inputs = io.getInputs();
+  expect(inputs.list.length).toBe(0);
 });
