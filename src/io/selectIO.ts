@@ -64,6 +64,11 @@ export class SelectedColumnIO {
   }
 }
 
+export const SelectedResultKey = 'result';
+const selectedResultVarList = new SQLVariableList();
+selectedResultVarList.add(new dd.SQLVariable('<Result>', SelectedResultKey));
+selectedResultVarList.seal();
+
 export class SelectIO extends ActionIO {
   constructor(
     public action: dd.SelectAction,
@@ -84,6 +89,10 @@ export class SelectIO extends ActionIO {
       return SQLVariableList.empty;
     }
     return this.where.inputs;
+  }
+
+  getReturns(): SQLVariableList {
+    return selectedResultVarList;
   }
 }
 

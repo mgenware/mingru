@@ -67,3 +67,21 @@ test('getInputs', () => {
   ]);
   expect(io.getInputs().sealed).toBe(true);
 });
+
+test('getInputs', () => {
+  class UserTA extends dd.TA {
+    t = dd
+      .updateSome()
+      .set(user.url_name, dd.sql`${dd.input(user.url_name)}`)
+      .setInputs(user.sig)
+      .set(user.follower_count, dd.sql`${user.follower_count} + 1`)
+      .where(dd.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
+  }
+  const ta = dd.ta(user, UserTA);
+  const v = ta.t;
+  const io = mr.updateIO(v, new mr.MySQL());
+  expect(io.getReturns().list).toEqual([
+    new dd.SQLVariable(dd.int(), mr.RowsAffectedKey),
+  ]);
+  expect(io.getReturns().sealed).toBe(true);
+});

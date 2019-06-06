@@ -6,6 +6,11 @@ import { SetterIO } from './common';
 import { SQLIO } from './sqlIO';
 import SQLVariableList from './sqlInputList';
 
+export const RowsAffectedKey = 'rows_affected';
+export const rowsAffectedVarList = new SQLVariableList();
+rowsAffectedVarList.add(new dd.SQLVariable(dd.int(), RowsAffectedKey));
+rowsAffectedVarList.seal();
+
 export class UpdateIO extends ActionIO {
   // Accumulated inputs (whereInputs + setterInputs)
   inputs: SQLVariableList;
@@ -38,6 +43,10 @@ export class UpdateIO extends ActionIO {
 
   getInputs(): SQLVariableList {
     return this.inputs;
+  }
+
+  getReturns(): SQLVariableList {
+    return rowsAffectedVarList;
   }
 }
 

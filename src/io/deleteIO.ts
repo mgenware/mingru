@@ -4,6 +4,7 @@ import Dialect from '../dialect';
 import { TableIO, ActionIO } from './common';
 import { SQLIO } from './sqlIO';
 import SQLVariableList from './sqlInputList';
+import { rowsAffectedVarList } from './updateIO';
 
 export class DeleteIO extends ActionIO {
   constructor(
@@ -23,6 +24,10 @@ export class DeleteIO extends ActionIO {
       return this.where.inputs;
     }
     return SQLVariableList.empty;
+  }
+
+  getReturns(): SQLVariableList {
+    return rowsAffectedVarList;
   }
 }
 

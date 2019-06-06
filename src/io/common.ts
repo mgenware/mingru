@@ -14,6 +14,10 @@ export class ActionIO {
   getInputs(): SQLVariableList {
     throw new Error('Not implemented yet');
   }
+
+  getReturns(): SQLVariableList {
+    throw new Error('Not implemented yet');
+  }
 }
 
 export class SetterIO {

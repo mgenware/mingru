@@ -54,3 +54,20 @@ test('getInputs', () => {
   ]);
   expect(inputs.sealed).toBe(true);
 });
+
+test('getReturns', () => {
+  class UserTA extends dd.TA {
+    t = dd
+      .insert()
+      .setInputs(user.sig, user.id)
+      .set(user.url_name, user.url_name.toInput('b'));
+  }
+  const ta = dd.ta(user, UserTA);
+  const v = ta.t;
+  const io = mr.insertIO(v, new mr.MySQL());
+  const returns = io.getReturns();
+  expect(returns.list).toEqual([
+    new dd.SQLVariable(dd.int(), mr.InsertedIDKey),
+  ]);
+  expect(returns.sealed).toBe(true);
+});

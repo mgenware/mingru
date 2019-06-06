@@ -53,3 +53,17 @@ test('getInputs (no WHERE)', () => {
   const inputs = io.getInputs();
   expect(inputs.list.length).toBe(0);
 });
+
+test('getInputs (no WHERE)', () => {
+  class UserTA extends dd.TA {
+    t = dd.unsafeDeleteAll();
+  }
+  const ta = dd.ta(user, UserTA);
+  const v = ta.t;
+  const io = mr.deleteIO(v, new mr.MySQL());
+  const returns = io.getReturns();
+  expect(returns.list).toEqual([
+    new dd.SQLVariable(dd.int(), mr.RowsAffectedKey),
+  ]);
+  expect(returns.sealed).toBe(true);
+});

@@ -7,8 +7,13 @@ import { SetterIO } from './common';
 import { SQLIO } from './sqlIO';
 import SQLVariableList from './sqlInputList';
 
+export const InsertedIDKey = 'inserted_id';
+const insertedIDVarList = new SQLVariableList();
+insertedIDVarList.add(new dd.SQLVariable(dd.int(), InsertedIDKey));
+insertedIDVarList.seal();
+
 export class InsertIO extends ActionIO {
-  inputs: SQLVariableList;
+  private inputs: SQLVariableList;
 
   constructor(
     public action: dd.InsertAction,
@@ -26,6 +31,10 @@ export class InsertIO extends ActionIO {
 
   getInputs(): SQLVariableList {
     return this.inputs;
+  }
+
+  getReturns(): SQLVariableList {
+    return insertedIDVarList;
   }
 }
 

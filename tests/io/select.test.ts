@@ -233,3 +233,21 @@ test('getInputs (with foreign tables)', () => {
   expect(inputs.list).toEqual([user.id.toInput(), post.title.toInput()]);
   expect(inputs.sealed).toBe(true);
 });
+
+test('getReturns', () => {
+  class UserTA extends dd.TA {
+    t = dd
+      .select(user.id, post.title)
+      .where(
+        dd.sql`${user.id.toInput()} ${post.title.toInput()} ${user.id.toInput()}`,
+      );
+  }
+  const ta = dd.ta(user, UserTA);
+  const v = ta.t;
+  const io = mr.selectIO(v, new mr.MySQL());
+  const returns = io.getReturns();
+  expect(returns.list).toEqual([
+    new dd.SQLVariable('<Result>', mr.SelectedResultKey),
+  ]);
+  expect(returns.sealed).toBe(true);
+});

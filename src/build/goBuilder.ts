@@ -93,23 +93,23 @@ export default class GoBuilder {
 
     switch (action.actionType) {
       case dd.ActionType.select: {
-        const io = selectIO(action as dd.SelectAction, dialect);
-        return this.select(io);
+        const concreteIO = selectIO(action as dd.SelectAction, dialect);
+        return this.select(concreteIO);
       }
 
       case dd.ActionType.update: {
-        const io = updateIO(action as dd.UpdateAction, dialect);
-        return this.update(io);
+        const concreteIO = updateIO(action as dd.UpdateAction, dialect);
+        return this.update(concreteIO);
       }
 
       case dd.ActionType.insert: {
-        const io = insertIO(action as dd.InsertAction, dialect);
-        return this.insert(io);
+        const concreteIO = insertIO(action as dd.InsertAction, dialect);
+        return this.insert(concreteIO);
       }
 
       case dd.ActionType.delete: {
-        const io = deleteIO(action as dd.DeleteAction, dialect);
-        return this.delete(io);
+        const concreteIO = deleteIO(action as dd.DeleteAction, dialect);
+        return this.delete(concreteIO);
       }
 
       default: {
@@ -240,7 +240,7 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) (${returnTypes.joi
     code += `\treturn ${ResultVar}, nil
 }
 `;
-    return new ActionResult(actionName, code, returnTypes, inputVars);
+    return new ActionResult(io, actionName, code, returnTypes, inputVars);
   }
 
   private update(io: UpdateIO): ActionResult {
@@ -291,7 +291,7 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
       code += `\treturn dbx.GetRowsAffectedIntWithError(${ResultVar}, err)`;
     }
     code += '\n}\n';
-    return new ActionResult(actionName, code, returnTypes, funcParams);
+    return new ActionResult(io, actionName, code, returnTypes, funcParams);
   }
 
   private insert(io: InsertIO): ActionResult {
@@ -335,7 +335,7 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
       code += '\treturn err';
     }
     code += '\n}\n';
-    return new ActionResult(actionName, code, returnTypes, funcParams);
+    return new ActionResult(io, actionName, code, returnTypes, funcParams);
   }
 
   private delete(io: DeleteIO): ActionResult {
@@ -375,7 +375,7 @@ func (da *${tableClassType}) ${actionName}(${funcParamsCode}) `;
       code += `\treturn dbx.GetRowsAffectedIntWithError(${ResultVar}, err)`;
     }
     code += '\n}\n';
-    return new ActionResult(actionName, code, returnTypes, funcParams);
+    return new ActionResult(io, actionName, code, returnTypes, funcParams);
   }
 
   private inputsToVars(
