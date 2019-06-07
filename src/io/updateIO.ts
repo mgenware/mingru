@@ -23,7 +23,7 @@ export class UpdateIO extends ActionIO {
     public setters: SetterIO[],
     public where: SQLIO | null,
   ) {
-    super();
+    super(action);
     throwIfFalsy(action, 'action');
     throwIfFalsy(sql, 'sql');
     throwIfFalsy(table, 'table');

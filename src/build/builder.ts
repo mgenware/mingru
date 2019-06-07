@@ -5,7 +5,7 @@ import * as mfs from 'm-fs';
 import Dialect from '../dialect';
 import * as nodepath from 'path';
 import del from 'del';
-import Logger from '../logger';
+import logger from '../logger';
 
 export interface IBuildOption {
   packageName?: string;
@@ -24,7 +24,9 @@ export default async function buildAsync(
   throwIfFalsy(dialect, 'dialect');
   throwIfFalsy(outDir, 'outDir');
   const opts = options || {};
+
   const logger = new Logger(!opts.noOutput);
+  logger.
 
   if (opts.cleanBuild) {
     logger.info(`🧹  Cleaning directory "${outDir}"`);

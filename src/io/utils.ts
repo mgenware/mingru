@@ -11,10 +11,3 @@ export function tableToObjName(table: dd.Table): string {
 export function tableToClsName(table: dd.Table): string {
   return `TableType${tableToObjName(table)}`;
 }
-
-export function actionToFullFuncName(action: dd.Action, ta: dd.TA): string {
-  if (action.__table === ta.__table) {
-    return actionToFuncName(action);
-  }
-  return `${tableToObjName(action.__table)}.${actionToFuncName(action)}`;
-}

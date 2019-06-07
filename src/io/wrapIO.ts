@@ -13,7 +13,7 @@ export class WrapIO extends ActionIO {
   innerIO: ActionIO;
 
   constructor(public action: dd.WrappedAction, dialect: Dialect) {
-    super();
+    super(action);
     throwIfFalsy(action, 'action');
 
     let innerIO: ActionIO;

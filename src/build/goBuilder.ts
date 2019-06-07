@@ -11,7 +11,6 @@ import * as go from './go';
 import * as defs from './defs';
 import NameContext from '../lib/nameContext';
 import Logger from '../logger';
-import * as utils from './utils';
 import SQLVariableList from '../io/sqlInputList';
 import { ActionResult } from './common';
 

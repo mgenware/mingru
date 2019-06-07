@@ -21,7 +21,7 @@ export class InsertIO extends ActionIO {
     public table: TableIO,
     public setters: SetterIO[],
   ) {
-    super();
+    super(action);
     throwIfFalsy(action, 'action');
     throwIfFalsy(sql, 'sql');
     throwIfFalsy(table, 'table');

@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 
-export default class Logger {
+export class Logger {
   constructor(public enabled: boolean) {}
   info(s: string) {
     if (!this.enabled) {
@@ -21,3 +21,6 @@ export default class Logger {
     console.log(s);
   }
 }
+
+export const logger = new Logger(false);
+export default logger;
