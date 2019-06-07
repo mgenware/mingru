@@ -4,7 +4,7 @@ import Dialect from '../dialect';
 import NameContext from '../lib/nameContext';
 import toTypeString from 'to-type-string';
 import SQLVariableList from './sqlInputList';
-import { TableIO, ActionIO } from './common';
+import { ActionIO } from './common';
 import { SQLIO } from './sqlIO';
 
 export class JoinIO {
@@ -74,14 +74,12 @@ export class SelectIO extends ActionIO {
     public action: dd.SelectAction,
     public sql: string,
     public cols: SelectedColumnIO[],
-    public from: TableIO,
     public where: SQLIO | null,
   ) {
-    super();
+    super(action);
     throwIfFalsy(action, 'action');
     throwIfFalsy(sql, 'sql');
     throwIfFalsy(cols, 'cols');
-    throwIfFalsy(from, 'from');
   }
 
   getInputs(): SQLVariableList {
@@ -142,8 +140,8 @@ export class SelectIOProcessor {
     sql += colIOs.map(c => c.sql(this.dialect, this.hasJoin)).join(', ');
 
     // from
-    const fromIO = this.handleFrom(from as dd.Table);
-    sql += ' ' + fromIO.sql;
+    const fromSQL = this.handleFrom(from as dd.Table);
+    sql += ' ' + fromSQL;
 
     // joins
     if (this.hasJoin) {
@@ -182,7 +180,7 @@ export class SelectIOProcessor {
     }
     sql += orderBySQL;
 
-    return new SelectIO(this.action, sql, colIOs, fromIO, whereIO);
+    return new SelectIO(this.action, sql, colIOs, whereIO);
   }
 
   private getOrderByColumnSQL(nCol: dd.ColumnName): string {
@@ -222,7 +220,7 @@ export class SelectIOProcessor {
     return value;
   }
 
-  private handleFrom(table: dd.Table): TableIO {
+  private handleFrom(table: dd.Table): string {
     const e = this.dialect.escape;
     const tableDBName = table.getDBName();
     const encodedTableName = e(tableDBName);
@@ -230,7 +228,7 @@ export class SelectIOProcessor {
     if (this.hasJoin) {
       sql += ' AS ' + encodedTableName;
     }
-    return new TableIO(table, sql);
+    return sql;
   }
 
   /*

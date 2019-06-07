@@ -3,7 +3,6 @@ import { throwIfFalsy } from 'throw-if-arg-empty';
 import SQLVariableList from './sqlInputList';
 import Dialect from '../dialect';
 import { SQLIO } from './sqlIO';
-import { Action, enumerateActions } from 'dd-models';
 import * as utils from './utils';
 import { selectIO } from './selectIO';
 import { updateIO } from './updateIO';
@@ -15,7 +14,7 @@ export class ActionIO {
   instanceName: string;
   funcName: string;
 
-  constructor(public action: Action) {
+  constructor(public action: dd.Action) {
     this.className = utils.tableToClsName(action.__table);
     this.instanceName = utils.tableToObjName(action.__table);
     this.funcName = utils.actionToFuncName(action);

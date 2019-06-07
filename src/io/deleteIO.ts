@@ -1,7 +1,7 @@
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
-import { TableIO, ActionIO } from './common';
+import { ActionIO } from './common';
 import { SQLIO } from './sqlIO';
 import SQLVariableList from './sqlInputList';
 import { rowsAffectedVarList } from './updateIO';
@@ -10,13 +10,11 @@ export class DeleteIO extends ActionIO {
   constructor(
     public action: dd.DeleteAction,
     public sql: string,
-    public table: TableIO,
     public where: SQLIO | null,
   ) {
-    super();
+    super(action);
     throwIfFalsy(action, 'action');
     throwIfFalsy(sql, 'sql');
-    throwIfFalsy(table, 'table');
   }
 
   getInputs(): SQLVariableList {
@@ -51,22 +49,20 @@ class DeleteIOProcessor {
     }
 
     // table
-    const fromIO = this.handleFrom(table);
-    sql += fromIO.sql;
+    const fromSQL = this.handleFrom(table);
+    sql += fromSQL;
 
     // where
     const whereIO = action.whereSQL ? new SQLIO(action.whereSQL) : null;
     if (whereIO) {
       sql += ` WHERE ${whereIO.toSQL(dialect)}`;
     }
-    return new DeleteIO(action, sql, fromIO, whereIO);
+    return new DeleteIO(action, sql, whereIO);
   }
 
-  private handleFrom(table: dd.Table): TableIO {
+  private handleFrom(table: dd.Table): string {
     const e = this.dialect.escape;
-    const encodedTableName = e(table.getDBName());
-    const sql = `${encodedTableName}`;
-    return new TableIO(table, sql);
+    return e(table.getDBName());
   }
 }
 

@@ -1,7 +1,7 @@
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
-import { TableIO, settersToInputs, ActionIO } from './common';
+import { settersToInputs, ActionIO } from './common';
 import { SetterIO } from './common';
 import { SQLIO } from './sqlIO';
 import SQLVariableList from './sqlInputList';
@@ -19,14 +19,12 @@ export class UpdateIO extends ActionIO {
   constructor(
     public action: dd.UpdateAction,
     public sql: string,
-    public table: TableIO,
     public setters: SetterIO[],
     public where: SQLIO | null,
   ) {
     super(action);
     throwIfFalsy(action, 'action');
     throwIfFalsy(sql, 'sql');
-    throwIfFalsy(table, 'table');
     throwIfFalsy(setters, 'setters');
 
     const setterInputs = settersToInputs(this.setters);
@@ -78,8 +76,8 @@ class UpdateIOProcessor {
     }
 
     // table
-    const fromIO = this.handleFrom(table);
-    sql += `${fromIO.sql} SET `;
+    const fromSQL = this.handleFrom(table);
+    sql += `${fromSQL} SET `;
 
     const setterIOs = SetterIO.fromMap(setters);
     sql += setterIOs
@@ -91,13 +89,12 @@ class UpdateIOProcessor {
     if (whereIO) {
       sql += ` WHERE ${whereIO.toSQL(dialect)}`;
     }
-    return new UpdateIO(action, sql, fromIO, setterIOs, whereIO);
+    return new UpdateIO(action, sql, setterIOs, whereIO);
   }
 
-  private handleFrom(table: dd.Table): TableIO {
+  private handleFrom(table: dd.Table): string {
     const e = this.dialect.escape;
-    const sql = `${e(table.getDBName())}`;
-    return new TableIO(table, sql);
+    return `${e(table.getDBName())}`;
   }
 }
 
