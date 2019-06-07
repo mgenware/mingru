@@ -1,7 +1,7 @@
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
-import { ActionIO } from './common';
+import { ActionIO } from './actionIO';
 import { SQLIO } from './sqlIO';
 import SQLVariableList from './sqlInputList';
 import { rowsAffectedVarList } from './updateIO';

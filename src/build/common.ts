@@ -1,5 +1,5 @@
 import VarInfo from './varInfo';
-import { ActionIO } from '../io/common';
+import { ActionIO } from '../io/actionIO';
 
 export class ActionResult {
   constructor(

@@ -12,7 +12,8 @@ import NameContext from '../lib/nameContext';
 import logger from '../logger';
 import SQLVariableList from '../io/sqlInputList';
 import { ActionResult } from './common';
-import { TAIO, ActionIO } from '../io/common';
+import { TAIO } from '../io/taIO';
+import { ActionIO } from '../io/actionIO';
 
 const HeaderRepeatCount = 90;
 const QueryableParam = 'queryable';
@@ -36,17 +37,15 @@ export default class GoBuilder {
   private tableClassType: string;
   private sysImports = new Set<string>();
   private userImports = new Set<string>();
+  private dialect: Dialect;
   private actionResults: { [name: string]: ActionResult } = {};
 
-  constructor(
-    public taIO: TAIO,
-    public dialect: Dialect,
-    public packageName = 'da',
-  ) {
+  constructor(public taIO: TAIO, public packageName = 'da') {
     throwIfFalsy(taIO, 'taIO');
     this.tableClassType = taIO.className;
     this.tableClassObject = taIO.instanceName;
     this.userImports.add(defs.SQLXPath);
+    this.dialect = taIO.dialect;
   }
 
   build(actionsOnly: boolean, noHeader: boolean): string {

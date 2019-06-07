@@ -1,37 +1,12 @@
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import SQLVariableList from './sqlInputList';
 import Dialect from '../dialect';
-import { SQLIO } from './sqlIO';
 import * as utils from './utils';
 import { selectIO } from './selectIO';
 import { updateIO } from './updateIO';
 import { insertIO } from './insertIO';
 import { deleteIO } from './deleteIO';
-
-export class ActionIO {
-  className: string;
-  instanceName: string;
-  funcName: string;
-
-  constructor(public action: dd.Action) {
-    this.className = utils.tableToClsName(action.__table);
-    this.instanceName = utils.tableToObjName(action.__table);
-    this.funcName = utils.actionToFuncName(action);
-  }
-
-  get fullFuncName(): string {
-    return `${this.instanceName}.${this.funcName}`;
-  }
-
-  getInputs(): SQLVariableList {
-    throw new Error('Not implemented yet');
-  }
-
-  getReturns(): SQLVariableList {
-    throw new Error('Not implemented yet');
-  }
-}
+import { ActionIO } from './actionIO';
 
 // IO object for TA(Tabla actions)
 export class TAIO {
@@ -76,31 +51,4 @@ export class TAIO {
         );
     }
   }
-}
-
-export class SetterIO {
-  static fromMap(map: Map<dd.Column, dd.SQL>): SetterIO[] {
-    return Array.from(
-      map,
-      ([key, value]) => new SetterIO(key, new SQLIO(value)),
-    );
-  }
-
-  constructor(public col: dd.Column, public sql: SQLIO) {
-    throwIfFalsy(col, 'col');
-    throwIfFalsy(sql, 'sql');
-  }
-}
-
-export function settersToInputs(setters: SetterIO[]): SQLVariableList {
-  // Set inputs
-  const inputs = new SQLVariableList();
-  // Merge setter inputs
-  for (const setter of setters) {
-    if (setter.sql.inputs.length) {
-      inputs.merge(setter.sql.inputs);
-    }
-  }
-  inputs.seal();
-  return inputs;
 }

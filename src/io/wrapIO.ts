@@ -1,4 +1,3 @@
-import { ActionIO } from './common';
 import SQLVariableList from './sqlInputList';
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
@@ -7,6 +6,7 @@ import Dialect from '../dialect';
 import { insertIO } from './insertIO';
 import { updateIO } from './updateIO';
 import { deleteIO } from './deleteIO';
+import { ActionIO } from './actionIO';
 
 export class WrapIO extends ActionIO {
   inputs: SQLVariableList;

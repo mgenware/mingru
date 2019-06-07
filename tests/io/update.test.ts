@@ -22,7 +22,6 @@ test('Update', () => {
   expect(io.sql).toBe(
     'UPDATE `post` SET `title` = "haha", `content` = ?, `cmt_c` = `cmt_c` + 1 WHERE `id` = ?',
   );
-  expect(io.table).toBeInstanceOf(mr.TableIO);
   expect(io.setters.length).toBe(3);
   expect(io.setters[0].col).toBe(post.title);
   expect(io.setters[0].sql.sql.toString()).toBe('"haha"');

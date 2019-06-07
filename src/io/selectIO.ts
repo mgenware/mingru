@@ -4,8 +4,8 @@ import Dialect from '../dialect';
 import NameContext from '../lib/nameContext';
 import toTypeString from 'to-type-string';
 import SQLVariableList from './sqlInputList';
-import { ActionIO } from './common';
 import { SQLIO } from './sqlIO';
+import { ActionIO } from './actionIO';
 
 export class JoinIO {
   constructor(

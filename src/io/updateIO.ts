@@ -1,10 +1,10 @@
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
-import { settersToInputs, ActionIO } from './common';
-import { SetterIO } from './common';
+import { settersToInputs, SetterIO } from './setterIO';
 import { SQLIO } from './sqlIO';
 import SQLVariableList from './sqlInputList';
+import { ActionIO } from './actionIO';
 
 export const RowsAffectedKey = 'rows_affected';
 export const rowsAffectedVarList = new SQLVariableList();

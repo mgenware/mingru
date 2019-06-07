@@ -6,7 +6,7 @@ import Dialect from '../dialect';
 import * as nodepath from 'path';
 import del from 'del';
 import logger from '../logger';
-import { TAIO } from '../io/common';
+import { TAIO } from '../io/taIO';
 
 export interface IBuildOption {
   packageName?: string;
@@ -36,7 +36,7 @@ export default async function buildAsync(
     taList.map(async ta => {
       logger.info(`🚙  Building table "${ta.__table.__name}"`);
       const taIO = new TAIO(ta, dialect);
-      const builder = new GoBuilder(taIO, dialect, opts.packageName);
+      const builder = new GoBuilder(taIO, opts.packageName);
       const code = builder.build(false, !!opts.noFileHeader);
       const fileName = dd.utils.toSnakeCase(ta.__table.__name) + '_ta'; // Add a "_ta" suffix to table actions file
       const outFile = nodepath.join(outDir, fileName + '.go');

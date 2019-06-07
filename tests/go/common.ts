@@ -13,8 +13,8 @@ export async function testBuildAsync(ta: dd.TA, path: string) {
     path = nodepath.resolve(nodepath.join(DestDataDir, path + '.go'));
     content = await mfs.readFileAsync(path, 'utf8');
   }
-  const logger = new mr.Logger(false);
-  const builder = new mr.Builder(ta, dialect, logger);
+  mr.logger.enabled = false;
+  const builder = new mr.Builder(new mr.TAIO(ta, dialect));
   let actual = builder.build(true, true);
   actual = `import "github.com/mgenware/go-packagex/v5/dbx"\n${actual}`;
   if (path) {
@@ -29,8 +29,8 @@ export async function testBuildFullAsync(ta: dd.TA, path: string) {
     path = nodepath.resolve(nodepath.join(DestDataDir, path + '.go'));
     content = await mfs.readFileAsync(path, 'utf8');
   }
-  const logger = new mr.Logger(false);
-  const builder = new mr.Builder(ta, dialect, logger);
+  mr.logger.enabled = false;
+  const builder = new mr.GoBuilder(new mr.TAIO(ta, dialect));
   const actual = builder.build(false, true);
   if (path) {
     expect(actual).toBe(content);

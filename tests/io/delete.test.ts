@@ -15,7 +15,6 @@ test('Delete', () => {
 
   expect(io).toBeInstanceOf(mr.DeleteIO);
   expect(io.sql).toBe('DELETE FROM `post` WHERE `id` = ?');
-  expect(io.table).toBeInstanceOf(mr.TableIO);
 });
 
 test('Delete with where', () => {

@@ -2,10 +2,10 @@ import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
 import dtDefault from '../build/dtDefault';
-import { ActionIO, settersToInputs } from './common';
-import { SetterIO } from './common';
+import { settersToInputs, SetterIO } from './setterIO';
 import { SQLIO } from './sqlIO';
 import SQLVariableList from './sqlInputList';
+import { ActionIO } from './actionIO';
 
 export const InsertedIDKey = 'inserted_id';
 const insertedIDVarList = new SQLVariableList();

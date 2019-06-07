@@ -15,7 +15,6 @@ test('Insert inputs', () => {
 
   expect(io).toBeInstanceOf(mr.InsertIO);
   expect(io.sql).toBe('INSERT INTO `post` (`title`, `user_id`) VALUES (?, ?)');
-  expect(io.table).toBeInstanceOf(mr.TableIO);
 });
 
 test('Insert inputs and values', () => {
@@ -33,7 +32,6 @@ test('Insert inputs and values', () => {
   expect(io.sql).toBe(
     'INSERT INTO `post` (`title`, `user_id`, `datetime`) VALUES (?, ?, NOW())',
   );
-  expect(io.table).toBeInstanceOf(mr.TableIO);
 });
 
 test('getInputs', () => {

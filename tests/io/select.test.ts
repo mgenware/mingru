@@ -17,7 +17,6 @@ test('Select', () => {
 
   expect(io).toBeInstanceOf(mr.SelectIO);
   expect(io.sql).toBe('SELECT `id`, `url_name` FROM `user`');
-  expect(io.from).toBeInstanceOf(mr.TableIO);
   expect(io.where).toBeNull();
 });
 
