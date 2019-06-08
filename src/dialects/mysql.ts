@@ -1,16 +1,10 @@
-import { Dialect, TypeBridge } from '../dialect';
+import { Dialect } from '../dialect';
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import toTypeString from 'to-type-string';
 const escapeString = require('sql-escape-string');
 
-function sysType(type: string): TypeBridge {
-  return new TypeBridge(type, null, true);
-}
-
-function timeType(): TypeBridge {
-  return new TypeBridge('time.Time', '"time"', true);
-}
+const TimeType = 'time.Time|time';
 
 export default class MySQL extends Dialect {
   escape(name: string): string {
@@ -38,13 +32,13 @@ export default class MySQL extends Dialect {
     throw new Error(`Unsupported type of object "${toTypeString(value)}"`);
   }
 
-  goType(type: dd.ColumnType): TypeBridge {
+  convertColumnType(type: dd.ColumnType): string {
     throwIfFalsy(type, 'type');
-    const bridge = this.goTypeNonNull(type);
+    let typeName = this.goTypeNonNull(type);
     if (type.nullable) {
-      bridge.type = '*' + bridge.type;
+      typeName = '*' + typeName;
     }
-    return bridge;
+    return typeName;
   }
 
   as(sql: string, name: string): string {
@@ -68,32 +62,32 @@ export default class MySQL extends Dialect {
     }
   }
 
-  private goTypeNonNull(colType: dd.ColumnType): TypeBridge {
+  private goTypeNonNull(colType: dd.ColumnType): string {
     const DT = dd.dt;
     const unsigned = colType.unsigned;
     for (const type of colType.types) {
       switch (type) {
         case DT.bigInt: {
-          return sysType(unsigned ? 'uint64' : 'int64');
+          return unsigned ? 'uint64' : 'int64';
         }
         case DT.int: {
-          return sysType(unsigned ? 'uint' : 'int');
+          return unsigned ? 'uint' : 'int';
         }
         case DT.smallInt: {
-          return sysType(unsigned ? 'uint16' : 'int16');
+          return unsigned ? 'uint16' : 'int16';
         }
         case DT.tinyInt: {
-          return sysType(unsigned ? 'uint8' : 'int8');
+          return unsigned ? 'uint8' : 'int8';
         }
         case DT.varChar:
         case DT.char:
         case DT.text: {
-          return sysType('string');
+          return 'string';
         }
 
         case DT.datetime:
         case DT.date: {
-          return timeType();
+          return TimeType;
         }
       }
     }

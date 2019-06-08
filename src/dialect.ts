@@ -1,18 +1,5 @@
 import * as dd from 'dd-models';
 
-// A bridge represents a mapping from SQL type to Go type.
-export class TypeBridge {
-  constructor(
-    public type: string,
-    public importPath: string | null,
-    public isSystemImport: boolean,
-  ) {}
-
-  toString(): string {
-    return this.type;
-  }
-}
-
 export class Dialect {
   escape(_: string): string {
     throw new Error('Not implemented yet');
@@ -23,7 +10,7 @@ export class Dialect {
     throw new Error('Not implemented yet');
   }
 
-  goType(_: dd.ColumnType): TypeBridge {
+  convertColumnType(_: dd.ColumnType): string {
     throw new Error('Not implemented yet');
   }
 

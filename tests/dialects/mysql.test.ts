@@ -6,9 +6,12 @@ const TimePkg = '"time"';
 const dialect = new mr.MySQL();
 
 function testType(col: dd.Column, type: string, pkg: string | null) {
-  const tb = dialect.goType(col.type);
-  expect(tb.type).toBe(type);
-  expect(tb.importPath).toBe(pkg);
+  const tb = dialect.convertColumnType(col.type);
+  let s = type;
+  if (pkg) {
+    s += `|${pkg}`;
+  }
+  expect(tb).toBe(s);
 }
 
 test('escape', () => {
@@ -48,7 +51,7 @@ test('DT', () => {
 
 test('DT (not supported)', () => {
   const props = new dd.ColumnType(['type1', 'type2']);
-  expect(() => dialect.goType(props)).toThrow('type2');
+  expect(() => dialect.convertColumnType(props)).toThrow('type2');
 });
 
 test('as', () => {

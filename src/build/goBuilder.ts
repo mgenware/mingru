@@ -1,4 +1,4 @@
-import Dialect, { TypeBridge } from '../dialect';
+import Dialect from '../dialect';
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import { SelectIO } from '../io/selectIO';
@@ -35,8 +35,7 @@ function joinParams(arr: string[]): string {
 export default class GoBuilder {
   private tableClassObject: string;
   private tableClassType: string;
-  private sysImports = new Set<string>();
-  private userImports = new Set<string>();
+  private imports = new Set<string>();
   private dialect: Dialect;
   private actionResults: { [name: string]: ActionResult } = {};
 
@@ -44,7 +43,7 @@ export default class GoBuilder {
     throwIfFalsy(taIO, 'taIO');
     this.tableClassType = taIO.className;
     this.tableClassObject = taIO.instanceName;
-    this.userImports.add(defs.SQLXPath);
+    this.imports.add(defs.SQLXPath);
     this.dialect = taIO.dialect;
   }
 
@@ -64,8 +63,7 @@ export default class GoBuilder {
     body += this.buildActions();
 
     // Add imports
-    code =
-      code + go.makeImports([...this.sysImports], [...this.userImports]) + body;
+    code = code + go.makeImports([...this.imports]) + body;
     return code;
   }
 
@@ -138,9 +136,12 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
     const selectedFields: go.InstanceVariable[] = [];
     for (const col of io.cols) {
       const fieldName = col.inputName;
-      const fieldType = dialect.goType(col.getResultType());
-      this.addTypeBridge(fieldType);
-      selectedFields.push(new go.InstanceVariable(fieldName, fieldType.type));
+      const fieldTypeStr = dialect.convertColumnType(col.getResultType());
+      const [typeName, importStr] = this.parseTypeString(fieldTypeStr);
+      selectedFields.push(new go.InstanceVariable(fieldName, typeName));
+      if (importStr) {
+        this.imports.add(importStr);
+      }
     }
 
     if (resultType) {
@@ -372,19 +373,20 @@ func (da *${tableClassType}) ${funcName}(${funcParamsCode}) `;
     }
     const params = VarInfo.fromInputs(this.dialect, context, inputs);
     for (const param of params) {
-      this.addTypeBridge(param.type);
+      const [, importStr] = this.parseTypeString(param.type);
+      if (importStr) {
+        this.imports.add(importStr);
+      }
     }
     return params;
   }
 
-  private addTypeBridge(bridge: TypeBridge) {
-    if (!bridge.importPath) {
-      return;
+  private parseTypeString(typeString: string): [string, string | null] {
+    throwIfFalsy(typeString, 'typeString');
+    const parts = typeString.split('|');
+    if (parts.length > 1) {
+      return parts as [string, string];
     }
-    if (bridge.isSystemImport) {
-      this.sysImports.add(bridge.importPath);
-    } else {
-      this.userImports.add(bridge.importPath);
-    }
+    return [parts[0], null];
   }
 }

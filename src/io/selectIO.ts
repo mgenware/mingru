@@ -6,6 +6,7 @@ import toTypeString from 'to-type-string';
 import SQLVariableList from './sqlInputList';
 import { SQLIO } from './sqlIO';
 import { ActionIO } from './actionIO';
+import * as utils from './utils';
 
 export class JoinIO {
   constructor(
@@ -113,10 +114,13 @@ export class SelectIOProcessor {
   joinedTableCounter = 0;
   // Make sure all selected column names are unique
   selectedNameContext = new NameContext();
+  returns = new SQLVariableList();
 
   constructor(public action: dd.SelectAction, public dialect: Dialect) {
     throwIfFalsy(action, 'action');
     throwIfFalsy(dialect, 'dialect');
+
+    this.convert();
   }
 
   convert(): SelectIO {
@@ -179,6 +183,21 @@ export class SelectIOProcessor {
         .join(', ');
     }
     sql += orderBySQL;
+
+    // Set return types
+    if (action.isSelectField) {
+      const col = colIOs[0];
+      const fieldTypeStr = this.dialect.convertColumnType(col.getResultType());
+      this.returns.add(new dd.SQLVariable(fieldTypeStr, SelectedResultKey));
+    } else {
+      const tableName = utils.tableToClsName(action.__table);
+      const funcName = utils.actionToFuncName(action);
+      let resultType = `*${tableName}Table${funcName}Result`;
+      if (action.isSelectAll) {
+        resultType = '[]' + resultType;
+      }
+      this.returns.add(new dd.SQLVariable(resultType, SelectedResultKey));
+    }
 
     return new SelectIO(this.action, sql, colIOs, whereIO);
   }
@@ -441,6 +460,6 @@ export class SelectIOProcessor {
 }
 
 export function selectIO(action: dd.SelectAction, dialect: Dialect): SelectIO {
-  const pro = new SelectIOProcessor(action, dialect);
-  return pro.convert();
+  const converter = new SelectIOProcessor(action, dialect);
+  return converter.convert();
 }

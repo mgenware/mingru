@@ -58,15 +58,8 @@ function formatImports(imports: string[]): string {
     .join('');
 }
 
-export function makeImports(system: string[], user: string[]): string {
-  const sysCode = formatImports(system);
-  const userCode = formatImports(user);
-  let code = sysCode;
-  if (sysCode && userCode) {
-    code += '\n';
-  }
-  code += userCode;
-
+export function makeImports(imports: string[]): string {
+  const code = formatImports(imports);
   return `import (
 ${code})
 
