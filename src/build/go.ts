@@ -54,7 +54,7 @@ function formatImports(imports: string[]): string {
   }
   return imports
     .sort()
-    .map(s => `\t${s}\n`)
+    .map(s => `\t"${s}"\n`)
     .join('');
 }
 

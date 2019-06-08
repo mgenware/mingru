@@ -9,7 +9,7 @@ function testType(col: dd.Column, type: string, pkg: string | null) {
   const tb = dialect.convertColumnType(col.type);
   let s = type;
   if (pkg) {
-    s += `|${pkg}`;
+    s += `|"${pkg}"`;
   }
   expect(tb).toBe(s);
 }

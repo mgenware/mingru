@@ -119,8 +119,6 @@ export class SelectIOProcessor {
   constructor(public action: dd.SelectAction, public dialect: Dialect) {
     throwIfFalsy(action, 'action');
     throwIfFalsy(dialect, 'dialect');
-
-    this.convert();
   }
 
   convert(): SelectIO {
