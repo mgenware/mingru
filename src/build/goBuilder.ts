@@ -137,7 +137,7 @@ func (da *${tableClassName}) ${funcName}`;
 
     // Add starting indent to all body lines
     const bodyLines = bodyMap.body.match(/[^\r\n]+/g) || [bodyMap.body];
-    code += bodyLines.map(line => `\t${line}`).join('');
+    code += bodyLines.map(line => `\t${line}`).join('\n');
 
     // Closing func
     code += '}\n';
