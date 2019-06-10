@@ -38,9 +38,20 @@ test('getInputs', () => {
   const v = ta.t;
   const io = mr.deleteIO(v, new mr.MySQL());
   const inputs = io.inputVarList;
-  expect(inputs.toString()).toEqual(
-    '[user.id.toInput(), user.url_name.toInput()]',
-  );
+  expect(inputs.toString()).toEqual('id: uint64, urlName: string');
+});
+
+test('getReturns', () => {
+  class UserTA extends dd.TA {
+    t = dd
+      .deleteOne()
+      .where(dd.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
+  }
+  const ta = dd.ta(user, UserTA);
+  const v = ta.t;
+  const io = mr.deleteIO(v, new mr.MySQL());
+  const returns = io.returnVarList;
+  expect(returns.toString()).toEqual('');
 });
 
 test('getInputs (no WHERE)', () => {
@@ -54,7 +65,7 @@ test('getInputs (no WHERE)', () => {
   expect(inputs.list.length).toBe(0);
 });
 
-test('getInputs (no WHERE)', () => {
+test('getReturns (no WHERE)', () => {
   class UserTA extends dd.TA {
     t = dd.unsafeDeleteAll();
   }
@@ -62,7 +73,5 @@ test('getInputs (no WHERE)', () => {
   const v = ta.t;
   const io = mr.deleteIO(v, new mr.MySQL());
   const returns = io.returnVarList;
-  expect(returns.toString()).toEqual([
-    new dd.SQLVariable(dd.int(), mr.RowsAffectedKey),
-  ]);
+  expect(returns.toString()).toEqual('_rows_affected: int');
 });

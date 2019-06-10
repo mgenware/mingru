@@ -58,13 +58,15 @@ class UpdateIOProcessor {
     const fromSQL = this.handleFrom(table);
     sql += `${fromSQL} SET `;
 
-    const setterIOs = SetterIO.fromMap(setters);
+    const setterIOs = SetterIO.fromMap(setters, dialect);
     sql += setterIOs
       .map(s => `${dialect.escapeColumn(s.col)} = ${s.sql.toSQL(dialect)}`)
       .join(', ');
 
     // where
-    const whereIO = action.whereSQL ? new SQLIO(action.whereSQL) : null;
+    const whereIO = action.whereSQL
+      ? SQLIO.fromSQL(action.whereSQL, dialect)
+      : null;
     if (whereIO) {
       sql += ` WHERE ${whereIO.toSQL(dialect)}`;
     }
@@ -73,18 +75,10 @@ class UpdateIOProcessor {
     const setterVars = settersToVarList(
       `SetterInputs of action "${action.__name}"`,
       setterIOs,
-      dialect,
     );
     const inputVars = new VarList(`Inputs of action "${action.__name}"`);
-    let whereVars: VarList | null = null;
     if (whereIO) {
-      // If WHERE is present, inputVars = WHERE.inputs + setter inputs
-      whereVars = VarList.fromSQLVars(
-        `WHERE params of action "${action.__name}"`,
-        whereIO.inputs,
-        dialect,
-      );
-      inputVars.mergeWith(whereVars);
+      inputVars.mergeWith(whereIO.varList);
     }
     inputVars.mergeWith(setterVars);
 
@@ -99,8 +93,8 @@ class UpdateIOProcessor {
     // query vars (see UpdateIO.ctor for details)
     const queryVars = new VarList(`Query params of action "${action.__name}"`);
     queryVars.mergeWith(setterVars);
-    if (whereVars) {
-      queryVars.mergeWith(whereVars);
+    if (whereIO) {
+      queryVars.mergeWith(whereIO.varList);
     }
 
     return new UpdateIO(

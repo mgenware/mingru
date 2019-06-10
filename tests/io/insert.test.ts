@@ -44,14 +44,12 @@ test('getInputs', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, new mr.MySQL());
-  expect(io.inputVarList.toString()).toEqual([
-    user.sig.toInput(),
-    user.id.toInput(),
-    user.url_name.toInput('b'),
-  ]);
+  expect(io.inputVarList.toString()).toEqual(
+    'sig: *string, id: uint64, b: string',
+  );
 });
 
-test('getReturns', () => {
+test('getReturns (isnert)', () => {
   class UserTA extends dd.TA {
     t = dd
       .insert()
@@ -61,7 +59,18 @@ test('getReturns', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, new mr.MySQL());
-  expect(io.returnVarList.toString()).toEqual([
-    new dd.SQLVariable(dd.int(), mr.InsertedIDKey),
-  ]);
+  expect(io.returnVarList.toString()).toEqual('');
+});
+
+test('getReturns (insertOne)', () => {
+  class UserTA extends dd.TA {
+    t = dd
+      .insertOne()
+      .setInputs(user.sig, user.id)
+      .set(user.url_name, user.url_name.toInput('b'));
+  }
+  const ta = dd.ta(user, UserTA);
+  const v = ta.t;
+  const io = mr.insertIO(v, new mr.MySQL());
+  expect(io.returnVarList.toString()).toEqual('inserted_id: uint64');
 });

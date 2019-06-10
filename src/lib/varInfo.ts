@@ -1,6 +1,5 @@
 import * as dd from 'dd-models';
 import { Dialect } from '../dialect';
-import SQLVarList from '../io/sqlVarList';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 
 export class TypeInfo {
@@ -32,17 +31,13 @@ export class TypeInfo {
 }
 
 export class VarInfo {
-  static fromSQLVars(vars: SQLVarList, dialect: Dialect): VarInfo[] {
-    throwIfFalsy(vars, 'vars');
+  static fromSQLVar(v: dd.SQLVariable, dialect: Dialect): VarInfo {
+    throwIfFalsy(v, 'v');
     throwIfFalsy(dialect, 'dialect');
-
-    const res: VarInfo[] = [];
-    for (const v of vars.list) {
-      const typeInfo = TypeInfo.fromSQLVariable(v, dialect);
-      res.push(new VarInfo(v.name, typeInfo));
-    }
-    return res;
+    const typeInfo = TypeInfo.fromSQLVariable(v, dialect);
+    return new VarInfo(v.name, typeInfo);
   }
+
   constructor(
     public name: string,
     public type: TypeInfo,

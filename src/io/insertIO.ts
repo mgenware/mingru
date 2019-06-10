@@ -45,7 +45,7 @@ export class InsertIOProcessor {
         `The insert action "${action}" does not have any setters`,
       );
     }
-    const setters = SetterIO.fromMap(actionSetters);
+    const setters = SetterIO.fromMap(actionSetters, dialect);
 
     // Try to set the remaining columns to defaults if withDefaults is true
     if (withDefaults) {
@@ -75,7 +75,7 @@ export class InsertIOProcessor {
         let value: string;
         if (col.default) {
           if (col.default instanceof dd.SQL) {
-            const valueIO = new SQLIO(col.default as dd.SQL);
+            const valueIO = SQLIO.fromSQL(col.default as dd.SQL, dialect);
             value = valueIO.toSQL(dialect);
           } else {
             value = dialect.translate(col.default);
@@ -94,7 +94,9 @@ export class InsertIOProcessor {
           value = dialect.translate(def);
         }
 
-        setters.push(new SetterIO(col, new SQLIO(dd.sql`${value}`)));
+        setters.push(
+          new SetterIO(col, SQLIO.fromSQL(dd.sql`${value}`, dialect)),
+        );
       });
     }
 
@@ -109,7 +111,6 @@ export class InsertIOProcessor {
     const inputVarList = settersToVarList(
       `Inputs of action ${action.__name}`,
       setters,
-      dialect,
     );
 
     // returns

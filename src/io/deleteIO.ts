@@ -45,22 +45,17 @@ class DeleteIOProcessor {
     sql += fromSQL;
 
     // where
-    const whereIO = action.whereSQL ? new SQLIO(action.whereSQL) : null;
+    const whereIO = action.whereSQL
+      ? SQLIO.fromSQL(action.whereSQL, dialect)
+      : null;
     if (whereIO) {
       sql += ` WHERE ${whereIO.toSQL(dialect)}`;
     }
 
     // inputs
-    const inputVarListName = `Inputs of action "${action.__name}"`;
-    let inputVarList: VarList;
-    if (!whereIO) {
-      inputVarList = new VarList(inputVarListName);
-    } else {
-      inputVarList = VarList.fromSQLVars(
-        inputVarListName,
-        whereIO.inputs,
-        this.dialect,
-      );
+    const inputVarList = new VarList(`Inputs of action "${action.__name}"`);
+    if (whereIO) {
+      inputVarList.mergeWith(whereIO.varList);
     }
 
     // returns

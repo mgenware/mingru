@@ -3,20 +3,28 @@ import * as dd from 'dd-models';
 import Dialect from '../dialect';
 import toTypeString from 'to-type-string';
 import VarList from '../lib/varList';
+import VarInfo from '../lib/varInfo';
 
 export class SQLIO {
-  inputs: VarList;
-
-  constructor(public sql: dd.SQL) {
+  static fromSQL(sql: dd.SQL, dialect: Dialect): SQLIO {
     throwIfFalsy(sql, 'sql');
+    throwIfFalsy(dialect, 'dialect');
 
-    const inputs = new VarList(`Expression ${sql.toString()}`);
+    const vars = new VarList(`Expression ${sql.toString()}`);
     for (const element of sql.elements) {
       if (element.type === dd.SQLElementType.input) {
-        inputs.add(element.value as dd.SQLVariable);
+        const sqlVar = element.value as dd.SQLVariable;
+        const varInfo = VarInfo.fromSQLVar(sqlVar, dialect);
+        vars.add(varInfo);
       }
     }
-    this.inputs.seal();
+
+    return new SQLIO(sql, vars);
+  }
+
+  private constructor(public sql: dd.SQL, public varList: VarList) {
+    throwIfFalsy(sql, 'sql');
+    throwIfFalsy(varList, 'varList');
   }
 
   toSQL(
@@ -49,7 +57,9 @@ export class SQLIO {
         const call = element.toCall();
         const name = dialect.sqlCall(call.type);
         const params = call.params.length
-          ? call.params.map(p => new SQLIO(p).toSQL(dialect)).join(', ')
+          ? call.params
+              .map(p => SQLIO.fromSQL(p, dialect).toSQL(dialect))
+              .join(', ')
           : '';
         return `${name}(${params})`;
       }
@@ -69,6 +79,6 @@ export class SQLIO {
   }
 }
 
-export function sqlIO(sql: dd.SQL): SQLIO {
-  return new SQLIO(sql);
+export function sqlIO(sql: dd.SQL, dialect: Dialect): SQLIO {
+  return SQLIO.fromSQL(sql, dialect);
 }

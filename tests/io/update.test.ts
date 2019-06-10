@@ -55,15 +55,10 @@ test('getInputs', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.updateIO(v, new mr.MySQL());
-  expect(io.setterVarList.toString()).toEqual([
-    user.url_name.toInput(),
-    user.sig.toInput(),
-  ]);
-  expect(io.inputVarList.toString()).toEqual([
-    user.id.toInput(),
-    user.url_name.toInput(),
-    user.sig.toInput(),
-  ]);
+  expect(io.setterVarList.toString()).toEqual('urlName: string, sig: *string');
+  expect(io.inputVarList.toString()).toEqual(
+    'id: uint64, urlName: string, sig: *string',
+  );
 });
 
 test('getReturns', () => {
@@ -78,7 +73,5 @@ test('getReturns', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.updateIO(v, new mr.MySQL());
-  expect(io.returnVarList.toString()).toEqual([
-    new dd.SQLVariable(dd.int(), mr.RowsAffectedKey),
-  ]);
+  expect(io.returnVarList.toString()).toEqual('rows_affected: int');
 });

@@ -151,7 +151,7 @@ export class SelectIOProcessor {
     // where
     let whereIO: SQLIO | null = null;
     if (action.whereSQL) {
-      whereIO = new SQLIO(action.whereSQL);
+      whereIO = SQLIO.fromSQL(action.whereSQL, this.dialect);
       sql +=
         ' WHERE ' +
         whereIO.toSQL(this.dialect, ele => {
@@ -178,16 +178,9 @@ export class SelectIOProcessor {
     sql += orderBySQL;
 
     // Inputs
-    const inputVarListName = `Inputs of action "${action.__name}"`;
-    let inputVarList: VarList;
-    if (!whereIO) {
-      inputVarList = new VarList(inputVarListName);
-    } else {
-      inputVarList = VarList.fromSQLVars(
-        inputVarListName,
-        whereIO.inputs,
-        this.dialect,
-      );
+    const inputVarList = new VarList(`Inputs of action "${action.__name}"`);
+    if (whereIO) {
+      inputVarList.mergeWith(whereIO.varList);
     }
     if (action.pagination) {
       inputVarList.add(
@@ -371,7 +364,7 @@ export class SelectIOProcessor {
 
       // Here, we have a RawColumn.core is an expression with a column inside
       const rawExpr = calcCol.core as dd.SQL;
-      const exprIO = new SQLIO(rawExpr);
+      const exprIO = SQLIO.fromSQL(rawExpr, dialect);
       // Replace the column with SQL only (no alias).
       // Imagine new RawColumn(dd.sql`COUNT(${col.as('a')})`, 'b'), the embedded column would be interpreted as `'col' AS 'a'`, but it really should be `COUNT('col') AS 'b'`, so this step replace the embedded with the SQL without its attached alias.
       const sql = exprIO.toSQL(dialect, element => {
@@ -397,7 +390,7 @@ export class SelectIOProcessor {
       }
       // Expression with no columns inside
       const rawExpr = calcCol.core as dd.SQL;
-      const exprIO = new SQLIO(rawExpr);
+      const exprIO = SQLIO.fromSQL(rawExpr, dialect);
       const sql = exprIO.toSQL(dialect);
       // If we cannot guess the result type (`resultType` is null), and neither does a user specified type (`type` is null) exists, we throw cuz we cannot determine the result type
       if (!resultType && !sCol.type) {

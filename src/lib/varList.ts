@@ -1,6 +1,5 @@
 import VarInfo from './varInfo';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import Dialect from '../dialect';
 
 export default class VarList {
   list: VarInfo[] = [];
@@ -25,14 +24,15 @@ export default class VarList {
     throwIfFalsy(v, 'v');
     const prev = this.getByName(v.name);
     if (prev) {
-      if (prev.toString() === this.toString()) {
-        // Duplicate variable, return
+      // Found an existing var with the same name, check if their types are identical
+      if (prev.type.toString() === v.type.toString()) {
+        // Ignore identical variables
         return;
       }
       throw new Error(
         `Cannot handle two variables with same names "${
           v.name
-        }" but different types ("${prev.toString()}" and "${this.toString()}") in "${
+        }" but different types ("${prev.type.toString()}" and "${v.type.toString()}") in "${
           this.name
         }"`,
       );

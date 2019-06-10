@@ -9,14 +9,14 @@ test('Columns and escape strings', () => {
   const sql = dd.sql`abc "aaa" ${post.user_id} ${
     post.user_id.join(user).url_name
   }`;
-  const io = new mr.SQLIO(sql);
+  const io = mr.sqlIO(sql, dialect);
   expect(io).toBeInstanceOf(mr.SQLIO);
   expect(io.toSQL(dialect)).toBe('abc "aaa" `user_id` `url_name`');
 });
 
 test('SQL calls', () => {
   const sql = dd.sql`${post.datetime} = ${dd.datetimeNow()}`;
-  const io = new mr.SQLIO(sql);
+  const io = mr.sqlIO(sql, dialect);
   expect(io.toSQL(dialect)).toBe('`datetime` = NOW()');
 });
 
@@ -31,24 +31,19 @@ test('Inputs', () => {
     user.sig,
   )} ${i4}`;
 
-  const io = mr.sqlIO(sql);
-  expect(io.inputs.list).toEqual([i1, i2, i4, i3]);
-  expect(io.inputs.sealed).toBe(true);
+  const io = mr.sqlIO(sql, dialect);
+  expect(io.varList.toString()).toEqual(
+    'id: uint64, urlName: string, b: a, sig: *string',
+  );
 });
 
 test('Inputs (conflicting names)', () => {
   expect(() => {
-    const sql = dd.sql`START${dd.sql`${user.id.toInput()}`} OR ${
-      user.sig
-    } = ${dd.sql`${post.id.toInput()}`}`;
-    mr.sqlIO(sql);
-  }).toThrow('id');
-  expect(() => {
     const sql = dd.sql`${user.id.toInput()}${dd.input('b', 'id')}`;
-    mr.sqlIO(sql);
+    mr.sqlIO(sql, dialect);
   }).toThrow('id');
   expect(() => {
     const sql = dd.sql`${dd.input('a', 'v1')}${dd.input('b', 'v1')}`;
-    mr.sqlIO(sql);
+    mr.sqlIO(sql, dialect);
   }).toThrow('v1');
 });

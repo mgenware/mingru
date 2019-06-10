@@ -5,10 +5,10 @@ import VarList from '../lib/varList';
 import Dialect from '../dialect';
 
 export class SetterIO {
-  static fromMap(map: Map<dd.Column, dd.SQL>): SetterIO[] {
+  static fromMap(map: Map<dd.Column, dd.SQL>, dialect: Dialect): SetterIO[] {
     return Array.from(
       map,
-      ([key, value]) => new SetterIO(key, new SQLIO(value)),
+      ([key, value]) => new SetterIO(key, SQLIO.fromSQL(value, dialect)),
     );
   }
 
@@ -18,18 +18,12 @@ export class SetterIO {
   }
 }
 
-export function settersToVarList(
-  name: string,
-  setters: SetterIO[],
-  dialect: Dialect,
-): VarList {
+export function settersToVarList(name: string, setters: SetterIO[]): VarList {
   // Set inputs
   const list = new VarList(name);
   // Merge setter inputs
   for (const setter of setters) {
-    if (setter.sql.inputs.length) {
-      list.addSQLVars(setter.sql.inputs, dialect);
-    }
+    list.mergeWith(setter.sql.varList);
   }
   return list;
 }
