@@ -2,9 +2,10 @@ import { Dialect } from '../dialect';
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import toTypeString from 'to-type-string';
+import VarInfo, { TypeInfo } from '../lib/varInfo';
 const escapeString = require('sql-escape-string');
 
-const TimeType = 'time.Time|time';
+const TimeType = new TypeInfo('time', 'time.Time');
 
 export default class MySQL extends Dialect {
   escape(name: string): string {
@@ -32,13 +33,18 @@ export default class MySQL extends Dialect {
     throw new Error(`Unsupported type of object "${toTypeString(value)}"`);
   }
 
-  convertColumnType(type: dd.ColumnType): string {
-    throwIfFalsy(type, 'type');
-    let typeName = this.goTypeNonNull(type);
-    if (type.nullable) {
-      typeName = '*' + typeName;
+  convertColumnType(colType: dd.ColumnType): VarInfo {
+    throwIfFalsy(colType, 'colType');
+    const type = this.goTypeNonNull(colType);
+    if (type instanceof VarInfo) {
+      return type;
     }
-    return typeName;
+    // type is a string
+    let typeStr = type as string;
+    if (colType.nullable) {
+      typeStr = '*' + typeStr;
+    }
+    return new VarInfo(typeStr);
   }
 
   as(sql: string, name: string): string {
@@ -62,7 +68,7 @@ export default class MySQL extends Dialect {
     }
   }
 
-  private goTypeNonNull(colType: dd.ColumnType): string {
+  private goTypeNonNull(colType: dd.ColumnType): TypeInfo | string {
     const DT = dd.dt;
     const unsigned = colType.unsigned;
     for (const type of colType.types) {

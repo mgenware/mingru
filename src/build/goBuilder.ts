@@ -1,11 +1,11 @@
-import Dialect from '../dialect';
+import { Dialect } from '../dialect';
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import { SelectIO } from '../io/selectIO';
 import { UpdateIO } from '../io/updateIO';
 import { InsertIO } from '../io/insertIO';
 import { DeleteIO } from '../io/deleteIO';
-import VarInfo from './varInfo';
+import VarInfo, { TypeInfo } from '../lib/varInfo';
 import * as go from './go';
 import * as defs from './defs';
 import NameContext from '../lib/nameContext';
@@ -14,6 +14,7 @@ import SQLVariableList from '../io/sqlInputList';
 import { ActionResult } from './common';
 import { TAIO } from '../io/taIO';
 import { ActionIO } from '../io/actionIO';
+import VarList from '../lib/varList';
 
 const HeaderRepeatCount = 90;
 const QueryableParam = 'queryable';
@@ -123,24 +124,20 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
     const { dialect, tableClassType } = this;
     const { action, funcName } = io;
 
-    const tableName = dd.utils.toPascalCase(action.__table.__name);
+    // const tableName = dd.utils.toPascalCase(action.__table.__name);
     const { pagination } = action;
-    // The struct type of result, null if isSelectField is true
-    // Table name is prefixed cuz class names are in global namespace (unlike instance methods which is scoped to a class)
-    const resultType = action.isSelectField
-      ? ''
-      : `${tableName}Table${funcName}Result`;
 
     let code = '';
     // Collect selected columns info, used to generate result type and params passed to `Scan`.
     const selectedFields: go.InstanceVariable[] = [];
     for (const col of io.cols) {
       const fieldName = col.inputName;
-      const fieldTypeStr = dialect.convertColumnType(col.getResultType());
-      const [typeName, importStr] = this.parseTypeString(fieldTypeStr);
-      selectedFields.push(new go.InstanceVariable(fieldName, typeName));
-      if (importStr) {
-        this.imports.add(importStr);
+      const typeInfo = dialect.convertColumnType(col.getResultType());
+      selectedFields.push(
+        new go.InstanceVariable(fieldName, typeInfo.typeName),
+      );
+      if (typeInfo.namespace) {
+        this.imports.add(typeInfo.namespace);
       }
     }
 
@@ -148,29 +145,22 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
       code += go.struct(resultType, selectedFields);
     }
 
-    // The return type of the function
-    let returnType: string;
-    if (action.isSelectField) {
-      // selectedFields are guaranteed not empty, cuz the action ctor will throw on empty columns
-      returnType = selectedFields[0].type;
-    } else if (action.isSelectAll) {
-      returnType = `[]*${resultType}`;
-    } else {
-      returnType = `*${resultType}`;
-    }
-
-    // Collect params info, used to generate function header, e.g. `(queryable dbx.Queryable, id uint64, name string)`.
     let funcParamsCode = `${QueryableParam} ${QueryableType}`;
-    const varContext = new NameContext();
-    const inputVars = this.inputsToVars(varContext, io.getInputs());
-    funcParamsCode += inputVars.map(p => `, ${p.name} ${p.type}`).join('');
-    let queryParamsCode = inputVars.map(p => `, ${p.name}`).join('');
+    const paramList = new VarList(`Function "${funcName}"`);
+    const returnList = new VarList(`Function returns of "${funcName}"`);
+    paramList.addSQLVars(io.getInputs(), dialect);
+    returnList.addSQLVars(io.getReturns(), dialect);
+
+    funcParamsCode += paramList.list
+      .map(p => `, ${p.name} ${p.type.typeName}`)
+      .join('');
+    let queryParamsCode = paramList.list.map(p => `, ${p.name}`).join('');
     if (pagination) {
       funcParamsCode += `, ${Limit}, ${Offset} int`;
       queryParamsCode += `, ${Limit}, ${Offset}`;
     }
 
-    const returnTypes = [returnType, 'error'];
+    const returnTypes = this.appendErrorType(io.getReturns());
     code += `// ${funcName} ...
 func (da *${tableClassType}) ${funcName}(${funcParamsCode}) (${returnTypes.join(
       ', ',
@@ -334,7 +324,7 @@ func (da *${tableClassType}) ${funcName}(${funcParamsCode}) `;
     // Prepare params
     let funcParamsCode = `${QueryableParam} ${QueryableType}`;
     const varContext = new NameContext();
-    const funcParams = this.inputsToVars(varContext, io.getInputs());
+    const funcParams = this.inputsToVars(io.getInputs());
     funcParamsCode += funcParams.map(p => `, ${p.name} ${p.type}`).join('');
     const queryParamsCode = funcParams.map(p => `, ${p.name}`).join('');
     code += `// ${funcName} ...
@@ -364,29 +354,16 @@ func (da *${tableClassType}) ${funcName}(${funcParamsCode}) `;
     return new ActionResult(io, code, returnTypes, funcParams);
   }
 
-  private inputsToVars(
-    context: NameContext,
-    inputs: SQLVariableList,
-  ): VarInfo[] {
-    if (!inputs.length) {
-      return [];
-    }
-    const params = VarInfo.fromInputs(this.dialect, context, inputs);
-    for (const param of params) {
-      const [, importStr] = this.parseTypeString(param.type);
-      if (importStr) {
-        this.imports.add(importStr);
+  private scanImports(varList: VarList) {
+    for (const info of varList.list) {
+      if (info.type.namespace) {
+        this.imports.add(info.type.namespace);
       }
     }
-    return params;
   }
 
-  private parseTypeString(typeString: string): [string, string | null] {
-    throwIfFalsy(typeString, 'typeString');
-    const parts = typeString.split('|');
-    if (parts.length > 1) {
-      return parts as [string, string];
-    }
-    return [parts[0], null];
+  // A varList usually ends without an error type, call this to append an Go error type to the varList
+  private appendErrorType(varList: VarList): VarInfo[] {
+    return [...varList.list, new VarInfo('error', new TypeInfo('error'))];
   }
 }

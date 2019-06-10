@@ -1,4 +1,4 @@
-import VarInfo from './varInfo';
+import VarInfo from '../lib/varInfo';
 import { ActionIO } from '../io/actionIO';
 
 export class ActionResult {

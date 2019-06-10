@@ -4,6 +4,7 @@ import * as dd from 'dd-models';
 // tslint:disable-next-line no-any
 let emptySQLVariableList: any = null;
 
+// See VarList for the difference between SQLVariableList and VarList
 export default class SQLVariableList {
   static get empty(): SQLVariableList {
     if (!emptySQLVariableList) {

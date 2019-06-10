@@ -1,4 +1,5 @@
 import * as dd from 'dd-models';
+import { TypeInfo } from './lib/varInfo';
 
 export class Dialect {
   escape(_: string): string {
@@ -10,7 +11,7 @@ export class Dialect {
     throw new Error('Not implemented yet');
   }
 
-  convertColumnType(_: dd.ColumnType): string {
+  convertColumnType(_: dd.ColumnType): TypeInfo {
     throw new Error('Not implemented yet');
   }
 

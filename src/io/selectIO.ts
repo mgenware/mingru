@@ -1,12 +1,13 @@
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
-import NameContext from '../lib/nameContext';
 import toTypeString from 'to-type-string';
 import SQLVariableList from './sqlInputList';
 import { SQLIO } from './sqlIO';
 import { ActionIO } from './actionIO';
 import * as utils from './utils';
+import VarInfo, { TypeInfo } from '../lib/varInfo';
+import VarList from '../lib/varList';
 
 export class JoinIO {
   constructor(
@@ -83,14 +84,14 @@ export class SelectIO extends ActionIO {
     throwIfFalsy(cols, 'cols');
   }
 
-  getInputs(): SQLVariableList {
+  getInputs(): VarList {
     if (!this.where) {
       return SQLVariableList.empty;
     }
     return this.where.inputs;
   }
 
-  getReturns(): SQLVariableList {
+  getReturns(): VarList {
     return selectedResultVarList;
   }
 }
@@ -112,13 +113,12 @@ export class SelectIOProcessor {
   joins: JoinIO[] = [];
   // Make sure all join table alias names are unique
   joinedTableCounter = 0;
-  // Make sure all selected column names are unique
-  selectedNameContext = new NameContext();
-  returns = new SQLVariableList();
+  returns: VarList;
 
   constructor(public action: dd.SelectAction, public dialect: Dialect) {
     throwIfFalsy(action, 'action');
     throwIfFalsy(dialect, 'dialect');
+    this.returns = new VarList(`Returns of action "${action.__name}"`);
   }
 
   convert(): SelectIO {
@@ -185,8 +185,8 @@ export class SelectIOProcessor {
     // Set return types
     if (action.isSelectField) {
       const col = colIOs[0];
-      const fieldTypeStr = this.dialect.convertColumnType(col.getResultType());
-      this.returns.add(new dd.SQLVariable(fieldTypeStr, SelectedResultKey));
+      const typeInfo = this.dialect.convertColumnType(col.getResultType());
+      this.returns.add(new VarInfo(SelectedResultKey, typeInfo));
     } else {
       const tableName = utils.tableToClsName(action.__table);
       const funcName = utils.actionToFuncName(action);
@@ -194,7 +194,9 @@ export class SelectIOProcessor {
       if (action.isSelectAll) {
         resultType = '[]' + resultType;
       }
-      this.returns.add(new dd.SQLVariable(resultType, SelectedResultKey));
+      this.returns.add(
+        new VarInfo(SelectedResultKey, new TypeInfo(resultType)),
+      );
     }
 
     return new SelectIO(this.action, sql, colIOs, whereIO);
@@ -453,7 +455,7 @@ export class SelectIOProcessor {
   }
 
   private nextSelectedName(name: string): string {
-    return this.selectedNameContext.get(name);
+    return this.selectedNameContext.check(name);
   }
 }
 
