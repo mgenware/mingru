@@ -2,7 +2,6 @@ import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
 import toTypeString from 'to-type-string';
-import SQLVariableList from './sqlInputList';
 import { SQLIO } from './sqlIO';
 import { ActionIO } from './actionIO';
 import * as utils from './utils';
@@ -67,9 +66,6 @@ export class SelectedColumnIO {
 }
 
 export const SelectedResultKey = 'result';
-const selectedResultVarList = new SQLVariableList();
-selectedResultVarList.add(new dd.SQLVariable('<Result>', SelectedResultKey));
-selectedResultVarList.seal();
 
 export class SelectIO extends ActionIO {
   constructor(
@@ -77,22 +73,13 @@ export class SelectIO extends ActionIO {
     public sql: string,
     public cols: SelectedColumnIO[],
     public where: SQLIO | null,
+    inputVarList: VarList,
+    returnVarList: VarList,
   ) {
-    super(action);
+    super(action, inputVarList, returnVarList);
     throwIfFalsy(action, 'action');
     throwIfFalsy(sql, 'sql');
     throwIfFalsy(cols, 'cols');
-  }
-
-  getInputs(): VarList {
-    if (!this.where) {
-      return SQLVariableList.empty;
-    }
-    return this.where.inputs;
-  }
-
-  getReturns(): VarList {
-    return selectedResultVarList;
   }
 }
 
@@ -113,12 +100,10 @@ export class SelectIOProcessor {
   joins: JoinIO[] = [];
   // Make sure all join table alias names are unique
   joinedTableCounter = 0;
-  returns: VarList;
 
   constructor(public action: dd.SelectAction, public dialect: Dialect) {
     throwIfFalsy(action, 'action');
     throwIfFalsy(dialect, 'dialect');
-    this.returns = new VarList(`Returns of action "${action.__name}"`);
   }
 
   convert(): SelectIO {
@@ -182,11 +167,36 @@ export class SelectIOProcessor {
     }
     sql += orderBySQL;
 
+    // Inputs
+    const inputVarListName = `Inputs of action "${action.__name}"`;
+    let inputVarList: VarList;
+    if (!whereIO) {
+      inputVarList = new VarList(inputVarListName);
+    } else {
+      inputVarList = VarList.fromSQLVars(
+        inputVarListName,
+        whereIO.inputs,
+        this.dialect,
+      );
+    }
+    if (action.pagination) {
+      inputVarList.add(
+        new VarInfo('limit', this.dialect.convertColumnType(dd.int().type)),
+      );
+      inputVarList.add(
+        new VarInfo('offset', this.dialect.convertColumnType(dd.int().type)),
+      );
+    }
+
     // Set return types
+    const returnVarListName = `Returns of action "${action.__name}"`;
+    const returnVarList = new VarList(returnVarListName);
+
     if (action.isSelectField) {
       const col = colIOs[0];
       const typeInfo = this.dialect.convertColumnType(col.getResultType());
-      this.returns.add(new VarInfo(SelectedResultKey, typeInfo));
+
+      returnVarList.add(new VarInfo(SelectedResultKey, typeInfo));
     } else {
       const tableName = utils.tableToClsName(action.__table);
       const funcName = utils.actionToFuncName(action);
@@ -194,12 +204,19 @@ export class SelectIOProcessor {
       if (action.isSelectAll) {
         resultType = '[]' + resultType;
       }
-      this.returns.add(
+      returnVarList.add(
         new VarInfo(SelectedResultKey, new TypeInfo(resultType)),
       );
     }
 
-    return new SelectIO(this.action, sql, colIOs, whereIO);
+    return new SelectIO(
+      this.action,
+      sql,
+      colIOs,
+      whereIO,
+      inputVarList,
+      returnVarList,
+    );
   }
 
   private getOrderByColumnSQL(nCol: dd.ColumnName): string {
@@ -421,7 +438,7 @@ export class SelectIOProcessor {
   ): ColumnSQL {
     const { dialect } = this;
     const e = dialect.escape;
-    const inputName = alias || this.nextSelectedName(col.inputName());
+    const inputName = alias || col.inputName();
     // Check for joined column
     if (col.isJoinedColumn()) {
       const joinIO = this.handleJoinRecursively(col);
@@ -452,10 +469,6 @@ export class SelectIOProcessor {
   private nextJoinedTableName(): string {
     this.joinedTableCounter++;
     return `join_${this.joinedTableCounter}`;
-  }
-
-  private nextSelectedName(name: string): string {
-    return this.selectedNameContext.check(name);
   }
 }
 

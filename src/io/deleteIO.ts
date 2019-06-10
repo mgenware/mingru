@@ -3,29 +3,21 @@ import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
 import { ActionIO } from './actionIO';
 import { SQLIO } from './sqlIO';
-import SQLVariableList from './sqlInputList';
-import { rowsAffectedVarList } from './updateIO';
+import VarList from '../lib/varList';
+import { RowsAffectedKey } from 'dd-models';
+import VarInfo from '../lib/varInfo';
 
 export class DeleteIO extends ActionIO {
   constructor(
     public action: dd.DeleteAction,
     public sql: string,
     public where: SQLIO | null,
+    inputVarList: VarList,
+    returnVarList: VarList,
   ) {
-    super(action);
+    super(action, inputVarList, returnVarList);
     throwIfFalsy(action, 'action');
     throwIfFalsy(sql, 'sql');
-  }
-
-  getInputs(): SQLVariableList {
-    if (this.where) {
-      return this.where.inputs;
-    }
-    return SQLVariableList.empty;
-  }
-
-  getReturns(): SQLVariableList {
-    return rowsAffectedVarList;
   }
 }
 
@@ -57,7 +49,27 @@ class DeleteIOProcessor {
     if (whereIO) {
       sql += ` WHERE ${whereIO.toSQL(dialect)}`;
     }
-    return new DeleteIO(action, sql, whereIO);
+
+    // inputs
+    const inputVarListName = `Inputs of action "${action.__name}"`;
+    let inputVarList: VarList;
+    if (!whereIO) {
+      inputVarList = new VarList(inputVarListName);
+    } else {
+      inputVarList = VarList.fromSQLVars(
+        inputVarListName,
+        whereIO.inputs,
+        this.dialect,
+      );
+    }
+
+    // returns
+    const returnVarList = new VarList(`Returns of action ${action.__name}`);
+    returnVarList.add(
+      new VarInfo(RowsAffectedKey, dialect.convertColumnType(dd.int().type)),
+    );
+
+    return new DeleteIO(action, sql, whereIO, inputVarList, returnVarList);
   }
 
   private handleFrom(table: dd.Table): string {

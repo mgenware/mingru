@@ -1,6 +1,6 @@
 import * as dd from 'dd-models';
 import { Dialect } from '../dialect';
-import SQLVariableList from '../io/sqlInputList';
+import SQLVarList from '../io/sqlVarList';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 
 export class TypeInfo {
@@ -24,7 +24,7 @@ export class TypeInfo {
 }
 
 export class VarInfo {
-  static fromSQLVars(vars: SQLVariableList, dialect: Dialect): VarInfo[] {
+  static fromSQLVars(vars: SQLVarList, dialect: Dialect): VarInfo[] {
     throwIfFalsy(vars, 'vars');
     throwIfFalsy(dialect, 'dialect');
 

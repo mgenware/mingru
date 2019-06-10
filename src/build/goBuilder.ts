@@ -8,10 +8,7 @@ import { DeleteIO } from '../io/deleteIO';
 import VarInfo, { TypeInfo } from '../lib/varInfo';
 import * as go from './go';
 import * as defs from './defs';
-import NameContext from '../lib/nameContext';
 import logger from '../logger';
-import SQLVariableList from '../io/sqlInputList';
-import { ActionResult } from './common';
 import { TAIO } from '../io/taIO';
 import { ActionIO } from '../io/actionIO';
 import VarList from '../lib/varList';
@@ -34,16 +31,11 @@ function joinParams(arr: string[]): string {
 }
 
 export default class GoBuilder {
-  private tableClassObject: string;
-  private tableClassType: string;
   private imports = new Set<string>();
   private dialect: Dialect;
-  private actionResults: { [name: string]: ActionResult } = {};
 
   constructor(public taIO: TAIO, public packageName = 'da') {
     throwIfFalsy(taIO, 'taIO');
-    this.tableClassType = taIO.className;
-    this.tableClassObject = taIO.instanceName;
     this.imports.add(defs.SQLXPath);
     this.dialect = taIO.dialect;
   }
@@ -53,9 +45,7 @@ export default class GoBuilder {
     if (actionsOnly) {
       return this.buildActions();
     }
-    code += `package ${this.packageName}
-
-`;
+    code += `package ${this.packageName}\n\n`;
 
     // this.buildActions will set this.systemImports and this.userImports
     let body = '';
@@ -72,31 +62,63 @@ export default class GoBuilder {
     let code = '';
     for (const actionIO of this.taIO.actions) {
       code += '\n';
-      const actionResult = this.processActionIO(actionIO);
-      this.actionResults[actionResult.io.funcName] = actionResult;
-      code += actionResult.code;
+      code += this.processActionIO(actionIO);
     }
     return code;
   }
 
-  private processActionIO(io: ActionIO): ActionResult {
+  private processActionIO(io: ActionIO): string {
     logger.debug(`Building action "${io.action.__name}"`);
 
+    // Prepare variables
+    const { funcName } = io;
+    const { className: tableClassName } = this.taIO;
+    let code = '';
+
+    // Build func head
+    code += `// ${funcName} ...
+func (da *${tableClassName}) ${funcName}`;
+
+    // Build func params
+    this.scanImports(io.inputVarList);
+    let funcParamsCode = `${QueryableParam} ${QueryableType}`;
+    funcParamsCode += io.inputVarList.list
+      .map(p => `, ${p.name} ${p.type.typeName}`)
+      .join('');
+    code += `(${funcParamsCode})`;
+
+    // Build return values
+    this.scanImports(io.returnVarList);
+    const returnsWithError = this.appendErrorType(io.returnVarList);
+    let returnCode = returnsWithError.map(v => v.type.typeName).join(', ');
+    if (returnsWithError.length > 1) {
+      returnCode = `(${returnCode})`;
+    }
+    code += returnCode;
+
+    // Func start
+    code += ' {';
+
+    let body: string;
     switch (io.action.actionType) {
       case dd.ActionType.select: {
-        return this.select(io as SelectIO);
+        body = this.select(io as SelectIO);
+        break;
       }
 
       case dd.ActionType.update: {
-        return this.update(io as UpdateIO);
+        body = this.update(io as UpdateIO);
+        break;
       }
 
       case dd.ActionType.insert: {
-        return this.insert(io as InsertIO);
+        body = this.insert(io as InsertIO);
+        break;
       }
 
       case dd.ActionType.delete: {
-        return this.delete(io as DeleteIO);
+        body = this.delete(io as DeleteIO);
+        break;
       }
 
       default: {
@@ -107,32 +129,36 @@ export default class GoBuilder {
         );
       }
     }
-  }
 
-  private buildTableObject(): string {
-    let code = go.struct(this.tableClassType, []);
-    code += `// ${this.tableClassObject} ...
-var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
-      this.tableClassType
-    }{}
+    // Add starting indent to all body lines
+    const bodyLines = body.match(/[^\r\n]+/g) || [body];
+    code += bodyLines.map(line => `\t${line}`).join('');
 
-`;
+    // Closing func
+    code += '}\n';
     return code;
   }
 
-  private select(io: SelectIO): ActionResult {
-    const { dialect, tableClassType } = this;
-    const { action, funcName } = io;
+  private buildTableObject(): string {
+    const { className, instanceName } = this.taIO;
+    let code = go.struct(className, []);
+    code += `// ${instanceName} ...
+var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
+    return code;
+  }
 
-    // const tableName = dd.utils.toPascalCase(action.__table.__name);
+  private select(io: SelectIO): string {
+    const { action } = io;
     const { pagination } = action;
 
+    // We only need the type name here, the namespace(import) is already handled in `processActionIO`
+    const resultType = io.returnVarList.getByIndex(0).type.typeName;
     let code = '';
-    // Collect selected columns info, used to generate result type and params passed to `Scan`.
+    // Collect selected columns info, used to generate result type and params passed to `Scan`
     const selectedFields: go.InstanceVariable[] = [];
     for (const col of io.cols) {
       const fieldName = col.inputName;
-      const typeInfo = dialect.convertColumnType(col.getResultType());
+      const typeInfo = this.dialect.convertColumnType(col.getResultType());
       selectedFields.push(
         new go.InstanceVariable(fieldName, typeInfo.typeName),
       );
@@ -141,31 +167,10 @@ var ${dd.utils.capitalizeFirstLetter(this.tableClassObject)} = &${
       }
     }
 
-    if (resultType) {
-      code += go.struct(resultType, selectedFields);
-    }
-
-    let funcParamsCode = `${QueryableParam} ${QueryableType}`;
-    const paramList = new VarList(`Function "${funcName}"`);
-    const returnList = new VarList(`Function returns of "${funcName}"`);
-    paramList.addSQLVars(io.getInputs(), dialect);
-    returnList.addSQLVars(io.getReturns(), dialect);
-
-    funcParamsCode += paramList.list
-      .map(p => `, ${p.name} ${p.type.typeName}`)
-      .join('');
-    let queryParamsCode = paramList.list.map(p => `, ${p.name}`).join('');
+    let queryParamsCode = io.inputVarList.list.map(p => `, ${p.name}`).join('');
     if (pagination) {
-      funcParamsCode += `, ${Limit}, ${Offset} int`;
       queryParamsCode += `, ${Limit}, ${Offset}`;
     }
-
-    const returnTypes = this.appendErrorType(io.getReturns());
-    code += `// ${funcName} ...
-func (da *${tableClassType}) ${funcName}(${funcParamsCode}) (${returnTypes.join(
-      ', ',
-    )}) {
-`;
 
     let sqlSource = io.sql;
     if (pagination) {
@@ -175,24 +180,24 @@ func (da *${tableClassType}) ${funcName}(${funcParamsCode}) (${returnTypes.join(
     if (action.isSelectAll) {
       const scanParams = joinParams(selectedFields.map(p => `&item.${p.name}`));
       // > call Query
-      code += `\trows, err := ${QueryableParam}.Query(${sqlLiteral}${queryParamsCode})
+      code += `rows, err := ${QueryableParam}.Query(${sqlLiteral}${queryParamsCode})
+if err != nil {
+\treturn nil, err
+}
+${go.makeArray(ResultVar, `*${resultType}`, 0, pagination ? Limit : 0)}
+defer rows.Close()
+for rows.Next() {
+\t${go.pointerVar('item', resultType)}
+\terr = rows.Scan(${scanParams})
 \tif err != nil {
 \t\treturn nil, err
 \t}
-\t${go.makeArray(ResultVar, `*${resultType}`, 0, pagination ? Limit : 0)}
-\tdefer rows.Close()
-\tfor rows.Next() {
-\t\t${go.pointerVar('item', resultType)}
-\t\terr = rows.Scan(${scanParams})
-\t\tif err != nil {
-\t\t\treturn nil, err
-\t\t}
-\t\tresult = append(result, item)
-\t}
-\terr = rows.Err()
-\tif err != nil {
-\t\treturn nil, err
-\t}
+\tresult = append(result, item)
+}
+err = rows.Err()
+if err != nil {
+\treturn nil, err
+}
 `;
     } else {
       // select/selectField
@@ -200,7 +205,7 @@ func (da *${tableClassType}) ${funcName}(${funcParamsCode}) (${returnTypes.join(
       // Declare the result variable
       if (action.isSelectField) {
         scanParams = `&${ResultVar}`;
-        code += `\tvar ${ResultVar} ${returnType}`;
+        code += `\tvar ${ResultVar} ${resultType}`;
       } else {
         scanParams = joinParams(
           selectedFields.map(p => `&${ResultVar}.${p.name}`),
@@ -213,145 +218,76 @@ func (da *${tableClassType}) ${funcName}(${funcParamsCode}) (${returnTypes.join(
 
       // Call query func
       code += `\terr := ${QueryableParam}.QueryRow(${sqlLiteral}${queryParamsCode}).Scan(${scanParams})
-\tif err != nil {
-\t\treturn ${resultVarOnError}, err
-\t}
-`;
-    }
-    // Return the result
-    code += `\treturn ${ResultVar}, nil
+if err != nil {
+\treturn ${resultVarOnError}, err
 }
 `;
-    return new ActionResult(io, code, returnTypes, inputVars);
+    }
+    // Return the result
+    code += `return ${ResultVar}, nil\n}\n`;
+    return code;
   }
 
-  private update(io: UpdateIO): ActionResult {
-    const { tableClassType } = this;
-    const { action, funcName } = io;
+  private update(io: UpdateIO): string {
+    const { action } = io;
     let code = '';
 
-    // Prepare params
-    let funcParamsCode = `${QueryableParam} ${QueryableType}`;
-    const varContext = new NameContext();
-    // Note: WHERE vars takes precedence over setter vars,
-    // e.g. UPDATE id = ? WHERE id = ? would produces func with params like (id, id2) where id is for WHERE, id2 for setter
-    const whereVars = io.where
-      ? this.inputsToVars(varContext, io.where.inputs)
-      : [];
-    const setterVars = this.inputsToVars(varContext, io.setterInputs);
-
-    // For func params, WHERE vars are put before setter vars
-    const funcParams = [...whereVars, ...setterVars];
-    // For query call arguments, WHERE vars are put behind setter vars
-    const queryParams = [...setterVars, ...whereVars];
-
-    funcParamsCode += funcParams.map(p => `, ${p.name} ${p.type}`).join('');
-    const queryParamsCode = queryParams.map(p => `, ${p.name}`).join('');
-    let returnTypes: string[];
-    code += `// ${funcName} ...
-func (da *${tableClassType}) ${funcName}(${funcParamsCode}) `;
-    // Return type is determined by checkRowsAffected
-    if (action.checkAffectedRows) {
-      returnTypes = ['error'];
-      code += returnTypes[0];
-    } else {
-      returnTypes = ['int', 'error'];
-      code += `(${returnTypes.join(', ')})`;
-    }
-    code += ' {\n';
-
-    // Body
+    const queryParamsCode = io.queryVarList.list
+      .map(p => `, ${p.name}`)
+      .join('');
     const sqlLiteral = go.makeStringLiteral(io.sql);
-    code += `\t${ResultVar}, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParamsCode})\n`;
+    code += `${ResultVar}, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParamsCode})\n`;
 
     // Return the result
     if (action.checkAffectedRows) {
-      code += `\treturn dbx.CheckOneRowAffectedWithError(${ResultVar}, err)`;
+      code += `return dbx.CheckOneRowAffectedWithError(${ResultVar}, err)`;
     } else {
-      code += `\treturn dbx.GetRowsAffectedIntWithError(${ResultVar}, err)`;
+      code += `return dbx.GetRowsAffectedIntWithError(${ResultVar}, err)`;
     }
     code += '\n}\n';
-    return new ActionResult(io, code, returnTypes, funcParams);
+    return code;
   }
 
-  private insert(io: InsertIO): ActionResult {
-    const { tableClassType } = this;
-    const { action, funcName } = io;
+  private insert(io: InsertIO): string {
+    const { action } = io;
     let code = '';
 
-    // Prepare params
-    let funcParamsCode = `${QueryableParam} ${QueryableType}`;
-    const varContext = new NameContext();
-    const funcParams = this.inputsToVars(varContext, io.getInputs());
-    funcParamsCode += funcParams.map(p => `, ${p.name} ${p.type}`).join('');
-    const queryParamsCode = funcParams.map(p => `, ${p.name}`).join('');
-    code += `// ${funcName} ...
-func (da *${tableClassType}) ${funcName}(${funcParamsCode}) `;
-
-    let returnTypes: string[];
-    // Return type is determined by fetchInsertedID
-    if (action.fetchInsertedID) {
-      returnTypes = ['uint64', 'error'];
-      code += `(${returnTypes.join(', ')})`;
-    } else {
-      returnTypes = ['error'];
-      code += returnTypes[0];
-    }
-    code += ' {\n';
-
-    // Body
+    const queryParamsCode = io.inputVarList.list
+      .map(p => `, ${p.name}`)
+      .join('');
     const sqlLiteral = go.makeStringLiteral(io.sql);
-    code += `\t${
+    code += `${
       action.fetchInsertedID ? 'result' : '_'
     }, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParamsCode})
 `;
 
     // Return the result
     if (action.fetchInsertedID) {
-      code += `\treturn dbx.GetLastInsertIDUint64WithError(${ResultVar}, err)`;
+      code += `return dbx.GetLastInsertIDUint64WithError(${ResultVar}, err)`;
     } else {
-      code += '\treturn err';
+      code += 'return err';
     }
     code += '\n}\n';
-    return new ActionResult(io, code, returnTypes, funcParams);
+    return code;
   }
 
-  private delete(io: DeleteIO): ActionResult {
-    const { tableClassType } = this;
-    const { action, funcName } = io;
+  private delete(io: DeleteIO): string {
+    const { action } = io;
     let code = '';
 
-    // Prepare params
-    let funcParamsCode = `${QueryableParam} ${QueryableType}`;
-    const varContext = new NameContext();
-    const funcParams = this.inputsToVars(io.getInputs());
-    funcParamsCode += funcParams.map(p => `, ${p.name} ${p.type}`).join('');
-    const queryParamsCode = funcParams.map(p => `, ${p.name}`).join('');
-    code += `// ${funcName} ...
-func (da *${tableClassType}) ${funcName}(${funcParamsCode}) `;
-
-    let returnTypes: string[];
-    // Return type is determined by checkRowsAffected
-    if (action.checkAffectedRows) {
-      returnTypes = ['error'];
-      code += returnTypes[0];
-    } else {
-      returnTypes = ['int', 'error'];
-      code += `(${returnTypes.join(', ')})`;
-    }
-    code += ' {\n';
-
-    // Body
+    const queryParamsCode = io.inputVarList.list
+      .map(p => `, ${p.name}`)
+      .join('');
     const sqlLiteral = go.makeStringLiteral(io.sql);
-    code += `\t${ResultVar}, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParamsCode})\n`;
+    code += `${ResultVar}, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParamsCode})\n`;
     // Return the result
     if (action.checkAffectedRows) {
-      code += `\treturn dbx.CheckOneRowAffectedWithError(${ResultVar}, err)`;
+      code += `return dbx.CheckOneRowAffectedWithError(${ResultVar}, err)`;
     } else {
-      code += `\treturn dbx.GetRowsAffectedIntWithError(${ResultVar}, err)`;
+      code += `return dbx.GetRowsAffectedIntWithError(${ResultVar}, err)`;
     }
     code += '\n}\n';
-    return new ActionResult(io, code, returnTypes, funcParams);
+    return code;
   }
 
   private scanImports(varList: VarList) {

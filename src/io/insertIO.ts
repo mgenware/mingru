@@ -2,37 +2,25 @@ import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
 import dtDefault from '../build/dtDefault';
-import { settersToInputs, SetterIO } from './setterIO';
+import { settersToVarList, SetterIO } from './setterIO';
 import { SQLIO } from './sqlIO';
-import SQLVariableList from './sqlInputList';
 import { ActionIO } from './actionIO';
+import VarList from '../lib/varList';
+import VarInfo, { TypeInfo } from '../lib/varInfo';
 
 export const InsertedIDKey = 'inserted_id';
-const insertedIDVarList = new SQLVariableList();
-insertedIDVarList.add(new dd.SQLVariable(dd.int(), InsertedIDKey));
-insertedIDVarList.seal();
 
 export class InsertIO extends ActionIO {
-  private inputs: SQLVariableList;
-
   constructor(
     public action: dd.InsertAction,
     public sql: string,
     public setters: SetterIO[],
+    inputVarList: VarList,
+    returnVarList: VarList,
   ) {
-    super(action);
+    super(action, inputVarList, returnVarList);
     throwIfFalsy(action, 'action');
     throwIfFalsy(sql, 'sql');
-
-    this.inputs = settersToInputs(this.setters);
-  }
-
-  getInputs(): SQLVariableList {
-    return this.inputs;
-  }
-
-  getReturns(): SQLVariableList {
-    return insertedIDVarList;
   }
 }
 
@@ -117,7 +105,18 @@ export class InsertIOProcessor {
     const colValues = setters.map(s => s.sql.toSQL(dialect));
     sql += ` VALUES (${colValues.join(', ')})`;
 
-    return new InsertIO(action, sql, setters);
+    // inputs
+    const inputVarList = settersToVarList(
+      `Inputs of action ${action.__name}`,
+      setters,
+      dialect,
+    );
+
+    // returns
+    const returnVarList = new VarList(`Returns of action ${action.__name}`);
+    returnVarList.add(new VarInfo(InsertedIDKey, new TypeInfo('uint64')));
+
+    return new InsertIO(action, sql, setters, inputVarList, returnVarList);
   }
 
   private handleFrom(table: dd.Table): string {

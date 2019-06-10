@@ -1,7 +1,8 @@
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import { SQLIO } from './sqlIO';
-import SQLVariableList from './sqlInputList';
+import VarList from '../lib/varList';
+import Dialect from '../dialect';
 
 export class SetterIO {
   static fromMap(map: Map<dd.Column, dd.SQL>): SetterIO[] {
@@ -17,15 +18,18 @@ export class SetterIO {
   }
 }
 
-export function settersToInputs(setters: SetterIO[]): SQLVariableList {
+export function settersToVarList(
+  name: string,
+  setters: SetterIO[],
+  dialect: Dialect,
+): VarList {
   // Set inputs
-  const inputs = new SQLVariableList();
+  const list = new VarList(name);
   // Merge setter inputs
   for (const setter of setters) {
     if (setter.sql.inputs.length) {
-      inputs.merge(setter.sql.inputs);
+      list.addSQLVars(setter.sql.inputs, dialect);
     }
   }
-  inputs.seal();
-  return inputs;
+  return list;
 }

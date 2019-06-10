@@ -2,16 +2,16 @@ import { throwIfFalsy } from 'throw-if-arg-empty';
 import * as dd from 'dd-models';
 
 // tslint:disable-next-line no-any
-let emptySQLVariableList: any = null;
+let emptySQLVarList: any = null;
 
-// See VarList for the difference between SQLVariableList and VarList
-export default class SQLVariableList {
-  static get empty(): SQLVariableList {
-    if (!emptySQLVariableList) {
-      emptySQLVariableList = new SQLVariableList();
-      emptySQLVariableList.seal();
+// SQLVarList is used in SQLIO to store a list of dd.SQLVariable and groups them by name with insertion order.
+export default class SQLVarList {
+  static get empty(): SQLVarList {
+    if (!emptySQLVarList) {
+      emptySQLVarList = new SQLVarList();
+      emptySQLVarList.seal();
     }
-    return emptySQLVariableList;
+    return emptySQLVarList;
   }
 
   list: dd.SQLVariable[] = [];
@@ -52,15 +52,15 @@ export default class SQLVariableList {
     }
   }
 
-  merge(other: SQLVariableList) {
+  merge(other: SQLVarList) {
     throwIfFalsy(other, 'other');
     for (const ipt of other.list) {
       this.add(ipt);
     }
   }
 
-  copy(): SQLVariableList {
-    const res = new SQLVariableList();
+  copy(): SQLVarList {
+    const res = new SQLVarList();
     res.map = { ...this.map };
     res.list = [...this.list];
     return res;

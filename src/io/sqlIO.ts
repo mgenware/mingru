@@ -1,11 +1,11 @@
-import SQLVariableList from './sqlInputList';
+import SQLVarList from './sqlVarList';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import * as dd from 'dd-models';
 import Dialect from '../dialect';
 import toTypeString from 'to-type-string';
 
 export class SQLIO {
-  inputs = new SQLVariableList();
+  inputs = new SQLVarList();
 
   constructor(public sql: dd.SQL) {
     throwIfFalsy(sql, 'sql');

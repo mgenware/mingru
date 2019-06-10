@@ -1,4 +1,3 @@
-import SQLVariableList from './sqlInputList';
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import { selectIO } from './selectIO';
@@ -7,15 +6,28 @@ import { insertIO } from './insertIO';
 import { updateIO } from './updateIO';
 import { deleteIO } from './deleteIO';
 import { ActionIO } from './actionIO';
+import VarList from '../lib/varList';
 
 export class WrapIO extends ActionIO {
-  inputs: SQLVariableList;
-  innerIO: ActionIO;
-
-  constructor(public action: dd.WrappedAction, dialect: Dialect) {
-    super(action);
+  constructor(
+    public action: dd.WrappedAction,
+    public innerIO: ActionIO,
+    inputVarList: VarList,
+    returnVarList: VarList,
+  ) {
+    super(action, inputVarList, returnVarList);
     throwIfFalsy(action, 'action');
+  }
+}
 
+class WrapIOProcessor {
+  constructor(public action: dd.WrappedAction, public dialect: Dialect) {
+    throwIfFalsy(action, 'action');
+    throwIfFalsy(dialect, 'dialect');
+  }
+
+  convert(): WrapIO {
+    const { action, dialect } = this;
     let innerIO: ActionIO;
     const innerAction = action.action;
     switch (innerAction.actionType) {
@@ -47,29 +59,30 @@ export class WrapIO extends ActionIO {
         );
       }
     }
-    this.innerIO = innerIO;
 
     const { args } = action;
     // Throw on non-existing argument names
-    const inputs = innerIO.getInputs();
+    const innerInputVars = innerIO.inputVarList;
     for (const key of Object.keys(args)) {
-      if (!inputs.getByName(key)) {
+      if (!innerInputVars.getByName(key)) {
         throw new Error(
           `The argument "${key}" doesn't exist in action "${action.__name}"`,
         );
       }
     }
-    // Populate new inputs
-    const newInputs = new SQLVariableList();
-    for (const input of inputs.list) {
+    // Populate new var list
+    const inputVarList = new VarList(`Inputs of action "${action.__name}"`);
+    for (const input of innerInputVars.list) {
       if (!args[input.name]) {
-        newInputs.add(input);
+        inputVarList.add(input);
       }
     }
-    this.inputs = newInputs;
-  }
 
-  getInputs(): SQLVariableList {
-    return this.inputs;
+    return new WrapIO(action, innerIO, inputVarList, innerIO.returnVarList);
   }
+}
+
+export function wrapIO(action: dd.WrappedAction, dialect: Dialect): WrapIO {
+  const pro = new WrapIOProcessor(action, dialect);
+  return pro.convert();
 }

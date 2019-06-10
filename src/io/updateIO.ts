@@ -1,50 +1,29 @@
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
-import { settersToInputs, SetterIO } from './setterIO';
+import { settersToVarList, SetterIO } from './setterIO';
 import { SQLIO } from './sqlIO';
-import SQLVariableList from './sqlInputList';
 import { ActionIO } from './actionIO';
+import VarList from '../lib/varList';
+import VarInfo from '../lib/varInfo';
 
 export const RowsAffectedKey = 'rows_affected';
-export const rowsAffectedVarList = new SQLVariableList();
-rowsAffectedVarList.add(new dd.SQLVariable(dd.int(), RowsAffectedKey));
-rowsAffectedVarList.seal();
 
 export class UpdateIO extends ActionIO {
-  // Accumulated inputs (whereInputs + setterInputs)
-  inputs: SQLVariableList;
-  setterInputs: SQLVariableList;
-
   constructor(
     public action: dd.UpdateAction,
     public sql: string,
     public setters: SetterIO[],
     public where: SQLIO | null,
+    inputVarList: VarList, // inputVarList = WHERE.vars + setterVars, used as func parameters, WHERE vars take presedence
+    public queryVarList: VarList, // queryVarList = setterVars + WHERE.vars, used as params when calling Exec, setter vars come first cuz SQL setters come before WHERE clause
+    returnVarList: VarList,
+    public setterVarList: VarList,
   ) {
-    super(action);
+    super(action, inputVarList, returnVarList);
     throwIfFalsy(action, 'action');
     throwIfFalsy(sql, 'sql');
     throwIfFalsy(setters, 'setters');
-
-    const setterInputs = settersToInputs(this.setters);
-    if (this.where) {
-      const inputs = this.where.inputs.copy();
-      inputs.merge(setterInputs);
-      inputs.seal();
-      this.inputs = inputs;
-    } else {
-      this.inputs = setterInputs;
-    }
-    this.setterInputs = setterInputs;
-  }
-
-  getInputs(): SQLVariableList {
-    return this.inputs;
-  }
-
-  getReturns(): SQLVariableList {
-    return rowsAffectedVarList;
   }
 }
 
@@ -89,7 +68,49 @@ class UpdateIOProcessor {
     if (whereIO) {
       sql += ` WHERE ${whereIO.toSQL(dialect)}`;
     }
-    return new UpdateIO(action, sql, setterIOs, whereIO);
+
+    // inputs
+    const setterVars = settersToVarList(
+      `SetterInputs of action "${action.__name}"`,
+      setterIOs,
+      dialect,
+    );
+    const inputVars = new VarList(`Inputs of action "${action.__name}"`);
+    let whereVars: VarList | null = null;
+    if (whereIO) {
+      // If WHERE is present, inputVars = WHERE.inputs + setter inputs
+      whereVars = VarList.fromSQLVars(
+        `WHERE params of action "${action.__name}"`,
+        whereIO.inputs,
+        dialect,
+      );
+      inputVars.mergeWith(whereVars);
+    }
+    inputVars.mergeWith(setterVars);
+
+    // returns
+    const returnVars = new VarList(`Returns of action ${action.__name}`);
+    returnVars.add(
+      new VarInfo(RowsAffectedKey, dialect.convertColumnType(dd.int().type)),
+    );
+
+    // query vars (see UpdateIO.ctor for details)
+    const queryVars = new VarList(`Query params of action "${action.__name}"`);
+    queryVars.mergeWith(setterVars);
+    if (whereVars) {
+      queryVars.mergeWith(whereVars);
+    }
+
+    return new UpdateIO(
+      action,
+      sql,
+      setterIOs,
+      whereIO,
+      inputVars,
+      queryVars,
+      returnVars,
+      setterVars,
+    );
   }
 
   private handleFrom(table: dd.Table): string {
