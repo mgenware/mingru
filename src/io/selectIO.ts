@@ -34,7 +34,7 @@ export class SelectedColumnIO {
   constructor(
     public selectedColumn: dd.SelectActionColumns,
     public valueSQL: string,
-    public inputName: string, // Equals to alias if it's not null
+    public varName: string, // is alias if it's present, otherwise auto generated from column name
     public alias: string | null,
     public column: dd.Column | null,
     public resultType: dd.ColumnType | null, // Available when we can guess the evaluated type, e.g. an expression containing only one column or SQLCall
@@ -45,7 +45,7 @@ export class SelectedColumnIO {
 
   sql(dialect: Dialect, hasJoin: boolean): string {
     if (hasJoin || this.alias) {
-      return dialect.as(this.valueSQL, this.alias || this.inputName);
+      return dialect.as(this.valueSQL, this.alias || this.varName);
     }
     return this.valueSQL;
   }
@@ -100,6 +100,8 @@ export class SelectIOProcessor {
   joins: JoinIO[] = [];
   // Make sure all join table alias names are unique
   joinedTableCounter = 0;
+  // Tracks all selected column names, and throw on duplicates
+  selectedNames = new Set<string>();
 
   constructor(public action: dd.SelectAction, public dialect: Dialect) {
     throwIfFalsy(action, 'action');
@@ -122,6 +124,14 @@ export class SelectIOProcessor {
     const colIOs: SelectedColumnIO[] = [];
     for (const col of columns) {
       const selIO = this.handleSelectedColumn(col);
+      if (this.selectedNames.has(selIO.varName)) {
+        throw new Error(
+          `The selected column name "${
+            selIO.varName
+          }" already exists in action "${action.__name}"`,
+        );
+      }
+      this.selectedNames.add(selIO.varName);
       colIOs.push(selIO);
     }
     sql += colIOs.map(c => c.sql(this.dialect, this.hasJoin)).join(', ');
