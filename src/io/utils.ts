@@ -11,3 +11,7 @@ export function tableToObjName(table: dd.Table): string {
 export function tableToClsName(table: dd.Table): string {
   return `TableType${tableToObjName(table)}`;
 }
+
+export function tableName(table: dd.Table): string {
+  return dd.utils.toPascalCase(table.__name);
+}

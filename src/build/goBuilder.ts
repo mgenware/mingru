@@ -30,6 +30,11 @@ function joinParams(arr: string[]): string {
   return arr.join(', ');
 }
 
+// For some actions, like SELECT, it uses CodeMap type to return multiple code blocks.
+class CodeMap {
+  constructor(public body: string, public header?: string) {}
+}
+
 export default class GoBuilder {
   private imports = new Set<string>();
   private dialect: Dialect;
@@ -99,25 +104,25 @@ func (da *${tableClassName}) ${funcName}`;
     // Func start
     code += ' {';
 
-    let body: string;
+    let bodyMap: CodeMap;
     switch (io.action.actionType) {
       case dd.ActionType.select: {
-        body = this.select(io as SelectIO);
+        bodyMap = this.select(io as SelectIO);
         break;
       }
 
       case dd.ActionType.update: {
-        body = this.update(io as UpdateIO);
+        bodyMap = this.update(io as UpdateIO);
         break;
       }
 
       case dd.ActionType.insert: {
-        body = this.insert(io as InsertIO);
+        bodyMap = this.insert(io as InsertIO);
         break;
       }
 
       case dd.ActionType.delete: {
-        body = this.delete(io as DeleteIO);
+        bodyMap = this.delete(io as DeleteIO);
         break;
       }
 
@@ -131,11 +136,15 @@ func (da *${tableClassName}) ${funcName}`;
     }
 
     // Add starting indent to all body lines
-    const bodyLines = body.match(/[^\r\n]+/g) || [body];
+    const bodyLines = bodyMap.body.match(/[^\r\n]+/g) || [bodyMap.body];
     code += bodyLines.map(line => `\t${line}`).join('');
 
     // Closing func
     code += '}\n';
+
+    if (bodyMap.header) {
+      return `${bodyMap.header}\n${code}`;
+    }
     return code;
   }
 
@@ -147,17 +156,22 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     return code;
   }
 
-  private select(io: SelectIO): string {
+  private select(io: SelectIO): CodeMap {
     const { action } = io;
     const { pagination } = action;
 
     // We only need the type name here, the namespace(import) is already handled in `processActionIO`
-    const resultType = io.returnVarList.getByIndex(0).type.typeName;
+    const firstReturn = io.returnVarList.getByIndex(0);
+    const resultType = firstReturn.type.typeName;
+    // originalResultType is used to generate additional type definition, e.g. resultType is '[]*Person', the origianlResultType is 'Person'
+    const originalResultType = firstReturn.originalName || resultType;
+    // Additional type definition for result type, empty on select field action
+    let resultTypeDef: string | undefined;
     let code = '';
-    // Collect selected columns info, used to generate result type and params passed to `Scan`
+    // Selected columns
     const selectedFields: go.InstanceVariable[] = [];
     for (const col of io.cols) {
-      const fieldName = col.inputName;
+      const fieldName = col.varName;
       const typeInfo = this.dialect.convertColumnType(col.getResultType());
       selectedFields.push(
         new go.InstanceVariable(fieldName, typeInfo.typeName),
@@ -165,6 +179,11 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       if (typeInfo.namespace) {
         this.imports.add(typeInfo.namespace);
       }
+    }
+
+    // Generate result type definition
+    if (!action.isSelectField) {
+      resultTypeDef = go.struct(originalResultType, selectedFields);
     }
 
     let queryParamsCode = io.inputVarList.list.map(p => `, ${p.name}`).join('');
@@ -225,10 +244,11 @@ if err != nil {
     }
     // Return the result
     code += `return ${ResultVar}, nil\n}\n`;
-    return code;
+
+    return new CodeMap(code, resultTypeDef);
   }
 
-  private update(io: UpdateIO): string {
+  private update(io: UpdateIO): CodeMap {
     const { action } = io;
     let code = '';
 
@@ -245,10 +265,10 @@ if err != nil {
       code += `return dbx.GetRowsAffectedIntWithError(${ResultVar}, err)`;
     }
     code += '\n}\n';
-    return code;
+    return new CodeMap(code);
   }
 
-  private insert(io: InsertIO): string {
+  private insert(io: InsertIO): CodeMap {
     const { action } = io;
     let code = '';
 
@@ -268,10 +288,10 @@ if err != nil {
       code += 'return err';
     }
     code += '\n}\n';
-    return code;
+    return new CodeMap(code);
   }
 
-  private delete(io: DeleteIO): string {
+  private delete(io: DeleteIO): CodeMap {
     const { action } = io;
     let code = '';
 
@@ -287,7 +307,7 @@ if err != nil {
       code += `return dbx.GetRowsAffectedIntWithError(${ResultVar}, err)`;
     }
     code += '\n}\n';
-    return code;
+    return new CodeMap(code);
   }
 
   private scanImports(varList: VarList) {

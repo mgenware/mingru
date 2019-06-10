@@ -208,14 +208,19 @@ export class SelectIOProcessor {
 
       returnVarList.add(new VarInfo(SelectedResultKey, typeInfo));
     } else {
-      const tableName = utils.tableToClsName(action.__table);
+      const tableName = utils.tableName(action.__table);
       const funcName = utils.actionToFuncName(action);
-      let resultType = `*${tableName}Table${funcName}Result`;
+      const originalResultType = `${tableName}Table${funcName}Result`;
+      let resultType = `*${originalResultType}`;
       if (action.isSelectAll) {
         resultType = '[]' + resultType;
       }
       returnVarList.add(
-        new VarInfo(SelectedResultKey, new TypeInfo(resultType)),
+        new VarInfo(
+          SelectedResultKey,
+          new TypeInfo(resultType),
+          originalResultType,
+        ),
       );
     }
 

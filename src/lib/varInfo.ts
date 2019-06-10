@@ -21,6 +21,14 @@ export class TypeInfo {
     return new TypeInfo(typeName, namespace);
   }
   constructor(public typeName: string, public namespace?: string) {}
+
+  toString(): string {
+    let s = this.typeName;
+    if (this.namespace) {
+      s += '|' + this.namespace;
+    }
+    return s;
+  }
 }
 
 export class VarInfo {
@@ -35,7 +43,19 @@ export class VarInfo {
     }
     return res;
   }
-  constructor(public name: string, public type: TypeInfo) {}
+  constructor(
+    public name: string,
+    public type: TypeInfo,
+    public originalName?: string, // e.g. name: []*Person, originalName: Person
+  ) {}
+
+  toString(): string {
+    let s = `${this.name}: ${this.type.toString()}`;
+    if (this.originalName) {
+      s = `${s}(${this.originalName})`;
+    }
+    return s;
+  }
 }
 
 export default VarInfo;
