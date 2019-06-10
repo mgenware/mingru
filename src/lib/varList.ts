@@ -31,7 +31,7 @@ export default class VarList {
         `Duplicate variable "${v.name}" found in context "${this.name}"`,
       );
     }
-    this.list.push();
+    this.list.push(v);
   }
 
   addSQLVars(vars: SQLVarList, dialect: Dialect) {
@@ -56,5 +56,9 @@ export default class VarList {
   getByName(name: string): VarInfo | undefined {
     throwIfFalsy(name, 'name');
     return this.map.get(name);
+  }
+
+  toString(): string {
+    return this.list.map(item => item.toString()).join(', ');
   }
 }
