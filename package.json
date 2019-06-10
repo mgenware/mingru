@@ -16,16 +16,14 @@
   },
   "license": "MIT",
   "scripts": {
-    "test": "yarn run clean && yarn run pi && yarn run compile && yarn run lint && yarn run t",
+    "test": "yarn run clean && yarn run compile && yarn run lint && yarn run t",
     "t": "jest",
     "build": "yarn test",
     "compile": "tsc -b tests",
-    "dev": "yarn run clean && yarn run pi && tsc -b tests -w",
+    "dev": "yarn run clean && tsc -b tests -w",
     "prepublishOnly": "yarn run test",
     "lint": "tslint --project tsconfig.json --config tslint.json",
-    "clean": "del-cli dist && del-cli dist_tests",
-    "pi": "yarn add dd-models -P",
-    "dev_no_pi": "yarn run clean && tsc -b tests -w"
+    "clean": "del-cli dist && del-cli dist_tests"
   },
   "engines": {
     "node": ">=8.6.0"
