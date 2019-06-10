@@ -5,7 +5,7 @@ import toTypeString from 'to-type-string';
 import { TypeInfo } from '../lib/varInfo';
 const escapeString = require('sql-escape-string');
 
-const TimeType = new TypeInfo('time', 'time.Time');
+const TimeType = new TypeInfo('time.Time', 'time');
 
 export default class MySQL extends Dialect {
   escape(name: string): string {
@@ -36,15 +36,14 @@ export default class MySQL extends Dialect {
   convertColumnType(colType: dd.ColumnType): TypeInfo {
     throwIfFalsy(colType, 'colType');
     const type = this.goTypeNonNull(colType);
+    if (colType.nullable) {
+      return this.toPointerType(type);
+    }
     if (type instanceof TypeInfo) {
       return type;
     }
-    // type is a string
-    let typeStr = type as string;
-    if (colType.nullable) {
-      typeStr = '*' + typeStr;
-    }
-    return new TypeInfo(typeStr);
+    // Convert string to TypeInfo
+    return new TypeInfo(type);
   }
 
   as(sql: string, name: string): string {
@@ -105,5 +104,12 @@ export default class MySQL extends Dialect {
       return 'null';
     }
     return `[${types.join()}]`;
+  }
+
+  private toPointerType(type: string | TypeInfo): TypeInfo {
+    if (type instanceof TypeInfo) {
+      return new TypeInfo(`*${type.typeName}`, type.namespace);
+    }
+    return new TypeInfo(`*${type}`);
   }
 }

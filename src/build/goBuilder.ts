@@ -153,7 +153,7 @@ func (da *${tableClassName}) ${funcName}`;
   private buildTableObject(): string {
     const { className, instanceName } = this.taIO;
     let code = go.struct(className, []);
-    code += `// ${instanceName} ...
+    code += `\n// ${instanceName} ...
 var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     return code;
   }
