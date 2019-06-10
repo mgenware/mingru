@@ -201,9 +201,7 @@ test('getInputs', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.selectIO(v, new mr.MySQL());
-  const inputs = io.getInputs();
-  expect(inputs.list).toEqual([user.id.toInput(), user.url_name.toInput()]);
-  expect(inputs.sealed).toBe(true);
+  expect(io.inputVarList.toString()).toEqual('id: uint64, urlName: string');
 });
 
 test('getInputs (no WHERE)', () => {
@@ -213,8 +211,7 @@ test('getInputs (no WHERE)', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.selectIO(v, new mr.MySQL());
-  const inputs = io.getInputs();
-  expect(inputs.list.length).toBe(0);
+  expect(io.inputVarList.list.length).toBe(0);
 });
 
 test('getInputs (with foreign tables)', () => {
@@ -228,9 +225,7 @@ test('getInputs (with foreign tables)', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.selectIO(v, new mr.MySQL());
-  const inputs = io.getInputs();
-  expect(inputs.list).toEqual([user.id.toInput(), post.title.toInput()]);
-  expect(inputs.sealed).toBe(true);
+  expect(io.inputVarList.toString()).toEqual('id: uint64, title: string');
 });
 
 test('getReturns', () => {
@@ -244,9 +239,7 @@ test('getReturns', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.selectIO(v, new mr.MySQL());
-  const returns = io.getReturns();
-  expect(returns.list).toEqual([
-    new dd.SQLVariable('<Result>', mr.SelectedResultKey),
-  ]);
-  expect(returns.sealed).toBe(true);
+  expect(io.returnVarList.toString()).toEqual(
+    'result: *TableTypeUserTableTResult',
+  );
 });

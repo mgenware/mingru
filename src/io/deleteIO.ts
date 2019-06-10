@@ -65,9 +65,11 @@ class DeleteIOProcessor {
 
     // returns
     const returnVarList = new VarList(`Returns of action ${action.__name}`);
-    returnVarList.add(
-      new VarInfo(RowsAffectedKey, dialect.convertColumnType(dd.int().type)),
-    );
+    if (!action.checkOnlyOneAffected) {
+      returnVarList.add(
+        new VarInfo(RowsAffectedKey, dialect.convertColumnType(dd.int().type)),
+      );
+    }
 
     return new DeleteIO(action, sql, whereIO, inputVarList, returnVarList);
   }

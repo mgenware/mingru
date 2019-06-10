@@ -18,9 +18,7 @@ type ${typeName} struct {
     code += `\t${mem.name.padEnd(max)} ${mem.type}
 `;
   }
-  code += `}
-
-`;
+  code += `}\n`;
   return code;
 }
 

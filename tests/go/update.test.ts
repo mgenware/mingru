@@ -66,7 +66,7 @@ test('Duplicate names in where and setters', async () => {
       );
   }
   const ta = dd.ta(post, PostTA);
-  expect(testBuildAsync(ta, '')).rejects.toThrow('already exists');
+  expect(testBuildAsync(ta, '')).rejects.toThrow('Duplicate');
 });
 
 test('Custom DB column name', async () => {

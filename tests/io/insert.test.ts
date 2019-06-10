@@ -44,13 +44,11 @@ test('getInputs', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, new mr.MySQL());
-  const inputs = io.getInputs();
-  expect(inputs.list).toEqual([
+  expect(io.inputVarList.toString()).toEqual([
     user.sig.toInput(),
     user.id.toInput(),
     user.url_name.toInput('b'),
   ]);
-  expect(inputs.sealed).toBe(true);
 });
 
 test('getReturns', () => {
@@ -63,9 +61,7 @@ test('getReturns', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, new mr.MySQL());
-  const returns = io.getReturns();
-  expect(returns.list).toEqual([
+  expect(io.returnVarList.toString()).toEqual([
     new dd.SQLVariable(dd.int(), mr.InsertedIDKey),
   ]);
-  expect(returns.sealed).toBe(true);
 });

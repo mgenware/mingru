@@ -24,7 +24,6 @@ const FileHeader = ` /${'*'.repeat(HeaderRepeatCount)}
 
 `;
 const Limit = 'limit';
-const Offset = 'offset';
 
 function joinParams(arr: string[]): string {
   return arr.join(', ');
@@ -99,10 +98,13 @@ func (da *${tableClassName}) ${funcName}`;
     if (returnsWithError.length > 1) {
       returnCode = `(${returnCode})`;
     }
+    if (returnCode) {
+      returnCode = ' ' + returnCode;
+    }
     code += returnCode;
 
     // Func start
-    code += ' {';
+    code += ' {\n';
 
     let bodyMap: CodeMap;
     switch (io.action.actionType) {
@@ -140,7 +142,7 @@ func (da *${tableClassName}) ${funcName}`;
     code += bodyLines.map(line => `\t${line}`).join('\n');
 
     // Closing func
-    code += '}\n';
+    code += '\n}\n';
 
     if (bodyMap.header) {
       return `${bodyMap.header}\n${code}`;
@@ -186,11 +188,9 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       resultTypeDef = go.struct(originalResultType, selectedFields);
     }
 
-    let queryParamsCode = io.inputVarList.list.map(p => `, ${p.name}`).join('');
-    if (pagination) {
-      queryParamsCode += `, ${Limit}, ${Offset}`;
-    }
-
+    const queryParamsCode = io.inputVarList.list
+      .map(p => `, ${p.name}`)
+      .join('');
     let sqlSource = io.sql;
     if (pagination) {
       sqlSource += ' LIMIT ? OFFSET ?';
@@ -203,10 +203,10 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 if err != nil {
 \treturn nil, err
 }
-${go.makeArray(ResultVar, `*${resultType}`, 0, pagination ? Limit : 0)}
+${go.makeArray(ResultVar, `*${originalResultType}`, 0, pagination ? Limit : 0)}
 defer rows.Close()
 for rows.Next() {
-\t${go.pointerVar('item', resultType)}
+\t${go.pointerVar('item', originalResultType)}
 \terr = rows.Scan(${scanParams})
 \tif err != nil {
 \t\treturn nil, err
@@ -224,26 +224,26 @@ if err != nil {
       // Declare the result variable
       if (action.isSelectField) {
         scanParams = `&${ResultVar}`;
-        code += `\tvar ${ResultVar} ${resultType}`;
+        code += `var ${ResultVar} ${resultType}`;
       } else {
         scanParams = joinParams(
           selectedFields.map(p => `&${ResultVar}.${p.name}`),
         );
-        code += `\t${go.pointerVar(ResultVar, resultType)}`;
+        code += `${go.pointerVar(ResultVar, originalResultType)}`;
       }
       // For selectField, we return the default value, for select, return nil
       const resultVarOnError = action.isSelectField ? 'result' : 'nil';
       code += '\n';
 
       // Call query func
-      code += `\terr := ${QueryableParam}.QueryRow(${sqlLiteral}${queryParamsCode}).Scan(${scanParams})
+      code += `err := ${QueryableParam}.QueryRow(${sqlLiteral}${queryParamsCode}).Scan(${scanParams})
 if err != nil {
 \treturn ${resultVarOnError}, err
 }
 `;
     }
     // Return the result
-    code += `return ${ResultVar}, nil\n}\n`;
+    code += `return ${ResultVar}, nil`;
 
     return new CodeMap(code, resultTypeDef);
   }
@@ -259,12 +259,11 @@ if err != nil {
     code += `${ResultVar}, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParamsCode})\n`;
 
     // Return the result
-    if (action.checkAffectedRows) {
+    if (action.checkOnlyOneAffected) {
       code += `return dbx.CheckOneRowAffectedWithError(${ResultVar}, err)`;
     } else {
       code += `return dbx.GetRowsAffectedIntWithError(${ResultVar}, err)`;
     }
-    code += '\n}\n';
     return new CodeMap(code);
   }
 
@@ -287,7 +286,6 @@ if err != nil {
     } else {
       code += 'return err';
     }
-    code += '\n}\n';
     return new CodeMap(code);
   }
 
@@ -301,12 +299,11 @@ if err != nil {
     const sqlLiteral = go.makeStringLiteral(io.sql);
     code += `${ResultVar}, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParamsCode})\n`;
     // Return the result
-    if (action.checkAffectedRows) {
+    if (action.checkOnlyOneAffected) {
       code += `return dbx.CheckOneRowAffectedWithError(${ResultVar}, err)`;
     } else {
       code += `return dbx.GetRowsAffectedIntWithError(${ResultVar}, err)`;
     }
-    code += '\n}\n';
     return new CodeMap(code);
   }
 

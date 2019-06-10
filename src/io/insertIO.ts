@@ -114,7 +114,9 @@ export class InsertIOProcessor {
 
     // returns
     const returnVarList = new VarList(`Returns of action ${action.__name}`);
-    returnVarList.add(new VarInfo(InsertedIDKey, new TypeInfo('uint64')));
+    if (action.fetchInsertedID) {
+      returnVarList.add(new VarInfo(InsertedIDKey, new TypeInfo('uint64')));
+    }
 
     return new InsertIO(action, sql, setters, inputVarList, returnVarList);
   }

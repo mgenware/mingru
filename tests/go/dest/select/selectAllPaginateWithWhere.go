@@ -7,7 +7,7 @@ type PostTableSelectTResult struct {
 }
 
 // SelectT ...
-func (da *TableTypePost) SelectT(queryable dbx.Queryable, id uint64, limit, offset int) ([]*PostTableSelectTResult, error) {
+func (da *TableTypePost) SelectT(queryable dbx.Queryable, id uint64, limit int, offset int) ([]*PostTableSelectTResult, error) {
 	rows, err := queryable.Query("SELECT `id`, `title` FROM `post` WHERE `id` = ? LIMIT ? OFFSET ?", id, limit, offset)
 	if err != nil {
 		return nil, err

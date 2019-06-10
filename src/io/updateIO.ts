@@ -90,9 +90,11 @@ class UpdateIOProcessor {
 
     // returns
     const returnVars = new VarList(`Returns of action ${action.__name}`);
-    returnVars.add(
-      new VarInfo(RowsAffectedKey, dialect.convertColumnType(dd.int().type)),
-    );
+    if (!action.checkOnlyOneAffected) {
+      returnVars.add(
+        new VarInfo(RowsAffectedKey, dialect.convertColumnType(dd.int().type)),
+      );
+    }
 
     // query vars (see UpdateIO.ctor for details)
     const queryVars = new VarList(`Query params of action "${action.__name}"`);

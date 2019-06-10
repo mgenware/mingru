@@ -1,18 +1,19 @@
-import SQLVarList from './sqlVarList';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import * as dd from 'dd-models';
 import Dialect from '../dialect';
 import toTypeString from 'to-type-string';
+import VarList from '../lib/varList';
 
 export class SQLIO {
-  inputs = new SQLVarList();
+  inputs: VarList;
 
   constructor(public sql: dd.SQL) {
     throwIfFalsy(sql, 'sql');
 
+    const inputs = new VarList(`Expression ${sql.toString()}`);
     for (const element of sql.elements) {
       if (element.type === dd.SQLElementType.input) {
-        this.inputs.add(element.value as dd.SQLVariable);
+        inputs.add(element.value as dd.SQLVariable);
       }
     }
     this.inputs.seal();

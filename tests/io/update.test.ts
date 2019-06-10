@@ -55,19 +55,18 @@ test('getInputs', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.updateIO(v, new mr.MySQL());
-  expect(io.setterInputs.list).toEqual([
+  expect(io.setterVarList.toString()).toEqual([
     user.url_name.toInput(),
     user.sig.toInput(),
   ]);
-  expect(io.getInputs().list).toEqual([
+  expect(io.inputVarList.toString()).toEqual([
     user.id.toInput(),
     user.url_name.toInput(),
     user.sig.toInput(),
   ]);
-  expect(io.getInputs().sealed).toBe(true);
 });
 
-test('getInputs', () => {
+test('getReturns', () => {
   class UserTA extends dd.TA {
     t = dd
       .updateSome()
@@ -79,8 +78,7 @@ test('getInputs', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.updateIO(v, new mr.MySQL());
-  expect(io.getReturns().list).toEqual([
+  expect(io.returnVarList.toString()).toEqual([
     new dd.SQLVariable(dd.int(), mr.RowsAffectedKey),
   ]);
-  expect(io.getReturns().sealed).toBe(true);
 });
