@@ -1,17 +1,14 @@
 import * as mr from '../../';
 import * as dd from 'dd-models';
 
-const TimePkg = '"time"';
+const TimePkg = 'time';
 
 const dialect = new mr.MySQL();
 
-function testType(col: dd.Column, type: string, pkg: string | null) {
-  const tb = dialect.convertColumnType(col.type);
-  let s = type;
-  if (pkg) {
-    s += `|${pkg}`;
-  }
-  expect(tb).toBe(s);
+function testType(col: dd.Column, type: string, pkg?: string) {
+  const info = dialect.convertColumnType(col.type);
+  expect(info.typeName).toBe(type);
+  expect(info.namespace || null).toBe(pkg || null);
 }
 
 test('escape', () => {
@@ -41,10 +38,10 @@ test('DT', () => {
 
   for (const t of tests) {
     const column = t[0] as dd.Column;
-    testType(column, t[1] as string, t[2] as string | null);
+    testType(column, t[1] as string, t[2] as string);
     if (!column.type.pk) {
       column.type.nullable = true;
-      testType(column, ('*' + t[1]) as string, t[2] as string | null);
+      testType(column, ('*' + t[1]) as string, t[2] as string);
     }
   }
 });
