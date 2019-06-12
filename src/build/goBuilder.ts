@@ -11,7 +11,6 @@ import * as defs from './defs';
 import logger from '../logger';
 import { TAIO } from '../io/taIO';
 import { ActionIO } from '../io/actionIO';
-import VarList from '../lib/varList';
 
 const HeaderRepeatCount = 90;
 const QueryableParam = 'queryable';
@@ -75,7 +74,9 @@ export default class GoBuilder {
     logger.debug(`Building action "${io.action.__name}"`);
 
     // Prepare variables
-    const { funcName, funcArgs, returnValues } = io;
+    const { funcName } = io;
+    const funcArgs = io.funcArgs.distinctList;
+    const returnValues = io.returnValues.list;
     const { className: tableClassName } = this.taIO;
     let code = '';
 
@@ -85,15 +86,15 @@ func (da *${tableClassName}) ${funcName}`;
 
     // Build func params
     // Use funcArgs.distinctList as duplicate var defs are not allowed in func args
-    this.scanImports(funcArgs.distinctList);
+    this.scanImports(funcArgs);
     let funcParamsCode = `${QueryableParam} ${QueryableType}`;
-    funcParamsCode += io.funcArgs.list
+    funcParamsCode += funcArgs
       .map(p => `, ${p.name} ${p.type.typeName}`)
       .join('');
     code += `(${funcParamsCode})`;
 
     // Build return values
-    this.scanImports(returnValues.list);
+    this.scanImports(returnValues);
     const returnsWithError = this.appendErrorType(returnValues);
     let returnCode = returnsWithError.map(v => v.type.typeName).join(', ');
     if (returnsWithError.length > 1) {
@@ -309,7 +310,7 @@ if err != nil {
   }
 
   // A varList usually ends without an error type, call this to append an Go error type to the varList
-  private appendErrorType(varList: VarList): VarInfo[] {
-    return [...varList.list, new VarInfo('error', new TypeInfo('error'))];
+  private appendErrorType(vars: VarInfo[]): VarInfo[] {
+    return [...vars, new VarInfo('error', new TypeInfo('error'))];
   }
 }

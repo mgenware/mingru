@@ -61,8 +61,9 @@ test('Duplicate names in WHERE and setters', async () => {
       .updateSome()
       .set(post.content, post.content.toInput())
       .set(post.title, dd.sql`"haha"`)
+      .set(post.m_user_id, post.m_user_id.toInput())
       .where(
-        dd.sql`${post.title.isEqualToInput()} AND ${post.content.isEqualToInput()}`,
+        dd.sql`${post.title.isEqualToInput()} ${post.title.isEqualToInput()} AND ${post.content.isEqualToInput()}`,
       );
   }
   const ta = dd.ta(post, PostTA);
