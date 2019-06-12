@@ -37,7 +37,7 @@ test('getInputs', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.deleteIO(v, new mr.MySQL());
-  const inputs = io.inputVarList;
+  const inputs = io.funcArgs;
   expect(inputs.toString()).toEqual('id: uint64, urlName: string');
 });
 
@@ -50,7 +50,7 @@ test('getReturns', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.deleteIO(v, new mr.MySQL());
-  const returns = io.returnVarList;
+  const returns = io.returnValues;
   expect(returns.toString()).toEqual('');
 });
 
@@ -61,7 +61,7 @@ test('getInputs (no WHERE)', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.deleteIO(v, new mr.MySQL());
-  const inputs = io.inputVarList;
+  const inputs = io.funcArgs;
   expect(inputs.list.length).toBe(0);
 });
 
@@ -72,6 +72,6 @@ test('getReturns (no WHERE)', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.deleteIO(v, new mr.MySQL());
-  const returns = io.returnVarList;
+  const returns = io.returnValues;
   expect(returns.toString()).toEqual('_rows_affected: int');
 });

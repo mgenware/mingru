@@ -84,16 +84,16 @@ export default class GoBuilder {
 func (da *${tableClassName}) ${funcName}`;
 
     // Build func params
-    this.scanImports(io.inputVarList);
+    this.scanImports(io.funcArgs);
     let funcParamsCode = `${QueryableParam} ${QueryableType}`;
-    funcParamsCode += io.inputVarList.list
+    funcParamsCode += io.funcArgs.list
       .map(p => `, ${p.name} ${p.type.typeName}`)
       .join('');
     code += `(${funcParamsCode})`;
 
     // Build return values
-    this.scanImports(io.returnVarList);
-    const returnsWithError = this.appendErrorType(io.returnVarList);
+    this.scanImports(io.returnValues);
+    const returnsWithError = this.appendErrorType(io.returnValues);
     let returnCode = returnsWithError.map(v => v.type.typeName).join(', ');
     if (returnsWithError.length > 1) {
       returnCode = `(${returnCode})`;
@@ -163,7 +163,7 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const { pagination } = action;
 
     // We only need the type name here, the namespace(import) is already handled in `processActionIO`
-    const firstReturn = io.returnVarList.getByIndex(0);
+    const firstReturn = io.returnValues.getByIndex(0);
     const resultType = firstReturn.type.typeName;
     // originalResultType is used to generate additional type definition, e.g. resultType is '[]*Person', the origianlResultType is 'Person'
     const originalResultType = firstReturn.originalName || resultType;
@@ -188,9 +188,7 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       resultTypeDef = go.struct(originalResultType, selectedFields);
     }
 
-    const queryParamsCode = io.inputVarList.list
-      .map(p => `, ${p.name}`)
-      .join('');
+    const queryParamsCode = io.funcArgs.list.map(p => `, ${p.name}`).join('');
     let sqlSource = io.sql;
     if (pagination) {
       sqlSource += ' LIMIT ? OFFSET ?';
@@ -252,9 +250,7 @@ if err != nil {
     const { action } = io;
     let code = '';
 
-    const queryParamsCode = io.queryVarList.list
-      .map(p => `, ${p.name}`)
-      .join('');
+    const queryParamsCode = io.funcArgs.list.map(p => `, ${p.name}`).join('');
     const sqlLiteral = go.makeStringLiteral(io.sql);
     code += `${ResultVar}, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParamsCode})\n`;
 
@@ -271,9 +267,7 @@ if err != nil {
     const { action } = io;
     let code = '';
 
-    const queryParamsCode = io.inputVarList.list
-      .map(p => `, ${p.name}`)
-      .join('');
+    const queryParamsCode = io.funcArgs.list.map(p => `, ${p.name}`).join('');
     const sqlLiteral = go.makeStringLiteral(io.sql);
     code += `${
       action.fetchInsertedID ? 'result' : '_'
@@ -293,9 +287,7 @@ if err != nil {
     const { action } = io;
     let code = '';
 
-    const queryParamsCode = io.inputVarList.list
-      .map(p => `, ${p.name}`)
-      .join('');
+    const queryParamsCode = io.funcArgs.list.map(p => `, ${p.name}`).join('');
     const sqlLiteral = go.makeStringLiteral(io.sql);
     code += `${ResultVar}, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParamsCode})\n`;
     // Return the result

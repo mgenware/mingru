@@ -73,10 +73,11 @@ export class SelectIO extends ActionIO {
     public sql: string,
     public cols: SelectedColumnIO[],
     public where: SQLIO | null,
-    inputVarList: VarList,
-    returnVarList: VarList,
+    funcArgs: VarList,
+    execArgs: VarList,
+    returnValues: VarList,
   ) {
-    super(action, inputVarList, returnVarList);
+    super(action, funcArgs, execArgs, returnValues);
     throwIfFalsy(action, 'action');
     throwIfFalsy(sql, 'sql');
     throwIfFalsy(cols, 'cols');
@@ -177,29 +178,44 @@ export class SelectIOProcessor {
     }
     sql += orderBySQL;
 
-    // Inputs
-    const inputVarList = new VarList(`Inputs of action "${action.__name}"`);
+    // Func args
+    const limitTypeInfo = new VarInfo(
+      'limit',
+      this.dialect.convertColumnType(dd.int().type),
+    );
+    const offsetTypeInfo = new VarInfo(
+      'offset',
+      this.dialect.convertColumnType(dd.int().type),
+    );
+    const funcArgs = new VarList(`Func args of action "${action.__name}"`);
+    const execArgs = new VarList(
+      `Exec args of action "${action.__name}"`,
+      true,
+    );
     if (whereIO) {
-      inputVarList.mergeWith(whereIO.varList);
+      // WHERE may contain duplicate vars, we only need distinct vars in func args
+      funcArgs.merge(whereIO.distinctVars);
+      // We need to pass all variables to Exec
+      funcArgs.merge(whereIO.vars);
     }
     if (action.pagination) {
-      inputVarList.add(
-        new VarInfo('limit', this.dialect.convertColumnType(dd.int().type)),
-      );
-      inputVarList.add(
-        new VarInfo('offset', this.dialect.convertColumnType(dd.int().type)),
-      );
+      funcArgs.add(limitTypeInfo);
+      funcArgs.add(offsetTypeInfo);
+      execArgs.add(limitTypeInfo);
+      execArgs.add(offsetTypeInfo);
     }
 
     // Set return types
-    const returnVarListName = `Returns of action "${action.__name}"`;
-    const returnVarList = new VarList(returnVarListName);
+    const returnValues = new VarList(
+      `Returns of action "${action.__name}"`,
+      true,
+    );
 
     if (action.isSelectField) {
       const col = colIOs[0];
       const typeInfo = this.dialect.convertColumnType(col.getResultType());
 
-      returnVarList.add(new VarInfo(SelectedResultKey, typeInfo));
+      returnValues.add(new VarInfo(SelectedResultKey, typeInfo));
     } else {
       const tableName = utils.tableName(action.__table);
       const funcName = utils.actionToFuncName(action);
@@ -208,7 +224,7 @@ export class SelectIOProcessor {
       if (action.isSelectAll) {
         resultType = '[]' + resultType;
       }
-      returnVarList.add(
+      returnValues.add(
         new VarInfo(
           SelectedResultKey,
           new TypeInfo(resultType),
@@ -222,8 +238,9 @@ export class SelectIOProcessor {
       sql,
       colIOs,
       whereIO,
-      inputVarList,
-      returnVarList,
+      funcArgs,
+      execArgs,
+      returnValues,
     );
   }
 

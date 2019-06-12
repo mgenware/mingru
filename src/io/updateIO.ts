@@ -15,12 +15,12 @@ export class UpdateIO extends ActionIO {
     public sql: string,
     public setters: SetterIO[],
     public where: SQLIO | null,
-    inputVarList: VarList, // inputVarList = WHERE.vars + setterVars, used as func parameters, WHERE vars take presedence
-    public queryVarList: VarList, // queryVarList = setterVars + WHERE.vars, used as params when calling Exec, setter vars come first cuz SQL setters come before WHERE clause
-    returnVarList: VarList,
-    public setterVarList: VarList,
+    funcArgs: VarList,
+    execArgs: VarList,
+    returnValues: VarList,
+    public setterArgs: VarList,
   ) {
-    super(action, inputVarList, returnVarList);
+    super(action, funcArgs, execArgs, returnValues);
     throwIfFalsy(action, 'action');
     throwIfFalsy(sql, 'sql');
     throwIfFalsy(setters, 'setters');
@@ -71,30 +71,31 @@ class UpdateIOProcessor {
       sql += ` WHERE ${whereIO.toSQL(dialect)}`;
     }
 
-    // inputs
+    // funcArgs
     const setterVars = settersToVarList(
       `SetterInputs of action "${action.__name}"`,
       setterIOs,
     );
-    const inputVars = new VarList(`Inputs of action "${action.__name}"`);
+    const funcArgs = new VarList(`Func args of action "${action.__name}"`);
+    const execArgs = new VarList(
+      `Exec args of action "${action.__name}"`,
+      true,
+    );
+    // funcArgs = WHERE(distinct) + setters
+    // execArgs = setters + WHERE(all)
+    execArgs.merge(setterVars.list);
     if (whereIO) {
-      inputVars.mergeWith(whereIO.varList);
+      funcArgs.merge(whereIO.distinctVars);
+      execArgs.merge(whereIO.vars);
     }
-    inputVars.mergeWith(setterVars);
+    funcArgs.merge(setterVars.list);
 
     // returns
-    const returnVars = new VarList(`Returns of action ${action.__name}`);
+    const returnValues = new VarList(`Returns of action ${action.__name}`);
     if (!action.checkOnlyOneAffected) {
-      returnVars.add(
+      returnValues.add(
         new VarInfo(RowsAffectedKey, dialect.convertColumnType(dd.int().type)),
       );
-    }
-
-    // query vars (see UpdateIO.ctor for details)
-    const queryVars = new VarList(`Query params of action "${action.__name}"`);
-    queryVars.mergeWith(setterVars);
-    if (whereIO) {
-      queryVars.mergeWith(whereIO.varList);
     }
 
     return new UpdateIO(
@@ -102,9 +103,9 @@ class UpdateIOProcessor {
       sql,
       setterIOs,
       whereIO,
-      inputVars,
-      queryVars,
-      returnVars,
+      funcArgs,
+      execArgs,
+      returnValues,
       setterVars,
     );
   }

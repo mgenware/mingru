@@ -12,10 +12,11 @@ export class DeleteIO extends ActionIO {
     public action: dd.DeleteAction,
     public sql: string,
     public where: SQLIO | null,
-    inputVarList: VarList,
-    returnVarList: VarList,
+    funcArgs: VarList,
+    execArgs: VarList,
+    returnValues: VarList,
   ) {
-    super(action, inputVarList, returnVarList);
+    super(action, funcArgs, execArgs, returnValues);
     throwIfFalsy(action, 'action');
     throwIfFalsy(sql, 'sql');
   }
@@ -53,20 +54,28 @@ class DeleteIOProcessor {
     }
 
     // inputs
-    const inputVarList = new VarList(`Inputs of action "${action.__name}"`);
+    const funcArgs = new VarList(`Func args of action "${action.__name}"`);
+    const execArgs = new VarList(
+      `Exec args of action "${action.__name}"`,
+      true,
+    );
     if (whereIO) {
-      inputVarList.mergeWith(whereIO.varList);
+      funcArgs.merge(whereIO.distinctVars);
+      execArgs.merge(whereIO.vars);
     }
 
     // returns
-    const returnVarList = new VarList(`Returns of action ${action.__name}`);
+    const returnValues = new VarList(
+      `Returns of action ${action.__name}`,
+      false,
+    );
     if (!action.checkOnlyOneAffected) {
-      returnVarList.add(
+      returnValues.add(
         new VarInfo(RowsAffectedKey, dialect.convertColumnType(dd.int().type)),
       );
     }
 
-    return new DeleteIO(action, sql, whereIO, inputVarList, returnVarList);
+    return new DeleteIO(action, sql, whereIO, funcArgs, execArgs, returnValues);
   }
 
   private handleFrom(table: dd.Table): string {

@@ -10,7 +10,7 @@ export class SQLIO {
     throwIfFalsy(sql, 'sql');
     throwIfFalsy(dialect, 'dialect');
 
-    const vars = new VarList(`Expression ${sql.toString()}`);
+    const vars = new VarList(`Expression ${sql.toString()}`, true);
     for (const element of sql.elements) {
       if (element.type === dd.SQLElementType.input) {
         const sqlVar = element.value as dd.SQLVariable;
@@ -20,6 +20,14 @@ export class SQLIO {
     }
 
     return new SQLIO(sql, vars);
+  }
+
+  get vars(): VarInfo[] {
+    return this.varList.list;
+  }
+
+  get distinctVars(): VarInfo[] {
+    return this.varList.distinctList;
   }
 
   private constructor(public sql: dd.SQL, public varList: VarList) {

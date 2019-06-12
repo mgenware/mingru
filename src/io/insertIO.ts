@@ -15,10 +15,11 @@ export class InsertIO extends ActionIO {
     public action: dd.InsertAction,
     public sql: string,
     public setters: SetterIO[],
-    inputVarList: VarList,
-    returnVarList: VarList,
+    funcArgs: VarList,
+    execArgs: VarList,
+    returnValues: VarList,
   ) {
-    super(action, inputVarList, returnVarList);
+    super(action, funcArgs, execArgs, returnValues);
     throwIfFalsy(action, 'action');
     throwIfFalsy(sql, 'sql');
   }
@@ -107,19 +108,21 @@ export class InsertIOProcessor {
     const colValues = setters.map(s => s.sql.toSQL(dialect));
     sql += ` VALUES (${colValues.join(', ')})`;
 
-    // inputs
-    const inputVarList = settersToVarList(
-      `Inputs of action ${action.__name}`,
+    // funcArgs
+    const funcArgs = settersToVarList(
+      `Func args of action ${action.__name}`,
       setters,
     );
+    const execArgs = new VarList(`Exec args of action ${action.__name}`);
+    execArgs.merge(funcArgs.list);
 
     // returns
-    const returnVarList = new VarList(`Returns of action ${action.__name}`);
+    const returnValue = new VarList(`Returns of action ${action.__name}`);
     if (action.fetchInsertedID) {
-      returnVarList.add(new VarInfo(InsertedIDKey, new TypeInfo('uint64')));
+      returnValue.add(new VarInfo(InsertedIDKey, new TypeInfo('uint64')));
     }
 
-    return new InsertIO(action, sql, setters, inputVarList, returnVarList);
+    return new InsertIO(action, sql, setters, funcArgs, execArgs, returnValue);
   }
 
   private handleFrom(table: dd.Table): string {

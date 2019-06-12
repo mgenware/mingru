@@ -20,7 +20,7 @@ test('SQL calls', () => {
   expect(io.toSQL(dialect)).toBe('`datetime` = NOW()');
 });
 
-test('Inputs', () => {
+test('Nested SQLs', () => {
   const i1 = dd.input(user.id);
   const i2 = user.url_name.toInput();
   const sql1 = dd.sql`${user.url_name} = ${i2} ${dd.input('a', 'b')}`;
@@ -33,11 +33,22 @@ test('Inputs', () => {
 
   const io = mr.sqlIO(sql, dialect);
   expect(io.varList.toString()).toEqual(
-    'id: uint64, urlName: string, b: a, sig: *string',
+    'id: uint64, urlName: string, b: a, sig: *string, sig: *string, b: a {id: uint64, urlName: string, b: a, sig: *string}',
   );
 });
 
-test('Inputs (conflicting names)', () => {
+test('list and distinctList', () => {
+  const i1 = dd.input(user.id);
+  const i2 = dd.sql`${i1} ${i1}`;
+  const sql = dd.sql`${i1} ${i2} ${user.age.toInput()}`;
+
+  const io = mr.sqlIO(sql, dialect);
+  expect(io.varList.toString()).toEqual(
+    'id: uint64, id: uint64, id: uint64, age: int {id: uint64, age: int}',
+  );
+});
+
+test('Conflicting names', () => {
   expect(() => {
     const sql = dd.sql`${user.id.toInput()}${dd.input('b', 'id')}`;
     mr.sqlIO(sql, dialect);

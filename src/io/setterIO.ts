@@ -23,7 +23,7 @@ export function settersToVarList(name: string, setters: SetterIO[]): VarList {
   const list = new VarList(name);
   // Merge setter inputs
   for (const setter of setters) {
-    list.mergeWith(setter.sql.varList);
+    list.merge(setter.sql.varList.list);
   }
   return list;
 }

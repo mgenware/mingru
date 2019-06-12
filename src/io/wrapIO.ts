@@ -12,10 +12,11 @@ export class WrapIO extends ActionIO {
   constructor(
     public action: dd.WrappedAction,
     public innerIO: ActionIO,
-    inputVarList: VarList,
-    returnVarList: VarList,
+    funcArgs: VarList,
+    execArgs: VarList,
+    returnValues: VarList,
   ) {
-    super(action, inputVarList, returnVarList);
+    super(action, funcArgs, execArgs, returnValues);
     throwIfFalsy(action, 'action');
   }
 }
@@ -62,23 +63,30 @@ class WrapIOProcessor {
 
     const { args } = action;
     // Throw on non-existing argument names
-    const innerInputVars = innerIO.inputVarList;
+    const innerFuncArgs = innerIO.funcArgs;
     for (const key of Object.keys(args)) {
-      if (!innerInputVars.getByName(key)) {
+      if (!innerFuncArgs.getByName(key)) {
         throw new Error(
           `The argument "${key}" doesn't exist in action "${action.__name}"`,
         );
       }
     }
-    // Populate new var list
-    const inputVarList = new VarList(`Inputs of action "${action.__name}"`);
-    for (const input of innerInputVars.list) {
+    // funcArgs
+    const funcArgs = new VarList(`Func args of action "${action.__name}"`);
+    for (const input of innerFuncArgs.list) {
       if (!args[input.name]) {
-        inputVarList.add(input);
+        funcArgs.add(input);
       }
     }
+    const execArgs = funcArgs;
 
-    return new WrapIO(action, innerIO, inputVarList, innerIO.returnVarList);
+    return new WrapIO(
+      action,
+      innerIO,
+      funcArgs,
+      execArgs,
+      innerIO.returnValues,
+    );
   }
 }
 

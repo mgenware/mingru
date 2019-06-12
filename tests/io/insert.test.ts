@@ -44,9 +44,7 @@ test('getInputs', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, new mr.MySQL());
-  expect(io.inputVarList.toString()).toEqual(
-    'sig: *string, id: uint64, b: string',
-  );
+  expect(io.funcArgs.toString()).toEqual('sig: *string, id: uint64, b: string');
 });
 
 test('getReturns (isnert)', () => {
@@ -59,7 +57,7 @@ test('getReturns (isnert)', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, new mr.MySQL());
-  expect(io.returnVarList.toString()).toEqual('');
+  expect(io.returnValues.toString()).toEqual('');
 });
 
 test('getReturns (insertOne)', () => {
@@ -72,5 +70,5 @@ test('getReturns (insertOne)', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, new mr.MySQL());
-  expect(io.returnVarList.toString()).toEqual('inserted_id: uint64');
+  expect(io.returnValues.toString()).toEqual('inserted_id: uint64');
 });

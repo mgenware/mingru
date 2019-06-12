@@ -55,7 +55,7 @@ test('Update with non-input setters', async () => {
   await testBuildAsync(ta, 'update/updateWithNonInputSetters');
 });
 
-test('Duplicate names in where and setters', async () => {
+test('Duplicate names in WHERE and setters', async () => {
   class PostTA extends dd.TA {
     updateT = dd
       .updateSome()
@@ -66,7 +66,7 @@ test('Duplicate names in where and setters', async () => {
       );
   }
   const ta = dd.ta(post, PostTA);
-  expect(testBuildAsync(ta, '')).rejects.toThrow('Duplicate');
+  await testBuildAsync(ta, 'update/dupNamesWhereSetters');
 });
 
 test('Custom DB column name', async () => {
