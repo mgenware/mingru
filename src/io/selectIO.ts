@@ -166,15 +166,17 @@ export class SelectIOProcessor {
     // order by
     let orderBySQL = '';
     if (action.orderByColumns.length) {
-      orderBySQL = action.orderByColumns
-        .map(oCol => {
-          let s = this.getOrderByColumnSQL(oCol);
-          if (oCol.desc) {
-            s += ' DESC';
-          }
-          return s;
-        })
-        .join(', ');
+      orderBySQL =
+        ' ORDER BY ' +
+        action.orderByColumns
+          .map(oCol => {
+            let s = this.getOrderByColumnSQL(oCol);
+            if (oCol.desc) {
+              s += ' DESC';
+            }
+            return s;
+          })
+          .join(', ');
     }
     sql += orderBySQL;
 
