@@ -37,8 +37,8 @@ test('getInputs', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.deleteIO(v, new mr.MySQL());
-  const inputs = io.funcArgs;
-  expect(inputs.toString()).toEqual('id: uint64, urlName: string');
+  expect(io.funcArgs.toString()).toEqual('id: uint64, urlName: string');
+  expect(io.execArgs.toString()).toEqual('id: uint64, urlName: string');
 });
 
 test('getReturns', () => {

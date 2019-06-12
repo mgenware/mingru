@@ -9,7 +9,7 @@ type PostTableSelectTResult struct {
 
 // SelectT ...
 func (da *TableTypePost) SelectT(queryable dbx.Queryable, id uint64) ([]*PostTableSelectTResult, error) {
-	rows, err := queryable.Query("SELECT `id`, RAND() AS `n`, `title` FROM `post` WHERE `id` = ?`title`, `n`, `title` DESC", id)
+	rows, err := queryable.Query("SELECT `id`, RAND() AS `n`, `title` FROM `post` WHERE `id` = ? ? ORDER BY `title`, `n`, `title` DESC", id, id)
 	if err != nil {
 		return nil, err
 	}

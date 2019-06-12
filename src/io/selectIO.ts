@@ -187,7 +187,10 @@ export class SelectIOProcessor {
       'offset',
       this.dialect.convertColumnType(dd.int().type),
     );
-    const funcArgs = new VarList(`Func args of action "${action.__name}"`);
+    const funcArgs = new VarList(
+      `Func args of action "${action.__name}"`,
+      true,
+    );
     const execArgs = new VarList(
       `Exec args of action "${action.__name}"`,
       true,
@@ -196,7 +199,7 @@ export class SelectIOProcessor {
       // WHERE may contain duplicate vars, we only need distinct vars in func args
       funcArgs.merge(whereIO.distinctVars);
       // We need to pass all variables to Exec
-      funcArgs.merge(whereIO.vars);
+      execArgs.merge(whereIO.vars);
     }
     if (action.pagination) {
       funcArgs.add(limitTypeInfo);

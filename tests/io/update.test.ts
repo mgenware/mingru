@@ -50,14 +50,19 @@ test('getInputs', () => {
       .set(user.url_name, dd.sql`${dd.input(user.url_name)}`)
       .setInputs(user.sig)
       .set(user.follower_count, dd.sql`${user.follower_count} + 1`)
-      .where(dd.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
+      .where(
+        dd.sql`${user.url_name.toInput()} ${user.id.toInput()} ${user.url_name.toInput()}`,
+      );
   }
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.updateIO(v, new mr.MySQL());
   expect(io.setterArgs.toString()).toEqual('urlName: string, sig: *string');
   expect(io.funcArgs.toString()).toEqual(
-    'id: uint64, urlName: string, sig: *string',
+    'urlName: string, id: uint64, urlName: string, sig: *string {urlName: string, id: uint64, sig: *string}',
+  );
+  expect(io.execArgs.toString()).toEqual(
+    'urlName: string, sig: *string, urlName: string, id: uint64, urlName: string {urlName: string, sig: *string, id: uint64}',
   );
 });
 

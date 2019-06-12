@@ -75,7 +75,7 @@ export default class GoBuilder {
     logger.debug(`Building action "${io.action.__name}"`);
 
     // Prepare variables
-    const { funcName } = io;
+    const { funcName, funcArgs, returnValues } = io;
     const { className: tableClassName } = this.taIO;
     let code = '';
 
@@ -84,7 +84,8 @@ export default class GoBuilder {
 func (da *${tableClassName}) ${funcName}`;
 
     // Build func params
-    this.scanImports(io.funcArgs);
+    // Use funcArgs.distinctList as duplicate var defs are not allowed in func args
+    this.scanImports(funcArgs.distinctList);
     let funcParamsCode = `${QueryableParam} ${QueryableType}`;
     funcParamsCode += io.funcArgs.list
       .map(p => `, ${p.name} ${p.type.typeName}`)
@@ -92,8 +93,8 @@ func (da *${tableClassName}) ${funcName}`;
     code += `(${funcParamsCode})`;
 
     // Build return values
-    this.scanImports(io.returnValues);
-    const returnsWithError = this.appendErrorType(io.returnValues);
+    this.scanImports(returnValues.list);
+    const returnsWithError = this.appendErrorType(returnValues);
     let returnCode = returnsWithError.map(v => v.type.typeName).join(', ');
     if (returnsWithError.length > 1) {
       returnCode = `(${returnCode})`;
@@ -188,7 +189,7 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       resultTypeDef = go.struct(originalResultType, selectedFields);
     }
 
-    const queryParamsCode = io.funcArgs.list.map(p => `, ${p.name}`).join('');
+    const queryParamsCode = io.execArgs.list.map(p => `, ${p.name}`).join('');
     let sqlSource = io.sql;
     if (pagination) {
       sqlSource += ' LIMIT ? OFFSET ?';
@@ -250,7 +251,7 @@ if err != nil {
     const { action } = io;
     let code = '';
 
-    const queryParamsCode = io.funcArgs.list.map(p => `, ${p.name}`).join('');
+    const queryParamsCode = io.execArgs.list.map(p => `, ${p.name}`).join('');
     const sqlLiteral = go.makeStringLiteral(io.sql);
     code += `${ResultVar}, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParamsCode})\n`;
 
@@ -267,7 +268,7 @@ if err != nil {
     const { action } = io;
     let code = '';
 
-    const queryParamsCode = io.funcArgs.list.map(p => `, ${p.name}`).join('');
+    const queryParamsCode = io.execArgs.list.map(p => `, ${p.name}`).join('');
     const sqlLiteral = go.makeStringLiteral(io.sql);
     code += `${
       action.fetchInsertedID ? 'result' : '_'
@@ -287,7 +288,7 @@ if err != nil {
     const { action } = io;
     let code = '';
 
-    const queryParamsCode = io.funcArgs.list.map(p => `, ${p.name}`).join('');
+    const queryParamsCode = io.execArgs.list.map(p => `, ${p.name}`).join('');
     const sqlLiteral = go.makeStringLiteral(io.sql);
     code += `${ResultVar}, err := ${QueryableParam}.Exec(${sqlLiteral}${queryParamsCode})\n`;
     // Return the result
@@ -299,8 +300,8 @@ if err != nil {
     return new CodeMap(code);
   }
 
-  private scanImports(varList: VarList) {
-    for (const info of varList.list) {
+  private scanImports(vars: VarInfo[]) {
+    for (const info of vars) {
       if (info.type.namespace) {
         this.imports.add(info.type.namespace);
       }

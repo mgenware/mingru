@@ -45,6 +45,7 @@ test('getInputs', () => {
   const v = ta.t;
   const io = mr.insertIO(v, new mr.MySQL());
   expect(io.funcArgs.toString()).toEqual('sig: *string, id: uint64, b: string');
+  expect(io.execArgs.toString()).toEqual('sig: *string, id: uint64, b: string');
 });
 
 test('getReturns (isnert)', () => {

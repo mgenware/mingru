@@ -72,7 +72,10 @@ class WrapIOProcessor {
       }
     }
     // funcArgs
-    const funcArgs = new VarList(`Func args of action "${action.__name}"`);
+    const funcArgs = new VarList(
+      `Func args of action "${action.__name}"`,
+      true,
+    );
     for (const input of innerFuncArgs.list) {
       if (!args[input.name]) {
         funcArgs.add(input);

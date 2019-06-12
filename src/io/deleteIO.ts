@@ -54,7 +54,10 @@ class DeleteIOProcessor {
     }
 
     // inputs
-    const funcArgs = new VarList(`Func args of action "${action.__name}"`);
+    const funcArgs = new VarList(
+      `Func args of action "${action.__name}"`,
+      true,
+    );
     const execArgs = new VarList(
       `Exec args of action "${action.__name}"`,
       true,

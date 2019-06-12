@@ -1,5 +1,5 @@
 import VarInfo from './varInfo';
-import { throwIfFalsy } from 'throw-if-arg-empty';
+import { throwIfFalsy, throwIfFalsyStrict } from 'throw-if-arg-empty';
 
 // IMP: two variables with same names and types are considered duplicates, variables with same names but different types always end with exception!
 //    allow, // Used in SQLIO, we need to track all variables in dd.SQL, in this case, map can only tracks the first occurrence and only list holds all items
@@ -37,7 +37,7 @@ export default class VarList {
       if (prev.type.toString() === v.type.toString()) {
         if (!this.allowDuplicates) {
           throw new Error(
-            `Duplicate variables "${prev.type.toString()}" in "${this.name}"`,
+            `Duplicate variables "${v.name}" found in "${this.name}"`,
           );
         }
         // duplicatesHandling === allow
@@ -57,7 +57,7 @@ export default class VarList {
   }
 
   merge(vars: VarInfo[]) {
-    throwIfFalsy(vars, 'vars');
+    throwIfFalsyStrict(vars, 'vars');
     for (const v of vars) {
       this.add(v);
     }

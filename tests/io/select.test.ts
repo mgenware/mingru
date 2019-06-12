@@ -22,14 +22,16 @@ test('Select', () => {
 
 test('Where', () => {
   class UserTA extends dd.TA {
-    t = dd.select(user.id, user.url_name).where(dd.sql`${user.id} = 1`);
+    t = dd
+      .select(user.id, user.url_name)
+      .where(dd.sql`${user.id} = 1 ${user.id.toInput()} ${user.id.toInput()}`);
   }
   const userTA = dd.ta(user, UserTA);
   const v = userTA.t;
   const io = mr.selectIO(v, dialect);
 
   expect(io.where).toBeInstanceOf(mr.SQLIO);
-  expect(io.sql).toBe('SELECT `id`, `url_name` FROM `user` WHERE `id` = 1');
+  expect(io.sql).toBe('SELECT `id`, `url_name` FROM `user` WHERE `id` = 1 ? ?');
 });
 
 test('Where and inputs', () => {
@@ -226,6 +228,9 @@ test('getInputs (with foreign tables)', () => {
   const v = ta.t;
   const io = mr.selectIO(v, new mr.MySQL());
   expect(io.funcArgs.toString()).toEqual('id: uint64, title: string');
+  expect(io.execArgs.toString()).toEqual(
+    'id: uint64, title: string, id: uint64 {id: uint64, title: string}',
+  );
 });
 
 test('getReturns', () => {

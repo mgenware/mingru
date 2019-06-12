@@ -54,7 +54,7 @@ test('Select all, where, orderBy', async () => {
   class PostTA extends dd.TA {
     selectT = dd
       .selectAll(post.id, cc, post.title)
-      .where(dd.sql`${post.id} = ${dd.input(post.id)}`)
+      .where(dd.sql`${post.id} = ${post.id.toInput()} ${post.id.toInput()}`)
       .orderBy(post.title)
       .orderBy(cc)
       .orderByDesc(post.title);
