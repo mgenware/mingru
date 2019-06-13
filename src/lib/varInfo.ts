@@ -38,16 +38,33 @@ export class VarInfo {
     return new VarInfo(v.name, typeInfo);
   }
 
+  static withValue(v: VarInfo, value: string): VarInfo {
+    throwIfFalsy(v, 'v');
+    return new VarInfo(v.name, v.type, v.originalName, value);
+  }
+
+  private _value: string | undefined;
+
   constructor(
     public name: string,
     public type: TypeInfo,
     public originalName?: string, // e.g. name: []*Person, originalName: Person
-  ) {}
+    value?: string,
+  ) {
+    this._value = value;
+  }
+
+  get value(): string | undefined {
+    return this._value;
+  }
 
   toString(): string {
     let s = `${this.name}: ${this.type.toString()}`;
     if (this.originalName) {
-      s = `${s}(${this.originalName})`;
+      s += `(${this.originalName})`;
+    }
+    if (this.value) {
+      s += `=${this.value}`;
     }
     return s;
   }

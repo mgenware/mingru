@@ -7,6 +7,7 @@ import { updateIO } from './updateIO';
 import { deleteIO } from './deleteIO';
 import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
+import VarInfo from '../lib/varInfo';
 
 export class WrapIO extends ActionIO {
   constructor(
@@ -64,6 +65,7 @@ class WrapIOProcessor {
     const { args } = action;
     // Throw on non-existing argument names
     const innerFuncArgs = innerIO.funcArgs;
+    const innerExecArgs = innerIO.execArgs;
     for (const key of Object.keys(args)) {
       if (!innerFuncArgs.getByName(key)) {
         throw new Error(
@@ -76,12 +78,24 @@ class WrapIOProcessor {
       `Func args of action "${action.__name}"`,
       true,
     );
-    for (const input of innerFuncArgs.list) {
-      if (!args[input.name]) {
-        funcArgs.add(input);
+    for (const v of innerFuncArgs.list) {
+      if (!args[v.name]) {
+        funcArgs.add(v);
       }
     }
-    const execArgs = funcArgs;
+    // execArgs
+    const execArgs = new VarList(
+      `Exec args of action "${action.__name}"`,
+      true,
+    );
+    for (const v of innerExecArgs.list) {
+      if (args[v.name]) {
+        // Replace the variable with a value
+        execArgs.add(VarInfo.withValue(v, args[v.name] as string));
+      } else {
+        execArgs.add(v);
+      }
+    }
 
     return new WrapIO(
       action,
