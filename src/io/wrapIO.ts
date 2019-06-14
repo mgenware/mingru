@@ -53,6 +53,11 @@ class WrapIOProcessor {
         break;
       }
 
+      case dd.ActionType.wrap: {
+        innerIO = wrapIO(innerAction as dd.WrappedAction, dialect);
+        break;
+      }
+
       default: {
         throw new Error(
           `Not supported action type "${

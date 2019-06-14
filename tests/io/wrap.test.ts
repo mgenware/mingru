@@ -16,6 +16,12 @@ class WrapSelfTA extends dd.TA {
 }
 const wrapSelf = dd.ta(user, WrapSelfTA);
 
+class WrapOtherTA extends dd.TA {
+  standard = wrapSelf.s.wrap({ id: '123' });
+  nested = wrapSelf.d.wrap({ id: '123' });
+}
+const wrapOther = dd.ta(user, WrapOtherTA);
+
 test('WrapIO', () => {
   const io = mr.wrapIO(wrapSelf.d, dialect);
   expect(io).toBeInstanceOf(mr.WrapIO);
@@ -34,5 +40,25 @@ test('getInputs (wrapSelf and innerIO)', () => {
   );
   expect(io.innerIO.execArgs.toString()).toEqual(
     'urlName: string, sig: *string, followerCount: *string, urlName: string, id: uint64, urlName: string {urlName: string, sig: *string, followerCount: *string, id: uint64}',
+  );
+});
+
+test('getInputs (wrapOther)', () => {
+  const io = mr.wrapIO(wrapOther.standard, dialect);
+  expect(io.funcArgs.toString()).toEqual(
+    'urlName: string, urlName: string, sig: *string, followerCount: *string {urlName: string, sig: *string, followerCount: *string}',
+  );
+  expect(io.execArgs.toString()).toEqual(
+    'urlName: string, sig: *string, followerCount: *string, urlName: string, id: uint64=123, urlName: string {urlName: string, sig: *string, followerCount: *string, id: uint64=123}',
+  );
+});
+
+test('getInputs (wrapOther, nested)', () => {
+  const io = mr.wrapIO(wrapOther.nested, dialect);
+  expect(io.funcArgs.toString()).toEqual(
+    'urlName: string, urlName: string, followerCount: *string {urlName: string, followerCount: *string}',
+  );
+  expect(io.execArgs.toString()).toEqual(
+    'urlName: string, sig: *string="haha", followerCount: *string, urlName: string, id: uint64=123, urlName: string {urlName: string, sig: *string="haha", followerCount: *string, id: uint64=123}',
   );
 });
