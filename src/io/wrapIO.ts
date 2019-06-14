@@ -8,6 +8,7 @@ import { deleteIO } from './deleteIO';
 import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
 import VarInfo from '../lib/varInfo';
+import * as utils from './utils';
 
 export class WrapIO extends ActionIO {
   constructor(
@@ -16,6 +17,7 @@ export class WrapIO extends ActionIO {
     funcArgs: VarList,
     execArgs: VarList,
     returnValues: VarList,
+    public funcPath: string,
   ) {
     super(action, funcArgs, execArgs, returnValues);
     throwIfFalsy(action, 'action');
@@ -102,12 +104,18 @@ class WrapIOProcessor {
       }
     }
 
+    let funcPath = utils.actionToFuncName(innerAction);
+    if (innerAction.__table !== action.__table) {
+      funcPath = utils.tableToObjName(innerAction.__table) + '.' + funcPath;
+    }
+
     return new WrapIO(
       action,
       innerIO,
       funcArgs,
       execArgs,
       innerIO.returnValues,
+      funcPath,
     );
   }
 }

@@ -1,6 +1,7 @@
 import * as mr from '../../';
 import * as dd from 'dd-models';
 import user from '../models/user';
+import post from '../models/post';
 
 const dialect = new mr.MySQL();
 
@@ -20,7 +21,7 @@ class WrapOtherTA extends dd.TA {
   standard = wrapSelf.s.wrap({ id: '123' });
   nested = wrapSelf.d.wrap({ id: '123' });
 }
-const wrapOther = dd.ta(user, WrapOtherTA);
+const wrapOther = dd.ta(post, WrapOtherTA);
 
 test('WrapIO', () => {
   const io = mr.wrapIO(wrapSelf.d, dialect);
@@ -41,6 +42,7 @@ test('getInputs (wrapSelf and innerIO)', () => {
   expect(io.innerIO.execArgs.toString()).toEqual(
     'urlName: string, sig: *string, followerCount: *string, urlName: string, id: uint64, urlName: string {urlName: string, sig: *string, followerCount: *string, id: uint64}',
   );
+  expect(io.funcPath).toBe('S');
 });
 
 test('getInputs (wrapOther)', () => {
@@ -51,6 +53,7 @@ test('getInputs (wrapOther)', () => {
   expect(io.execArgs.toString()).toEqual(
     'urlName: string, sig: *string, followerCount: *string, urlName: string, id: uint64=123, urlName: string {urlName: string, sig: *string, followerCount: *string, id: uint64=123}',
   );
+  expect(io.funcPath).toBe('User.S');
 });
 
 test('getInputs (wrapOther, nested)', () => {
@@ -61,4 +64,5 @@ test('getInputs (wrapOther, nested)', () => {
   expect(io.execArgs.toString()).toEqual(
     'urlName: string, sig: *string="haha", followerCount: *string, urlName: string, id: uint64=123, urlName: string {urlName: string, sig: *string="haha", followerCount: *string, id: uint64=123}',
   );
+  expect(io.funcPath).toBe('User.D');
 });

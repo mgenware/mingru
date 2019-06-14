@@ -5,7 +5,7 @@ export function actionToFuncName(action: dd.Action): string {
 }
 
 export function tableToObjName(table: dd.Table): string {
-  return dd.utils.capitalizeFirstLetter(dd.utils.toCamelCase(table.__name));
+  return dd.utils.toPascalCase(table.__name);
 }
 
 export function tableToClsName(table: dd.Table): string {
