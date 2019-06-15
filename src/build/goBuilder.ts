@@ -11,6 +11,7 @@ import * as defs from './defs';
 import logger from '../logger';
 import { TAIO } from '../io/taIO';
 import { ActionIO } from '../io/actionIO';
+import { WrapIO } from '../io/wrapIO';
 
 const HeaderRepeatCount = 90;
 const QueryableParam = 'queryable';
@@ -127,6 +128,11 @@ func (da *${tableClassName}) ${funcName}`;
 
       case dd.ActionType.delete: {
         bodyMap = this.delete(io as DeleteIO);
+        break;
+      }
+
+      case dd.ActionType.wrap: {
+        bodyMap = this.wrap(io as WrapIO);
         break;
       }
 
@@ -298,6 +304,16 @@ if err != nil {
     } else {
       code += `return dbx.GetRowsAffectedIntWithError(${ResultVar}, err)`;
     }
+    return new CodeMap(code);
+  }
+
+  private wrap(io: WrapIO): CodeMap {
+    let code = '';
+
+    const queryParamsCode = io.execArgs.list
+      .map(p => `,  ${p.value || p.name}`)
+      .join('');
+    code += `return ${io.funcPath}(${queryParamsCode})\n`;
     return new CodeMap(code);
   }
 

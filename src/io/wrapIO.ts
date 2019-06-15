@@ -7,7 +7,7 @@ import { updateIO } from './updateIO';
 import { deleteIO } from './deleteIO';
 import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
-import VarInfo from '../lib/varInfo';
+import VarInfo, { TypeInfo } from '../lib/varInfo';
 import * as utils from './utils';
 
 export class WrapIO extends ActionIO {
@@ -95,6 +95,8 @@ class WrapIOProcessor {
       `Exec args of action "${action.__name}"`,
       true,
     );
+    // Pass the queryable param
+    execArgs.add(new VarInfo('queryable', new TypeInfo('dbx.Queryable')));
     for (const v of innerExecArgs.list) {
       if (args[v.name]) {
         // Replace the variable with a value

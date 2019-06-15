@@ -7,6 +7,7 @@ import { updateIO } from './updateIO';
 import { insertIO } from './insertIO';
 import { deleteIO } from './deleteIO';
 import { ActionIO } from './actionIO';
+import { wrapIO } from './wrapIO';
 
 // IO object for TA(Tabla actions)
 export class TAIO {
@@ -44,6 +45,9 @@ export class TAIO {
 
       case dd.ActionType.delete:
         return deleteIO(action as dd.DeleteAction, dialect);
+
+      case dd.ActionType.wrap:
+        return wrapIO(action as dd.WrappedAction, dialect);
 
       default:
         throw new Error(
