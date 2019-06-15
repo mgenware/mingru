@@ -311,8 +311,8 @@ if err != nil {
     let code = '';
 
     const queryParamsCode = io.execArgs.list
-      .map(p => `,  ${p.value || p.name}`)
-      .join('');
+      .map(p => `${p.value || p.name}`)
+      .join(', ');
     code += `return ${io.funcPath}(${queryParamsCode})\n`;
     return new CodeMap(code);
   }

@@ -109,6 +109,8 @@ class WrapIOProcessor {
     let funcPath = utils.actionToFuncName(innerAction);
     if (innerAction.__table !== action.__table) {
       funcPath = utils.tableToObjName(innerAction.__table) + '.' + funcPath;
+    } else {
+      funcPath = 'da.' + funcPath;
     }
 
     return new WrapIO(
