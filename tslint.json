@@ -13,7 +13,8 @@
     "variable-name": false,
     "max-line-length": false,
     "arrow-parens": [true, "ban-single-arg-parens"],
-    "quotemark": false
+    "quotemark": false,
+    "interface-name": false
   },
   "rulesDirectory": []
 }
