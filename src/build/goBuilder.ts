@@ -313,7 +313,7 @@ if err != nil {
     const queryParamsCode = io.execArgs.list
       .map(p => `${p.value || p.name}`)
       .join(', ');
-    code += `return ${io.funcPath}(${queryParamsCode})\n`;
+    code += `return ${io.funcPath}(queryable, ${queryParamsCode})\n`;
     return new CodeMap(code);
   }
 

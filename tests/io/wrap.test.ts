@@ -42,7 +42,7 @@ test('getInputs (wrapSelf and innerIO)', () => {
   expect(io.innerIO.execArgs.toString()).toEqual(
     'urlName: string, sig: *string, followerCount: *string, urlName: string, id: uint64, urlName: string {urlName: string, sig: *string, followerCount: *string, id: uint64}',
   );
-  expect(io.funcPath).toBe('S');
+  expect(io.funcPath).toBe('da.S');
 });
 
 test('getInputs (wrapOther)', () => {

@@ -3,7 +3,7 @@ import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
 import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
-import VarInfo, { TypeInfo } from '../lib/varInfo';
+import VarInfo from '../lib/varInfo';
 import * as utils from './utils';
 import actionToIO, { registerHanlder } from './actionToIO';
 
@@ -59,7 +59,6 @@ class WrapIOProcessor {
       true,
     );
     // Pass the queryable param
-    execArgs.add(new VarInfo('queryable', new TypeInfo('dbx.Queryable')));
     for (const v of innerExecArgs.list) {
       if (args[v.name]) {
         // Replace the variable with a value
