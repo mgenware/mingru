@@ -6,6 +6,7 @@ import { SQLIO } from './sqlIO';
 import VarList from '../lib/varList';
 import { RowsAffectedKey } from 'dd-models';
 import VarInfo from '../lib/varInfo';
+import { registerHanlder } from './actionToIO';
 
 export class DeleteIO extends ActionIO {
   constructor(
@@ -87,7 +88,9 @@ class DeleteIOProcessor {
   }
 }
 
-export function deleteIO(action: dd.DeleteAction, dialect: Dialect): DeleteIO {
-  const pro = new DeleteIOProcessor(action, dialect);
+export function deleteIO(action: dd.Action, dialect: Dialect): DeleteIO {
+  const pro = new DeleteIOProcessor(action as dd.DeleteAction, dialect);
   return pro.convert();
 }
+
+registerHanlder(dd.ActionType.delete, deleteIO);

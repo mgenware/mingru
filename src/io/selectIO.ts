@@ -7,6 +7,7 @@ import { ActionIO } from './actionIO';
 import * as utils from './utils';
 import VarInfo, { TypeInfo } from '../lib/varInfo';
 import VarList from '../lib/varList';
+import { registerHanlder } from './actionToIO';
 
 export class JoinIO {
   constructor(
@@ -502,7 +503,9 @@ export class SelectIOProcessor {
   }
 }
 
-export function selectIO(action: dd.SelectAction, dialect: Dialect): SelectIO {
-  const converter = new SelectIOProcessor(action, dialect);
+export function selectIO(action: dd.Action, dialect: Dialect): SelectIO {
+  const converter = new SelectIOProcessor(action as dd.SelectAction, dialect);
   return converter.convert();
 }
+
+registerHanlder(dd.ActionType.select, selectIO);

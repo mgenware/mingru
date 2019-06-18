@@ -7,6 +7,7 @@ import { SQLIO } from './sqlIO';
 import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
 import VarInfo, { TypeInfo } from '../lib/varInfo';
+import { registerHanlder } from './actionToIO';
 
 export const InsertedIDKey = 'inserted_id';
 
@@ -131,7 +132,9 @@ export class InsertIOProcessor {
   }
 }
 
-export function insertIO(action: dd.InsertAction, dialect: Dialect): InsertIO {
-  const pro = new InsertIOProcessor(action, dialect);
+export function insertIO(action: dd.Action, dialect: Dialect): InsertIO {
+  const pro = new InsertIOProcessor(action as dd.InsertAction, dialect);
   return pro.convert();
 }
+
+registerHanlder(dd.ActionType.insert, insertIO);

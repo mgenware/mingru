@@ -6,6 +6,7 @@ import { SQLIO } from './sqlIO';
 import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
 import VarInfo from '../lib/varInfo';
+import { registerHanlder } from './actionToIO';
 
 export const RowsAffectedKey = 'rows_affected';
 
@@ -119,7 +120,9 @@ class UpdateIOProcessor {
   }
 }
 
-export function updateIO(action: dd.UpdateAction, dialect: Dialect): UpdateIO {
-  const pro = new UpdateIOProcessor(action, dialect);
+export function updateIO(action: dd.Action, dialect: Dialect): UpdateIO {
+  const pro = new UpdateIOProcessor(action as dd.UpdateAction, dialect);
   return pro.convert();
 }
+
+registerHanlder(dd.ActionType.update, updateIO);

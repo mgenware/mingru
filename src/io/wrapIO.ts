@@ -1,14 +1,11 @@
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import { selectIO } from './selectIO';
 import Dialect from '../dialect';
-import { insertIO } from './insertIO';
-import { updateIO } from './updateIO';
-import { deleteIO } from './deleteIO';
 import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
 import VarInfo, { TypeInfo } from '../lib/varInfo';
 import * as utils from './utils';
+import actionToIO, { registerHanlder } from './actionToIO';
 
 export class WrapIO extends ActionIO {
   constructor(
@@ -32,42 +29,8 @@ class WrapIOProcessor {
 
   convert(): WrapIO {
     const { action, dialect } = this;
-    let innerIO: ActionIO;
     const innerAction = action.action;
-    switch (innerAction.actionType) {
-      case dd.ActionType.select: {
-        innerIO = selectIO(innerAction as dd.SelectAction, dialect);
-        break;
-      }
-
-      case dd.ActionType.insert: {
-        innerIO = insertIO(innerAction as dd.InsertAction, dialect);
-        break;
-      }
-
-      case dd.ActionType.update: {
-        innerIO = updateIO(innerAction as dd.UpdateAction, dialect);
-        break;
-      }
-
-      case dd.ActionType.delete: {
-        innerIO = deleteIO(innerAction as dd.DeleteAction, dialect);
-        break;
-      }
-
-      case dd.ActionType.wrap: {
-        innerIO = wrapIO(innerAction as dd.WrappedAction, dialect);
-        break;
-      }
-
-      default: {
-        throw new Error(
-          `Not supported action type "${
-            innerAction.actionType
-          }" inside toWrapIO`,
-        );
-      }
-    }
+    const innerIO = actionToIO(innerAction, dialect);
 
     const { args } = action;
     // Throw on non-existing argument names
@@ -124,7 +87,9 @@ class WrapIOProcessor {
   }
 }
 
-export function wrapIO(action: dd.WrappedAction, dialect: Dialect): WrapIO {
-  const pro = new WrapIOProcessor(action, dialect);
+export function wrapIO(action: dd.Action, dialect: Dialect): WrapIO {
+  const pro = new WrapIOProcessor(action as dd.WrappedAction, dialect);
   return pro.convert();
 }
+
+registerHanlder(dd.ActionType.wrap, wrapIO);
