@@ -5,6 +5,7 @@ import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
 import actionToIO, { registerHanlder } from './actionToIO';
 import * as utils from './utils';
+import * as defs from '../defs';
 
 export class TransactMemberIO {
   constructor(public actionIO: ActionIO, public callPath: string) {}
@@ -43,9 +44,11 @@ class TransactIOProcessor {
       `Func args of action "${action.__name}"`,
       true,
     );
+    funcArgs.add(defs.sqlDBVar);
     for (const m of memberIOs) {
       const mAction = m.actionIO;
-      for (const v of mAction.funcArgs.list) {
+      // Skip the first param of member functions, which is dbx.Queryable
+      for (const v of mAction.funcArgs.list.slice(1)) {
         funcArgs.add(v);
       }
     }

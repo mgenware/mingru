@@ -340,14 +340,14 @@ if err != nil {
       const queryParamsCode = mActionIO.execArgs.list
         .map(p => `${p.name}`)
         .join(', ');
-      body += `(queryable, ${queryParamsCode})`;
-      body += `\nif err != nil {\n\treturn err;\n}\n`;
+      body += `(tx, ${queryParamsCode})`;
+      body += `\nif err != nil {\n\treturn err\n}\n`;
     }
+    body += 'return nil\n';
 
-    let code =
-      'txErr := dbx.Transact(queryable, func(queryable dbx.Queryable) error {\n';
+    let code = 'txErr := dbx.Transact(db, func(tx *sql.Tx) error {\n';
     code += this.increaseIndent(body);
-    code += '\n}\nreturn txErr\n';
+    code += '\n})\nreturn txErr\n';
     return new CodeMap(code);
   }
 

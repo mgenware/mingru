@@ -1,4 +1,19 @@
-import "github.com/mgenware/go-packagex/v5/dbx"
+package da
+
+import (
+	"database/sql"
+
+	"github.com/mgenware/go-packagex/v5/dbx"
+)
+
+// TableTypePost ...
+type TableTypePost struct {
+}
+
+// Post ...
+var Post = &TableTypePost{}
+
+// ------------ Actions ------------
 
 // Tx ...
 func (da *TableTypePost) Tx(db *sql.DB, id uint64, urlName string, followerCount *string, title string) error {
