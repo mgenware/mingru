@@ -1,18 +1,19 @@
 import "github.com/mgenware/go-packagex/v5/dbx"
 
 // Tx ...
-func (da *TableTypePost) Tx(queryable dbx.Queryable, id uint64, urlName string, followerCount *string, title string) error {
-	txErr := dbx.Transact(queryable, func(queryable dbx.Queryable) error {
+func (da *TableTypePost) Tx(db *sql.DB, id uint64, urlName string, followerCount *string, title string) error {
+	txErr := dbx.Transact(db, func(tx *sql.Tx) error {
 		var err error
-		err = User.Upd(queryable, urlName, followerCount, id)
+		err = User.Upd(tx, urlName, followerCount, id)
 		if err != nil {
-			return err;
+			return err
 		}
-		err = da.Upd(queryable, title, id)
+		err = da.Upd(tx, title, id)
 		if err != nil {
-			return err;
+			return err
 		}
-	}
+		return nil
+	})
 	return txErr
 }
 
