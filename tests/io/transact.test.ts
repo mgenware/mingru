@@ -33,9 +33,8 @@ test('TransactIO', () => {
 test('getInputs', () => {
   const io = mr.transactIO(wrapOther.t1, dialect);
   expect(io.funcArgs.toString()).toEqual(
-    'urlName: string, id: uint64, urlName: string, followerCount: *string {urlName: string, id: uint64, followerCount: *string}',
+    'urlName: string, id: uint64, urlName: string, sig: *string, followerCount: *string, urlName: string, id: uint64, urlName: string, followerCount: *string, urlName: string, urlName: string, sig: *string, followerCount: *string {urlName: string, id: uint64, sig: *string, followerCount: *string}',
   );
-  // expect(io.execArgs.toString()).toEqual(
-  //   'urlName: string, sig: *string="haha", followerCount: *string, urlName: string, id: uint64, urlName: string {urlName: string, sig: *string="haha", followerCount: *string, id: uint64}',
-  // );
+  // No execArgs in TX actions
+  expect(io.execArgs.toString()).toEqual('');
 });

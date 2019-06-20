@@ -337,16 +337,16 @@ if err != nil {
       body += 'err = ';
       body += memberIO.callPath;
       const queryParamsCode = mActionIO.execArgs.list
-        .map(p => `, ${p.name}`)
-        .join('');
-      body += `(${queryParamsCode})`;
-      body += `\nif err != nil {\n\treturn err;\n}\n\n`;
+        .map(p => `${p.name}`)
+        .join(', ');
+      body += `(queryable, ${queryParamsCode})`;
+      body += `\nif err != nil {\n\treturn err;\n}\n`;
     }
 
     let code =
-      'txErr := dbx.Transact(queryable, func(queryable dbx.Queryable) error {';
+      'txErr := dbx.Transact(queryable, func(queryable dbx.Queryable) error {\n';
     code += this.increaseIndent(body);
-    code += '}\n';
+    code += '\n}\nreturn txErr\n';
     return new CodeMap(code);
   }
 
