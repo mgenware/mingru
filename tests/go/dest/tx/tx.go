@@ -1,3 +1,5 @@
+package da
+
 import "github.com/mgenware/go-packagex/v5/dbx"
 
 // Tx ...
@@ -13,7 +15,7 @@ import "github.com/mgenware/go-packagex/v5/dbx"
             return err;
     }
   }
-}
+} 
 
 // Upd ...
 func (da *TableTypePost) Upd(queryable dbx.Queryable, id uint64, title string) error {

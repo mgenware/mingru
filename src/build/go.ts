@@ -46,14 +46,34 @@ export function makeArray(
   return `${name} := make([]${type}, ${size}${capacityParam})`;
 }
 
-function formatImports(imports: string[]): string {
-  if (!imports || !imports.length) {
-    return '';
-  }
+function joinImports(imports: string[]): string {
   return imports
     .sort()
     .map(s => `\t"${s}"\n`)
     .join('');
+}
+
+function formatImports(imports: string[]): string {
+  if (!imports || !imports.length) {
+    return '';
+  }
+
+  // Split the imports into system and user imports
+  const sysImports: string[] = [];
+  const usrImports: string[] = [];
+  for (const s of imports) {
+    if (s.includes('.')) {
+      usrImports.push(s);
+    } else {
+      sysImports.push(s);
+    }
+  }
+
+  const sysStr = joinImports(sysImports);
+  const usrStr = joinImports(usrImports);
+  // Add an empty line between system imports and user imports
+  const hasSep = sysStr && usrStr;
+  return `${sysStr}${hasSep ? '\n' : ''}${usrStr}`;
 }
 
 export function makeImports(imports: string[]): string {
