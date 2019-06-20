@@ -7,6 +7,7 @@ import VarList from '../lib/varList';
 import { RowsAffectedKey } from 'dd-models';
 import VarInfo from '../lib/varInfo';
 import { registerHanlder } from './actionToIO';
+import * as defs from '../defs';
 
 export class DeleteIO extends ActionIO {
   constructor(
@@ -59,6 +60,7 @@ class DeleteIOProcessor {
       `Func args of action "${action.__name}"`,
       true,
     );
+    funcArgs.add(defs.dbxQueryableVar);
     const execArgs = new VarList(
       `Exec args of action "${action.__name}"`,
       true,

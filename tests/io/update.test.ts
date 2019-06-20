@@ -57,11 +57,11 @@ test('getInputs', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.updateIO(v, new mr.MySQL());
-  expect(io.setterArgs.toString()).toEqual('urlName: string, sig: *string');
-  expect(io.funcArgs.toString()).toEqual(
-    'urlName: string, id: uint64, urlName: string, sig: *string {urlName: string, id: uint64, sig: *string}',
+  expect(io.setterArgs.toString()).toBe('urlName: string, sig: *string');
+  expect(io.funcArgs.toString()).toBe(
+    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, urlName: string, sig: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, sig: *string}',
   );
-  expect(io.execArgs.toString()).toEqual(
+  expect(io.execArgs.toString()).toBe(
     'urlName: string, sig: *string, urlName: string, id: uint64, urlName: string {urlName: string, sig: *string, id: uint64}',
   );
 });

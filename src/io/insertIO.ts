@@ -8,6 +8,7 @@ import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
 import VarInfo, { TypeInfo } from '../lib/varInfo';
 import { registerHanlder } from './actionToIO';
+import * as defs from '../defs';
 
 export const InsertedIDKey = 'inserted_id';
 
@@ -114,6 +115,7 @@ export class InsertIOProcessor {
       `Func args of action ${action.__name}`,
       setters,
     );
+    funcArgs.add(defs.dbxQueryableVar);
     const execArgs = new VarList(`Exec args of action ${action.__name}`);
     execArgs.merge(funcArgs.list);
 

@@ -44,8 +44,10 @@ test('getInputs', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, new mr.MySQL());
-  expect(io.funcArgs.toString()).toEqual('sig: *string, id: uint64, b: string');
-  expect(io.execArgs.toString()).toEqual('sig: *string, id: uint64, b: string');
+  expect(io.funcArgs.toString()).toBe(
+    'sig: *string, id: uint64, b: string, queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx',
+  );
+  expect(io.execArgs.toString()).toBe('sig: *string, id: uint64, b: string');
 });
 
 test('getReturns (isnert)', () => {
@@ -58,7 +60,7 @@ test('getReturns (isnert)', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, new mr.MySQL());
-  expect(io.returnValues.toString()).toEqual('');
+  expect(io.returnValues.toString()).toBe('');
 });
 
 test('getReturns (insertOne)', () => {
@@ -71,5 +73,5 @@ test('getReturns (insertOne)', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, new mr.MySQL());
-  expect(io.returnValues.toString()).toEqual('inserted_id: uint64');
+  expect(io.returnValues.toString()).toBe('inserted_id: uint64');
 });

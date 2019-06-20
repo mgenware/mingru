@@ -37,8 +37,10 @@ test('getInputs', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.deleteIO(v, new mr.MySQL());
-  expect(io.funcArgs.toString()).toEqual('id: uint64, urlName: string');
-  expect(io.execArgs.toString()).toEqual('id: uint64, urlName: string');
+  expect(io.funcArgs.toString()).toBe(
+    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, urlName: string',
+  );
+  expect(io.execArgs.toString()).toBe('id: uint64, urlName: string');
 });
 
 test('getReturns', () => {
@@ -51,7 +53,7 @@ test('getReturns', () => {
   const v = ta.t;
   const io = mr.deleteIO(v, new mr.MySQL());
   const returns = io.returnValues;
-  expect(returns.toString()).toEqual('');
+  expect(returns.toString()).toBe('');
 });
 
 test('getInputs (no WHERE)', () => {
@@ -62,7 +64,7 @@ test('getInputs (no WHERE)', () => {
   const v = ta.t;
   const io = mr.deleteIO(v, new mr.MySQL());
   const inputs = io.funcArgs;
-  expect(inputs.list.length).toBe(0);
+  expect(inputs.list.length).toBe(1);
 });
 
 test('getReturns (no WHERE)', () => {

@@ -8,6 +8,7 @@ import * as utils from './utils';
 import VarInfo, { TypeInfo } from '../lib/varInfo';
 import VarList from '../lib/varList';
 import { registerHanlder } from './actionToIO';
+import * as defs from '../defs';
 
 export class JoinIO {
   constructor(
@@ -194,6 +195,7 @@ export class SelectIOProcessor {
       `Func args of action "${action.__name}"`,
       true,
     );
+    funcArgs.add(defs.dbxQueryableVar);
     const execArgs = new VarList(
       `Exec args of action "${action.__name}"`,
       true,

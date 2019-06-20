@@ -203,7 +203,9 @@ test('getInputs', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.selectIO(v, new mr.MySQL());
-  expect(io.funcArgs.toString()).toEqual('id: uint64, urlName: string');
+  expect(io.funcArgs.toString()).toBe(
+    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, urlName: string',
+  );
 });
 
 test('getInputs (no WHERE)', () => {
@@ -213,7 +215,7 @@ test('getInputs (no WHERE)', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.selectIO(v, new mr.MySQL());
-  expect(io.funcArgs.list.length).toBe(0);
+  expect(io.funcArgs.list.length).toBe(1);
 });
 
 test('getInputs (with foreign tables)', () => {
@@ -227,8 +229,10 @@ test('getInputs (with foreign tables)', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.selectIO(v, new mr.MySQL());
-  expect(io.funcArgs.toString()).toEqual('id: uint64, title: string');
-  expect(io.execArgs.toString()).toEqual(
+  expect(io.funcArgs.toString()).toBe(
+    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, title: string',
+  );
+  expect(io.execArgs.toString()).toBe(
     'id: uint64, title: string, id: uint64 {id: uint64, title: string}',
   );
 });

@@ -7,6 +7,7 @@ import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
 import VarInfo from '../lib/varInfo';
 import { registerHanlder } from './actionToIO';
+import * as defs from '../defs';
 
 export const RowsAffectedKey = 'rows_affected';
 
@@ -81,6 +82,7 @@ class UpdateIOProcessor {
       `Func args of action "${action.__name}"`,
       true,
     );
+    funcArgs.add(defs.dbxQueryableVar);
     const execArgs = new VarList(
       `Exec args of action "${action.__name}"`,
       true,
