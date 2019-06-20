@@ -30,16 +30,16 @@ test('WrapIO', () => {
 
 test('getInputs (wrapSelf and innerIO)', () => {
   const io = mr.wrapIO(wrapSelf.d, dialect);
-  expect(io.funcArgs.toString()).toEqual(
-    'urlName: string, id: uint64, urlName: string, followerCount: *string {urlName: string, id: uint64, followerCount: *string}',
+  expect(io.funcArgs.toString()).toBe(
+    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, urlName: string, followerCount: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, followerCount: *string}',
   );
-  expect(io.innerIO.funcArgs.toString()).toEqual(
-    'urlName: string, id: uint64, urlName: string, sig: *string, followerCount: *string {urlName: string, id: uint64, sig: *string, followerCount: *string}',
+  expect(io.innerIO.funcArgs.toString()).toBe(
+    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, urlName: string, sig: *string, followerCount: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, sig: *string, followerCount: *string}',
   );
-  expect(io.execArgs.toString()).toEqual(
+  expect(io.execArgs.toString()).toBe(
     'urlName: string, sig: *string="haha", followerCount: *string, urlName: string, id: uint64, urlName: string {urlName: string, sig: *string="haha", followerCount: *string, id: uint64}',
   );
-  expect(io.innerIO.execArgs.toString()).toEqual(
+  expect(io.innerIO.execArgs.toString()).toBe(
     'urlName: string, sig: *string, followerCount: *string, urlName: string, id: uint64, urlName: string {urlName: string, sig: *string, followerCount: *string, id: uint64}',
   );
   expect(io.funcPath).toBe('da.S');
@@ -47,10 +47,10 @@ test('getInputs (wrapSelf and innerIO)', () => {
 
 test('getInputs (wrapOther)', () => {
   const io = mr.wrapIO(wrapOther.standard, dialect);
-  expect(io.funcArgs.toString()).toEqual(
-    'urlName: string, urlName: string, sig: *string, followerCount: *string {urlName: string, sig: *string, followerCount: *string}',
+  expect(io.funcArgs.toString()).toBe(
+    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, urlName: string, sig: *string, followerCount: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, sig: *string, followerCount: *string}',
   );
-  expect(io.execArgs.toString()).toEqual(
+  expect(io.execArgs.toString()).toBe(
     'urlName: string, sig: *string, followerCount: *string, urlName: string, id: uint64=123, urlName: string {urlName: string, sig: *string, followerCount: *string, id: uint64=123}',
   );
   expect(io.funcPath).toBe('User.S');
@@ -58,10 +58,10 @@ test('getInputs (wrapOther)', () => {
 
 test('getInputs (wrapOther, nested)', () => {
   const io = mr.wrapIO(wrapOther.nested, dialect);
-  expect(io.funcArgs.toString()).toEqual(
-    'urlName: string, urlName: string, followerCount: *string {urlName: string, followerCount: *string}',
+  expect(io.funcArgs.toString()).toBe(
+    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, urlName: string, followerCount: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, followerCount: *string}',
   );
-  expect(io.execArgs.toString()).toEqual(
+  expect(io.execArgs.toString()).toBe(
     'urlName: string, sig: *string="haha", followerCount: *string, urlName: string, id: uint64=123, urlName: string {urlName: string, sig: *string="haha", followerCount: *string, id: uint64=123}',
   );
   expect(io.funcPath).toBe('User.D');

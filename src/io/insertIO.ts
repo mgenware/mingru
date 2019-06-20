@@ -114,10 +114,11 @@ export class InsertIOProcessor {
     const funcArgs = settersToVarList(
       `Func args of action ${action.__name}`,
       setters,
+      [defs.dbxQueryableVar],
     );
-    funcArgs.add(defs.dbxQueryableVar);
     const execArgs = new VarList(`Exec args of action ${action.__name}`);
-    execArgs.merge(funcArgs.list);
+    // Skip the first items, which is queryable
+    execArgs.merge(funcArgs.list.slice(1));
 
     // returns
     const returnValue = new VarList(`Returns of action ${action.__name}`);

@@ -3,6 +3,7 @@ import { throwIfFalsy } from 'throw-if-arg-empty';
 import { SQLIO } from './sqlIO';
 import VarList from '../lib/varList';
 import Dialect from '../dialect';
+import VarInfo from '../lib/varInfo';
 
 export class SetterIO {
   static fromMap(map: Map<dd.Column, dd.SQL>, dialect: Dialect): SetterIO[] {
@@ -18,9 +19,18 @@ export class SetterIO {
   }
 }
 
-export function settersToVarList(name: string, setters: SetterIO[]): VarList {
+export function settersToVarList(
+  name: string,
+  setters: SetterIO[],
+  items?: VarInfo[],
+): VarList {
   // Set inputs
   const list = new VarList(name);
+  if (items) {
+    for (const v of items) {
+      list.add(v);
+    }
+  }
   // Merge setter inputs
   for (const setter of setters) {
     list.merge(setter.sql.varList.list);

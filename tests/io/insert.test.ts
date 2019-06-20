@@ -45,7 +45,7 @@ test('getInputs', () => {
   const v = ta.t;
   const io = mr.insertIO(v, new mr.MySQL());
   expect(io.funcArgs.toString()).toBe(
-    'sig: *string, id: uint64, b: string, queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx',
+    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, sig: *string, id: uint64, b: string',
   );
   expect(io.execArgs.toString()).toBe('sig: *string, id: uint64, b: string');
 });

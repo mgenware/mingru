@@ -6,6 +6,7 @@ import VarList from '../lib/varList';
 import VarInfo from '../lib/varInfo';
 import * as utils from './utils';
 import actionToIO, { registerHanlder } from './actionToIO';
+import * as defs from '../defs';
 
 export class WrapIO extends ActionIO {
   constructor(
@@ -48,7 +49,11 @@ class WrapIOProcessor {
       `Func args of action "${action.__name}"`,
       true,
     );
-    for (const v of innerFuncArgs.list) {
+    funcArgs.add(defs.dbxQueryableVar);
+
+    // Skip the first param, which is always either dbx.Queryable or db.Tx for TX
+    for (let i = 1; i < innerFuncArgs.list.length; i++) {
+      const v = innerFuncArgs.list[i];
       if (!args[v.name]) {
         funcArgs.add(v);
       }
