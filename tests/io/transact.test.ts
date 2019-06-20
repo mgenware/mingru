@@ -26,9 +26,9 @@ test('TransactIO', () => {
   const wrapOther = dd.ta(post, WrapOtherTA);
   const io = mr.transactIO(wrapOther.t1, dialect);
   expect(io).toBeInstanceOf(mr.TransactIO);
-  expect(io.funcArgs.toString()).toEqual(
-    'urlName: string, id: uint64, urlName: string, sig: *string, followerCount: *string, urlName: string, id: uint64, urlName: string, followerCount: *string, urlName: string, urlName: string, sig: *string, followerCount: *string {urlName: string, id: uint64, sig: *string, followerCount: *string}',
+  expect(io.funcArgs.toString()).toBe(
+    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, urlName: string, sig: *string, followerCount: *string, queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, urlName: string, followerCount: *string, queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, urlName: string, sig: *string, followerCount: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, sig: *string, followerCount: *string}',
   );
   // No execArgs in TX actions
-  expect(io.execArgs.toString()).toEqual('');
+  expect(io.execArgs.toString()).toBe('');
 });

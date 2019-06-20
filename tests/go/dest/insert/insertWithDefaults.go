@@ -1,4 +1,17 @@
-import "github.com/mgenware/go-packagex/v5/dbx"
+package da
+
+import (
+	"github.com/mgenware/go-packagex/v5/dbx"
+)
+
+// TableTypeCols ...
+type TableTypeCols struct {
+}
+
+// Cols ...
+var Cols = &TableTypeCols{}
+
+// ------------ Actions ------------
 
 // InsertT ...
 func (da *TableTypeCols) InsertT(queryable dbx.Queryable, fk uint64) error {

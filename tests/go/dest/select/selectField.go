@@ -1,4 +1,17 @@
-import "github.com/mgenware/go-packagex/v5/dbx"
+package da
+
+import (
+	"github.com/mgenware/go-packagex/v5/dbx"
+)
+
+// TableTypePost ...
+type TableTypePost struct {
+}
+
+// Post ...
+var Post = &TableTypePost{}
+
+// ------------ Actions ------------
 
 // SelectT ...
 func (da *TableTypePost) SelectT(queryable dbx.Queryable) (string, error) {

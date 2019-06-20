@@ -1,4 +1,17 @@
-import "github.com/mgenware/go-packagex/v5/dbx"
+package da
+
+import (
+	"github.com/mgenware/go-packagex/v5/dbx"
+)
+
+// TableTypePostCmt ...
+type TableTypePostCmt struct {
+}
+
+// PostCmt ...
+var PostCmt = &TableTypePostCmt{}
+
+// ------------ Actions ------------
 
 // PostCmtTableSelectTResult ...
 type PostCmtTableSelectTResult struct {

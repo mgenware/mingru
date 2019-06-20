@@ -1,4 +1,17 @@
-import "github.com/mgenware/go-packagex/v5/dbx"
+package da
+
+import (
+	"github.com/mgenware/go-packagex/v5/dbx"
+)
+
+// TableTypePost ...
+type TableTypePost struct {
+}
+
+// Post ...
+var Post = &TableTypePost{}
+
+// ------------ Actions ------------
 
 // DeleteT ...
 func (da *TableTypePost) DeleteT(queryable dbx.Queryable, id uint64) (int, error) {

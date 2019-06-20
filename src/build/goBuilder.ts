@@ -42,11 +42,8 @@ export default class GoBuilder {
     this.dialect = taIO.dialect;
   }
 
-  build(actionsOnly: boolean, noHeader: boolean): string {
+  build(noHeader: boolean): string {
     let code = noHeader ? '' : FileHeader;
-    if (actionsOnly) {
-      return this.buildActions();
-    }
     code += `package ${this.packageName}\n\n`;
 
     // this.buildActions will set this.systemImports and this.userImports

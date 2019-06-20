@@ -37,7 +37,7 @@ export default async function buildAsync(
       logger.info(`🚙  Building table "${ta.__table.__name}"`);
       const taIO = new TAIO(ta, dialect);
       const builder = new GoBuilder(taIO, opts.packageName);
-      const code = builder.build(false, !!opts.noFileHeader);
+      const code = builder.build(!!opts.noFileHeader);
       const fileName = dd.utils.toSnakeCase(ta.__table.__name) + '_ta'; // Add a "_ta" suffix to table actions file
       const outFile = nodepath.join(outDir, fileName + '.go');
       await mfs.writeFileAsync(outFile, code, 'utf8');

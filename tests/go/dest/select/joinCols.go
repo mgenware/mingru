@@ -1,4 +1,17 @@
-import "github.com/mgenware/go-packagex/v5/dbx"
+package da
+
+import (
+	"github.com/mgenware/go-packagex/v5/dbx"
+)
+
+// TableTypePostReply ...
+type TableTypePostReply struct {
+}
+
+// PostReply ...
+var PostReply = &TableTypePostReply{}
+
+// ------------ Actions ------------
 
 // PostReplyTableSelectTResult ...
 type PostReplyTableSelectTResult struct {

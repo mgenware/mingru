@@ -1,4 +1,17 @@
-import "github.com/mgenware/go-packagex/v5/dbx"
+package da
+
+import (
+	"github.com/mgenware/go-packagex/v5/dbx"
+)
+
+// TableTypeUser ...
+type TableTypeUser struct {
+}
+
+// User ...
+var User = &TableTypeUser{}
+
+// ------------ Actions ------------
 
 // D ...
 func (da *TableTypeUser) D(queryable dbx.Queryable, urlName string, id uint64, followerCount *string) (int, error) {

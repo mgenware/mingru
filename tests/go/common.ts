@@ -15,8 +15,7 @@ export async function testBuildAsync(ta: dd.TA, path: string) {
   }
   mr.logger.enabled = false;
   const builder = new mr.Builder(new mr.TAIO(ta, dialect));
-  let actual = builder.build(true, true);
-  actual = `import "github.com/mgenware/go-packagex/v5/dbx"\n${actual}`;
+  const actual = builder.build(true);
   if (path) {
     expect(actual).toBe(content);
   }
@@ -31,7 +30,7 @@ export async function testBuildFullAsync(ta: dd.TA, path: string) {
   }
   mr.logger.enabled = false;
   const builder = new mr.GoBuilder(new mr.TAIO(ta, dialect));
-  const actual = builder.build(false, true);
+  const actual = builder.build(true);
   if (path) {
     expect(actual).toBe(content);
   }

@@ -120,7 +120,7 @@ test('Same table, multiple cols join', async () => {
   await testBuildAsync(ta, 'select/joinCols');
 });
 
-test('AS', async () => {
+test('Join as', async () => {
   class CmtTA extends dd.TA {
     selectT = dd.select(
       cmt.id,
