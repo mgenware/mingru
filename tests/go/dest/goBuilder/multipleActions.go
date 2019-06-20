@@ -22,8 +22,8 @@ func (da *TableTypePost) DeleteByID(queryable dbx.Queryable, id uint64) (int, er
 // PostTableSelectPostInfoResult ...
 type PostTableSelectPostInfoResult struct {
 	ID          uint64
-	Title       string
-	UserID      uint64
+	Title       string  
+	UserID      uint64 
 	UserUrlName string
 }
 

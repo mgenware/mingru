@@ -12,6 +12,7 @@ import logger from '../logger';
 import { TAIO } from '../io/taIO';
 import { ActionIO } from '../io/actionIO';
 import { WrapIO } from '../io/wrapIO';
+import { TransactIO } from '../io/transactIO';
 
 const HeaderRepeatCount = 90;
 const QueryableParam = 'queryable';
@@ -136,6 +137,11 @@ func (da *${tableClassName}) ${funcName}`;
         break;
       }
 
+      case dd.ActionType.transact: {
+        bodyMap = this.transact(io as TransactIO);
+        break;
+      }
+
       default: {
         throw new Error(
           `Not supported action type "${
@@ -145,9 +151,8 @@ func (da *${tableClassName}) ${funcName}`;
       }
     }
 
-    // Add starting indent to all body lines
-    const bodyLines = bodyMap.body.match(/[^\r\n]+/g) || [bodyMap.body];
-    code += bodyLines.map(line => `\t${line}`).join('\n');
+    // Increase indent on all body lines
+    code += this.increaseIndent(bodyMap.body);
 
     // Closing func
     code += '\n}\n';
@@ -317,6 +322,34 @@ if err != nil {
     return new CodeMap(code);
   }
 
+  private transact(io: TransactIO): CodeMap {
+    let body = '';
+    const { memberIOs } = io;
+
+    // Declare err
+    body += 'var err error\n';
+    for (const memberIO of memberIOs) {
+      const mActionIO = memberIO.actionIO;
+      // Ignore all return values: _, _, _, err = action(a, b, ...)
+      if (mActionIO.returnValues.length) {
+        body += '_, '.repeat(mActionIO.returnValues.length);
+      }
+      body += 'err = ';
+      body += memberIO.callPath;
+      const queryParamsCode = mActionIO.execArgs.list
+        .map(p => `, ${p.name}`)
+        .join('');
+      body += `(${queryParamsCode})`;
+      body += `\nif err != nil {\n\treturn err;\n}\n\n`;
+    }
+
+    let code =
+      'txErr := dbx.Transact(queryable, func(queryable dbx.Queryable) error {';
+    code += this.increaseIndent(body);
+    code += '}\n';
+    return new CodeMap(code);
+  }
+
   private scanImports(vars: VarInfo[]) {
     for (const info of vars) {
       if (info.type.namespace) {
@@ -328,5 +361,10 @@ if err != nil {
   // A varList usually ends without an error type, call this to append an Go error type to the varList
   private appendErrorType(vars: VarInfo[]): VarInfo[] {
     return [...vars, new VarInfo('error', new TypeInfo('error'))];
+  }
+
+  private increaseIndent(code: string): string {
+    const lines = code.match(/[^\r\n]+/g) || [code];
+    return lines.map(line => `\t${line}`).join('\n');
   }
 }

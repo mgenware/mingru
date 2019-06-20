@@ -67,13 +67,7 @@ class WrapIOProcessor {
         execArgs.add(v);
       }
     }
-
-    let funcPath = utils.actionToFuncName(innerAction);
-    if (innerAction.__table !== action.__table) {
-      funcPath = utils.tableToObjName(innerAction.__table) + '.' + funcPath;
-    } else {
-      funcPath = 'da.' + funcPath;
-    }
+    const funcPath = utils.actionCallPath(innerAction, action.__table);
 
     return new WrapIO(
       action,

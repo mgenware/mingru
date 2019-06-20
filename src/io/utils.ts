@@ -15,3 +15,16 @@ export function tableToClsName(table: dd.Table): string {
 export function tableName(table: dd.Table): string {
   return dd.utils.toPascalCase(table.__name);
 }
+
+export function actionCallPath(
+  action: dd.Action,
+  currentTable: dd.Table | null,
+): string {
+  let funcPath = actionToFuncName(action);
+  if (action.__table !== currentTable) {
+    funcPath = tableToObjName(action.__table) + '.' + funcPath;
+  } else {
+    funcPath = 'da.' + funcPath;
+  }
+  return funcPath;
+}
