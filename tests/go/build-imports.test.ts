@@ -75,7 +75,9 @@ test('Delete (where)', async () => {
 
 test('Insert', async () => {
   class PostTA extends dd.TA {
-    insertTimes = dd.insertOne().setInputs(post.datetime, post.n_datetime);
+    insertTimes = dd
+      .unsafeInsertOne()
+      .setInputs(post.datetime, post.n_datetime);
   }
   const ta = dd.ta(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'extraImportsInsert');
