@@ -61,7 +61,7 @@ test('Custom package name', async () => {
 test('Table DBName', async () => {
   class PostRplTA extends dd.TA {
     insertPostReply = dd
-      .insertOne()
+      .unsafeInsertOne()
       .setInputs(postReply.to_user_id, postReply.user_id);
   }
   const ta = dd.ta(postReply, PostRplTA);

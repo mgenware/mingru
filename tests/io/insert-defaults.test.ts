@@ -29,7 +29,10 @@ test('dtDefault', () => {
 
 test('insertWithDefaults', () => {
   class ColsTA extends dd.TA {
-    insertT = dd.insertWithDefaults().setInputs(cols.fk);
+    insertT = dd
+      .insert()
+      .setInputs(cols.fk)
+      .setDefaults();
   }
   const ta = dd.ta(cols, ColsTA);
   const v = ta.insertT;

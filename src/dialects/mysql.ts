@@ -91,7 +91,8 @@ export default class MySQL extends Dialect {
         }
 
         case DT.datetime:
-        case DT.date: {
+        case DT.date:
+        case DT.time: {
           return TimeType;
         }
       }

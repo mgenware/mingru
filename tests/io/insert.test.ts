@@ -7,7 +7,7 @@ const dialect = new mr.MySQL();
 
 test('Insert inputs', () => {
   class PostTA extends dd.TA {
-    t = dd.insert().setInputs(post.title, post.user_id);
+    t = dd.unsafeInsert().setInputs(post.title, post.user_id);
   }
   const postTA = dd.ta(post, PostTA);
   const v = postTA.t;
@@ -20,7 +20,7 @@ test('Insert inputs', () => {
 test('Insert inputs and values', () => {
   class PostTA extends dd.TA {
     t = dd
-      .insert()
+      .unsafeInsert()
       .setInputs(post.title, post.user_id)
       .set(post.datetime, dd.sql`NOW()`);
   }
@@ -37,7 +37,7 @@ test('Insert inputs and values', () => {
 test('getInputs', () => {
   class UserTA extends dd.TA {
     t = dd
-      .insert()
+      .unsafeInsert()
       .setInputs(user.sig, user.id)
       .set(user.url_name, user.url_name.toInput('b'));
   }
@@ -53,7 +53,7 @@ test('getInputs', () => {
 test('getReturns (isnert)', () => {
   class UserTA extends dd.TA {
     t = dd
-      .insert()
+      .unsafeInsert()
       .setInputs(user.sig, user.id)
       .set(user.url_name, user.url_name.toInput('b'));
   }
@@ -66,7 +66,7 @@ test('getReturns (isnert)', () => {
 test('getReturns (insertOne)', () => {
   class UserTA extends dd.TA {
     t = dd
-      .insertOne()
+      .unsafeInsertOne()
       .setInputs(user.sig, user.id)
       .set(user.url_name, user.url_name.toInput('b'));
   }

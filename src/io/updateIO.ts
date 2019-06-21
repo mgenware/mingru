@@ -48,24 +48,17 @@ class UpdateIOProcessor {
       );
     }
 
-    // setters
-    const { setters } = action;
-    if (!setters.size) {
-      throw new Error(
-        `The update action "${action}" does not have any setters`,
-      );
-    }
-
-    // table
+    // Table
     const fromSQL = this.handleFrom(table);
     sql += `${fromSQL} SET `;
 
-    const setterIOs = SetterIO.fromMap(setters, dialect);
+    // Setters
+    const setterIOs = SetterIO.fromAction(action, dialect);
     sql += setterIOs
       .map(s => `${dialect.escapeColumn(s.col)} = ${s.sql.toSQL(dialect)}`)
       .join(', ');
 
-    // where
+    // WHERE
     const whereIO = action.whereSQL
       ? SQLIO.fromSQL(action.whereSQL, dialect)
       : null;
