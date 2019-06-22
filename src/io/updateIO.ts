@@ -9,8 +9,6 @@ import VarInfo from '../lib/varInfo';
 import { registerHanlder } from './actionToIO';
 import * as defs from '../defs';
 
-export const RowsAffectedKey = 'rows_affected';
-
 export class UpdateIO extends ActionIO {
   constructor(
     public action: dd.UpdateAction,
@@ -93,7 +91,10 @@ class UpdateIOProcessor {
     const returnValues = new VarList(`Returns of action ${action.__name}`);
     if (!action.checkOnlyOneAffected) {
       returnValues.add(
-        new VarInfo(RowsAffectedKey, dialect.convertColumnType(dd.int().type)),
+        new VarInfo(
+          defs.rowsAffectedKey,
+          dialect.convertColumnType(dd.int().type),
+        ),
       );
     }
 

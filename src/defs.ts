@@ -10,3 +10,5 @@ export const dbxQueryableType = new TypeInfo(
 );
 export const dbxQueryableVar = new VarInfo(queryableParam, dbxQueryableType);
 export const sqlDBVar = new VarInfo(dbParam, sqlDBType);
+export const insertedIDKey = 'inserted_id';
+export const rowsAffectedKey = 'rows_affected';

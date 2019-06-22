@@ -8,8 +8,6 @@ import VarInfo, { TypeInfo } from '../lib/varInfo';
 import { registerHanlder } from './actionToIO';
 import * as defs from '../defs';
 
-export const InsertedIDKey = 'inserted_id';
-
 export class InsertIO extends ActionIO {
   constructor(
     public action: dd.InsertAction,
@@ -62,7 +60,7 @@ export class InsertIOProcessor {
     // returns
     const returnValue = new VarList(`Returns of action ${action.__name}`);
     if (action.fetchInsertedID) {
-      returnValue.add(new VarInfo(InsertedIDKey, new TypeInfo('uint64')));
+      returnValue.add(new VarInfo(defs.insertedIDKey, new TypeInfo('uint64')));
     }
 
     return new InsertIO(action, sql, setters, funcArgs, execArgs, returnValue);

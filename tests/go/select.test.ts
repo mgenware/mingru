@@ -211,3 +211,18 @@ test('Select all, paginate, where', async () => {
   const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'select/selectAllPaginateWithWhere');
 });
+
+test('WHERE, inputs, joins', async () => {
+  class CmtTA extends dd.TA {
+    selectT = dd.select(cmt.id).where(
+      dd.sql` ${cmt.id.toInput()}, ${cmt.user_id.toInput()}, ${cmt.target_id
+        .join(post)
+        .title.toInput()}, ${cmt.target_id
+        .join(post)
+        .user_id.join(user)
+        .url_name.toInput()}`,
+    );
+  }
+  const ta = dd.ta(cmt, CmtTA);
+  await testBuildAsync(ta, 'select/whereInputsJoins');
+});
