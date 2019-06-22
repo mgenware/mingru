@@ -4,11 +4,12 @@ import Dialect from '../dialect';
 import { settersToVarList, SetterIO } from './setterIO';
 import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
-import VarInfo, { TypeInfo } from '../lib/varInfo';
 import { registerHanlder } from './actionToIO';
 import * as defs from '../defs';
 
 export class InsertIO extends ActionIO {
+  returnMember: ActionIO | undefined;
+
   constructor(
     public action: dd.InsertAction,
     public sql: string,
@@ -60,7 +61,7 @@ export class InsertIOProcessor {
     // returns
     const returnValue = new VarList(`Returns of action ${action.__name}`);
     if (action.fetchInsertedID) {
-      returnValue.add(new VarInfo(defs.insertedIDKey, new TypeInfo('uint64')));
+      returnValue.add(defs.insertedIDVar);
     }
 
     return new InsertIO(action, sql, setters, funcArgs, execArgs, returnValue);

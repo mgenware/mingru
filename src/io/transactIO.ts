@@ -33,8 +33,12 @@ class TransactIOProcessor {
   convert(): TransactIO {
     const { action, dialect } = this;
     const { members } = action;
+    let lastInsertAction: ActionIO | null = null;
     const memberIOs = members.map(m => {
       const io = actionToIO(m.action, dialect);
+      if (m.action.actionType === dd.ActionType.transact) {
+        lastInsertAction = io;
+      }
       const callPath = utils.actionCallPath(m.action, action.__table);
       return new TransactMemberIO(io, callPath);
     });
@@ -58,11 +62,13 @@ class TransactIOProcessor {
       true,
     );
 
-    // returnValues is empty for transact io
     const returnValues = new VarList(
       `Returns of action ${action.__name}`,
       false,
     );
+    if (lastInsertAction) {
+      returnValues.add(defs.insertedIDVar);
+    }
 
     return new TransactIO(action, memberIOs, funcArgs, execArgs, returnValues);
   }

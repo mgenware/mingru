@@ -325,10 +325,17 @@ if err != nil {
 
   private transact(io: TransactIO): CodeMap {
     let body = '';
-    const { memberIOs } = io;
+    const { memberIOs, returnValues } = io;
 
     // Declare err
     body += 'var err error\n';
+    // Declare return varibles if needed
+    if (returnValues.length) {
+      this.scanImports(returnValues.list);
+      for (const v of returnValues.list) {
+        body += `var ${v.name} ${v.type.typeName}\n`;
+      }
+    }
     for (const memberIO of memberIOs) {
       const mActionIO = memberIO.actionIO;
       // Ignore all return values: _, _, _, err = action(a, b, ...)
