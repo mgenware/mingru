@@ -12,6 +12,8 @@ export class TransactMemberIO {
 }
 
 export class TransactIO extends ActionIO {
+  lastInsertedMember?: TransactMemberIO;
+
   constructor(
     public action: dd.TransactAction,
     public memberIOs: TransactMemberIO[],
@@ -33,14 +35,19 @@ class TransactIOProcessor {
   convert(): TransactIO {
     const { action, dialect } = this;
     const { members } = action;
-    let lastInsertAction: ActionIO | null = null;
+    let lastInsertMember: TransactMemberIO | undefined;
     const memberIOs = members.map(m => {
-      const io = actionToIO(m.action, dialect);
-      if (m.action.actionType === dd.ActionType.transact) {
-        lastInsertAction = io;
+      const mAction = m.action;
+      const io = actionToIO(mAction, dialect);
+      const callPath = utils.actionCallPath(mAction, action.__table);
+      const memberIO = new TransactMemberIO(io, callPath);
+      if (
+        mAction.actionType === dd.ActionType.insert &&
+        (mAction as dd.InsertAction).fetchInsertedID
+      ) {
+        lastInsertMember = memberIO;
       }
-      const callPath = utils.actionCallPath(m.action, action.__table);
-      return new TransactMemberIO(io, callPath);
+      return memberIO;
     });
 
     // funcArgs
@@ -66,11 +73,19 @@ class TransactIOProcessor {
       `Returns of action ${action.__name}`,
       false,
     );
-    if (lastInsertAction) {
+    if (lastInsertMember) {
       returnValues.add(defs.insertedIDVar);
     }
 
-    return new TransactIO(action, memberIOs, funcArgs, execArgs, returnValues);
+    const result = new TransactIO(
+      action,
+      memberIOs,
+      funcArgs,
+      execArgs,
+      returnValues,
+    );
+    result.lastInsertedMember = lastInsertMember;
+    return result;
   }
 }
 

@@ -325,7 +325,7 @@ if err != nil {
 
   private transact(io: TransactIO): CodeMap {
     let body = '';
-    const { memberIOs, returnValues } = io;
+    const { memberIOs, returnValues, lastInsertedMember } = io;
 
     // Declare err
     body += 'var err error\n';
@@ -338,8 +338,10 @@ if err != nil {
     }
     for (const memberIO of memberIOs) {
       const mActionIO = memberIO.actionIO;
-      // Ignore all return values: _, _, _, err = action(a, b, ...)
-      if (mActionIO.returnValues.length) {
+      if (lastInsertedMember === memberIO) {
+        body += `${mActionIO.returnValues.list[0].name}, `;
+      } else if (mActionIO.returnValues.length) {
+        // Ignore all return values: _, _, _, err = action(a, b, ...)
         body += '_, '.repeat(mActionIO.returnValues.length);
       }
       body += 'err = ';
