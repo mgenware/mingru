@@ -4,7 +4,6 @@ import Dialect from '../dialect';
 import { ActionIO } from './actionIO';
 import { SQLIO } from './sqlIO';
 import VarList from '../lib/varList';
-import { RowsAffectedKey } from 'dd-models';
 import VarInfo from '../lib/varInfo';
 import { registerHanlder } from './actionToIO';
 import * as defs from '../defs';
@@ -77,7 +76,10 @@ class DeleteIOProcessor {
     );
     if (!action.checkOnlyOneAffected) {
       returnValues.add(
-        new VarInfo(RowsAffectedKey, dialect.convertColumnType(dd.int().type)),
+        new VarInfo(
+          defs.rowsAffectedKey,
+          dialect.convertColumnType(dd.int().type),
+        ),
       );
     }
 

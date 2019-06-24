@@ -78,5 +78,5 @@ test('getReturns', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.updateIO(v, new mr.MySQL());
-  expect(io.returnValues.toString()).toEqual('rows_affected: int');
+  expect(io.returnValues.toString()).toEqual('rowsAffected: int');
 });

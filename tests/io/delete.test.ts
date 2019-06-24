@@ -75,5 +75,5 @@ test('getReturns (no WHERE)', () => {
   const v = ta.t;
   const io = mr.deleteIO(v, new mr.MySQL());
   const returns = io.returnValues;
-  expect(returns.toString()).toEqual('_rows_affected: int');
+  expect(returns.toString()).toEqual('rowsAffected: int');
 });

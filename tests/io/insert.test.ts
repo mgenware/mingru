@@ -73,5 +73,5 @@ test('getReturns (insertOne)', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, new mr.MySQL());
-  expect(io.returnValues.toString()).toBe('inserted_id: uint64');
+  expect(io.returnValues.toString()).toBe('insertedID: uint64');
 });
