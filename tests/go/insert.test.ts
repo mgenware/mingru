@@ -2,7 +2,6 @@ import * as dd from 'dd-models';
 import post from '../models/post';
 import cols from '../models/cols';
 import { testBuildAsync } from './common';
-import employee from '../models/employee';
 
 test('insert', async () => {
   class PostTA extends dd.TA {
@@ -24,6 +23,15 @@ test('unsafeInsert', async () => {
 });
 
 test('insertOne', async () => {
+  class Employee extends dd.Table {
+    id = dd.pk(dd.int()).setDBName('emp_no');
+    firstName = dd.varChar(50);
+    lastName = dd.varChar(50);
+    gender = dd.varChar(10);
+    birthDate = dd.date();
+    hireDate = dd.date();
+  }
+  const employee = dd.table(Employee, 'employees');
   class EmployeeTA extends dd.TA {
     insertT = dd.insertOne().setInputs();
   }
