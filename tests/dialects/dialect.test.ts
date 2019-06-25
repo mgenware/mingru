@@ -10,10 +10,10 @@ test('inputPlaceholder', () => {
   );
 });
 
-test('escapeColumn', () => {
-  expect(dialect.escapeColumn(user.age)).toBe('`age`');
+test('encodeColumnName', () => {
+  expect(dialect.encodeColumnName(user.age)).toBe('`age`');
 });
 
-test('escapeTable', () => {
-  expect(dialect.escapeTable(user)).toBe('`user`');
+test('encodeTableName', () => {
+  expect(dialect.encodeTableName(user)).toBe('`user`');
 });

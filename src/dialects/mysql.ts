@@ -8,12 +8,12 @@ const escapeString = require('sql-escape-string');
 const TimeType = new TypeInfo('time.Time', 'time');
 
 export default class MySQL extends Dialect {
-  escape(name: string): string {
+  encodeName(name: string): string {
     throwIfFalsy(name, 'name');
     return '`' + name + '`';
   }
 
-  translate(value: unknown): string {
+  objToSQL(value: unknown): string {
     // tslint:disable-next-line
     if (value === undefined) {
       throw new Error('value is undefined');
@@ -33,7 +33,7 @@ export default class MySQL extends Dialect {
     throw new Error(`Unsupported type of object "${toTypeString(value)}"`);
   }
 
-  convertColumnType(colType: dd.ColumnType): TypeInfo {
+  colTypeToGoType(colType: dd.ColumnType): TypeInfo {
     throwIfFalsy(colType, 'colType');
     const type = this.goTypeNonNull(colType);
     if (colType.nullable) {
@@ -46,8 +46,23 @@ export default class MySQL extends Dialect {
     return new TypeInfo(type);
   }
 
+  colTypeToSQLType(col: dd.Column): string {
+    throwIfFalsy(col, 'col');
+    const colType = col.type;
+    const types = [this.absoluteSQLType(colType)];
+    if (colType.unsigned) {
+      types.push('UNSIGNED');
+    }
+    types.push(colType.nullable ? 'NULL' : 'NOT NULL');
+    if (col.defaultValue) {
+      types.push('DEFAULT');
+      types.push(this.objToSQL(col.defaultValue));
+    }
+    return types.join(' ');
+  }
+
   as(sql: string, name: string): string {
-    return `${sql} AS ${this.escape(name)}`;
+    return `${sql} AS ${this.encodeName(name)}`;
   }
 
   sqlCall(type: dd.SQLCallType): string {
@@ -65,6 +80,46 @@ export default class MySQL extends Dialect {
       default:
         throw new Error(`Unsupported type of call "${type}"`);
     }
+  }
+
+  private absoluteSQLType(colType: dd.ColumnType): string {
+    const DT = dd.dt;
+    const size = colType.length;
+    for (const type of colType.types) {
+      switch (type) {
+        case DT.bigInt: {
+          return 'BIGINT';
+        }
+        case DT.int: {
+          return 'INT';
+        }
+        case DT.smallInt: {
+          return 'SMALLINT';
+        }
+        case DT.tinyInt: {
+          return 'TINYINT';
+        }
+        case DT.varChar: {
+          return `VARCHAR(${size})`;
+        }
+        case DT.char: {
+          return `CHAR(${size})`;
+        }
+        case DT.text: {
+          return 'TEXT';
+        }
+        case DT.datetime: {
+          return 'DATETIME';
+        }
+        case DT.date: {
+          return 'DATE';
+        }
+        case DT.time: {
+          return 'TIME';
+        }
+      }
+    }
+    throw new Error(`Type not supported: ${this.inspectTypes(colType.types)}`);
   }
 
   private goTypeNonNull(colType: dd.ColumnType): TypeInfo | string {

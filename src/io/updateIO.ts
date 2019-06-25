@@ -53,7 +53,7 @@ class UpdateIOProcessor {
     // Setters
     const setterIOs = SetterIO.fromAction(action, dialect);
     sql += setterIOs
-      .map(s => `${dialect.escapeColumn(s.col)} = ${s.sql.toSQL(dialect)}`)
+      .map(s => `${dialect.encodeColumnName(s.col)} = ${s.sql.toSQL(dialect)}`)
       .join(', ');
 
     // WHERE
@@ -93,7 +93,7 @@ class UpdateIOProcessor {
       returnValues.add(
         new VarInfo(
           defs.rowsAffectedKey,
-          dialect.convertColumnType(dd.int().type),
+          dialect.colTypeToGoType(dd.int().type),
         ),
       );
     }
@@ -111,7 +111,7 @@ class UpdateIOProcessor {
   }
 
   private handleFrom(table: dd.Table): string {
-    const e = this.dialect.escape;
+    const e = this.dialect.encodeName;
     return `${e(table.getDBName())}`;
   }
 }

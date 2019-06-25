@@ -58,7 +58,7 @@ export class SQLIO {
       }
 
       case dd.SQLElementType.column: {
-        return dialect.escapeColumn(element.toColumn());
+        return dialect.encodeColumnName(element.toColumn());
       }
 
       case dd.SQLElementType.call: {

@@ -22,7 +22,7 @@ export class JoinIO {
   ) {}
 
   toSQL(dialect: Dialect): string {
-    const e = dialect.escape;
+    const e = dialect.encodeName;
     const localTableDBName = this.localColumn.tableName(true);
     return `INNER JOIN ${e(this.remoteTable)} AS ${e(this.tableAlias)} ON ${e(
       this.tableAlias,
@@ -188,11 +188,11 @@ export class SelectIOProcessor {
     // Func args
     const limitTypeInfo = new VarInfo(
       'limit',
-      this.dialect.convertColumnType(dd.int().type),
+      this.dialect.colTypeToGoType(dd.int().type),
     );
     const offsetTypeInfo = new VarInfo(
       'offset',
-      this.dialect.convertColumnType(dd.int().type),
+      this.dialect.colTypeToGoType(dd.int().type),
     );
     const funcArgs = new VarList(
       `Func args of action "${action.__name}"`,
@@ -224,7 +224,7 @@ export class SelectIOProcessor {
 
     if (action.isSelectField) {
       const col = colIOs[0];
-      const typeInfo = this.dialect.convertColumnType(col.getResultType());
+      const typeInfo = this.dialect.colTypeToGoType(col.getResultType());
 
       returnValues.add(new VarInfo(SelectedResultKey, typeInfo));
     } else {
@@ -259,20 +259,20 @@ export class SelectIOProcessor {
     const { dialect } = this;
     const col = nCol.column;
     if (typeof col === 'string') {
-      return dialect.escape(col as string);
+      return dialect.encodeName(col as string);
     }
     if (col instanceof dd.Column) {
       return this.getColumnSQL(col as dd.Column);
     }
     if (col instanceof dd.RawColumn) {
-      return dialect.escape((col as dd.RawColumn).selectedName);
+      return dialect.encodeName((col as dd.RawColumn).selectedName);
     }
     throw new Error(`Unsupported orderBy column "${toTypeString(col)}"`);
   }
 
   private getColumnSQL(col: dd.Column): string {
     const { dialect } = this;
-    let value = dialect.escapeColumn(col);
+    let value = dialect.encodeColumnName(col);
     if (this.hasJoin) {
       if (col.isJoinedColumn()) {
         const jt = col.__table as dd.JoinedTable;
@@ -283,17 +283,17 @@ export class SelectIOProcessor {
             `Column path ”${joinPath}“ does not have a associated value in column alias map`,
           );
         }
-        value = `${dialect.escape(join.tableAlias)}.${value}`;
+        value = `${dialect.encodeName(join.tableAlias)}.${value}`;
       } else {
         // Use table name as alias
-        value = `${dialect.escape(col.tableName())}.${value}`;
+        value = `${dialect.encodeName(col.tableName())}.${value}`;
       }
     }
     return value;
   }
 
   private handleFrom(table: dd.Table): string {
-    const e = this.dialect.escape;
+    const e = this.dialect.encodeName;
     const tableDBName = table.getDBName();
     const encodedTableName = e(tableDBName);
     let sql = `FROM ${encodedTableName}`;
@@ -473,7 +473,7 @@ export class SelectIOProcessor {
     alias: string | null, // if an user alias is present, we don't need to guess the input name just use it as alias
   ): ColumnSQL {
     const { dialect } = this;
-    const e = dialect.escape;
+    const e = dialect.encodeName;
     const inputName = alias || col.inputName();
     // Check for joined column
     if (col.isJoinedColumn()) {

@@ -180,7 +180,7 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const selectedFields: go.InstanceVariable[] = [];
     for (const col of io.cols) {
       const fieldName = col.varName;
-      const typeInfo = this.dialect.convertColumnType(col.getResultType());
+      const typeInfo = this.dialect.colTypeToGoType(col.getResultType());
       selectedFields.push(
         new go.InstanceVariable(fieldName, typeInfo.typeName),
       );

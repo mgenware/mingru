@@ -2,16 +2,20 @@ import * as dd from 'dd-models';
 import { TypeInfo } from './lib/varInfo';
 
 export class Dialect {
-  escape(_: string): string {
+  encodeName(_: string): string {
     throw new Error('Not implemented yet');
   }
 
   // Translates a JavaScript object to SQL equivalent
-  translate(_: unknown): string {
+  objToSQL(_: unknown): string {
     throw new Error('Not implemented yet');
   }
 
-  convertColumnType(_: dd.ColumnType): TypeInfo {
+  colTypeToGoType(_: dd.ColumnType): TypeInfo {
+    throw new Error('Not implemented yet');
+  }
+
+  colToSQLType(_: dd.Column): string {
     throw new Error('Not implemented yet');
   }
 
@@ -19,12 +23,12 @@ export class Dialect {
     throw new Error('Not implemented yet');
   }
 
-  escapeColumn(column: dd.Column): string {
-    return this.escape(column.getDBName());
+  encodeColumnName(column: dd.Column): string {
+    return this.encodeName(column.getDBName());
   }
 
-  escapeTable(table: dd.Table): string {
-    return this.escape(table.__name);
+  encodeTableName(table: dd.Table): string {
+    return this.encodeName(table.__name);
   }
 
   inputPlaceholder(_: dd.SQLVariable | null): string {

@@ -44,7 +44,7 @@ export class InsertIOProcessor {
 
     // setters
     const setters = SetterIO.fromAction(action, dialect);
-    const colNames = setters.map(s => dialect.escapeColumn(s.col));
+    const colNames = setters.map(s => dialect.encodeColumnName(s.col));
     sql += ` (${colNames.join(', ')})`;
 
     // values
@@ -79,7 +79,7 @@ export class InsertIOProcessor {
   }
 
   private handleFrom(table: dd.Table): string {
-    const e = this.dialect.escape;
+    const e = this.dialect.encodeName;
     return `${e(table.getDBName())}`;
   }
 }

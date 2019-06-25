@@ -78,7 +78,7 @@ class DeleteIOProcessor {
       returnValues.add(
         new VarInfo(
           defs.rowsAffectedKey,
-          dialect.convertColumnType(dd.int().type),
+          dialect.colTypeToGoType(dd.int().type),
         ),
       );
     }
@@ -87,7 +87,7 @@ class DeleteIOProcessor {
   }
 
   private handleFrom(table: dd.Table): string {
-    const e = this.dialect.escape;
+    const e = this.dialect.encodeName;
     return e(table.getDBName());
   }
 }

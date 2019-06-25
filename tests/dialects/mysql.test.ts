@@ -6,13 +6,13 @@ const TimePkg = 'time';
 const dialect = new mr.MySQL();
 
 function testType(col: dd.Column, type: string, pkg?: string) {
-  const info = dialect.convertColumnType(col.type);
+  const info = dialect.colTypeToGoType(col.type);
   expect(info.typeName).toBe(type);
   expect(info.namespace || null).toBe(pkg || null);
 }
 
-test('escape', () => {
-  expect(dialect.escape('abc')).toBe('`abc`');
+test('encodeName', () => {
+  expect(dialect.encodeName('abc')).toBe('`abc`');
 });
 
 test('DT', () => {
@@ -48,7 +48,7 @@ test('DT', () => {
 
 test('DT (not supported)', () => {
   const props = new dd.ColumnType(['type1', 'type2']);
-  expect(() => dialect.convertColumnType(props)).toThrow('type2');
+  expect(() => dialect.colTypeToGoType(props)).toThrow('type2');
 });
 
 test('as', () => {
@@ -64,20 +64,20 @@ test('SQL calls', () => {
   expect(t(dd.SQLCallType.coalesce)).toBe('COALESCE');
 });
 
-test('translate', () => {
+test('objToSQL', () => {
   // null
-  expect(dialect.translate(null)).toBe('NULL');
+  expect(dialect.objToSQL(null)).toBe('NULL');
   // number
-  expect(dialect.translate(-32)).toBe('-32');
+  expect(dialect.objToSQL(-32)).toBe('-32');
   // boolean
-  expect(dialect.translate(true)).toBe('1');
-  expect(dialect.translate(false)).toBe('0');
+  expect(dialect.objToSQL(true)).toBe('1');
+  expect(dialect.objToSQL(false)).toBe('0');
   // string
-  expect(dialect.translate('a 123 🛋')).toBe("'a 123 🛋'"); // tslint:disable-line
-  expect(dialect.translate('')).toBe("''"); // tslint:disable-line
-  expect(dialect.translate('\'"\\')).toBe("'''\"\\'"); // tslint:disable-line
+  expect(dialect.objToSQL('a 123 🛋')).toBe("'a 123 🛋'"); // tslint:disable-line
+  expect(dialect.objToSQL('')).toBe("''"); // tslint:disable-line
+  expect(dialect.objToSQL('\'"\\')).toBe("'''\"\\'"); // tslint:disable-line
   // undefined
-  expect(() => dialect.translate(undefined)).toThrow();
+  expect(() => dialect.objToSQL(undefined)).toThrow();
   // Others
-  expect(() => dialect.translate([])).toThrow();
+  expect(() => dialect.objToSQL([])).toThrow();
 });

@@ -8,7 +8,7 @@ export class TypeInfo {
     throwIfFalsy(dialect, 'dialect');
 
     if (variable.type instanceof dd.Column) {
-      return dialect.convertColumnType((variable.type as dd.Column).type);
+      return dialect.colTypeToGoType((variable.type as dd.Column).type);
     }
     // variable.type is a string
     const parts = variable.type.split('|');

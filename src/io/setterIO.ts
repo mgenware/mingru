@@ -39,7 +39,7 @@ export class SetterIO {
               );
               value = valueIO.toSQL(dialect);
             } else {
-              value = dialect.translate(col.defaultValue);
+              value = dialect.objToSQL(col.defaultValue);
             }
           } else if (col.type.nullable) {
             value = 'NULL';
@@ -54,7 +54,7 @@ export class SetterIO {
                 }`,
               );
             }
-            value = dialect.translate(def);
+            value = dialect.objToSQL(def);
           }
 
           result.push(
