@@ -20,15 +20,15 @@ var DeptManager = &TableTypeDeptManager{}
 func (da *TableTypeDeptManager) Insert(db *sql.DB, id int, firstName string, lastName string, gender string, birthDate time.Time, hireDate time.Time, no string, name string, empNo int, deptNo string, fromDate time.Time, toDate time.Time) error {
 	txErr := dbx.Transact(db, func(tx *sql.Tx) error {
 		var err error
-		_, err = Employee.Insert(tx, id, firstName, lastName, gender, birthDate, hireDate)
+		err = Employee.Insert(tx, id, firstName, lastName, gender, birthDate, hireDate)
 		if err != nil {
 			return err
 		}
-		_, err = Dept.Insert(tx, no, name)
+		err = Dept.Insert(tx, no, name)
 		if err != nil {
 			return err
 		}
-		_, err = da.InsertCore(tx, empNo, deptNo, fromDate, toDate)
+		err = da.InsertCore(tx, empNo, deptNo, fromDate, toDate)
 		if err != nil {
 			return err
 		}
@@ -38,7 +38,7 @@ func (da *TableTypeDeptManager) Insert(db *sql.DB, id int, firstName string, las
 }
 
 // InsertCore ...
-func (da *TableTypeDeptManager) InsertCore(queryable dbx.Queryable, empNo int, deptNo string, fromDate time.Time, toDate time.Time) (uint64, error) {
-	result, err := queryable.Exec("INSERT INTO `dept_manager` (`emp_no`, `dept_no`, `from_date`, `to_date`) VALUES (?, ?, ?, ?)", empNo, deptNo, fromDate, toDate)
-	return dbx.GetLastInsertIDUint64WithError(result, err)
+func (da *TableTypeDeptManager) InsertCore(queryable dbx.Queryable, empNo int, deptNo string, fromDate time.Time, toDate time.Time) error {
+	_, err := queryable.Exec("INSERT INTO `dept_manager` (`emp_no`, `dept_no`, `from_date`, `to_date`) VALUES (?, ?, ?, ?)", empNo, deptNo, fromDate, toDate)
+	return err
 }

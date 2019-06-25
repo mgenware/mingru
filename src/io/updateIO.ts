@@ -89,7 +89,7 @@ class UpdateIOProcessor {
 
     // returns
     const returnValues = new VarList(`Returns of action ${action.__name}`);
-    if (!action.checkOnlyOneAffected) {
+    if (!action.ensureOneRowAffected) {
       returnValues.add(
         new VarInfo(
           defs.rowsAffectedKey,

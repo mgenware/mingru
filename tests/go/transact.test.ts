@@ -1,9 +1,9 @@
 import { testBuildAsync } from './common';
 import * as dd from 'dd-models';
 
-test('TX', async () => {
+test('No inserted ID', async () => {
   class Employee extends dd.Table {
-    id = dd.pk(dd.int()).setDBName('emp_no');
+    id = dd.pk(dd.int()).setDBName('emp_no').noAutoIncrement;
     firstName = dd.varChar(50);
     lastName = dd.varChar(50);
     gender = dd.varChar(10);
@@ -26,8 +26,8 @@ test('TX', async () => {
   }
   const deptTA = dd.ta(dept, DeptTA);
   class DeptManager extends dd.Table {
-    empNo = dd.pk(dd.int()).setDBName('emp_no');
-    deptNo = dd.pk(dd.char(4)).setDBName('dept_no');
+    empNo = employee.id;
+    deptNo = dept.no;
     fromDate = dd.date();
     toDate = dd.date();
   }
@@ -38,7 +38,21 @@ test('TX', async () => {
   }
 
   const deptManagerTA = dd.ta(deptManager, DeptManagerTA);
-  await testBuildAsync(employeeTA, 'tx/tx/employee');
-  await testBuildAsync(deptTA, 'tx/tx/dept');
-  await testBuildAsync(deptManagerTA, 'tx/tx/deptManager');
+  await testBuildAsync(employeeTA, 'tx/noInsID/employee');
+  await testBuildAsync(deptTA, 'tx/noInsID/dept');
+  await testBuildAsync(deptManagerTA, 'tx/noInsID/deptManager');
+});
+
+test('Last inserted ID', async () => {
+  class Employee extends dd.Table {
+    id = dd.pk(dd.int()).setDBName('emp_no');
+    firstName = dd.varChar(50);
+  }
+  const employee = dd.table(Employee, 'employees');
+  class EmployeeTA extends dd.TA {
+    insert = dd.insertOne().setInputs();
+    insert2 = dd.transact(this.insert, this.insert);
+  }
+  const employeeTA = dd.ta(employee, EmployeeTA);
+  await testBuildAsync(employeeTA, 'tx/autoInsID/employee');
 });

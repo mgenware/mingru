@@ -14,6 +14,7 @@ export class InsertIO extends ActionIO {
     public action: dd.InsertAction,
     public sql: string,
     public setters: SetterIO[],
+    public fetchInsertedID: boolean,
     funcArgs: VarList,
     execArgs: VarList,
     returnValues: VarList,
@@ -34,6 +35,8 @@ export class InsertIOProcessor {
     let sql = 'INSERT INTO ';
     const { action, dialect } = this;
     const { __table: table } = action;
+    const fetchInsertedID =
+      action.ensureOneRowAffected && !!action.__table.__pkAIs.length;
 
     // table
     const tableSQL = this.handleFrom(table);
@@ -60,11 +63,19 @@ export class InsertIOProcessor {
 
     // returns
     const returnValue = new VarList(`Returns of action ${action.__name}`);
-    if (action.fetchInsertedID) {
+    if (fetchInsertedID) {
       returnValue.add(defs.insertedIDVar);
     }
 
-    return new InsertIO(action, sql, setters, funcArgs, execArgs, returnValue);
+    return new InsertIO(
+      action,
+      sql,
+      setters,
+      fetchInsertedID,
+      funcArgs,
+      execArgs,
+      returnValue,
+    );
   }
 
   private handleFrom(table: dd.Table): string {

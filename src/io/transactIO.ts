@@ -6,6 +6,7 @@ import VarList from '../lib/varList';
 import actionToIO, { registerHanlder } from './actionToIO';
 import * as utils from './utils';
 import * as defs from '../defs';
+import { InsertIO } from './insertIO';
 
 export class TransactMemberIO {
   constructor(public actionIO: ActionIO, public callPath: string) {}
@@ -43,7 +44,7 @@ class TransactIOProcessor {
       const memberIO = new TransactMemberIO(io, callPath);
       if (
         mAction.actionType === dd.ActionType.insert &&
-        (mAction as dd.InsertAction).fetchInsertedID
+        (memberIO.actionIO as InsertIO).fetchInsertedID
       ) {
         lastInsertMember = memberIO;
       }

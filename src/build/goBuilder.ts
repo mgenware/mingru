@@ -267,7 +267,7 @@ if err != nil {
     }.Exec(${sqlLiteral}${queryParamsCode})\n`;
 
     // Return the result
-    if (action.checkOnlyOneAffected) {
+    if (action.ensureOneRowAffected) {
       code += `return dbx.CheckOneRowAffectedWithError(${ResultVar}, err)`;
     } else {
       code += `return dbx.GetRowsAffectedIntWithError(${ResultVar}, err)`;
@@ -276,18 +276,18 @@ if err != nil {
   }
 
   private insert(io: InsertIO): CodeMap {
-    const { action } = io;
+    const { fetchInsertedID } = io;
     let code = '';
 
     const queryParamsCode = io.execArgs.list.map(p => `, ${p.name}`).join('');
     const sqlLiteral = go.makeStringLiteral(io.sql);
-    code += `${action.fetchInsertedID ? 'result' : '_'}, err := ${
+    code += `${fetchInsertedID ? 'result' : '_'}, err := ${
       defs.queryableParam
     }.Exec(${sqlLiteral}${queryParamsCode})
 `;
 
     // Return the result
-    if (action.fetchInsertedID) {
+    if (fetchInsertedID) {
       code += `return dbx.GetLastInsertIDUint64WithError(${ResultVar}, err)`;
     } else {
       code += 'return err';
@@ -305,7 +305,7 @@ if err != nil {
       defs.queryableParam
     }.Exec(${sqlLiteral}${queryParamsCode})\n`;
     // Return the result
-    if (action.checkOnlyOneAffected) {
+    if (action.ensureOneRowAffected) {
       code += `return dbx.CheckOneRowAffectedWithError(${ResultVar}, err)`;
     } else {
       code += `return dbx.GetRowsAffectedIntWithError(${ResultVar}, err)`;
@@ -324,40 +324,47 @@ if err != nil {
   }
 
   private transact(io: TransactIO): CodeMap {
-    let body = '';
+    let inner = '';
     const { memberIOs, returnValues, lastInsertedMember } = io;
 
     // Declare err
-    body += 'var err error\n';
+    inner += 'var err error\n';
+    for (const memberIO of memberIOs) {
+      const mActionIO = memberIO.actionIO;
+      if (lastInsertedMember === memberIO) {
+        inner += `${mActionIO.returnValues.list[0].name}, `;
+      } else if (mActionIO.returnValues.length) {
+        // Ignore all return values: _, _, _, err = action(a, b, ...)
+        inner += '_, '.repeat(mActionIO.returnValues.length);
+      }
+      inner += 'err = ';
+      inner += memberIO.callPath;
+      const queryParamsCode = mActionIO.execArgs.list
+        .map(p => `${p.name}`)
+        .join(', ');
+      inner += `(tx, ${queryParamsCode})`;
+      inner += `\nif err != nil {\n\treturn err\n}\n`;
+    }
+    inner += 'return nil\n';
+
+    let outer = '';
     // Declare return varibles if needed
     if (returnValues.length) {
       this.scanImports(returnValues.list);
       for (const v of returnValues.list) {
-        body += `var ${v.name} ${v.type.typeName}\n`;
+        outer += `var ${v.name} ${v.type.typeName}\n`;
       }
     }
-    for (const memberIO of memberIOs) {
-      const mActionIO = memberIO.actionIO;
-      if (lastInsertedMember === memberIO) {
-        body += `${mActionIO.returnValues.list[0].name}, `;
-      } else if (mActionIO.returnValues.length) {
-        // Ignore all return values: _, _, _, err = action(a, b, ...)
-        body += '_, '.repeat(mActionIO.returnValues.length);
+    outer += 'txErr := dbx.Transact(db, func(tx *sql.Tx) error {\n';
+    outer += this.increaseIndent(inner);
+    outer += '\n})\nreturn ';
+    if (returnValues.length) {
+      for (const v of returnValues.list) {
+        outer += `${v.name}, `;
       }
-      body += 'err = ';
-      body += memberIO.callPath;
-      const queryParamsCode = mActionIO.execArgs.list
-        .map(p => `${p.name}`)
-        .join(', ');
-      body += `(tx, ${queryParamsCode})`;
-      body += `\nif err != nil {\n\treturn err\n}\n`;
     }
-    body += 'return nil\n';
-
-    let code = 'txErr := dbx.Transact(db, func(tx *sql.Tx) error {\n';
-    code += this.increaseIndent(body);
-    code += '\n})\nreturn txErr\n';
-    return new CodeMap(code);
+    outer += 'txErr\n';
+    return new CodeMap(outer);
   }
 
   private scanImports(vars: VarInfo[]) {

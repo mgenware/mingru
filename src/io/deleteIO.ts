@@ -74,7 +74,7 @@ class DeleteIOProcessor {
       `Returns of action ${action.__name}`,
       false,
     );
-    if (!action.checkOnlyOneAffected) {
+    if (!action.ensureOneRowAffected) {
       returnValues.add(
         new VarInfo(
           defs.rowsAffectedKey,

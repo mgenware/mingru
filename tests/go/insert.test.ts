@@ -76,3 +76,23 @@ test('Custom DB name', async () => {
   const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'insert/customDBName');
 });
+
+test('Set auto-increment as input', async () => {
+  class Employee extends dd.Table {
+    id = dd.pk(dd.int()).setDBName('emp_no');
+    firstName = dd.varChar(50);
+    lastName = dd.varChar(50);
+    gender = dd.varChar(10);
+    birthDate = dd.date();
+    hireDate = dd.date();
+  }
+  const employee = dd.table(Employee, 'employees');
+  class EmployeeTA extends dd.TA {
+    insertT = dd
+      .insertOne()
+      .setInputs(employee.id)
+      .setInputs();
+  }
+  const ta = dd.ta(employee, EmployeeTA);
+  await testBuildAsync(ta, 'insert/aiColumnAsInput');
+});
