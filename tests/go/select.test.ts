@@ -5,7 +5,7 @@ import rpl from '../models/postReply';
 import user from '../models/user';
 import { testBuildAsync } from './common';
 
-test('Select', async () => {
+test('select', async () => {
   class PostTA extends dd.TA {
     selectT = dd.select(post.id, post.title);
   }
@@ -13,15 +13,31 @@ test('Select', async () => {
   await testBuildAsync(ta, 'select/select');
 });
 
-test('Select all', async () => {
+test('select, all rows', async () => {
   class PostTA extends dd.TA {
-    selectT = dd.selectAll(post.id, post.title);
+    selectT = dd.select();
   }
   const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'select/selectAll');
 });
 
-test('Select field', async () => {
+test('selectRows', async () => {
+  class PostTA extends dd.TA {
+    selectT = dd.selectRows(post.id, post.title);
+  }
+  const ta = dd.ta(post, PostTA);
+  await testBuildAsync(ta, 'select/selectRows');
+});
+
+test('selectRows', async () => {
+  class PostTA extends dd.TA {
+    selectT = dd.selectRows();
+  }
+  const ta = dd.ta(post, PostTA);
+  await testBuildAsync(ta, 'select/selectAllRows');
+});
+
+test('selectField', async () => {
   class PostTA extends dd.TA {
     selectT = dd.selectField(post.title);
   }
@@ -29,7 +45,7 @@ test('Select field', async () => {
   await testBuildAsync(ta, 'select/selectField');
 });
 
-test('Where', async () => {
+test('WHERE', async () => {
   class PostTA extends dd.TA {
     selectT = dd
       .select(post.id, post.title)
@@ -39,31 +55,31 @@ test('Where', async () => {
   await testBuildAsync(ta, 'select/where');
 });
 
-test('Select all, where', async () => {
+test('selectRows with WHERE', async () => {
   class PostTA extends dd.TA {
     selectT = dd
-      .selectAll(post.id, post.title)
+      .selectRows(post.id, post.title)
       .where(dd.sql`${post.id} = ${dd.input(post.id)}`);
   }
   const ta = dd.ta(post, PostTA);
-  await testBuildAsync(ta, 'select/whereAll');
+  await testBuildAsync(ta, 'select/selectRowsWhere');
 });
 
-test('Select all, where, orderBy', async () => {
+test('selectRows, WHERE, orderBy', async () => {
   const cc = dd.sel('RAND()', 'n', new dd.ColumnType(dd.dt.int));
   class PostTA extends dd.TA {
     selectT = dd
-      .selectAll(post.id, cc, post.title)
+      .selectRows(post.id, cc, post.title)
       .where(dd.sql`${post.id} = ${post.id.toInput()} ${post.id.toInput()}`)
       .orderBy(post.title)
       .orderBy(cc)
       .orderByDesc(post.title);
   }
   const ta = dd.ta(post, PostTA);
-  await testBuildAsync(ta, 'select/whereAllOrderBy');
+  await testBuildAsync(ta, 'select/selectRowsWhereOrder');
 });
 
-test('Select field, where', async () => {
+test('selectField, WHERE', async () => {
   class PostTA extends dd.TA {
     selectT = dd.selectField(post.user_id).byID();
   }
@@ -71,7 +87,7 @@ test('Select field, where', async () => {
   await testBuildAsync(ta, 'select/whereField');
 });
 
-test('Where: multiple cols', async () => {
+test('WHERE: multiple cols', async () => {
   class PostTA extends dd.TA {
     selectT = dd
       .select(post.id, post.title)
@@ -193,23 +209,23 @@ test('Custom DB names', async () => {
   await testBuildAsync(ta, 'select/modifiedDBNames');
 });
 
-test('Select all, paginate', async () => {
+test('selectRows, paginate', async () => {
   class PostTA extends dd.TA {
-    selectT = dd.selectAll(post.id, post.title).paginate();
+    selectT = dd.selectRows(post.id, post.title).paginate();
   }
   const ta = dd.ta(post, PostTA);
-  await testBuildAsync(ta, 'select/selectAllPaginate');
+  await testBuildAsync(ta, 'select/selectRowsPaginate');
 });
 
-test('Select all, paginate, where', async () => {
+test('selectRows, paginate, where', async () => {
   class PostTA extends dd.TA {
     selectT = dd
-      .selectAll(post.id, post.title)
+      .selectRows(post.id, post.title)
       .byID()
       .paginate();
   }
   const ta = dd.ta(post, PostTA);
-  await testBuildAsync(ta, 'select/selectAllPaginateWithWhere');
+  await testBuildAsync(ta, 'select/selectRowsPaginateWithWhere');
 });
 
 test('WHERE, inputs, joins', async () => {

@@ -4,8 +4,8 @@ import { testBuildToDirAsync } from './common';
 
 test('Select', async () => {
   class PostTA extends dd.TA {
-    selectTimes = dd.selectAll(post.datetime, post.date);
-    selectNullableTimes = dd.selectAll(post.n_datetime, post.n_date);
+    selectTimes = dd.selectRows(post.datetime, post.date);
+    selectNullableTimes = dd.selectRows(post.n_datetime, post.n_date);
   }
   const ta = dd.ta(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'extraImportsSelect');
@@ -14,7 +14,7 @@ test('Select', async () => {
 test('Select (where)', async () => {
   class PostTA extends dd.TA {
     selectTimes = dd
-      .selectAll(post.datetime, post.date)
+      .selectRows(post.datetime, post.date)
       .where(
         dd.sql`${post.n_datetime} = ${post.n_datetime.toInput()} OR ${
           post.n_date

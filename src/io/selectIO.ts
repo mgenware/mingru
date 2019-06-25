@@ -114,7 +114,10 @@ export class SelectIOProcessor {
   convert(): SelectIO {
     let sql = 'SELECT ';
     const { action } = this;
-    const { columns, __table: from } = action;
+    const { __table: from } = action;
+    const columns = action.columns.length
+      ? action.columns
+      : action.__table.__columns;
     this.hasJoin = columns.some(sCol => {
       const [col] = this.analyzeSelectedColumn(sCol);
       if (col && col.isJoinedColumn()) {
@@ -229,7 +232,7 @@ export class SelectIOProcessor {
       const funcName = utils.actionToFuncName(action);
       const originalResultType = `${tableName}Table${funcName}Result`;
       let resultType = `*${originalResultType}`;
-      if (action.isSelectAll) {
+      if (action.selectRows) {
         resultType = '[]' + resultType;
       }
       returnValues.add(

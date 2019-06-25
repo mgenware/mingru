@@ -1,6 +1,8 @@
 package da
 
 import (
+	"time"
+
 	"github.com/mgenware/go-packagex/v5/dbx"
 )
 
@@ -15,27 +17,25 @@ var Post = &TableTypePost{}
 
 // PostTableSelectTResult ...
 type PostTableSelectTResult struct {
-	ID    uint64
-	Title string
+	ID         uint64
+	Title      string
+	Content    string
+	UserID     uint64
+	ReviewerID uint64
+	CmtCount   uint
+	Datetime   time.Time
+	Date       time.Time
+	Time       time.Time
+	NDatetime  *time.Time
+	NDate      *time.Time
+	NTime      *time.Time
+	MUserID    uint64
 }
 
 // SelectT ...
-func (da *TableTypePost) SelectT(queryable dbx.Queryable) ([]*PostTableSelectTResult, error) {
-	rows, err := queryable.Query("SELECT `id`, `title` FROM `post`")
-	if err != nil {
-		return nil, err
-	}
-	result := make([]*PostTableSelectTResult, 0)
-	defer rows.Close()
-	for rows.Next() {
-		item := &PostTableSelectTResult{}
-		err = rows.Scan(&item.ID, &item.Title)
-		if err != nil {
-			return nil, err
-		}
-		result = append(result, item)
-	}
-	err = rows.Err()
+func (da *TableTypePost) SelectT(queryable dbx.Queryable) (*PostTableSelectTResult, error) {
+	result := &PostTableSelectTResult{}
+	err := queryable.QueryRow("SELECT `id`, `title`, `content`, `user_id`, `reviewer_id`, `cmt_c`, `datetime`, `date`, `time`, `n_datetime`, `n_date`, `n_time`, `my_user_id` FROM `post`").Scan(&result.ID, &result.Title, &result.Content, &result.UserID, &result.ReviewerID, &result.CmtCount, &result.Datetime, &result.Date, &result.Time, &result.NDatetime, &result.NDate, &result.NTime, &result.MUserID)
 	if err != nil {
 		return nil, err
 	}

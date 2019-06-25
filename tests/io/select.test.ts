@@ -183,15 +183,6 @@ test('Duplicate selected names', () => {
   expect(() => mr.selectIO(v, dialect)).toThrow('already exists');
 });
 
-test('Select nothing', () => {
-  expect(() => {
-    class UserTA extends dd.TA {
-      t = dd.select();
-    }
-    dd.ta(user, UserTA);
-  }).toThrow('empty');
-});
-
 test('getInputs', () => {
   class UserTA extends dd.TA {
     t = dd

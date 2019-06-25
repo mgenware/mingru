@@ -200,7 +200,7 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       sqlSource += ' LIMIT ? OFFSET ?';
     }
     const sqlLiteral = go.makeStringLiteral(sqlSource);
-    if (action.isSelectAll) {
+    if (action.selectRows) {
       const scanParams = joinParams(selectedFields.map(p => `&item.${p.name}`));
       // > call Query
       code += `rows, err := ${
