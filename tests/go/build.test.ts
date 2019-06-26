@@ -45,7 +45,7 @@ test('Multiple tables', async () => {
   }
   const postTA = dd.ta(post, PostTA);
   const actions = [userTA, postTA];
-  await testBuildToDirAsync(actions, ['post', 'User'], 'multipleTables');
+  await testBuildToDirAsync(actions, ['post', 'user'], 'multipleTables');
 });
 
 test('Custom package name', async () => {
@@ -66,4 +66,33 @@ test('Table DBName', async () => {
   }
   const ta = dd.ta(postReply, PostRplTA);
   await testBuildToDirAsync([ta], ['post_reply'], 'tableName');
+});
+
+test('Multiple tables + CSQL', async () => {
+  class UserTA extends dd.TA {
+    selectProfile = dd.select(user.display_name, user.sig);
+    updateProfile = dd.unsafeUpdateAll().setInputs(user.sig);
+    deleteByID = dd.deleteOne().where(user.id.isEqualToInput());
+  }
+  const userTA = dd.ta(user, UserTA);
+
+  class PostTA extends dd.TA {
+    selectPostInfo = dd.select(
+      post.id,
+      post.content,
+      post.user_id.join(user).url_name,
+    );
+    updateContent = dd
+      .unsafeUpdateAll()
+      .set(post.content, post.content.isEqualToInput());
+    deleteByID = dd.deleteOne().where(post.id.isEqualToInput());
+  }
+  const postTA = dd.ta(post, PostTA);
+  const actions = [userTA, postTA];
+  await testBuildToDirAsync(
+    actions,
+    ['post', 'user', 'post.sql', 'user.sql'],
+    'multipleTablesCSQL',
+    { buildCreateSQL: true },
+  );
 });

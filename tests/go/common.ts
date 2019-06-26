@@ -54,11 +54,23 @@ export async function testBuildToDirAsync(
   const tmpDir = tempy.directory();
   await mr.build(taList, dialect, tmpDir, opt);
   for (const file of files) {
-    const actual = await nodepath.join(tmpDir, file + '_ta.go');
-    const expected = await nodepath.join(
-      nodepath.resolve(nodepath.join(DestDataDir, 'build', expectedDir)),
-      file + '_ta.go',
-    );
+    let actual = '';
+    let expected = '';
+    if (nodepath.extname(file)) {
+      // An SQL file
+      actual = await nodepath.join(tmpDir, file);
+      expected = await nodepath.join(
+        nodepath.resolve(nodepath.join(DestDataDir, 'build', expectedDir)),
+        file,
+      );
+    } else {
+      // A go file
+      actual = await nodepath.join(tmpDir, file + '_ta.go');
+      expected = await nodepath.join(
+        nodepath.resolve(nodepath.join(DestDataDir, 'build', expectedDir)),
+        file + '_ta.go',
+      );
+    }
     await testFilesAsync(actual, expected);
   }
 }

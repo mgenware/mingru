@@ -1,5 +1,7 @@
 import * as dd from 'dd-models';
 import { testBuildAsync } from './common';
+import user from '../models/user';
+import post from '../models/post';
 
 test('Common (NULL, defaults)', async () => {
   class User extends dd.Table {
@@ -20,4 +22,9 @@ test('PK', async () => {
   }
   const t = dd.table(User);
   await testBuildAsync(t, 'pk/user');
+});
+
+test('FK', async () => {
+  await testBuildAsync(user, 'fk/user');
+  await testBuildAsync(post, 'fk/post');
 });

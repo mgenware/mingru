@@ -447,7 +447,7 @@ export class SelectIOProcessor {
     }
 
     let localTableName: string;
-    const { srcColumn, destColumn } = table;
+    const { srcColumn, destColumn, destTable } = table;
     if (srcColumn.isJoinedColumn()) {
       const srcIO = this.handleJoinRecursively(srcColumn);
       localTableName = srcIO.tableAlias;
@@ -460,7 +460,7 @@ export class SelectIOProcessor {
       this.nextJoinedTableName(),
       localTableName,
       srcColumn,
-      destColumn.tableName(true),
+      destTable.getDBName(),
       destColumn,
     );
     this.jcMap.set(table.keyPath, joinIO);
