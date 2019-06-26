@@ -15,7 +15,7 @@ export interface IBuildOption {
   cleanBuild?: boolean;
   noOutput?: boolean;
   buildCode?: boolean;
-  buildCreateSQL?: boolean;
+  buildCSQL?: boolean;
 }
 
 class Builder {
@@ -54,7 +54,7 @@ class Builder {
     if (opts.buildCode) {
       await this.buildCode(ta);
     }
-    if (opts.buildCreateSQL) {
+    if (opts.buildCSQL) {
       await this.buildCSQL(ta.__table);
     }
   }

@@ -93,6 +93,6 @@ test('Multiple tables + CSQL', async () => {
     actions,
     ['post', 'user', 'post.sql', 'user.sql'],
     'multipleTablesCSQL',
-    { buildCreateSQL: true },
+    { buildCSQL: true },
   );
 });
