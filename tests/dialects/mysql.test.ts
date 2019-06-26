@@ -1,5 +1,6 @@
 import * as mr from '../../';
 import * as dd from 'dd-models';
+import user from '../models/user';
 
 const TimePkg = 'time';
 
@@ -13,6 +14,18 @@ function testType(col: dd.Column, type: string, pkg?: string) {
 
 test('encodeName', () => {
   expect(dialect.encodeName('abc')).toBe('`abc`');
+});
+
+test('encodeColumnName', () => {
+  expect(dialect.encodeColumnName(user.age)).toBe('`age`');
+  expect(dialect.encodeColumnName(user.follower_count)).toBe('`follower_c`');
+});
+
+test('encodeTableName', () => {
+  class Table extends dd.Table {}
+  const t = dd.table(Table, 'haha');
+  expect(dialect.encodeTableName(user)).toBe('`user`');
+  expect(dialect.encodeTableName(t)).toBe('`haha`');
 });
 
 test('DT', () => {

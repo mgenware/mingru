@@ -28,7 +28,7 @@ export class Dialect {
   }
 
   encodeTableName(table: dd.Table): string {
-    return this.encodeName(table.__name);
+    return this.encodeName(table.getDBName());
   }
 
   inputPlaceholder(_: dd.SQLVariable | null): string {
