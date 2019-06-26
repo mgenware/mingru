@@ -260,33 +260,33 @@ mingru converts [dd-models](https://github.com/mgenware/dd-models) to Go code, t
 Once you are familiar with [dd-models](https://github.com/mgenware/dd-models), you can import your actions, and use `mingru.build` along with a dialect(e.g. MySQL) to generate Go code:
 
 ```ts
-export interface IBuildOption {
-  packageName?: string;
-  noFileHeader?: boolean;
-  cleanBuild?: boolean;
-  noOutput?: boolean;
+interface IBuildOption {
+    packageName?: string;
+    noFileHeader?: boolean;
+    cleanBuild?: boolean;
+    noOutput?: boolean;
+    buildCode?: boolean;
+    buildCSQL?: boolean;
 }
-export default function buildAsync(
-  taList: dd.TA[],
-  dialect: Dialect,
-  outDir: string,
-  options?: IBuildOption,
-): Promise<void>;
+
+default function buildAsync(taList: dd.TA[], dialect: Dialect, outDir: string, options?: IBuildOption): Promise<void>;
 ```
 
 Example:
 
 ```ts
-// mingru.ts
 import * as mr from 'mingru';
-// Import your model actions
-import userTA from './models/userTA';
+// Import table actions
+import employeeTA from './models/userTA';
 
 (async () => {
-  const actions = [userTA];
+  const actions = [employeeTA];
   const dialect = new mr.MySQL();
-  // Build Go code to '../da/` directory
-  await mr.build(actions, dialect, '../da/');
+  // Build Go and SQL code to '../da/` directory
+  await mr.build(actions, dialect, '../da/', {
+    cleanBuild: true,
+    buildCSQL: true,
+  });
 })();
 ```
 
