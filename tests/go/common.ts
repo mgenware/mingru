@@ -14,7 +14,7 @@ export async function testBuildAsync(ta: dd.TA, path: string) {
     content = await mfs.readFileAsync(path, 'utf8');
   }
   mr.logger.enabled = false;
-  const builder = new mr.Builder(new mr.TAIO(ta, dialect));
+  const builder = new mr.GoBuilder(new mr.TAIO(ta, dialect));
   const actual = builder.build(true);
   if (path) {
     expect(actual).toBe(content);

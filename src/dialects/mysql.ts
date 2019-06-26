@@ -46,7 +46,7 @@ export default class MySQL extends Dialect {
     return new TypeInfo(type);
   }
 
-  colTypeToSQLType(col: dd.Column): string {
+  colToSQLType(col: dd.Column): string {
     throwIfFalsy(col, 'col');
     const colType = col.type;
     const types = [this.absoluteSQLType(colType)];
@@ -57,6 +57,12 @@ export default class MySQL extends Dialect {
     if (col.defaultValue) {
       types.push('DEFAULT');
       types.push(this.objToSQL(col.defaultValue));
+    } else if (colType.nullable) {
+      types.push('DEFAULT');
+      types.push('NULL');
+    }
+    if (colType.autoIncrement) {
+      types.push('AUTO_INCREMENT');
     }
     return types.join(' ');
   }

@@ -81,3 +81,27 @@ test('objToSQL', () => {
   // Others
   expect(() => dialect.objToSQL([])).toThrow();
 });
+
+test('colToSQLType', () => {
+  // Integers
+  expect(dialect.colToSQLType(dd.int())).toBe('INT NOT NULL');
+  expect(dialect.colToSQLType(dd.bigInt())).toBe('BIGINT NOT NULL');
+  expect(dialect.colToSQLType(dd.tinyInt())).toBe('TINYINT NOT NULL');
+  expect(dialect.colToSQLType(dd.smallInt())).toBe('SMALLINT NOT NULL');
+  expect(dialect.colToSQLType(dd.uInt())).toBe('INT UNSIGNED NOT NULL');
+  // Chars
+  expect(dialect.colToSQLType(dd.varChar(3))).toBe('VARCHAR(3) NOT NULL');
+  expect(dialect.colToSQLType(dd.char(3))).toBe('CHAR(3) NOT NULL');
+  expect(dialect.colToSQLType(dd.text())).toBe('TEXT NOT NULL');
+  // DateTime
+  expect(dialect.colToSQLType(dd.date())).toBe('DATE NOT NULL');
+  expect(dialect.colToSQLType(dd.datetime())).toBe('DATETIME NOT NULL');
+  expect(dialect.colToSQLType(dd.time())).toBe('TIME NOT NULL');
+  // NULL
+  expect(dialect.colToSQLType(dd.int().nullable)).toBe('INT NULL DEFAULT NULL');
+  // Default value
+  expect(dialect.colToSQLType(dd.int(43).nullable)).toBe('INT NULL DEFAULT 43');
+  expect(dialect.colToSQLType(dd.varChar(23, 'oo').nullable)).toBe(
+    "VARCHAR(23) NULL DEFAULT 'oo'",
+  );
+});
