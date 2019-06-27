@@ -36,7 +36,6 @@ class WrapIOProcessor {
     const { args } = action;
     // Throw on non-existing argument names
     const innerFuncArgs = innerIO.funcArgs;
-    const innerExecArgs = innerIO.execArgs;
     for (const key of Object.keys(args)) {
       if (!innerFuncArgs.getByName(key)) {
         throw new Error(
@@ -51,7 +50,7 @@ class WrapIOProcessor {
     );
     funcArgs.add(defs.dbxQueryableVar);
 
-    // Skip the first param, which is always either dbx.Queryable or db.Tx for TX
+    // Skip the first param, which is always either dbx.Queryable or db.Tx
     for (let i = 1; i < innerFuncArgs.list.length; i++) {
       const v = innerFuncArgs.list[i];
       if (!args[v.name]) {
@@ -64,7 +63,7 @@ class WrapIOProcessor {
       true,
     );
     // Pass the queryable param
-    for (const v of innerExecArgs.list) {
+    for (const v of innerFuncArgs.distinctList) {
       if (args[v.name]) {
         // Replace the variable with a value
         execArgs.add(VarInfo.withValue(v, args[v.name] as string));

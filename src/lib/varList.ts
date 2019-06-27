@@ -1,9 +1,13 @@
 import VarInfo from './varInfo';
 import { throwIfFalsy, throwIfFalsyStrict } from 'throw-if-arg-empty';
 
-// IMP: two variables with same names and types are considered duplicates, variables with same names but different types always end with exception!
-//    allow, // Used in SQLIO, we need to track all variables in dd.SQL, in this case, map can only tracks the first occurrence and only list holds all items
-//    disallow, // Used in selected columns, setters, throws on duplicate items
+/**
+ * IMP: two variables with same names and types are considered duplicates, variables with same names but different types always end with exception!
+ * allowDuplicates:
+ *   Used in SQLIO: all variables are tracked in order
+ * disallowDuplicates:
+ *   Used in selected columns, setters, throws on duplicate items
+ */
 export default class VarList {
   list: VarInfo[] = [];
   private map = new Map<string, VarInfo>();

@@ -37,7 +37,7 @@ test('getInputs (wrapSelf and innerIO)', () => {
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, urlName: string, sig: *string, followerCount: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, sig: *string, followerCount: *string}',
   );
   expect(io.execArgs.toString()).toBe(
-    'urlName: string, sig: *string="haha", followerCount: *string, urlName: string, id: uint64, urlName: string {urlName: string, sig: *string="haha", followerCount: *string, id: uint64}',
+    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, sig: *string="haha", followerCount: *string',
   );
   expect(io.innerIO.execArgs.toString()).toBe(
     'urlName: string, sig: *string, followerCount: *string, urlName: string, id: uint64, urlName: string {urlName: string, sig: *string, followerCount: *string, id: uint64}',
@@ -51,7 +51,7 @@ test('getInputs (wrapOther)', () => {
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, urlName: string, sig: *string, followerCount: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, sig: *string, followerCount: *string}',
   );
   expect(io.execArgs.toString()).toBe(
-    'urlName: string, sig: *string, followerCount: *string, urlName: string, id: uint64=123, urlName: string {urlName: string, sig: *string, followerCount: *string, id: uint64=123}',
+    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64=123, sig: *string, followerCount: *string',
   );
   expect(io.funcPath).toBe('User.S');
 });
@@ -62,7 +62,7 @@ test('getInputs (wrapOther, nested)', () => {
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, urlName: string, followerCount: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, followerCount: *string}',
   );
   expect(io.execArgs.toString()).toBe(
-    'urlName: string, sig: *string="haha", followerCount: *string, urlName: string, id: uint64=123, urlName: string {urlName: string, sig: *string="haha", followerCount: *string, id: uint64=123}',
+    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64=123, followerCount: *string',
   );
   expect(io.funcPath).toBe('User.D');
 });
