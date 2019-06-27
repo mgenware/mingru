@@ -66,3 +66,19 @@ test('getInputs (wrapOther, nested)', () => {
   );
   expect(io.funcPath).toBe('User.D');
 });
+
+test('Throws on undefined inputs', () => {
+  class UserTA extends dd.TA {
+    t = dd
+      .select(user.id, user.url_name)
+      .where(
+        dd.sql`${user.id.toInput()} ${user.url_name.toInput()} ${user.id.toInput()}`,
+      );
+    t2 = this.t.wrap({
+      haha: `"tony"`,
+    });
+  }
+  const ta = dd.ta(user, UserTA);
+  const v = ta.t2;
+  expect(() => mr.wrapIO(v, dialect)).toThrow('haha');
+});
