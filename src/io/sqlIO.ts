@@ -6,22 +6,6 @@ import VarList from '../lib/varList';
 import VarInfo from '../lib/varInfo';
 
 export class SQLIO {
-  static fromSQL(sql: dd.SQL, dialect: Dialect): SQLIO {
-    throwIfFalsy(sql, 'sql');
-    throwIfFalsy(dialect, 'dialect');
-
-    const vars = new VarList(`Expression ${sql.toString()}`, true);
-    for (const element of sql.elements) {
-      if (element.type === dd.SQLElementType.input) {
-        const sqlVar = element.value as dd.SQLVariable;
-        const varInfo = VarInfo.fromSQLVar(sqlVar, dialect);
-        vars.add(varInfo);
-      }
-    }
-
-    return new SQLIO(sql, vars);
-  }
-
   get vars(): VarInfo[] {
     return this.varList.list;
   }
@@ -30,15 +14,16 @@ export class SQLIO {
     return this.varList.distinctList;
   }
 
-  private constructor(public sql: dd.SQL, public varList: VarList) {
+  constructor(
+    public sql: dd.SQL,
+    public dialect: Dialect,
+    public varList: VarList,
+  ) {
     throwIfFalsy(sql, 'sql');
     throwIfFalsy(varList, 'varList');
   }
 
-  toSQL(
-    dialect: Dialect,
-    cb?: (element: dd.SQLElement) => string | null,
-  ): string {
+  toSQL(cb?: (element: dd.SQLElement) => string | null): string {
     const { sql } = this;
     let res = '';
     for (const element of sql.elements) {
@@ -46,7 +31,7 @@ export class SQLIO {
       if (cb) {
         cbRes = cb(element);
       }
-      res += cbRes === null ? this.handleElement(element, dialect) : cbRes;
+      res += cbRes === null ? this.handleElement(element, this.dialect) : cbRes;
     }
     return res;
   }
@@ -65,9 +50,7 @@ export class SQLIO {
         const call = element.toCall();
         const name = dialect.sqlCall(call.type);
         const params = call.params.length
-          ? call.params
-              .map(p => SQLIO.fromSQL(p, dialect).toSQL(dialect))
-              .join(', ')
+          ? call.params.map(p => sqlIO(p, dialect).toSQL()).join(', ')
           : '';
         return `${name}(${params})`;
       }
@@ -88,5 +71,14 @@ export class SQLIO {
 }
 
 export function sqlIO(sql: dd.SQL, dialect: Dialect): SQLIO {
-  return SQLIO.fromSQL(sql, dialect);
+  const vars = new VarList(`Expression ${sql.toString()}`, true);
+  for (const element of sql.elements) {
+    if (element.type === dd.SQLElementType.input) {
+      const sqlVar = element.value as dd.SQLVariable;
+      const varInfo = VarInfo.fromSQLVar(sqlVar, dialect);
+      vars.add(varInfo);
+    }
+  }
+
+  return new SQLIO(sql, dialect, vars);
 }

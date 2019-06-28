@@ -11,13 +11,13 @@ test('Columns and escape strings', () => {
   }`;
   const io = mr.sqlIO(sql, dialect);
   expect(io).toBeInstanceOf(mr.SQLIO);
-  expect(io.toSQL(dialect)).toBe('abc "aaa" `user_id` `url_name`');
+  expect(io.toSQL()).toBe('abc "aaa" `user_id` `url_name`');
 });
 
 test('SQL calls', () => {
   const sql = dd.sql`${post.datetime} = ${dd.datetimeNow()}`;
   const io = mr.sqlIO(sql, dialect);
-  expect(io.toSQL(dialect)).toBe('`datetime` = NOW()');
+  expect(io.toSQL()).toBe('`datetime` = NOW()');
 });
 
 test('Nested SQLs', () => {

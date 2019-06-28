@@ -48,7 +48,7 @@ export class InsertIOProcessor {
     sql += ` (${colNames.join(', ')})`;
 
     // values
-    const colValues = setters.map(s => s.sql.toSQL(dialect));
+    const colValues = setters.map(s => s.sql.toSQL());
     sql += ` VALUES (${colValues.join(', ')})`;
 
     // funcArgs

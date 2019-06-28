@@ -1,6 +1,6 @@
 import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import { SQLIO } from './sqlIO';
+import { SQLIO, sqlIO } from './sqlIO';
 import VarList from '../lib/varList';
 import Dialect from '../dialect';
 import VarInfo from '../lib/varInfo';
@@ -10,7 +10,7 @@ export class SetterIO {
   static fromAction(action: dd.CoreUpdateAction, dialect: Dialect): SetterIO[] {
     const result = Array.from(
       action.setters,
-      ([key, value]) => new SetterIO(key, SQLIO.fromSQL(value, dialect)),
+      ([key, value]) => new SetterIO(key, sqlIO(value, dialect)),
     );
     if (action.autoSetter) {
       const { setters: actionSetters } = action;
@@ -27,17 +27,14 @@ export class SetterIO {
 
         if (action.autoSetter === 'input') {
           result.push(
-            new SetterIO(col, SQLIO.fromSQL(dd.sql`${col.toInput()}`, dialect)),
+            new SetterIO(col, sqlIO(dd.sql`${col.toInput()}`, dialect)),
           );
         } else {
           let value: string;
           if (col.defaultValue) {
             if (col.defaultValue instanceof dd.SQL) {
-              const valueIO = SQLIO.fromSQL(
-                col.defaultValue as dd.SQL,
-                dialect,
-              );
-              value = valueIO.toSQL(dialect);
+              const valueIO = sqlIO(col.defaultValue as dd.SQL, dialect);
+              value = valueIO.toSQL();
             } else {
               value = dialect.objToSQL(col.defaultValue);
             }
@@ -57,9 +54,7 @@ export class SetterIO {
             value = dialect.objToSQL(def);
           }
 
-          result.push(
-            new SetterIO(col, SQLIO.fromSQL(dd.sql`${value}`, dialect)),
-          );
+          result.push(new SetterIO(col, sqlIO(dd.sql`${value}`, dialect)));
         }
       });
     }

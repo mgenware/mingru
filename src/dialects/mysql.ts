@@ -3,6 +3,7 @@ import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import toTypeString from 'to-type-string';
 import { TypeInfo } from '../lib/varInfo';
+import { sqlIO } from '../io/sqlIO';
 const escapeString = require('sql-escape-string');
 
 const TimeType = new TypeInfo('time.Time', 'time');
@@ -14,21 +15,21 @@ export default class MySQL extends Dialect {
   }
 
   objToSQL(value: unknown): string {
-    // tslint:disable-next-line
     if (value === undefined) {
       throw new Error('value is undefined');
     }
-    // tslint:disable-next-line
     if (value === null) {
       return 'NULL';
     }
-    // tslint:disable-next-line
     if (typeof value === 'boolean' || typeof value === 'number') {
       return `${+(value as number)}`;
     }
-    // tslint:disable-next-line
     if (typeof value === 'string') {
       return escapeString(value);
+    }
+    if (value instanceof dd.SQL) {
+      const io = sqlIO(value as dd.SQL, this);
+      return io.toSQL();
     }
     throw new Error(`Unsupported type of object "${toTypeString(value)}"`);
   }

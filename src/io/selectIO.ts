@@ -2,7 +2,7 @@ import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
 import toTypeString from 'to-type-string';
-import { SQLIO } from './sqlIO';
+import { SQLIO, sqlIO } from './sqlIO';
 import { ActionIO } from './actionIO';
 import * as utils from './utils';
 import VarInfo, { TypeInfo } from '../lib/varInfo';
@@ -157,10 +157,10 @@ export class SelectIOProcessor {
     // where
     let whereIO: SQLIO | null = null;
     if (action.whereSQL) {
-      whereIO = SQLIO.fromSQL(action.whereSQL, this.dialect);
+      whereIO = sqlIO(action.whereSQL, this.dialect);
       sql +=
         ' WHERE ' +
-        whereIO.toSQL(this.dialect, ele => {
+        whereIO.toSQL(ele => {
           if (ele.type === dd.SQLElementType.column) {
             return this.getColumnSQL(ele.toColumn());
           }
@@ -392,10 +392,10 @@ export class SelectIOProcessor {
 
       // Here, we have a RawColumn.core is an expression with a column inside
       const rawExpr = calcCol.core as dd.SQL;
-      const exprIO = SQLIO.fromSQL(rawExpr, dialect);
+      const exprIO = sqlIO(rawExpr, dialect);
       // Replace the column with SQL only (no alias).
       // Imagine new RawColumn(dd.sql`COUNT(${col.as('a')})`, 'b'), the embedded column would be interpreted as `'col' AS 'a'`, but it really should be `COUNT('col') AS 'b'`, so this step replace the embedded with the SQL without its attached alias.
-      const sql = exprIO.toSQL(dialect, element => {
+      const sql = exprIO.toSQL(element => {
         if (element.value === col) {
           return colSQL.sql;
         }
@@ -418,8 +418,8 @@ export class SelectIOProcessor {
       }
       // Expression with no columns inside
       const rawExpr = calcCol.core as dd.SQL;
-      const exprIO = SQLIO.fromSQL(rawExpr, dialect);
-      const sql = exprIO.toSQL(dialect);
+      const exprIO = sqlIO(rawExpr, dialect);
+      const sql = exprIO.toSQL();
       // If we cannot guess the result type (`resultType` is null), and neither does a user specified type (`type` is null) exists, we throw cuz we cannot determine the result type
       if (!resultType && !sCol.type) {
         throw new Error(

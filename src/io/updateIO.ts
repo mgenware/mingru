@@ -2,7 +2,7 @@ import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
 import { settersToVarList, SetterIO } from './setterIO';
-import { SQLIO } from './sqlIO';
+import { SQLIO, sqlIO } from './sqlIO';
 import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
 import VarInfo from '../lib/varInfo';
@@ -53,15 +53,13 @@ class UpdateIOProcessor {
     // Setters
     const setterIOs = SetterIO.fromAction(action, dialect);
     sql += setterIOs
-      .map(s => `${dialect.encodeColumnName(s.col)} = ${s.sql.toSQL(dialect)}`)
+      .map(s => `${dialect.encodeColumnName(s.col)} = ${s.sql.toSQL()}`)
       .join(', ');
 
     // WHERE
-    const whereIO = action.whereSQL
-      ? SQLIO.fromSQL(action.whereSQL, dialect)
-      : null;
+    const whereIO = action.whereSQL ? sqlIO(action.whereSQL, dialect) : null;
     if (whereIO) {
-      sql += ` WHERE ${whereIO.toSQL(dialect)}`;
+      sql += ` WHERE ${whereIO.toSQL()}`;
     }
 
     // funcArgs

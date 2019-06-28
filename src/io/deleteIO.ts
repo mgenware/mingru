@@ -2,7 +2,7 @@ import * as dd from 'dd-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
 import { ActionIO } from './actionIO';
-import { SQLIO } from './sqlIO';
+import { SQLIO, sqlIO } from './sqlIO';
 import VarList from '../lib/varList';
 import VarInfo from '../lib/varInfo';
 import { registerHanlder } from './actionToIO';
@@ -47,11 +47,9 @@ class DeleteIOProcessor {
     sql += fromSQL;
 
     // where
-    const whereIO = action.whereSQL
-      ? SQLIO.fromSQL(action.whereSQL, dialect)
-      : null;
+    const whereIO = action.whereSQL ? sqlIO(action.whereSQL, dialect) : null;
     if (whereIO) {
-      sql += ` WHERE ${whereIO.toSQL(dialect)}`;
+      sql += ` WHERE ${whereIO.toSQL()}`;
     }
 
     // inputs
