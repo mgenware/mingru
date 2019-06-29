@@ -1,6 +1,7 @@
 import * as dd from 'dd-models';
 import post from '../models/post';
 import { testBuildAsync } from './common';
+import cols from '../models/cols';
 
 test('UpdateSome', async () => {
   class PostTA extends dd.TA {
@@ -81,4 +82,16 @@ test('Custom DB column name', async () => {
   }
   const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'update/customName');
+});
+
+test('updateWithDefaults', async () => {
+  class ColsTA extends dd.TA {
+    updateT = dd
+      .updateOne()
+      .setInputs(cols.fk)
+      .setDefaults()
+      .byID();
+  }
+  const ta = dd.ta(cols, ColsTA);
+  await testBuildAsync(ta, 'update/updateWithDefaults');
 });

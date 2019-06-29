@@ -55,12 +55,14 @@ export default class MySQL extends Dialect {
       types.push('UNSIGNED');
     }
     types.push(colType.nullable ? 'NULL' : 'NOT NULL');
-    if (col.defaultValue) {
-      types.push('DEFAULT');
-      types.push(this.objToSQL(col.defaultValue));
-    } else if (colType.nullable) {
-      types.push('DEFAULT');
-      types.push('NULL');
+    if (!col.isNoDefaultOnCSQL) {
+      if (col.defaultValue) {
+        types.push('DEFAULT');
+        types.push(this.objToSQL(col.defaultValue));
+      } else if (colType.nullable) {
+        types.push('DEFAULT');
+        types.push('NULL');
+      }
     }
     if (colType.autoIncrement) {
       types.push('AUTO_INCREMENT');

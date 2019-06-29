@@ -28,3 +28,12 @@ test('FK', async () => {
   await testBuildAsync(user, 'fk/user');
   await testBuildAsync(post, 'fk/post');
 });
+
+test('noDefaultOnCSQL', async () => {
+  class User extends dd.Table {
+    a = dd.int(1);
+    b = dd.int(1).noDefaultOnCSQL;
+  }
+  const t = dd.table(User);
+  await testBuildAsync(t, 'noDefaultOnCSQL/user');
+});
