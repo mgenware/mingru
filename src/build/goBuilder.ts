@@ -157,6 +157,7 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
   private select(io: SelectIO): CodeMap {
     const { action } = io;
     const { pagination } = action;
+    const selMode = action.mode;
 
     // We only need the type name here, the namespace(import) is already handled in `processActionIO`
     const firstReturn = io.returnValues.getByIndex(0);
@@ -180,7 +181,7 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     }
 
     // Generate result type definition
-    if (!action.isSelectField) {
+    if (selMode !== dd.SelectActionMode.field) {
       resultTypeDef = go.struct(originalResultType, selectedFields);
     }
 
@@ -190,7 +191,7 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       sqlSource += ' LIMIT ? OFFSET ?';
     }
     const sqlLiteral = go.makeStringLiteral(sqlSource);
-    if (action.selectRows) {
+    if (selMode === dd.SelectActionMode.list) {
       const scanParams = joinParams(selectedFields.map(p => `&item.${p.name}`));
       // > call Query
       code += `rows, err := ${
@@ -223,7 +224,7 @@ if err != nil {
       // select/selectField
       let scanParams: string;
       // Declare the result variable
-      if (action.isSelectField) {
+      if (selMode === dd.SelectActionMode.field) {
         scanParams = `&${defs.ResultVarName}`;
         code += `var ${defs.ResultVarName} ${resultType}`;
       } else {
@@ -233,7 +234,8 @@ if err != nil {
         code += `${go.pointerVar(defs.ResultVarName, originalResultType)}`;
       }
       // For selectField, we return the default value, for select, return nil
-      const resultVarOnError = action.isSelectField ? 'result' : 'nil';
+      const resultVarOnError =
+        selMode === dd.SelectActionMode.field ? 'result' : 'nil';
       code += '\n';
 
       // Call query func

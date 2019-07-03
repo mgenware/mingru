@@ -125,6 +125,7 @@ export class SelectIOProcessor {
       }
       return false;
     });
+    const selMode = action.mode;
 
     // Process columns
     const colIOs: SelectedColumnIO[] = [];
@@ -222,7 +223,7 @@ export class SelectIOProcessor {
       true,
     );
 
-    if (action.isSelectField) {
+    if (selMode === dd.SelectActionMode.field) {
       const col = colIOs[0];
       const typeInfo = this.dialect.colTypeToGoType(col.getResultType());
 
@@ -232,7 +233,7 @@ export class SelectIOProcessor {
       const funcName = utils.actionToFuncName(action);
       const originalResultType = `${tableName}Table${funcName}Result`;
       let resultType = `*${originalResultType}`;
-      if (action.selectRows) {
+      if (selMode === dd.SelectActionMode.list) {
         resultType = '[]' + resultType;
       }
       returnValues.add(
