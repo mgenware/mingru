@@ -13,6 +13,7 @@ import { TAIO } from '../io/taIO';
 import { ActionIO } from '../io/actionIO';
 import { WrapIO } from '../io/wrapIO';
 import { TransactIO } from '../io/transactIO';
+import LinesBuilder from './linesBuilder';
 
 function joinParams(arr: string[]): string {
   return arr.join(', ');
@@ -156,7 +157,7 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
   private select(io: SelectIO): CodeMap {
     const { action } = io;
-    const { pagination } = action;
+    const { hasLimit } = action;
     const selMode = action.mode;
 
     // We only need the type name here, the namespace(import) is already handled in `processActionIO`
@@ -166,7 +167,7 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const originalResultType = firstReturn.originalName || resultType;
     // Additional type definition for result type, empty on select field action
     let resultTypeDef: string | undefined;
-    let code = '';
+    const codeBuilder = new LinesBuilder();
     // Selected columns
     const selectedFields: go.InstanceVariable[] = [];
     for (const col of io.cols) {
@@ -187,70 +188,88 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
     const queryParamsCode = io.execArgs.list.map(p => `, ${p.name}`).join('');
     let sqlSource = io.sql;
-    if (pagination) {
+    if (hasLimit) {
       sqlSource += ' LIMIT ? OFFSET ?';
     }
     const sqlLiteral = go.makeStringLiteral(sqlSource);
     if (selMode === dd.SelectActionMode.list) {
       const scanParams = joinParams(selectedFields.map(p => `&item.${p.name}`));
       // > call Query
-      code += `rows, err := ${
-        defs.queryableParam
-      }.Query(${sqlLiteral}${queryParamsCode})
-if err != nil {
-\treturn nil, err
-}
-${go.makeArray(
-  defs.ResultVarName,
-  `*${originalResultType}`,
-  0,
-  pagination ? defs.LimitVarName : 0,
-)}
-defer rows.Close()
-for rows.Next() {
-\t${go.pointerVar('item', originalResultType)}
-\terr = rows.Scan(${scanParams})
-\tif err != nil {
-\t\treturn nil, err
-\t}
-\tresult = append(result, item)
-}
-err = rows.Err()
-if err != nil {
-\treturn nil, err
-}
-`;
+      codeBuilder.push(
+        `rows, err := ${
+          defs.queryableParam
+        }.Query(${sqlLiteral}${queryParamsCode})`,
+      );
+      codeBuilder.push('if err != nil {');
+      codeBuilder.incrementIndent();
+      codeBuilder.push('return nil, err');
+      codeBuilder.decrementIndent();
+      codeBuilder.push('}');
+      codeBuilder.pushLines(
+        go.makeArray(
+          defs.ResultVarName,
+          `*${originalResultType}`,
+          0,
+          hasLimit ? defs.LimitVarName : 0,
+        ),
+        'defer rows.Close()',
+        'for rows.Next() {',
+      );
+      codeBuilder.incrementIndent();
+      codeBuilder.pushLines(
+        go.pointerVar('item', originalResultType),
+        `err = rows.Scan(${scanParams})`,
+        `if err != nil {`,
+      );
+      codeBuilder.incrementIndent();
+      codeBuilder.push('return nil, err');
+      codeBuilder.decrementIndent();
+      codeBuilder.push('}');
+      codeBuilder.push('result = append(result, item)');
+      codeBuilder.decrementIndent();
+      codeBuilder.push('}');
+      codeBuilder.push('err = rows.Err()');
+      codeBuilder.push('if err != nil {');
+      codeBuilder.incrementIndent();
+      codeBuilder.push('return nil, err');
+      codeBuilder.decrementIndent();
+      codeBuilder.push('}');
     } else {
       // select/selectField
       let scanParams: string;
       // Declare the result variable
       if (selMode === dd.SelectActionMode.field) {
         scanParams = `&${defs.ResultVarName}`;
-        code += `var ${defs.ResultVarName} ${resultType}`;
+        codeBuilder.push(`var ${defs.ResultVarName} ${resultType}`);
       } else {
         scanParams = joinParams(
           selectedFields.map(p => `&${defs.ResultVarName}.${p.name}`),
         );
-        code += `${go.pointerVar(defs.ResultVarName, originalResultType)}`;
+        codeBuilder.push(
+          `${go.pointerVar(defs.ResultVarName, originalResultType)}`,
+        );
       }
       // For selectField, we return the default value, for select, return nil
       const resultVarOnError =
         selMode === dd.SelectActionMode.field ? 'result' : 'nil';
-      code += '\n';
+      codeBuilder.push();
 
       // Call query func
-      code += `err := ${
-        defs.queryableParam
-      }.QueryRow(${sqlLiteral}${queryParamsCode}).Scan(${scanParams})
-if err != nil {
-\treturn ${resultVarOnError}, err
-}
-`;
+      codeBuilder.push(
+        `err := ${
+          defs.queryableParam
+        }.QueryRow(${sqlLiteral}${queryParamsCode}).Scan(${scanParams})`,
+      );
+      codeBuilder.push('if err != nil {');
+      codeBuilder.incrementIndent();
+      codeBuilder.push(`return ${resultVarOnError}, err`);
+      codeBuilder.decrementIndent();
+      codeBuilder.push('}');
     }
     // Return the result
-    code += `return ${defs.ResultVarName}, nil`;
+    codeBuilder.push(`return ${defs.ResultVarName}, nil`);
 
-    return new CodeMap(code, resultTypeDef);
+    return new CodeMap(codeBuilder.toString(), resultTypeDef);
   }
 
   private update(io: UpdateIO): CodeMap {
