@@ -22,3 +22,4 @@ export const FileHeader = ` /${'*'.repeat(90)}
 
 `;
 export const LimitVarName = 'limit';
+export const IntTypeInfo = new TypeInfo('int');

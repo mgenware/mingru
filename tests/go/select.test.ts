@@ -211,7 +211,7 @@ test('Custom DB names', async () => {
 
 test('selectRows, paginate', async () => {
   class PostTA extends dd.TA {
-    selectT = dd.selectRows(post.id, post.title).paginate();
+    selectT = dd.selectRows(post.id, post.title).limit();
   }
   const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'select/selectRowsPaginate');
@@ -222,7 +222,7 @@ test('selectRows, paginate, where', async () => {
     selectT = dd
       .selectRows(post.id, post.title)
       .byID()
-      .paginate();
+      .limit();
   }
   const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'select/selectRowsPaginateWithWhere');

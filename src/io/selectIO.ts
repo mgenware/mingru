@@ -210,9 +210,10 @@ export class SelectIOProcessor {
       // We need to pass all variables to Exec
       execArgs.merge(whereIO.vars);
     }
-    if (action.pagination) {
+    if (action.hasLimit) {
       funcArgs.add(limitTypeInfo);
       funcArgs.add(offsetTypeInfo);
+      funcArgs.add(new VarInfo('max', new TypeInfo('int')));
       execArgs.add(limitTypeInfo);
       execArgs.add(offsetTypeInfo);
     }
@@ -243,6 +244,9 @@ export class SelectIOProcessor {
           originalResultType,
         ),
       );
+      if (action.hasLimit) {
+        returnValues.add(new VarInfo('max', defs.IntTypeInfo));
+      }
     }
 
     return new SelectIO(
