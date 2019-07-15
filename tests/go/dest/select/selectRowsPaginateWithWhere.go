@@ -2,6 +2,7 @@ package da
 
 import (
 	"github.com/mgenware/go-packagex/v5/dbx"
+	"github.com/mgenware/go-packagex/v5/mathx"
 )
 
 // TableTypePost ...
@@ -20,24 +21,29 @@ type PostTableSelectTResult struct {
 }
 
 // SelectT ...
-func (da *TableTypePost) SelectT(queryable dbx.Queryable, id uint64, limit int, offset int) ([]*PostTableSelectTResult, error) {
+func (da *TableTypePost) SelectT(queryable dbx.Queryable, id uint64, limit int, offset int, max int) ([]*PostTableSelectTResult, int, error) {
 	rows, err := queryable.Query("SELECT `id`, `title` FROM `post` WHERE `id` = ? LIMIT ? OFFSET ?", id, limit, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	result := make([]*PostTableSelectTResult, 0, limit)
 	defer rows.Close()
+
+	itemCounter := 0
 	for rows.Next() {
-		item := &PostTableSelectTResult{}
-		err = rows.Scan(&item.ID, &item.Title)
-		if err != nil {
-			return nil, err
+		itemCounter++
+		if itemCounter <= max {
+			item := &PostTableSelectTResult{}
+			err = rows.Scan(&item.ID, &item.Title)
+			if err != nil {
+				return nil, 0, err
+			}
+			result = append(result, item)
 		}
-		result = append(result, item)
 	}
 	err = rows.Err()
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return result, nil
+	return result, itemCounter, nil
 }
