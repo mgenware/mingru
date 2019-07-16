@@ -215,9 +215,8 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
           0,
           hasLimit ? defs.limitVarName : 0,
         ),
-        'defer rows.Close()',
-        hasLimit ? '' : null,
         hasLimit ? 'itemCounter := 0' : null,
+        'defer rows.Close()',
         'for rows.Next() {',
       );
       codeBuilder.incrementIndent();

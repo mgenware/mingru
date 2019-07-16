@@ -2,7 +2,6 @@ package da
 
 import (
 	"github.com/mgenware/go-packagex/v5/dbx"
-	"github.com/mgenware/go-packagex/v5/mathx"
 )
 
 // TableTypePost ...
@@ -27,9 +26,8 @@ func (da *TableTypePost) SelectT(queryable dbx.Queryable, id uint64, limit int, 
 		return nil, 0, err
 	}
 	result := make([]*PostTableSelectTResult, 0, limit)
-	defer rows.Close()
-
 	itemCounter := 0
+	defer rows.Close()
 	for rows.Next() {
 		itemCounter++
 		if itemCounter <= max {

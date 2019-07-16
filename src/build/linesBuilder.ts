@@ -29,7 +29,10 @@ export default class LinesBuilder {
   toString(): string {
     let s = '';
     for (const line of this.lines) {
-      s += '\t'.repeat(line.indent) + line.content + '\n';
+      if (line.content !== '') {
+        s += '\t'.repeat(line.indent) + line.content;
+      }
+      s += '\n';
     }
     return s;
   }
