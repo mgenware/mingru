@@ -23,3 +23,5 @@ export const FileHeader = ` /${'*'.repeat(90)}
 `;
 export const LimitVarName = 'limit';
 export const IntTypeInfo = new TypeInfo('int');
+
+export const mathxNS = 'github.com/mgenware/go-packagex/v5/mathx';

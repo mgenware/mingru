@@ -167,7 +167,10 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const originalResultType = firstReturn.originalName || resultType;
     // Additional type definition for result type, empty on select field action
     let resultTypeDef: string | undefined;
+    const defaultReturnCode =
+      'return ' + (hasLimit ? 'nil, 0, err' : 'nil, err');
     const codeBuilder = new LinesBuilder();
+
     // Selected columns
     const selectedFields: go.InstanceVariable[] = [];
     for (const col of io.cols) {
@@ -202,7 +205,7 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       );
       codeBuilder.push('if err != nil {');
       codeBuilder.incrementIndent();
-      codeBuilder.push('return nil, err');
+      codeBuilder.push(defaultReturnCode);
       codeBuilder.decrementIndent();
       codeBuilder.push('}');
       codeBuilder.pushLines(
@@ -213,25 +216,36 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
           hasLimit ? defs.LimitVarName : 0,
         ),
         'defer rows.Close()',
+        hasLimit ? '' : null,
+        hasLimit ? 'itemCounter := 0' : null,
         'for rows.Next() {',
       );
       codeBuilder.incrementIndent();
+      // Wrap the object scan code inside a "if itemCounter <= max" block if hasLimit
+      if (hasLimit) {
+        codeBuilder.pushLines('itemCounter++', 'if itemCounter <= max {');
+        codeBuilder.incrementIndent();
+      }
       codeBuilder.pushLines(
         go.pointerVar('item', originalResultType),
         `err = rows.Scan(${scanParams})`,
         `if err != nil {`,
       );
       codeBuilder.incrementIndent();
-      codeBuilder.push('return nil, err');
+      codeBuilder.push(defaultReturnCode);
       codeBuilder.decrementIndent();
       codeBuilder.push('}');
       codeBuilder.push('result = append(result, item)');
+      if (hasLimit) {
+        codeBuilder.decrementIndent();
+        codeBuilder.push('}');
+      }
       codeBuilder.decrementIndent();
       codeBuilder.push('}');
       codeBuilder.push('err = rows.Err()');
       codeBuilder.push('if err != nil {');
       codeBuilder.incrementIndent();
-      codeBuilder.push('return nil, err');
+      codeBuilder.push(defaultReturnCode);
       codeBuilder.decrementIndent();
       codeBuilder.push('}');
     } else {
@@ -267,7 +281,11 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       codeBuilder.push('}');
     }
     // Return the result
-    codeBuilder.push(`return ${defs.ResultVarName}, nil`);
+    codeBuilder.push(
+      hasLimit
+        ? `return ${defs.ResultVarName}, itemCounter, nil`
+        : `return ${defs.ResultVarName}, nil`,
+    );
 
     return new CodeMap(codeBuilder.toString(), resultTypeDef);
   }

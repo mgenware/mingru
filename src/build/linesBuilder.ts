@@ -10,9 +10,11 @@ export default class LinesBuilder {
     this.lines.push(new LineItem(this.indent, content));
   }
 
-  pushLines(...lines: string[]) {
+  pushLines(...lines: Array<string | null>) {
     for (const line of lines) {
-      this.push(line);
+      if (line !== null) {
+        this.push(line);
+      }
     }
   }
 
