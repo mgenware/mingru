@@ -245,7 +245,7 @@ export class SelectIOProcessor {
         ),
       );
       if (action.hasLimit) {
-        returnValues.add(new VarInfo('max', defs.IntTypeInfo));
+        returnValues.add(new VarInfo('max', defs.intTypeInfo));
       }
     }
 

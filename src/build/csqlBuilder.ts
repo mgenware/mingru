@@ -31,7 +31,7 @@ export default class CSQLBuilder {
     if (fks.length) {
       body.push(...fks);
     }
-    let code = noHeader ? '' : defs.FileHeader;
+    let code = noHeader ? '' : defs.fileHeader;
     code = `CREATE TABLE ${dialect.encodeTableName(table)} (\n`;
     code += this.increaseIndent(body, ',\n');
     code += '\n)\n';

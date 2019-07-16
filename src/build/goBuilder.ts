@@ -34,7 +34,7 @@ export default class GoBuilder {
   }
 
   build(noHeader: boolean): string {
-    let code = noHeader ? '' : defs.FileHeader;
+    let code = noHeader ? '' : defs.fileHeader;
     code += `package ${this.packageName}\n\n`;
 
     // this.buildActions will set this.systemImports and this.userImports
@@ -210,10 +210,10 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       codeBuilder.push('}');
       codeBuilder.pushLines(
         go.makeArray(
-          defs.ResultVarName,
+          defs.resultVarName,
           `*${originalResultType}`,
           0,
-          hasLimit ? defs.LimitVarName : 0,
+          hasLimit ? defs.limitVarName : 0,
         ),
         'defer rows.Close()',
         hasLimit ? '' : null,
@@ -253,14 +253,14 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       let scanParams: string;
       // Declare the result variable
       if (selMode === dd.SelectActionMode.field) {
-        scanParams = `&${defs.ResultVarName}`;
-        codeBuilder.push(`var ${defs.ResultVarName} ${resultType}`);
+        scanParams = `&${defs.resultVarName}`;
+        codeBuilder.push(`var ${defs.resultVarName} ${resultType}`);
       } else {
         scanParams = joinParams(
-          selectedFields.map(p => `&${defs.ResultVarName}.${p.name}`),
+          selectedFields.map(p => `&${defs.resultVarName}.${p.name}`),
         );
         codeBuilder.push(
-          `${go.pointerVar(defs.ResultVarName, originalResultType)}`,
+          `${go.pointerVar(defs.resultVarName, originalResultType)}`,
         );
       }
       // For selectField, we return the default value, for select, return nil
@@ -283,8 +283,8 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     // Return the result
     codeBuilder.push(
       hasLimit
-        ? `return ${defs.ResultVarName}, itemCounter, nil`
-        : `return ${defs.ResultVarName}, nil`,
+        ? `return ${defs.resultVarName}, itemCounter, nil`
+        : `return ${defs.resultVarName}, nil`,
     );
 
     return new CodeMap(codeBuilder.toString(), resultTypeDef);
@@ -296,18 +296,18 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
     const queryParamsCode = io.execArgs.list.map(p => `, ${p.name}`).join('');
     const sqlLiteral = go.makeStringLiteral(io.sql);
-    code += `${defs.ResultVarName}, err := ${
+    code += `${defs.resultVarName}, err := ${
       defs.queryableParam
     }.Exec(${sqlLiteral}${queryParamsCode})\n`;
 
     // Return the result
     if (action.ensureOneRowAffected) {
       code += `return dbx.CheckOneRowAffectedWithError(${
-        defs.ResultVarName
+        defs.resultVarName
       }, err)`;
     } else {
       code += `return dbx.GetRowsAffectedIntWithError(${
-        defs.ResultVarName
+        defs.resultVarName
       }, err)`;
     }
     return new CodeMap(code);
@@ -327,7 +327,7 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     // Return the result
     if (fetchInsertedID) {
       code += `return dbx.GetLastInsertIDUint64WithError(${
-        defs.ResultVarName
+        defs.resultVarName
       }, err)`;
     } else {
       code += 'return err';
@@ -341,17 +341,17 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
     const queryParamsCode = io.execArgs.list.map(p => `, ${p.name}`).join('');
     const sqlLiteral = go.makeStringLiteral(io.sql);
-    code += `${defs.ResultVarName}, err := ${
+    code += `${defs.resultVarName}, err := ${
       defs.queryableParam
     }.Exec(${sqlLiteral}${queryParamsCode})\n`;
     // Return the result
     if (action.ensureOneRowAffected) {
       code += `return dbx.CheckOneRowAffectedWithError(${
-        defs.ResultVarName
+        defs.resultVarName
       }, err)`;
     } else {
       code += `return dbx.GetRowsAffectedIntWithError(${
-        defs.ResultVarName
+        defs.resultVarName
       }, err)`;
     }
     return new CodeMap(code);
