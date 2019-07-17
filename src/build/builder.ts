@@ -4,7 +4,7 @@ import { throwIfFalsy } from 'throw-if-arg-empty';
 import * as mfs from 'm-fs';
 import Dialect from '../dialect';
 import * as nodepath from 'path';
-import del from 'del';
+import * as del from 'del';
 import logger from '../logger';
 import { TAIO } from '../io/taIO';
 import CSQLBuilder from './csqlBuilder';
