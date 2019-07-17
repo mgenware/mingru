@@ -228,6 +228,14 @@ test('selectRows, paginate, where', async () => {
   await testBuildAsync(ta, 'select/selectRowsPaginateWithWhere');
 });
 
+test('selectPage', async () => {
+  class PostTA extends dd.TA {
+    selectT = dd.selectPage(post.id, post.title).byID();
+  }
+  const ta = dd.ta(post, PostTA);
+  await testBuildAsync(ta, 'select/selectPage');
+});
+
 test('WHERE, inputs, joins', async () => {
   class CmtTA extends dd.TA {
     selectT = dd.select(cmt.id).where(

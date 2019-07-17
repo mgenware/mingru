@@ -28,3 +28,7 @@ export function actionCallPath(
   }
   return funcPath;
 }
+
+export function paginateCoreFuncName(name: string): string {
+  return `${name}Core`;
+}

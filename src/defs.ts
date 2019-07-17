@@ -23,5 +23,6 @@ export const fileHeader = ` /${'*'.repeat(90)}
 `;
 export const limitVarName = 'limit';
 export const intTypeInfo = new TypeInfo('int');
+export const boolTypeInfo = new TypeInfo('bool');
 
 export const mathxNS = 'github.com/mgenware/go-packagex/v5/mathx';

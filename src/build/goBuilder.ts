@@ -52,12 +52,12 @@ export default class GoBuilder {
     let code = '';
     for (const actionIO of this.taIO.actions) {
       code += '\n';
-      code += this.processActionIO(actionIO);
+      code += this.handleActionIO(actionIO);
     }
     return code;
   }
 
-  private processActionIO(io: ActionIO): string {
+  private handleActionIO(io: ActionIO): string {
     logger.debug(`Building action "${io.action.__name}"`);
 
     // Prepare variables
@@ -157,8 +157,13 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
   private select(io: SelectIO): CodeMap {
     const { action } = io;
-    const { hasLimit } = action;
     const selMode = action.mode;
+    const isPageMode = selMode === dd.SelectActionMode.page;
+    let { hasLimit } = action;
+    if (isPageMode) {
+      // Page mode can be considered a special case of hasLimit
+      hasLimit = true;
+    }
 
     // We only need the type name here, the namespace(import) is already handled in `processActionIO`
     const firstReturn = io.returnValues.getByIndex(0);
@@ -167,8 +172,26 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const originalResultType = firstReturn.originalName || resultType;
     // Additional type definition for result type, empty on select field action
     let resultTypeDef: string | undefined;
-    const defaultReturnCode =
-      'return ' + (hasLimit ? 'nil, 0, err' : 'nil, err');
+    let errReturnCode = '';
+    if (isPageMode) {
+      errReturnCode = 'nil, false, err';
+    } else if (hasLimit) {
+      errReturnCode = 'nil, 0, err';
+    } else {
+      errReturnCode = 'nil, err';
+    }
+    errReturnCode = 'return ' + errReturnCode;
+
+    let succReturnCode = '';
+    if (isPageMode) {
+      succReturnCode = `${defs.resultVarName}, itemCounter > len(result), nil`;
+    } else if (hasLimit) {
+      succReturnCode = `${defs.resultVarName}, itemCounter, nil`;
+    } else {
+      succReturnCode = `${defs.resultVarName}, nil`;
+    }
+    succReturnCode = 'return ' + succReturnCode;
+
     const codeBuilder = new LinesBuilder();
 
     // Selected columns
@@ -195,9 +218,16 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       sqlSource += ' LIMIT ? OFFSET ?';
     }
     const sqlLiteral = go.makeStringLiteral(sqlSource);
-    if (selMode === dd.SelectActionMode.list) {
+    if (selMode === dd.SelectActionMode.list || isPageMode) {
       const scanParams = joinParams(selectedFields.map(p => `&item.${p.name}`));
-      // > call Query
+      if (isPageMode) {
+        codeBuilder.pushLines(
+          'limit := pageSize + 1',
+          'offset := (page - 1) * pageSize',
+          'max := pageSize',
+        );
+      }
+      // Call the Query method
       codeBuilder.push(
         `rows, err := ${
           defs.queryableParam
@@ -205,7 +235,7 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       );
       codeBuilder.push('if err != nil {');
       codeBuilder.incrementIndent();
-      codeBuilder.push(defaultReturnCode);
+      codeBuilder.push(errReturnCode);
       codeBuilder.decrementIndent();
       codeBuilder.push('}');
       codeBuilder.pushLines(
@@ -231,7 +261,7 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         `if err != nil {`,
       );
       codeBuilder.incrementIndent();
-      codeBuilder.push(defaultReturnCode);
+      codeBuilder.push(errReturnCode);
       codeBuilder.decrementIndent();
       codeBuilder.push('}');
       codeBuilder.push('result = append(result, item)');
@@ -244,7 +274,7 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       codeBuilder.push('err = rows.Err()');
       codeBuilder.push('if err != nil {');
       codeBuilder.incrementIndent();
-      codeBuilder.push(defaultReturnCode);
+      codeBuilder.push(errReturnCode);
       codeBuilder.decrementIndent();
       codeBuilder.push('}');
     } else {
@@ -280,11 +310,7 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       codeBuilder.push('}');
     }
     // Return the result
-    codeBuilder.push(
-      hasLimit
-        ? `return ${defs.resultVarName}, itemCounter, nil`
-        : `return ${defs.resultVarName}, nil`,
-    );
+    codeBuilder.push(succReturnCode);
 
     return new CodeMap(codeBuilder.toString(), resultTypeDef);
   }

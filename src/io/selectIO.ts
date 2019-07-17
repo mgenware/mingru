@@ -187,14 +187,8 @@ export class SelectIOProcessor {
     sql += orderBySQL;
 
     // Func args
-    const limitTypeInfo = new VarInfo(
-      'limit',
-      this.dialect.colTypeToGoType(dd.int().type),
-    );
-    const offsetTypeInfo = new VarInfo(
-      'offset',
-      this.dialect.colTypeToGoType(dd.int().type),
-    );
+    const limitTypeInfo = new VarInfo('limit', defs.intTypeInfo);
+    const offsetTypeInfo = new VarInfo('offset', defs.intTypeInfo);
     const funcArgs = new VarList(
       `Func args of action "${action.__name}"`,
       true,
@@ -213,7 +207,12 @@ export class SelectIOProcessor {
     if (action.hasLimit) {
       funcArgs.add(limitTypeInfo);
       funcArgs.add(offsetTypeInfo);
-      funcArgs.add(new VarInfo('max', new TypeInfo('int')));
+      funcArgs.add(new VarInfo('max', defs.intTypeInfo));
+      execArgs.add(limitTypeInfo);
+      execArgs.add(offsetTypeInfo);
+    } else if (selMode === dd.SelectActionMode.page) {
+      funcArgs.add(new VarInfo('page', defs.intTypeInfo));
+      funcArgs.add(new VarInfo('pageSize', defs.intTypeInfo));
       execArgs.add(limitTypeInfo);
       execArgs.add(offsetTypeInfo);
     }
@@ -227,14 +226,17 @@ export class SelectIOProcessor {
     if (selMode === dd.SelectActionMode.field) {
       const col = colIOs[0];
       const typeInfo = this.dialect.colTypeToGoType(col.getResultType());
-
       returnValues.add(new VarInfo(SelectedResultKey, typeInfo));
     } else {
+      // list or row
       const tableName = utils.tableName(action.__table);
       const funcName = utils.actionToFuncName(action);
       const originalResultType = `${tableName}Table${funcName}Result`;
       let resultType = `*${originalResultType}`;
-      if (selMode === dd.SelectActionMode.list) {
+      if (
+        selMode === dd.SelectActionMode.list ||
+        selMode === dd.SelectActionMode.page
+      ) {
         resultType = '[]' + resultType;
       }
       returnValues.add(
@@ -246,6 +248,8 @@ export class SelectIOProcessor {
       );
       if (action.hasLimit) {
         returnValues.add(new VarInfo('max', defs.intTypeInfo));
+      } else if (action.mode === dd.SelectActionMode.page) {
+        returnValues.add(new VarInfo('hasNext', defs.boolTypeInfo));
       }
     }
 
