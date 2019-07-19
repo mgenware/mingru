@@ -37,3 +37,14 @@ test('noDefaultOnCSQL', async () => {
   const t = dd.table(User);
   await testBuildAsync(t, 'noDefaultOnCSQL/user');
 });
+
+test('No SQL expr as default value', async () => {
+  class User extends dd.Table {
+    a = dd.int(1);
+    b = dd.datetime(true);
+    c = dd.datetime(false);
+    d = dd.datetime().setDefault('2012-12-20');
+  }
+  const t = dd.table(User);
+  await testBuildAsync(t, 'noSQLExpr/user');
+});

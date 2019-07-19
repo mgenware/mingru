@@ -56,9 +56,12 @@ export default class MySQL extends Dialect {
     }
     types.push(colType.nullable ? 'NULL' : 'NOT NULL');
     if (!col.isNoDefaultOnCSQL) {
-      if (col.defaultValue) {
+      const defValue = col.defaultValue;
+      if (defValue && defValue instanceof dd.SQL === false) {
         types.push('DEFAULT');
-        types.push(this.objToSQL(col.defaultValue));
+
+        // MySQL doesn't allow dynamic value as default value, we simply ignore SQL expr here
+        types.push(this.objToSQL(defValue));
       } else if (colType.nullable) {
         types.push('DEFAULT');
         types.push('NULL');
