@@ -412,7 +412,8 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       inner += 'err = ';
       inner += memberIO.callPath;
       const queryParamsCode = mActionIO.execArgs.list
-        .map(p => `${p.name}`)
+        .slice(1)
+        .map(p => `${p.value || p.name}`)
         .join(', ');
       inner += `(tx, ${queryParamsCode})`;
       inner += `\nif err != nil {\n\treturn err\n}\n`;
