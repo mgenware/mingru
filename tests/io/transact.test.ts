@@ -32,3 +32,89 @@ test('TransactIO', () => {
   // No execArgs in TX actions
   expect(io.execArgs.toString()).toBe('');
 });
+
+test('Member details (normal action, wrapped, tmp wrapped)', () => {
+  class SourceTA extends dd.TA {
+    s = dd
+      .updateSome()
+      .setInputs(user.sig, user.follower_count)
+      .byID();
+  }
+  const srcTA = dd.ta(user, SourceTA);
+  class WrapTA extends dd.TA {
+    s = dd
+      .updateSome()
+      .setInputs(user.sig, user.follower_count)
+      .byID();
+    s2 = this.s.wrap({ sig: '"haha"' });
+    t = dd.transact(this.s.wrap({ sig: '"haha"' }));
+    t2 = dd.transact(this.s2);
+    t3 = dd.transact(this.s);
+    t4 = dd.transact(srcTA.s);
+  }
+  const wrapTA = dd.ta(user, WrapTA);
+
+  const io = mr.transactIO(wrapTA.t, dialect);
+  expect(io).toBeInstanceOf(mr.TransactIO);
+  expect(io.funcArgs.toString()).toBe(
+    'db: *sql.DB|database/sql, id: uint64, followerCount: *string',
+  );
+  // No execArgs in TX actions
+  expect(io.execArgs.toString()).toBe('');
+
+  const m1 = io.memberIOs[0].actionIO;
+  expect(m1.funcArgs.toString()).toBe(
+    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, followerCount: *string',
+  );
+  expect(m1.execArgs.toString()).toBe(
+    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, sig: *string="haha", followerCount: *string',
+  );
+
+  const io2 = mr.transactIO(wrapTA.t2, dialect);
+  expect(io2).toBeInstanceOf(mr.TransactIO);
+  expect(io2.funcArgs.toString()).toBe(
+    'db: *sql.DB|database/sql, id: uint64, followerCount: *string',
+  );
+  // No execArgs in TX actions
+  expect(io2.execArgs.toString()).toBe('');
+
+  const m2 = io2.memberIOs[0].actionIO;
+  expect(m2.funcArgs.toString()).toBe(
+    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, followerCount: *string',
+  );
+  expect(m2.execArgs.toString()).toBe(
+    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, sig: *string="haha", followerCount: *string',
+  );
+
+  const io3 = mr.transactIO(wrapTA.t3, dialect);
+  expect(io3).toBeInstanceOf(mr.TransactIO);
+  expect(io3.funcArgs.toString()).toBe(
+    'db: *sql.DB|database/sql, id: uint64, sig: *string, followerCount: *string',
+  );
+  // No execArgs in TX actions
+  expect(io3.execArgs.toString()).toBe('');
+
+  const m3 = io3.memberIOs[0].actionIO;
+  expect(m3.funcArgs.toString()).toBe(
+    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, sig: *string, followerCount: *string',
+  );
+  expect(m3.execArgs.toString()).toBe(
+    'sig: *string, followerCount: *string, id: uint64',
+  );
+
+  const io4 = mr.transactIO(wrapTA.t4, dialect);
+  expect(io4).toBeInstanceOf(mr.TransactIO);
+  expect(io4.funcArgs.toString()).toBe(
+    'db: *sql.DB|database/sql, id: uint64, sig: *string, followerCount: *string',
+  );
+  // No execArgs in TX actions
+  expect(io4.execArgs.toString()).toBe('');
+
+  const m4 = io4.memberIOs[0].actionIO;
+  expect(m4.funcArgs.toString()).toBe(
+    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, sig: *string, followerCount: *string',
+  );
+  expect(m4.execArgs.toString()).toBe(
+    'sig: *string, followerCount: *string, id: uint64',
+  );
+});

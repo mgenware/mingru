@@ -56,3 +56,33 @@ test('Last inserted ID', async () => {
   const employeeTA = dd.ta(employee, EmployeeTA);
   await testBuildAsync(employeeTA, 'tx/autoInsID/employee');
 });
+
+test('Temp member actions', async () => {
+  class User extends dd.Table {
+    id = dd.pk();
+    postCount = dd.int();
+  }
+  const user = dd.table(User);
+  class UserTA extends dd.TA {
+    updatePostCount = dd
+      .updateOne()
+      .set(
+        user.postCount,
+        dd.sql`${user.postCount} + ${dd.input(dd.int(), 'offset')}`,
+      )
+      .byID();
+  }
+  const userTA = dd.ta(user, UserTA);
+  class Post extends dd.Table {
+    id = dd.pk();
+    title = dd.varChar(200);
+  }
+
+  const post = dd.table(Post);
+  class PostTA extends dd.TA {
+    insert = dd.transact(userTA.updatePostCount.wrap({ offset: 1 }));
+  }
+  const postTA = dd.ta(post, PostTA);
+  await testBuildAsync(userTA, 'tx/tmpActions/user');
+  await testBuildAsync(postTA, 'tx/tmpActions/post');
+});

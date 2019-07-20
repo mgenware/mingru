@@ -396,6 +396,9 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     let inner = '';
     const { memberIOs, returnValues, lastInsertedMember } = io;
 
+    // We don't use queryable in transaction arguments but we still need to import the dbx namespace as we're calling dbx.transact.
+    this.scanImports([defs.dbxQueryableVar]);
+
     // Declare err
     inner += 'var err error\n';
     for (const memberIO of memberIOs) {
@@ -417,7 +420,7 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     inner += 'return nil\n';
 
     let outer = '';
-    // Declare return varibles if needed
+    // Declare return variables if needed
     if (returnValues.length) {
       this.scanImports(returnValues.list);
       for (const v of returnValues.list) {
