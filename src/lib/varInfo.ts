@@ -58,6 +58,10 @@ export class VarInfo {
     return this._value;
   }
 
+  get valueOrName(): string {
+    return this.value || this.name;
+  }
+
   toString(): string {
     let s = `${this.name}: ${this.type.toString()}`;
     if (this.originalName) {

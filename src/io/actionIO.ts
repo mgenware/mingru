@@ -4,9 +4,9 @@ import VarList from '../lib/varList';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 
 export class ActionIO {
-  className: string;
-  instanceName: string;
-  funcName: string;
+  className: string = '';
+  instanceName: string = '';
+  funcName: string = '';
 
   constructor(
     public action: dd.Action,
@@ -19,9 +19,12 @@ export class ActionIO {
     throwIfFalsy(execArgs, 'execArgs');
     throwIfFalsy(returnValues, 'returnValues');
 
-    this.className = utils.tableToClsName(action.__table);
-    this.instanceName = utils.tableToObjName(action.__table);
-    this.funcName = utils.actionToFuncName(action);
+    // action can be a temp wrapped action in a transaction, which doesn't have a table attached.
+    if (action.__table) {
+      this.className = utils.tableToClsName(action.__table);
+      this.instanceName = utils.tableToObjName(action.__table);
+      this.funcName = utils.actionToFuncName(action);
+    }
   }
 
   get fullFuncName(): string {

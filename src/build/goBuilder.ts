@@ -8,6 +8,7 @@ import { DeleteIO } from '../io/deleteIO';
 import VarInfo, { TypeInfo } from '../lib/varInfo';
 import * as go from './go';
 import * as defs from '../defs';
+import * as utils from '../io/utils';
 import logger from '../logger';
 import { TAIO } from '../io/taIO';
 import { ActionIO } from '../io/actionIO';
@@ -386,7 +387,7 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     let code = '';
 
     const queryParamsCode = io.execArgs.list
-      .map(p => `${p.value || p.name}`)
+      .map(p => `${p.valueOrName}`)
       .join(', ');
     code += `return ${io.funcPath}(${queryParamsCode})\n`;
     return new CodeMap(code);
@@ -411,10 +412,21 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       }
       inner += 'err = ';
       inner += memberIO.callPath;
-      const queryParamsCode = mActionIO.execArgs.list
-        .slice(1)
-        .map(p => `${p.value || p.name}`)
-        .join(', ');
+      let queryParamsCode: string;
+      const [, isTempWrappedAction] = utils.mustGetTable(mActionIO.action);
+      if (!isTempWrappedAction) {
+        queryParamsCode = mActionIO.funcArgs.list
+          .slice(1) // Stripe the first queryable param
+          .map(p => `${p.name}`)
+          .join(', ');
+      } else {
+        // Use execArgs instead of funcArgs
+        queryParamsCode = mActionIO.execArgs.list
+          .slice(1) // Stripe the first queryable param
+          .map(p => `${p.valueOrName}`)
+          .join(', ');
+      }
+
       inner += `(tx, ${queryParamsCode})`;
       inner += `\nif err != nil {\n\treturn err\n}\n`;
     }
