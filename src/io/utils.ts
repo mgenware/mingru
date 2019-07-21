@@ -55,5 +55,11 @@ export function mustGetTable(action: Action): [Table, boolean] {
       }" must be a WrappedAction if no table attached`,
     );
   }
-  return [(action as dd.WrappedAction).action.__table, true];
+  const table = (action as dd.WrappedAction).action.__table;
+  if (!table) {
+    throw new Error(
+      `Unexpected empty __table in WrappedAction "${action.__name}"`,
+    );
+  }
+  return [table, true];
 }

@@ -6,6 +6,7 @@ import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
 import { registerHanlder } from './actionToIO';
 import * as defs from '../defs';
+import * as utils from './utils';
 
 export class InsertIO extends ActionIO {
   returnMember: ActionIO | undefined;
@@ -34,9 +35,9 @@ export class InsertIOProcessor {
   convert(): InsertIO {
     let sql = 'INSERT INTO ';
     const { action, dialect } = this;
-    const { __table: table } = action;
+    const [table] = utils.mustGetTable(action);
     const fetchInsertedID =
-      action.ensureOneRowAffected && !!action.__table.__pkAIs.length;
+      action.ensureOneRowAffected && !!table.__pkAIs.length;
 
     // table
     const tableSQL = this.handleFrom(table);

@@ -80,7 +80,11 @@ test('Temp member actions', async () => {
 
   const post = dd.table(Post);
   class PostTA extends dd.TA {
-    insert = dd.transact(userTA.updatePostCount.wrap({ offset: 1 }));
+    insertCore = dd.insertOne().setInputs();
+    insert = dd.transact(
+      userTA.updatePostCount.wrap({ offset: 1 }),
+      this.insertCore,
+    );
   }
   const postTA = dd.ta(post, PostTA);
   await testBuildAsync(userTA, 'tx/tmpActions/user');

@@ -114,10 +114,10 @@ export class SelectIOProcessor {
   convert(): SelectIO {
     let sql = 'SELECT ';
     const { action } = this;
-    const { __table: from } = action;
+    const [fromTable] = utils.mustGetTable(action);
     const columns = action.columns.length
       ? action.columns
-      : action.__table.__columns;
+      : fromTable.__columns;
     this.hasJoin = columns.some(sCol => {
       const [col] = this.analyzeSelectedColumn(sCol);
       if (col && col.isJoinedColumn()) {
@@ -144,7 +144,7 @@ export class SelectIOProcessor {
     sql += colIOs.map(c => c.sql(this.dialect, this.hasJoin)).join(', ');
 
     // from
-    const fromSQL = this.handleFrom(from as dd.Table);
+    const fromSQL = this.handleFrom(fromTable as dd.Table);
     sql += ' ' + fromSQL;
 
     // joins
@@ -229,7 +229,7 @@ export class SelectIOProcessor {
       returnValues.add(new VarInfo(SelectedResultKey, typeInfo));
     } else {
       // list or row
-      const tableName = utils.tableName(action.__table);
+      const tableName = utils.tableName(fromTable);
       const funcName = utils.actionToFuncName(action);
       const originalResultType = `${tableName}Table${funcName}Result`;
       let resultType = `*${originalResultType}`;
