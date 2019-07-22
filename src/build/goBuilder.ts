@@ -21,8 +21,15 @@ function joinParams(arr: string[]): string {
 }
 
 // For some actions, like SELECT, it uses CodeMap type to return multiple code blocks.
+/**
+ * <CodeMap.head>
+ * func foo(...) { // auto generated
+ *   <CodeMap.body>
+ * } // closing brace, auto generated
+ * <CodeMap.tail>
+ */
 class CodeMap {
-  constructor(public body: string, public header?: string) {}
+  constructor(public body: string, public head?: string, public tail?: string) {}
 }
 
 export default class GoBuilder {
@@ -142,8 +149,11 @@ func (da *${tableClassName}) ${funcName}`;
     // Closing func
     code += '\n}\n';
 
-    if (bodyMap.header) {
-      return `${bodyMap.header}\n${code}`;
+    if (bodyMap.head) {
+      code = `${bodyMap.head}\n${code}`;
+    }
+    if (bodyMap.tail) {
+      code = `${code}\n${bodyMap.tail}`;
     }
     return code;
   }
