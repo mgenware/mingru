@@ -6,7 +6,6 @@ import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
 import { registerHanlder } from './actionToIO';
 import * as defs from '../defs';
-import * as utils from './utils';
 
 export class InsertIO extends ActionIO {
   returnMember: ActionIO | undefined;
@@ -35,7 +34,10 @@ export class InsertIOProcessor {
   convert(): InsertIO {
     let sql = 'INSERT INTO ';
     const { action, dialect } = this;
-    const [table] = utils.mustGetTable(action);
+    const table = action.__table;
+    if (!table) {
+      throw new Error('Action does not have a bound table');
+    }
     const fetchInsertedID =
       action.ensureOneRowAffected && !!table.__pkAIs.length;
 

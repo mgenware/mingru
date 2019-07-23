@@ -5,7 +5,6 @@ import VarList from '../lib/varList';
 import Dialect from '../dialect';
 import VarInfo from '../lib/varInfo';
 import dtDefault from '../build/dtDefault';
-import * as utils from './utils';
 
 export class SetterIO {
   static fromAction(action: dd.CoreUpdateAction, dialect: Dialect): SetterIO[] {
@@ -15,7 +14,10 @@ export class SetterIO {
     );
     if (action.autoSetter) {
       const { setters: actionSetters } = action;
-      const [table] = utils.mustGetTable(action);
+      const table = action.__table;
+      if (!table) {
+        throw new Error('Action does not have a bound table');
+      }
       dd.enumerateColumns(table, col => {
         // If already set, return
         if (actionSetters.get(col)) {

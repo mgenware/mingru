@@ -114,7 +114,10 @@ export class SelectIOProcessor {
   convert(): SelectIO {
     let sql = 'SELECT ';
     const { action } = this;
-    const [fromTable] = utils.mustGetTable(action);
+    const fromTable = action.__table;
+    if (!fromTable) {
+      throw new Error('Action does not have a bound table');
+    }
     const columns = action.columns.length
       ? action.columns
       : fromTable.__columns;
