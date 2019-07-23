@@ -24,6 +24,9 @@ export class TAIO {
     );
     this.actions = actions;
 
+    if (!ta.__table) {
+      throw new Error('Table action group is not initialized');
+    }
     this.className = utils.tableToClsName(ta.__table);
     this.instanceName = utils.tableToObjName(ta.__table);
   }

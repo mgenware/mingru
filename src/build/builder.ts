@@ -49,6 +49,9 @@ class Builder {
   }
 
   private async buildTA(ta: dd.TA): Promise<void> {
+    if (!ta.__table) {
+      throw new Error('Table action group is not initialized');
+    }
     const { opts } = this;
     logger.info(`🚙  Building table "${ta.__table.__name}"`);
     if (opts.buildCode) {
@@ -60,6 +63,10 @@ class Builder {
   }
 
   private async buildCode(ta: dd.TA): Promise<void> {
+    if (!ta.__table) {
+      throw new Error('Table action group is not initialized');
+    }
+
     const { dialect, outDir, opts } = this;
     const taIO = new TAIO(ta, dialect);
     const builder = new GoBuilder(taIO, opts.packageName);
