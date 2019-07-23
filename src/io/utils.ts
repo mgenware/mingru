@@ -63,3 +63,10 @@ export function mustGetTable(action: Action): [Table, boolean] {
   }
   return [table, true];
 }
+
+export function lowerFirstChar(s: string): string {
+  if (!s) {
+    return s;
+  }
+  return `${s.charAt(0).toLowerCase()}${s.substr(1)}`;
+}

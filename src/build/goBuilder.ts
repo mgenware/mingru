@@ -29,7 +29,11 @@ function joinParams(arr: string[]): string {
  * <CodeMap.tail>
  */
 class CodeMap {
-  constructor(public body: string, public head?: string, public tail?: string) {}
+  constructor(
+    public body: string,
+    public head?: string,
+    public tail?: string,
+  ) {}
 }
 
 export default class GoBuilder {
@@ -65,11 +69,12 @@ export default class GoBuilder {
     return code;
   }
 
-  private handleActionIO(io: ActionIO): string {
+  // fallbackName: temp action doesn't have a name, caller must specify a fallback name.
+  private handleActionIO(io: ActionIO, fallbackName?: string): string {
     logger.debug(`Building action "${io.action.__name}"`);
 
     // Prepare variables
-    const { funcName } = io;
+    const funcName = io.funcName || fallbackName;
     const funcArgs = io.funcArgs.distinctList;
     const returnValues = io.returnValues.list;
     const { className: tableClassName } = this.taIO;
@@ -404,62 +409,71 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
   }
 
   private transact(io: TransactIO): CodeMap {
-    let inner = '';
+    let headCode = '';
+    let innerBody = '';
     const { memberIOs, returnValues, lastInsertedMember } = io;
 
     // We don't use queryable in transaction arguments but we still need to import the dbx namespace as we're calling dbx.transact.
     this.scanImports([defs.dbxQueryableVar]);
 
     // Declare err
-    inner += 'var err error\n';
+    innerBody += 'var err error\n';
+    let memberFuncName = 1;
     for (const memberIO of memberIOs) {
       const mActionIO = memberIO.actionIO;
       if (lastInsertedMember === memberIO) {
-        inner += `${mActionIO.returnValues.list[0].name}, `;
+        innerBody += `${mActionIO.returnValues.list[0].name}, `;
       } else if (mActionIO.returnValues.length) {
         // Ignore all return values: _, _, _, err = action(a, b, ...)
-        inner += '_, '.repeat(mActionIO.returnValues.length);
+        innerBody += '_, '.repeat(mActionIO.returnValues.length);
       }
-      inner += 'err = ';
-      inner += memberIO.callPath;
+      innerBody += 'err = ';
+      innerBody += memberIO.callPath;
       let queryParamsCode: string;
-      const [, isTempWrappedAction] = utils.mustGetTable(mActionIO.action);
-      if (!isTempWrappedAction) {
+      // const [, isTempWrappedAction] = utils.mustGetTable(mActionIO.action);
+      const mAction = mActionIO.action;
+      if (mAction.__table) {
         queryParamsCode = mActionIO.funcArgs.list
           .slice(1) // Stripe the first queryable param
           .map(p => `${p.name}`)
           .join(', ');
       } else {
-        // Use execArgs instead of funcArgs
+        // If this is a temp action (created directly in dd.transact), generated a method for it.
+        const memberName =
+          utils.lowerFirstChar(io.funcName) + `Part${memberFuncName++}`;
+        const methodCode = this.handleActionIO(memberIO.actionIO, memberName);
+        // Put this extra member func code into head
+        headCode += methodCode;
+
         queryParamsCode = mActionIO.execArgs.list
           .slice(1) // Stripe the first queryable param
           .map(p => `${p.valueOrName}`)
           .join(', ');
       }
 
-      inner += `(tx, ${queryParamsCode})`;
-      inner += `\nif err != nil {\n\treturn err\n}\n`;
+      innerBody += `(tx, ${queryParamsCode})`;
+      innerBody += `\nif err != nil {\n\treturn err\n}\n`;
     }
-    inner += 'return nil\n';
+    innerBody += 'return nil\n';
 
-    let outer = '';
+    let body = '';
     // Declare return variables if needed
     if (returnValues.length) {
       this.scanImports(returnValues.list);
       for (const v of returnValues.list) {
-        outer += `var ${v.name} ${v.type.typeName}\n`;
+        body += `var ${v.name} ${v.type.typeName}\n`;
       }
     }
-    outer += 'txErr := dbx.Transact(db, func(tx *sql.Tx) error {\n';
-    outer += this.increaseIndent(inner);
-    outer += '\n})\nreturn ';
+    body += 'txErr := dbx.Transact(db, func(tx *sql.Tx) error {\n';
+    body += this.increaseIndent(innerBody);
+    body += '\n})\nreturn ';
     if (returnValues.length) {
       for (const v of returnValues.list) {
-        outer += `${v.name}, `;
+        body += `${v.name}, `;
       }
     }
-    outer += 'txErr\n';
-    return new CodeMap(outer);
+    body += 'txErr\n';
+    return new CodeMap(body, headCode);
   }
 
   private scanImports(vars: VarInfo[]) {
