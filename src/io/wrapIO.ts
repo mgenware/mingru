@@ -15,7 +15,7 @@ export class WrapIO extends ActionIO {
     funcArgs: VarList,
     execArgs: VarList,
     returnValues: VarList,
-    public funcPath: string,
+    public funcPath: string | null,
   ) {
     super(action, funcArgs, execArgs, returnValues);
     throwIfFalsy(action, 'action');
@@ -71,7 +71,15 @@ class WrapIOProcessor {
         execArgs.add(v);
       }
     }
-    const funcPath = utils.actionCallPath(innerAction, action.__table);
+    const actionTable = action.__table;
+    if (!actionTable) {
+      throw new Error('action not initialized');
+    }
+    let funcPath: string | null = null;
+    // funcPath only works when inner action is a named action
+    if (action.__name) {
+      funcPath = utils.actionCallPath(actionTable.__name, action.__name);
+    }
 
     return new WrapIO(
       action,

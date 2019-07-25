@@ -1,39 +1,23 @@
 import * as dd from 'dd-models';
 
-export function actionToFuncName(action: dd.Action): string {
-  if (!action.__name) {
-    throw new Error('action is not initialized');
-  }
-  return dd.utils.capitalizeFirstLetter(action.__name);
+export function actionPascalName(actionName: string): string {
+  return dd.utils.toPascalCase(actionName);
 }
 
-export function tableToObjName(table: dd.Table): string {
-  return dd.utils.toPascalCase(table.__name);
+export function tableTypeName(tableName: string): string {
+  return `TableType${tablePascalName(tableName)}`;
 }
 
-export function tableToClsName(table: dd.Table): string {
-  return `TableType${tableToObjName(table)}`;
-}
-
-export function tableName(table: dd.Table): string {
-  return dd.utils.toPascalCase(table.__name);
+export function tablePascalName(tableName: string): string {
+  return dd.utils.toPascalCase(tableName);
 }
 
 export function actionCallPath(
-  action: dd.Action,
-  currentTable: dd.Table | null,
+  tableName: string | null,
+  actionName: string,
 ): string {
-  const table = action.__table;
-  if (!table) {
-    throw new Error('Action does not have a bound table');
-  }
-  let funcPath = actionToFuncName(action);
-  if (table !== currentTable) {
-    funcPath = tableToObjName(table) + '.' + funcPath;
-  } else {
-    funcPath = 'da.' + funcPath;
-  }
-  return funcPath;
+  const resolvedTableName = tableName ? tablePascalName(tableName) : 'da';
+  return resolvedTableName + '.' + actionPascalName(actionName);
 }
 
 export function paginateCoreFuncName(name: string): string {

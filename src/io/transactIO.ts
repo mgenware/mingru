@@ -37,10 +37,25 @@ class TransactIOProcessor {
     const { action, dialect } = this;
     const { members } = action;
     let lastInsertMember: TransactMemberIO | undefined;
-    const memberIOs = members.map(m => {
+
+    if (!action.__name) {
+      throw new Error('Action not initialized');
+    }
+    const memberFuncPrefix = utils.lowerFirstChar(action.__name);
+    const memberIOs = members.map((m, idx) => {
+      if (!action.__table) {
+        throw new Error('Action not initialized');
+      }
       const mAction = m.action;
       const io = actionToIO(mAction, dialect);
-      const callPath = utils.actionCallPath(mAction, action.__table);
+      // Assign each member a name if not exists
+      if (!mAction.__name) {
+        mAction.__name = `${memberFuncPrefix}Child${idx}`;
+      }
+      const callPath = utils.actionCallPath(
+        action.__table === mAction.__table ? null : action.__table.__name,
+        mAction.__name,
+      );
       const memberIO = new TransactMemberIO(io, callPath);
       if (
         mAction.actionType === dd.ActionType.insert &&

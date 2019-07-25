@@ -231,9 +231,14 @@ export class SelectIOProcessor {
       const typeInfo = this.dialect.colTypeToGoType(col.getResultType());
       returnValues.add(new VarInfo(SelectedResultKey, typeInfo));
     } else {
-      // list or row
-      const tableName = utils.tableName(fromTable);
-      const funcName = utils.actionToFuncName(action);
+      // selMode now equlas .list or .row
+      const tableNameSrc = fromTable.__name;
+      const actionNameSrc = action.__name;
+      const tableName = utils.tablePascalName(tableNameSrc);
+      if (!actionNameSrc) {
+        throw new Error('Action not initialized');
+      }
+      const funcName = utils.actionPascalName(actionNameSrc);
       const originalResultType = `${tableName}Table${funcName}Result`;
       let resultType = `*${originalResultType}`;
       if (
