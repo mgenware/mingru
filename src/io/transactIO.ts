@@ -9,7 +9,11 @@ import * as defs from '../defs';
 import { InsertIO } from './insertIO';
 
 export class TransactMemberIO {
-  constructor(public actionIO: ActionIO, public callPath: string) {}
+  constructor(
+    public actionIO: ActionIO,
+    public callPath: string,
+    public isTemp: boolean, // True if created inside dd.transact
+  ) {}
 }
 
 export class TransactIO extends ActionIO {
@@ -37,26 +41,41 @@ class TransactIOProcessor {
     const { action, dialect } = this;
     const { members } = action;
     let lastInsertMember: TransactMemberIO | undefined;
-
-    if (!action.__name) {
+    const outerActionName = action.__name;
+    const outerActionTable = action.__table;
+    if (!outerActionName || !outerActionTable) {
       throw new Error('Action not initialized');
     }
-    const memberFuncPrefix = utils.lowerFirstChar(action.__name);
+    const memberFuncPrefix = utils.lowerFirstChar(outerActionName);
     const memberIOs = members.map((m, idx) => {
-      if (!action.__table) {
-        throw new Error('Action not initialized');
-      }
       const mAction = m.action;
-      const io = actionToIO(mAction, dialect);
-      // Assign each member a name if not exists
+      let isTemp = false;
+      // Initialize action
       if (!mAction.__name) {
-        mAction.__name = `${memberFuncPrefix}Child${idx}`;
+        // For temporary actions, we need to initialize them first
+        dd.initializeAction(
+          mAction,
+          outerActionTable,
+          `${memberFuncPrefix}Child${idx}`,
+        );
+        isTemp = true;
       }
-      const callPath = utils.actionCallPath(
-        action.__table === mAction.__table ? null : action.__table.__name,
-        mAction.__name,
+      // These properties are no longer null as member action is now initialized
+      const memberActionTable = mAction.__table as dd.Table;
+      const memberActionName = mAction.__name as string;
+
+      // Call actionToIO after initialization
+      const io = actionToIO(
+        mAction,
+        dialect,
+        `transaction child index "${idx}"`,
       );
-      const memberIO = new TransactMemberIO(io, callPath);
+
+      const callPath = utils.actionCallPath(
+        action.__table === mAction.__table ? null : memberActionTable.__name,
+        memberActionName,
+      );
+      const memberIO = new TransactMemberIO(io, callPath, isTemp);
       if (
         mAction.actionType === dd.ActionType.insert &&
         (memberIO.actionIO as InsertIO).fetchInsertedID

@@ -231,7 +231,7 @@ export class SelectIOProcessor {
       const typeInfo = this.dialect.colTypeToGoType(col.getResultType());
       returnValues.add(new VarInfo(SelectedResultKey, typeInfo));
     } else {
-      // selMode now equlas .list or .row
+      // selMode now equals .list or .row
       const tableNameSrc = fromTable.__name;
       const actionNameSrc = action.__name;
       const tableName = utils.tablePascalName(tableNameSrc);

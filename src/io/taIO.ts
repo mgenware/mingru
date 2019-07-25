@@ -17,8 +17,8 @@ export class TAIO {
     const actions: ActionIO[] = [];
     dd.enumerateActions(
       ta,
-      action => {
-        actions.push(actionToIO(action, dialect));
+      (action, prop) => {
+        actions.push(actionToIO(action, dialect, `action "${prop}"`));
       },
       { sorted: true },
     );

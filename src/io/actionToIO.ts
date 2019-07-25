@@ -15,17 +15,28 @@ export function registerHanlder(type: dd.ActionType, handler: HandlerType) {
   handlers.set(type, handler);
 }
 
-export function actionToIO(action: dd.Action, dialect: Dialect): ActionIO {
-  throwIfFalsy(action, 'action');
-  throwIfFalsy(dialect, 'dialect');
+export function actionToIO(
+  action: dd.Action,
+  dialect: Dialect,
+  dlgMsg: string,
+): ActionIO {
+  try {
+    throwIfFalsy(action, 'action');
+    throwIfFalsy(dialect, 'dialect');
 
-  const handler = handlers.get(action.actionType);
-  if (!handler) {
-    throw new Error(
-      `The type "${action.actionType}" is not supported in actionToIO`,
-    );
+    const handler = handlers.get(action.actionType);
+    if (!handler) {
+      throw new Error(
+        `The type "${action.actionType}" is not supported in actionToIO`,
+      );
+    }
+    return handler(action, dialect);
+  } catch (err) {
+    if (err.message) {
+      err.message += ` [${dlgMsg}]`;
+    }
+    throw err;
   }
-  return handler(action, dialect);
 }
 
 export default actionToIO;

@@ -31,7 +31,11 @@ class WrapIOProcessor {
   convert(): WrapIO {
     const { action, dialect } = this;
     const innerAction = action.action;
-    const innerIO = actionToIO(innerAction, dialect);
+    const innerIO = actionToIO(
+      innerAction,
+      dialect,
+      `WrappedAction "${action.__name}"`,
+    );
 
     const { args } = action;
     // Throw on non-existing argument names

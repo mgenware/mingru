@@ -8,7 +8,6 @@ import { DeleteIO } from '../io/deleteIO';
 import VarInfo, { TypeInfo } from '../lib/varInfo';
 import * as go from './go';
 import * as defs from '../defs';
-import * as utils from '../io/utils';
 import logger from '../logger';
 import { TAIO } from '../io/taIO';
 import { ActionIO } from '../io/actionIO';
@@ -418,7 +417,6 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
     // Declare err
     innerBody += 'var err error\n';
-    let memberFuncName = 1;
     for (const memberIO of memberIOs) {
       const mActionIO = memberIO.actionIO;
       if (lastInsertedMember === memberIO) {
@@ -429,26 +427,17 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       }
       innerBody += 'err = ';
       innerBody += memberIO.callPath;
-      let queryParamsCode: string;
-      // const [, isTempWrappedAction] = utils.mustGetTable(mActionIO.action);
-      const mAction = mActionIO.action;
-      if (mAction.__table) {
-        queryParamsCode = mActionIO.funcArgs.list
-          .slice(1) // Stripe the first queryable param
-          .map(p => `${p.name}`)
-          .join(', ');
-      } else {
-        // If this is a temp action (created directly in dd.transact), generated a method for it.
-        const memberName =
-          utils.lowerFirstChar(io.funcName) + `Part${memberFuncName++}`;
-        const methodCode = this.handleActionIO(memberIO.actionIO, memberName);
-        // Put this extra member func code into head
+      // Generating the calling code of this member
+      const queryParamsCode = mActionIO.funcArgs.list
+        .slice(1) // Stripe the first queryable param
+        .map(p => `${p.name}`)
+        .join(', ');
+      // If this is a temp member (created inside transaction),
+      // then we also need to generate the member func body code.
+      if (memberIO.isTemp) {
+        const methodCode = this.handleActionIO(memberIO.actionIO);
+        // Put func code into head
         headCode += methodCode;
-
-        queryParamsCode = mActionIO.execArgs.list
-          .slice(1) // Stripe the first queryable param
-          .map(p => `${p.valueOrName}`)
-          .join(', ');
       }
 
       innerBody += `(tx, ${queryParamsCode})`;

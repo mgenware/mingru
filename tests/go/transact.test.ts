@@ -84,7 +84,15 @@ test('Temp member actions', async () => {
     insert = dd.transact(
       userTA.updatePostCount.wrap({ offset: 1 }),
       this.insertCore,
-      dd.select(post.id, post.title).byID(),
+      dd
+        .updateOne()
+        .setInputs()
+        .byID(),
+      dd
+        .updateOne()
+        .setInputs()
+        .byID()
+        .wrap({ title: 'TITLE' }),
     );
   }
   const postTA = dd.ta(post, PostTA);
