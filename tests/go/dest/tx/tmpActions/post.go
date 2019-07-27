@@ -15,16 +15,37 @@ var Post = &TableTypePost{}
 
 // ------------ Actions ------------
 
+func (da *TableTypePost) insertChild0(queryable dbx.Queryable, id uint64) error {
+	return User.UpdatePostCount(queryable, id, 1)
+}
+
+func (da *TableTypePost) insertChild2(queryable dbx.Queryable, id uint64, title string) error {
+	result, err := queryable.Exec("UPDATE `post` SET `title` = ? WHERE `id` = ?", title, id)
+	return dbx.CheckOneRowAffectedWithError(result, err)
+}
+
+func (da *TableTypePost) insertChild3(queryable dbx.Queryable, id uint64) error {
+	return Post.InsertChild3(queryable, id, TITLE)
+}
+
 // Insert ...
 func (da *TableTypePost) Insert(db *sql.DB, id uint64, title string) (uint64, error) {
 	var insertedID uint64
 	txErr := dbx.Transact(db, func(tx *sql.Tx) error {
 		var err error
-		err = User.UpdatePostCount(tx, id, 1)
+		err = da.InsertChild0(tx, id)
 		if err != nil {
 			return err
 		}
 		insertedID, err = da.InsertCore(tx, title)
+		if err != nil {
+			return err
+		}
+		err = da.InsertChild2(tx, id, title)
+		if err != nil {
+			return err
+		}
+		err = da.InsertChild3(tx, id)
 		if err != nil {
 			return err
 		}

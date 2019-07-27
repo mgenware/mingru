@@ -75,14 +75,17 @@ class WrapIOProcessor {
         execArgs.add(v);
       }
     }
-    const actionTable = action.__table;
-    if (!actionTable) {
-      throw new Error('action not initialized');
+    const innerActionTable = innerAction.__table;
+    if (!innerActionTable) {
+      throw new Error('innerAction not initialized');
     }
     let funcPath: string | null = null;
     // funcPath only works when inner action is a named action
-    if (action.__name) {
-      funcPath = utils.actionCallPath(actionTable.__name, action.__name);
+    if (innerAction.__name) {
+      funcPath = utils.actionCallPath(
+        innerAction === action ? null : innerActionTable.__name,
+        innerAction.__name,
+      );
     }
 
     return new WrapIO(

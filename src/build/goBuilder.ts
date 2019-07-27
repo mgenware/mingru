@@ -14,6 +14,7 @@ import { ActionIO } from '../io/actionIO';
 import { WrapIO } from '../io/wrapIO';
 import { TransactIO } from '../io/transactIO';
 import LinesBuilder from './linesBuilder';
+import * as utils from '../io/utils';
 
 function joinParams(arr: string[]): string {
   return arr.join(', ');
@@ -68,20 +69,21 @@ export default class GoBuilder {
     return code;
   }
 
-  // fallbackName: temp action doesn't have a name, caller must specify a fallback name.
-  private handleActionIO(io: ActionIO, fallbackName?: string): string {
+  private handleActionIO(io: ActionIO, pri?: boolean): string {
     logger.debug(`Building action "${io.action.__name}"`);
 
     // Prepare variables
-    const funcName = io.funcName || fallbackName;
+    const funcName = pri ? utils.lowerFirstChar(io.funcName) : io.funcName;
     const funcArgs = io.funcArgs.distinctList;
     const returnValues = io.returnValues.list;
     const { className: tableClassName } = this.taIO;
     let code = '';
 
     // Build func head
-    code += `// ${funcName} ...
-func (da *${tableClassName}) ${funcName}`;
+    if (!pri) {
+      code += `// ${funcName} ...\n`;
+    }
+    code += `func (da *${tableClassName}) ${funcName}`;
 
     // Build func params
     // Use funcArgs.distinctList as duplicate var defs are not allowed in func args
@@ -417,7 +419,11 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
     // Declare err
     innerBody += 'var err error\n';
+
+    let memberIdx = -1;
+    const memberCount = memberIOs.length;
     for (const memberIO of memberIOs) {
+      memberIdx++;
       const mActionIO = memberIO.actionIO;
       if (lastInsertedMember === memberIO) {
         innerBody += `${mActionIO.returnValues.list[0].name}, `;
@@ -435,9 +441,12 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       // If this is a temp member (created inside transaction),
       // then we also need to generate the member func body code.
       if (memberIO.isTemp) {
-        const methodCode = this.handleActionIO(memberIO.actionIO);
+        const methodCode = this.handleActionIO(memberIO.actionIO, true);
         // Put func code into head
         headCode += methodCode;
+        if (memberIdx !== memberCount - 1) {
+          headCode += '\n';
+        }
       }
 
       innerBody += `(tx, ${queryParamsCode})`;

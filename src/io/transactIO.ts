@@ -12,7 +12,7 @@ export class TransactMemberIO {
   constructor(
     public actionIO: ActionIO,
     public callPath: string,
-    public isTemp: boolean, // True if created inside dd.transact
+    public isTemp: boolean,
   ) {}
 }
 
@@ -46,23 +46,13 @@ class TransactIOProcessor {
     if (!outerActionName || !outerActionTable) {
       throw new Error('Action not initialized');
     }
-    const memberFuncPrefix = utils.lowerFirstChar(outerActionName);
     const memberIOs = members.map((m, idx) => {
       const mAction = m.action;
-      let isTemp = false;
-      // Initialize action
-      if (!mAction.__name) {
-        // For temporary actions, we need to initialize them first
-        dd.initializeAction(
-          mAction,
-          outerActionTable,
-          `${memberFuncPrefix}Child${idx}`,
-        );
-        isTemp = true;
+      if (!mAction.__table || !mAction.__name) {
+        throw new Error('Unexpected error, member action is not initialized');
       }
-      // These properties are no longer null as member action is now initialized
-      const memberActionTable = mAction.__table as dd.Table;
-      const memberActionName = mAction.__name as string;
+      const memberActionTable = mAction.__table;
+      const memberActionName = mAction.__name;
 
       // Call actionToIO after initialization
       const io = actionToIO(
@@ -75,7 +65,7 @@ class TransactIOProcessor {
         action.__table === mAction.__table ? null : memberActionTable.__name,
         memberActionName,
       );
-      const memberIO = new TransactMemberIO(io, callPath, isTemp);
+      const memberIO = new TransactMemberIO(io, callPath, m.isTemp);
       if (
         mAction.actionType === dd.ActionType.insert &&
         (memberIO.actionIO as InsertIO).fetchInsertedID
