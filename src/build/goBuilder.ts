@@ -457,7 +457,11 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         }
       }
 
-      innerBody += `(${queryParamsCode ? 'tx, ' : ''}${queryParamsCode})`;
+      innerBody += '(tx';
+      if (queryParamsCode) {
+        innerBody += `, ${queryParamsCode}`;
+      }
+      innerBody += ')\n';
       innerBody += `\nif err != nil {\n\treturn err\n}\n`;
     }
     innerBody += 'return nil\n';
