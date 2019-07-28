@@ -25,7 +25,12 @@ func (da *TableTypePost) insertChild2(queryable dbx.Queryable, id uint64, title 
 }
 
 func (da *TableTypePost) insertChild3(queryable dbx.Queryable, id uint64) error {
-	return Post.InsertChild3(queryable, id, TITLE)
+	result, err := queryable.Exec("UPDATE `post` SET `title` = ? WHERE `id` = ?", "TITLE", id)
+	return dbx.CheckOneRowAffectedWithError(result, err)
+}
+
+func (da *TableTypePost) insertChild4(queryable dbx.Queryable) (uint64, error) {
+	return da.InsertCore(queryable, "abc")
 }
 
 // Insert ...
@@ -33,7 +38,7 @@ func (da *TableTypePost) Insert(db *sql.DB, id uint64, title string) (uint64, er
 	var insertedID uint64
 	txErr := dbx.Transact(db, func(tx *sql.Tx) error {
 		var err error
-		err = da.InsertChild0(tx, id)
+		err = da.insertChild0(tx, id)
 		if err != nil {
 			return err
 		}
@@ -41,11 +46,15 @@ func (da *TableTypePost) Insert(db *sql.DB, id uint64, title string) (uint64, er
 		if err != nil {
 			return err
 		}
-		err = da.InsertChild2(tx, id, title)
+		err = da.insertChild2(tx, id, title)
 		if err != nil {
 			return err
 		}
-		err = da.InsertChild3(tx, id)
+		err = da.insertChild3(tx, id)
+		if err != nil {
+			return err
+		}
+		_, err = da.insertChild4(tx)
 		if err != nil {
 			return err
 		}

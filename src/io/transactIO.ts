@@ -64,6 +64,7 @@ class TransactIOProcessor {
       const callPath = utils.actionCallPath(
         action.__table === mAction.__table ? null : memberActionTable.__name,
         memberActionName,
+        m.isTemp ? true : false, // Temp member func is generated as private member
       );
       const memberIO = new TransactMemberIO(io, callPath, m.isTemp);
       if (

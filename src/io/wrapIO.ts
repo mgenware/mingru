@@ -11,7 +11,6 @@ import * as defs from '../defs';
 export class WrapIO extends ActionIO {
   constructor(
     public action: dd.WrappedAction,
-    public innerIO: ActionIO,
     funcArgs: VarList,
     execArgs: VarList,
     returnValues: VarList,
@@ -28,14 +27,21 @@ class WrapIOProcessor {
     throwIfFalsy(dialect, 'dialect');
   }
 
-  convert(): WrapIO {
+  convert(): ActionIO {
     const { action, dialect } = this;
     const innerAction = action.action;
+    if (!action.__table || !action.__name) {
+      throw new Error('Action not initialized');
+    }
     const innerIO = actionToIO(
       innerAction,
       dialect,
       `WrappedAction "${action.__name}"`,
     );
+    const innerActionTable = innerAction.__table;
+    if (!innerActionTable) {
+      throw new Error('innerAction not initialized');
+    }
 
     const { args } = action;
     // Throw on non-existing argument names
@@ -61,45 +67,49 @@ class WrapIOProcessor {
         funcArgs.add(v);
       }
     }
-    // execArgs
-    const execArgs = new VarList(
-      `Exec args of action "${action.__name}"`,
-      true,
+
+    // For temp actions, inner and outer actions are merged into one
+    //   dd.update().wrap(args) -> dd.update(args)
+    // For non-temp actions:
+    //   this.t.wrap(args) -> inner: this.t, outer: this.t(args)
+    const funcPath = utils.actionCallPath(
+      innerActionTable === action.__table ? null : innerActionTable.__name,
+      innerAction.__name || action.__name,
     );
-    // Pass the queryable param
-    for (const v of innerFuncArgs.distinctList) {
-      if (args[v.name]) {
-        // Replace the variable with a value
-        execArgs.add(VarInfo.withValue(v, args[v.name] as string));
-      } else {
-        execArgs.add(v);
+    let execArgs: VarList;
+    if (action.isTemp) {
+      // We can change innerIO in-place as no other place is using it
+      innerIO.funcArgs = funcArgs;
+      for (const v of innerFuncArgs.distinctList) {
+        if (args[v.name]) {
+          // Replace the variable with a value
+          v.value = args[v.name] as string;
+        }
       }
-    }
-    const innerActionTable = innerAction.__table;
-    if (!innerActionTable) {
-      throw new Error('innerAction not initialized');
-    }
-    let funcPath: string | null = null;
-    // funcPath only works when inner action is a named action
-    if (innerAction.__name) {
-      funcPath = utils.actionCallPath(
-        innerAction === action ? null : innerActionTable.__name,
-        innerAction.__name,
+      return innerIO;
+    } else {
+      execArgs = new VarList(`Exec args of action "${action.__name}"`, true);
+      // Pass the queryable param
+      for (const v of innerFuncArgs.distinctList) {
+        if (args[v.name]) {
+          // Replace the variable with a value
+          execArgs.add(VarInfo.withValue(v, args[v.name] as string));
+        } else {
+          execArgs.add(v);
+        }
+      }
+      return new WrapIO(
+        action,
+        funcArgs,
+        execArgs,
+        innerIO.returnValues,
+        funcPath,
       );
     }
-
-    return new WrapIO(
-      action,
-      innerIO,
-      funcArgs,
-      execArgs,
-      innerIO.returnValues,
-      funcPath,
-    );
   }
 }
 
-export function wrapIO(action: dd.Action, dialect: Dialect): WrapIO {
+export function wrapIO(action: dd.Action, dialect: Dialect): ActionIO {
   const pro = new WrapIOProcessor(action as dd.WrappedAction, dialect);
   return pro.convert();
 }

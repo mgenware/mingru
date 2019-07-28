@@ -73,7 +73,7 @@ export default class GoBuilder {
     logger.debug(`Building action "${io.action.__name}"`);
 
     // Prepare variables
-    const funcName = pri ? utils.lowerFirstChar(io.funcName) : io.funcName;
+    const funcName = pri ? utils.lowercaseFirstChar(io.funcName) : io.funcName;
     const funcArgs = io.funcArgs.distinctList;
     const returnValues = io.returnValues.list;
     const { className: tableClassName } = this.taIO;
@@ -229,7 +229,9 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       resultTypeDef = go.struct(originalResultType, selectedFields);
     }
 
-    const queryParamsCode = io.execArgs.list.map(p => `, ${p.name}`).join('');
+    const queryParamsCode = io.execArgs.list
+      .map(p => `, ${p.valueOrName}`)
+      .join('');
     let sqlSource = io.sql;
     if (hasLimit) {
       sqlSource += ' LIMIT ? OFFSET ?';
@@ -336,7 +338,9 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const { action } = io;
     let code = '';
 
-    const queryParamsCode = io.execArgs.list.map(p => `, ${p.name}`).join('');
+    const queryParamsCode = io.execArgs.list
+      .map(p => `, ${p.valueOrName}`)
+      .join('');
     const sqlLiteral = go.makeStringLiteral(io.sql);
     code += `${defs.resultVarName}, err := ${
       defs.queryableParam
@@ -359,7 +363,9 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const { fetchInsertedID } = io;
     let code = '';
 
-    const queryParamsCode = io.execArgs.list.map(p => `, ${p.name}`).join('');
+    const queryParamsCode = io.execArgs.list
+      .map(p => `, ${p.valueOrName}`)
+      .join('');
     const sqlLiteral = go.makeStringLiteral(io.sql);
     code += `${fetchInsertedID ? 'result' : '_'}, err := ${
       defs.queryableParam
@@ -381,7 +387,9 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const { action } = io;
     let code = '';
 
-    const queryParamsCode = io.execArgs.list.map(p => `, ${p.name}`).join('');
+    const queryParamsCode = io.execArgs.list
+      .map(p => `, ${p.valueOrName}`)
+      .join('');
     const sqlLiteral = go.makeStringLiteral(io.sql);
     code += `${defs.resultVarName}, err := ${
       defs.queryableParam
@@ -449,7 +457,7 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         }
       }
 
-      innerBody += `(tx, ${queryParamsCode})`;
+      innerBody += `(${queryParamsCode ? 'tx, ' : ''}${queryParamsCode})`;
       innerBody += `\nif err != nil {\n\treturn err\n}\n`;
     }
     innerBody += 'return nil\n';

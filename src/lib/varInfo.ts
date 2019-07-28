@@ -43,20 +43,12 @@ export class VarInfo {
     return new VarInfo(v.name, v.type, v.originalName, value);
   }
 
-  private _value: string | undefined;
-
   constructor(
     public name: string,
     public type: TypeInfo,
     public originalName?: string, // e.g. name: []*Person, originalName: Person
-    value?: string,
-  ) {
-    this._value = value;
-  }
-
-  get value(): string | undefined {
-    return this._value;
-  }
+    public value?: string,
+  ) {}
 
   get valueOrName(): string {
     return this.value || this.name;

@@ -92,7 +92,8 @@ test('Temp member actions', async () => {
         .updateOne()
         .setInputs()
         .byID()
-        .wrap({ title: 'TITLE' }),
+        .wrap({ title: '"TITLE"' }),
+      this.insertCore.wrap({ title: '"abc"' }),
     );
   }
   const postTA = dd.ta(post, PostTA);

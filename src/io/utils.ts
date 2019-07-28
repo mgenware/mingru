@@ -15,16 +15,20 @@ export function tablePascalName(tableName: string): string {
 export function actionCallPath(
   tableName: string | null,
   actionName: string,
+  pri?: boolean,
 ): string {
+  const funcName = actionPascalName(actionName);
   const resolvedTableName = tableName ? tablePascalName(tableName) : 'da';
-  return resolvedTableName + '.' + actionPascalName(actionName);
+  return (
+    resolvedTableName + '.' + (pri ? lowercaseFirstChar(funcName) : funcName)
+  );
 }
 
 export function paginateCoreFuncName(name: string): string {
   return `${name}Core`;
 }
 
-export function lowerFirstChar(s: string): string {
+export function lowercaseFirstChar(s: string): string {
   if (!s) {
     return s;
   }

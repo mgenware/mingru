@@ -2,6 +2,7 @@ import * as mr from '../../';
 import * as dd from 'dd-models';
 import user from '../models/user';
 import post from '../models/post';
+import { WrapIO } from '../../';
 
 const dialect = new mr.MySQL();
 
@@ -29,24 +30,18 @@ test('WrapIO', () => {
 });
 
 test('getInputs (wrapSelf and innerIO)', () => {
-  const io = mr.wrapIO(wrapSelf.d, dialect);
+  const io = mr.wrapIO(wrapSelf.d, dialect) as WrapIO;
   expect(io.funcArgs.toString()).toBe(
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, urlName: string, followerCount: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, followerCount: *string}',
   );
-  expect(io.innerIO.funcArgs.toString()).toBe(
-    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, urlName: string, sig: *string, followerCount: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, sig: *string, followerCount: *string}',
-  );
   expect(io.execArgs.toString()).toBe(
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, sig: *string="haha", followerCount: *string',
-  );
-  expect(io.innerIO.execArgs.toString()).toBe(
-    'urlName: string, sig: *string, followerCount: *string, urlName: string, id: uint64, urlName: string {urlName: string, sig: *string, followerCount: *string, id: uint64}',
   );
   expect(io.funcPath).toBe('da.S');
 });
 
 test('getInputs (wrapOther)', () => {
-  const io = mr.wrapIO(wrapOther.standard, dialect);
+  const io = mr.wrapIO(wrapOther.standard, dialect) as WrapIO;
   expect(io.funcArgs.toString()).toBe(
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, urlName: string, sig: *string, followerCount: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, sig: *string, followerCount: *string}',
   );
@@ -57,7 +52,7 @@ test('getInputs (wrapOther)', () => {
 });
 
 test('getInputs (wrapOther, nested)', () => {
-  const io = mr.wrapIO(wrapOther.nested, dialect);
+  const io = mr.wrapIO(wrapOther.nested, dialect) as WrapIO;
   expect(io.funcArgs.toString()).toBe(
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, urlName: string, followerCount: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, followerCount: *string}',
   );
