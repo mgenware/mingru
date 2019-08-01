@@ -41,7 +41,8 @@
     "jest": "^24.8.0",
     "tempy": "^0.3.0",
     "tslint": "^5.18.0",
-    "typescript": "^3.5.3"
+    "typescript": "^3.5.3",
+    "dd-models": "^0.20.0"
   },
   "dependencies": {
     "chalk": "^2.4.2",
@@ -50,8 +51,5 @@
     "sql-escape-string": "^1.1.0",
     "throw-if-arg-empty": "^2.0.2",
     "to-type-string": "^1.0.1"
-  },
-  "peerDependencies": {
-    "dd-models": "^0.20.0"
   }
 }
