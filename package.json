@@ -42,7 +42,7 @@
     "tempy": "^0.3.0",
     "tslint": "^5.18.0",
     "typescript": "^3.5.3",
-    "dd-models": "^0.20.0"
+    "dd-models": "^0.20.1"
   },
   "dependencies": {
     "chalk": "^2.4.2",
