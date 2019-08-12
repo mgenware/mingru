@@ -74,6 +74,7 @@ export default class GoBuilder {
 
     // Prepare variables
     const funcName = pri ? utils.lowercaseFirstChar(io.funcName) : io.funcName;
+    // Use funcArgs.distinctList cuz duplicate vars are not allowed
     const funcArgs = io.funcArgs.distinctList;
     const returnValues = io.returnValues.list;
     const { className: tableClassName } = this.taIO;
@@ -86,11 +87,13 @@ export default class GoBuilder {
     code += `func (da *${tableClassName}) ${funcName}`;
 
     // Build func params
-    // Use funcArgs.distinctList as duplicate var defs are not allowed in func args
-    this.scanImports(funcArgs);
-    const funcParamsCode = funcArgs
+    // allFuncArgs = original func args + arg stubs
+    const allFuncArgs = [...funcArgs, ...io.funcStubs];
+    this.scanImports(allFuncArgs);
+    const funcParamsCode = allFuncArgs
       .map(p => `${p.name} ${p.type.typeName}`)
       .join(', ');
+    // Wrap all params with parentheses
     code += `(${funcParamsCode})`;
 
     // Build return values

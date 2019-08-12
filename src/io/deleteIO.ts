@@ -10,6 +10,7 @@ import * as defs from '../defs';
 
 export class DeleteIO extends ActionIO {
   constructor(
+    dialect: Dialect,
     public action: dd.DeleteAction,
     public sql: string,
     public where: SQLIO | null,
@@ -17,7 +18,7 @@ export class DeleteIO extends ActionIO {
     execArgs: VarList,
     returnValues: VarList,
   ) {
-    super(action, funcArgs, execArgs, returnValues);
+    super(dialect, action, funcArgs, execArgs, returnValues);
     throwIfFalsy(action, 'action');
     throwIfFalsy(sql, 'sql');
   }
@@ -81,7 +82,15 @@ class DeleteIOProcessor {
       );
     }
 
-    return new DeleteIO(action, sql, whereIO, funcArgs, execArgs, returnValues);
+    return new DeleteIO(
+      dialect,
+      action,
+      sql,
+      whereIO,
+      funcArgs,
+      execArgs,
+      returnValues,
+    );
   }
 
   private handleFrom(table: dd.Table): string {

@@ -2,11 +2,15 @@ import * as utils from './utils';
 import * as dd from 'dd-models';
 import VarList from '../lib/varList';
 import { throwIfFalsy } from 'throw-if-arg-empty';
+import VarInfo from '../lib/varInfo';
+import Dialect from '../dialect';
 
 export class ActionIO {
   funcName: string = '';
+  funcStubs: VarInfo[];
 
   constructor(
+    public dialect: Dialect,
     public action: dd.Action,
     public funcArgs: VarList,
     public execArgs: VarList,
@@ -26,5 +30,7 @@ export class ActionIO {
     if (actionName) {
       this.funcName = utils.actionPascalName(actionName);
     }
+
+    this.funcStubs = action.__argStubs.map(v => VarInfo.fromSQLVar(v, dialect));
   }
 }

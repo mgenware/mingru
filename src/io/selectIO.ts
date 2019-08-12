@@ -71,6 +71,7 @@ export const SelectedResultKey = 'result';
 
 export class SelectIO extends ActionIO {
   constructor(
+    dialect: Dialect,
     public action: dd.SelectAction,
     public sql: string,
     public cols: SelectedColumnIO[],
@@ -79,7 +80,7 @@ export class SelectIO extends ActionIO {
     execArgs: VarList,
     returnValues: VarList,
   ) {
-    super(action, funcArgs, execArgs, returnValues);
+    super(dialect, action, funcArgs, execArgs, returnValues);
     throwIfFalsy(action, 'action');
     throwIfFalsy(sql, 'sql');
     throwIfFalsy(cols, 'cols');
@@ -262,6 +263,7 @@ export class SelectIOProcessor {
     }
 
     return new SelectIO(
+      this.dialect,
       this.action,
       sql,
       colIOs,

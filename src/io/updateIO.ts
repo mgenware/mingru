@@ -11,6 +11,7 @@ import * as defs from '../defs';
 
 export class UpdateIO extends ActionIO {
   constructor(
+    dialect: Dialect,
     public action: dd.UpdateAction,
     public sql: string,
     public setters: SetterIO[],
@@ -20,7 +21,7 @@ export class UpdateIO extends ActionIO {
     returnValues: VarList,
     public setterArgs: VarList,
   ) {
-    super(action, funcArgs, execArgs, returnValues);
+    super(dialect, action, funcArgs, execArgs, returnValues);
     throwIfFalsy(action, 'action');
     throwIfFalsy(sql, 'sql');
     throwIfFalsy(setters, 'setters');
@@ -97,6 +98,7 @@ class UpdateIOProcessor {
     }
 
     return new UpdateIO(
+      dialect,
       action,
       sql,
       setterIOs,

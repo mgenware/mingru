@@ -250,3 +250,16 @@ test('WHERE, inputs, joins', async () => {
   const ta = dd.ta(cmt, CmtTA);
   await testBuildAsync(ta, 'select/whereInputsJoins');
 });
+
+test('Argument stubs', async () => {
+  class PostTA extends dd.TA {
+    selectT = dd
+      .select(post.id, post.title)
+      .argStubs(
+        new dd.SQLVariable('int', 'id1'),
+        new dd.SQLVariable('int', 'id2'),
+      );
+  }
+  const ta = dd.ta(post, PostTA);
+  await testBuildAsync(ta, 'select/argStubs');
+});

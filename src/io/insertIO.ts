@@ -11,6 +11,7 @@ export class InsertIO extends ActionIO {
   returnMember: ActionIO | undefined;
 
   constructor(
+    dialect: Dialect,
     public action: dd.InsertAction,
     public sql: string,
     public setters: SetterIO[],
@@ -19,7 +20,7 @@ export class InsertIO extends ActionIO {
     execArgs: VarList,
     returnValues: VarList,
   ) {
-    super(action, funcArgs, execArgs, returnValues);
+    super(dialect, action, funcArgs, execArgs, returnValues);
     throwIfFalsy(action, 'action');
     throwIfFalsy(sql, 'sql');
   }
@@ -71,6 +72,7 @@ export class InsertIOProcessor {
     }
 
     return new InsertIO(
+      dialect,
       action,
       sql,
       setters,

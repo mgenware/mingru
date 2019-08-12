@@ -20,13 +20,14 @@ export class TransactIO extends ActionIO {
   lastInsertedMember?: TransactMemberIO;
 
   constructor(
+    dialect: Dialect,
     public action: dd.TransactAction,
     public memberIOs: TransactMemberIO[],
     funcArgs: VarList,
     execArgs: VarList,
     returnValues: VarList,
   ) {
-    super(action, funcArgs, execArgs, returnValues);
+    super(dialect, action, funcArgs, execArgs, returnValues);
     throwIfFalsy(action, 'action');
   }
 }
@@ -104,6 +105,7 @@ class TransactIOProcessor {
     }
 
     const result = new TransactIO(
+      dialect,
       action,
       memberIOs,
       funcArgs,

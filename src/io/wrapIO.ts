@@ -10,13 +10,14 @@ import * as defs from '../defs';
 
 export class WrapIO extends ActionIO {
   constructor(
+    dialect: Dialect,
     public action: dd.WrappedAction,
     funcArgs: VarList,
     execArgs: VarList,
     returnValues: VarList,
     public funcPath: string | null,
   ) {
-    super(action, funcArgs, execArgs, returnValues);
+    super(dialect, action, funcArgs, execArgs, returnValues);
     throwIfFalsy(action, 'action');
   }
 }
@@ -99,6 +100,7 @@ class WrapIOProcessor {
         }
       }
       return new WrapIO(
+        dialect,
         action,
         funcArgs,
         execArgs,
