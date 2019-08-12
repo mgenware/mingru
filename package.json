@@ -1,6 +1,6 @@
 {
   "name": "mingru",
-  "version": "0.13.0",
+  "version": "0.13.1",
   "description": "SQL Generator for dd-models",
   "main": "dist/main.js",
   "types": "dist/main.d.ts",
@@ -37,12 +37,12 @@
     "@types/glob": "^7.1.1",
     "@types/jest": "^24.0.15",
     "@types/node": "^12.6.6",
+    "dd-models": "^0.20.1",
     "del-cli": "^2.0.0",
     "jest": "^24.8.0",
     "tempy": "^0.3.0",
     "tslint": "^5.18.0",
-    "typescript": "^3.5.3",
-    "dd-models": "^0.20.1"
+    "typescript": "^3.5.3"
   },
   "dependencies": {
     "chalk": "^2.4.2",
