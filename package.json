@@ -37,7 +37,7 @@
     "@types/glob": "^7.1.1",
     "@types/jest": "^24.0.15",
     "@types/node": "^12.6.6",
-    "dd-models": "^0.20.1",
+    "dd-models": "^0.21.0",
     "del-cli": "^2.0.0",
     "jest": "^24.8.0",
     "tempy": "^0.3.0",
