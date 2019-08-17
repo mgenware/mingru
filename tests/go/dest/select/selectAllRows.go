@@ -34,7 +34,7 @@ type PostTableSelectTResult struct {
 
 // SelectT ...
 func (da *TableTypePost) SelectT(queryable dbx.Queryable) ([]*PostTableSelectTResult, error) {
-	rows, err := queryable.Query("SELECT `id`, `title`, `content`, `user_id`, `reviewer_id`, `cmt_c`, `datetime`, `date`, `time`, `n_datetime`, `n_date`, `n_time`, `my_user_id` FROM `post`")
+	rows, err := queryable.Query("SELECT `id`, `title`, `content`, `user_id`, `reviewer_id`, `cmt_c`, `datetime`, `date`, `time`, `n_datetime`, `n_date`, `n_time`, `my_user_id` FROM `post` ORDER BY `id`")
 	if err != nil {
 		return nil, err
 	}

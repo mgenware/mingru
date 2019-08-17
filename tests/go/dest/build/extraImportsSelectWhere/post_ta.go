@@ -23,7 +23,7 @@ type PostTableSelectTimesResult struct {
 
 // SelectTimes ...
 func (da *TableTypePost) SelectTimes(queryable dbx.Queryable, nDatetime *time.Time, nDate *time.Time) ([]*PostTableSelectTimesResult, error) {
-	rows, err := queryable.Query("SELECT `datetime`, `date` FROM `post` WHERE `n_datetime` = ? OR `n_date` = ?", nDatetime, nDate)
+	rows, err := queryable.Query("SELECT `datetime`, `date` FROM `post` WHERE `n_datetime` = ? OR `n_date` = ? ORDER BY `id`", nDatetime, nDate)
 	if err != nil {
 		return nil, err
 	}

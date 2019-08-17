@@ -21,7 +21,7 @@ type PostTableSelectTResult struct {
 
 // SelectT ...
 func (da *TableTypePost) SelectT(queryable dbx.Queryable, id uint64) ([]*PostTableSelectTResult, error) {
-	rows, err := queryable.Query("SELECT `id`, `title` FROM `post` WHERE `id` = ?", id)
+	rows, err := queryable.Query("SELECT `id`, `title` FROM `post` WHERE `id` = ? ORDER BY `id`", id)
 	if err != nil {
 		return nil, err
 	}

@@ -23,7 +23,7 @@ test('select, all rows', async () => {
 
 test('selectRows', async () => {
   class PostTA extends dd.TA {
-    selectT = dd.selectRows(post.id, post.title);
+    selectT = dd.selectRows(post.id, post.title).orderBy(post.id);
   }
   const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'select/selectRows');
@@ -31,7 +31,7 @@ test('selectRows', async () => {
 
 test('selectRows', async () => {
   class PostTA extends dd.TA {
-    selectT = dd.selectRows();
+    selectT = dd.selectRows().orderBy(post.id);
   }
   const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'select/selectAllRows');
@@ -59,7 +59,8 @@ test('selectRows with WHERE', async () => {
   class PostTA extends dd.TA {
     selectT = dd
       .selectRows(post.id, post.title)
-      .where(dd.sql`${post.id} = ${dd.input(post.id)}`);
+      .where(dd.sql`${post.id} = ${dd.input(post.id)}`)
+      .orderBy(post.id);
   }
   const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'select/selectRowsWhere');
@@ -211,7 +212,10 @@ test('Custom DB names', async () => {
 
 test('selectRows, paginate', async () => {
   class PostTA extends dd.TA {
-    selectT = dd.selectRows(post.id, post.title).limit();
+    selectT = dd
+      .selectRows(post.id, post.title)
+      .limit()
+      .orderBy(post.id);
   }
   const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'select/selectRowsPaginate');
@@ -222,7 +226,8 @@ test('selectRows, paginate, where', async () => {
     selectT = dd
       .selectRows(post.id, post.title)
       .byID()
-      .limit();
+      .limit()
+      .orderBy(post.id);
   }
   const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'select/selectRowsPaginateWithWhere');
@@ -230,7 +235,10 @@ test('selectRows, paginate, where', async () => {
 
 test('selectPage', async () => {
   class PostTA extends dd.TA {
-    selectT = dd.selectPage(post.id, post.title).byID();
+    selectT = dd
+      .selectPage(post.id, post.title)
+      .byID()
+      .orderBy(post.id);
   }
   const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'select/selectPage');
