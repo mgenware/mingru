@@ -24,6 +24,18 @@ test('PK', async () => {
   await testBuildAsync(t, 'pk/user');
 });
 
+test('Multiple PKs', async () => {
+  class Post extends dd.Table {
+    a = dd.pk();
+    b = dd.pk(dd.char(4));
+    user1 = dd.pk(user.id);
+    user2 = dd.pk(user.id);
+    d = dd.uBigInt(12);
+  }
+  const t = dd.table(Post);
+  await testBuildAsync(t, 'multiplePKs/post');
+});
+
 test('FK', async () => {
   await testBuildAsync(user, 'fk/user');
   await testBuildAsync(post, 'fk/post');
