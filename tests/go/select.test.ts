@@ -23,7 +23,7 @@ test('select, all rows', async () => {
 
 test('selectRows', async () => {
   class PostTA extends dd.TA {
-    selectT = dd.selectRows(post.id, post.title).orderBy(post.id);
+    selectT = dd.selectRows(post.id, post.title).orderByAsc(post.id);
   }
   const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'select/selectRows');
@@ -31,7 +31,7 @@ test('selectRows', async () => {
 
 test('selectRows', async () => {
   class PostTA extends dd.TA {
-    selectT = dd.selectRows().orderBy(post.id);
+    selectT = dd.selectRows().orderByAsc(post.id);
   }
   const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'select/selectAllRows');
@@ -60,7 +60,7 @@ test('selectRows with WHERE', async () => {
     selectT = dd
       .selectRows(post.id, post.title)
       .where(dd.sql`${post.id} = ${dd.input(post.id)}`)
-      .orderBy(post.id);
+      .orderByAsc(post.id);
   }
   const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'select/selectRowsWhere');
@@ -72,8 +72,8 @@ test('selectRows, WHERE, orderBy', async () => {
     selectT = dd
       .selectRows(post.id, cc, post.title)
       .where(dd.sql`${post.id} = ${post.id.toInput()} ${post.id.toInput()}`)
-      .orderBy(post.title)
-      .orderBy(cc)
+      .orderByAsc(post.title)
+      .orderByAsc(cc)
       .orderByDesc(post.title);
   }
   const ta = dd.ta(post, PostTA);
@@ -215,7 +215,7 @@ test('selectRows, paginate', async () => {
     selectT = dd
       .selectRows(post.id, post.title)
       .limit()
-      .orderBy(post.id);
+      .orderByAsc(post.id);
   }
   const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'select/selectRowsPaginate');
@@ -227,7 +227,7 @@ test('selectRows, paginate, where', async () => {
       .selectRows(post.id, post.title)
       .byID()
       .limit()
-      .orderBy(post.id);
+      .orderByAsc(post.id);
   }
   const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'select/selectRowsPaginateWithWhere');
@@ -238,7 +238,7 @@ test('selectPage', async () => {
     selectT = dd
       .selectPage(post.id, post.title)
       .byID()
-      .orderBy(post.id);
+      .orderByAsc(post.id);
   }
   const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'select/selectPage');

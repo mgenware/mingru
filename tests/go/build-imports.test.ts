@@ -4,10 +4,10 @@ import { testBuildToDirAsync } from './common';
 
 test('Select', async () => {
   class PostTA extends dd.TA {
-    selectTimes = dd.selectRows(post.datetime, post.date).orderBy(post.id);
+    selectTimes = dd.selectRows(post.datetime, post.date).orderByAsc(post.id);
     selectNullableTimes = dd
       .selectRows(post.n_datetime, post.n_date)
-      .orderBy(post.id);
+      .orderByAsc(post.id);
   }
   const ta = dd.ta(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'extraImportsSelect');
@@ -22,7 +22,7 @@ test('Select (where)', async () => {
           post.n_date
         } = ${post.n_date.toInput()}`,
       )
-      .orderBy(post.id);
+      .orderByAsc(post.id);
   }
   const ta = dd.ta(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'extraImportsSelectWhere');
