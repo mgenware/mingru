@@ -2,10 +2,12 @@ import * as mr from '../../';
 import * as dd from 'dd-models';
 import post from '../models/post';
 import user from '../models/user';
+import * as assert from 'assert';
 
+const expect = assert.equal;
 const dialect = new mr.MySQL();
 
-test('Update', () => {
+it('Update', () => {
   class PostTA extends dd.TA {
     t = dd
       .updateSome()
@@ -18,18 +20,19 @@ test('Update', () => {
   const v = postTA.t;
   const io = mr.updateIO(v, dialect);
 
-  expect(io).toBeInstanceOf(mr.UpdateIO);
-  expect(io.sql).toBe(
+  assert.ok(io instanceof mr.UpdateIO);
+  expect(
+    io.sql,
     'UPDATE `post` SET `title` = "haha", `content` = ?, `cmt_c` = `cmt_c` + 1 WHERE `id` = ?',
   );
-  expect(io.setters.length).toBe(3);
-  expect(io.setters[0].col).toBe(post.title);
-  expect(io.setters[0].sql.sql.toString()).toBe('"haha"');
-  expect(io.setters[1].col).toBe(post.content);
-  expect(io.setters[2].col).toBe(post.cmtCount);
+  expect(io.setters.length, 3);
+  expect(io.setters[0].col, post.title);
+  expect(io.setters[0].sql.sql.toString(), '"haha"');
+  expect(io.setters[1].col, post.content);
+  expect(io.setters[2].col, post.cmtCount);
 });
 
-test('Update with where', () => {
+it('Update with where', () => {
   class PostTA extends dd.TA {
     t = dd
       .updateOne()
@@ -40,10 +43,10 @@ test('Update with where', () => {
   const v = postTA.t;
   const io = mr.updateIO(v, dialect);
 
-  expect(io.sql).toBe('UPDATE `post` SET `title` = "haha" WHERE `id` = 1');
+  expect(io.sql, 'UPDATE `post` SET `title` = "haha" WHERE `id` = 1');
 });
 
-test('getInputs', () => {
+it('getInputs', () => {
   class UserTA extends dd.TA {
     t = dd
       .updateSome()
@@ -57,16 +60,18 @@ test('getInputs', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.updateIO(v, new mr.MySQL());
-  expect(io.setterArgs.toString()).toBe('urlName: string, sig: *string');
-  expect(io.funcArgs.toString()).toBe(
+  expect(io.setterArgs.toString(), 'urlName: string, sig: *string');
+  expect(
+    io.funcArgs.toString(),
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, urlName: string, sig: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, sig: *string}',
   );
-  expect(io.execArgs.toString()).toBe(
+  expect(
+    io.execArgs.toString(),
     'urlName: string, sig: *string, urlName: string, id: uint64, urlName: string {urlName: string, sig: *string, id: uint64}',
   );
 });
 
-test('getReturns', () => {
+it('getReturns', () => {
   class UserTA extends dd.TA {
     t = dd
       .updateSome()
@@ -78,5 +83,5 @@ test('getReturns', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.updateIO(v, new mr.MySQL());
-  expect(io.returnValues.toString()).toEqual('rowsAffected: int');
+  assert.deepEqual(io.returnValues.toString(), 'rowsAffected: int');
 });

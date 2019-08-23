@@ -2,7 +2,7 @@ import * as dd from 'dd-models';
 import post from '../models/post';
 import { testBuildAsync } from './common';
 
-test('Escape string', async () => {
+it('Escape string', async () => {
   class PostTA extends dd.TA {
     selectT = dd
       .select(post.id, post.title)

@@ -4,7 +4,7 @@ import post from '../models/post';
 import postReply from '../models/postReply';
 import { testBuildToDirAsync } from './common';
 
-test('Single table', async () => {
+it('Single table', async () => {
   class PostTA extends dd.TA {
     selectPostTitle = dd.select(post.id, post.title);
     selectPostInfo = dd.select(
@@ -24,7 +24,7 @@ test('Single table', async () => {
   await testBuildToDirAsync([ta], ['post'], 'singleTable');
 });
 
-test('Multiple tables', async () => {
+it('Multiple tables', async () => {
   class UserTA extends dd.TA {
     selectProfile = dd.select(user.display_name, user.sig);
     updateProfile = dd.unsafeUpdateAll().setInputs(user.sig);
@@ -48,7 +48,7 @@ test('Multiple tables', async () => {
   await testBuildToDirAsync(actions, ['post', 'user'], 'multipleTables');
 });
 
-test('Custom package name', async () => {
+it('Custom package name', async () => {
   class PostTA extends dd.TA {
     selectPostTitle = dd.select(post.id, post.title);
   }
@@ -58,7 +58,7 @@ test('Custom package name', async () => {
   });
 });
 
-test('Table DBName', async () => {
+it('Table DBName', async () => {
   class PostRplTA extends dd.TA {
     insertPostReply = dd
       .unsafeInsertOne()
@@ -68,7 +68,7 @@ test('Table DBName', async () => {
   await testBuildToDirAsync([ta], ['post_reply'], 'tableName');
 });
 
-test('Multiple tables + CSQL', async () => {
+it('Multiple tables + CSQL', async () => {
   class UserTA extends dd.TA {
     selectProfile = dd.select(user.display_name, user.sig);
     updateProfile = dd.unsafeUpdateAll().setInputs(user.sig);

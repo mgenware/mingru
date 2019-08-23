@@ -3,7 +3,7 @@ import { testBuildAsync } from './common';
 import user from '../models/user';
 import post from '../models/post';
 
-test('Common (NULL, defaults)', async () => {
+it('Common (NULL, defaults)', async () => {
   class User extends dd.Table {
     a = dd.varChar(100);
     b = dd.varChar(100).nullable;
@@ -15,7 +15,7 @@ test('Common (NULL, defaults)', async () => {
   await testBuildAsync(t, 'common/user');
 });
 
-test('PK', async () => {
+it('PK', async () => {
   class User extends dd.Table {
     a = dd.pk();
     b = dd.uBigInt(12);
@@ -24,7 +24,7 @@ test('PK', async () => {
   await testBuildAsync(t, 'pk/user');
 });
 
-test('Multiple PKs', async () => {
+it('Multiple PKs', async () => {
   class Post extends dd.Table {
     a = dd.pk();
     b = dd.pk(dd.char(4));
@@ -36,12 +36,12 @@ test('Multiple PKs', async () => {
   await testBuildAsync(t, 'multiplePKs/post');
 });
 
-test('FK', async () => {
+it('FK', async () => {
   await testBuildAsync(user, 'fk/user');
   await testBuildAsync(post, 'fk/post');
 });
 
-test('noDefaultOnCSQL', async () => {
+it('noDefaultOnCSQL', async () => {
   class User extends dd.Table {
     a = dd.int(1);
     b = dd.int(1).noDefaultOnCSQL;
@@ -50,7 +50,7 @@ test('noDefaultOnCSQL', async () => {
   await testBuildAsync(t, 'noDefaultOnCSQL/user');
 });
 
-test('No SQL expr as default value', async () => {
+it('No SQL expr as default value', async () => {
   class User extends dd.Table {
     a = dd.int(1);
     b = dd.datetime(true);

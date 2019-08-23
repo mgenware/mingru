@@ -17,7 +17,7 @@
   "license": "MIT",
   "scripts": {
     "test": "yarn run clean && yarn run compile && yarn run lint && yarn run t",
-    "t": "jest",
+    "t": "mocha dist_tests/**/*.test.js",
     "build": "yarn test",
     "compile": "tsc -b tests",
     "dev": "yarn run clean && tsc -b tests -w",
@@ -28,18 +28,13 @@
   "engines": {
     "node": ">=8.6.0"
   },
-  "jest": {
-    "moduleFileExtensions": [
-      "js"
-    ]
-  },
   "devDependencies": {
     "@types/glob": "^7.1.1",
-    "@types/jest": "^24.0.15",
+    "@types/mocha": "^5.2.7",
     "@types/node": "^12.6.6",
     "dd-models": "^0.21.0",
     "del-cli": "^2.0.0",
-    "jest": "^24.8.0",
+    "mocha": "^6.2.0",
     "tempy": "^0.3.0",
     "tslint": "^5.18.0",
     "typescript": "^3.5.3"

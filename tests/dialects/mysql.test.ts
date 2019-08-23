@@ -1,34 +1,35 @@
 import * as mr from '../../';
 import * as dd from 'dd-models';
 import user from '../models/user';
+import * as assert from 'assert';
 
+const expect = assert.equal;
 const TimePkg = 'time';
-
 const dialect = new mr.MySQL();
 
 function testType(col: dd.Column, type: string, pkg?: string) {
   const info = dialect.colTypeToGoType(col.type);
-  expect(info.typeName).toBe(type);
-  expect(info.namespace || null).toBe(pkg || null);
+  expect(info.typeName, type);
+  expect(info.namespace || null, pkg || null);
 }
 
-test('encodeName', () => {
-  expect(dialect.encodeName('abc')).toBe('`abc`');
+it('encodeName', () => {
+  expect(dialect.encodeName('abc'), '`abc`');
 });
 
-test('encodeColumnName', () => {
-  expect(dialect.encodeColumnName(user.age)).toBe('`age`');
-  expect(dialect.encodeColumnName(user.follower_count)).toBe('`follower_c`');
+it('encodeColumnName', () => {
+  expect(dialect.encodeColumnName(user.age), '`age`');
+  expect(dialect.encodeColumnName(user.follower_count), '`follower_c`');
 });
 
-test('encodeTableName', () => {
+it('encodeTableName', () => {
   class Table extends dd.Table {}
   const t = dd.table(Table, 'haha');
-  expect(dialect.encodeTableName(user)).toBe('`user`');
-  expect(dialect.encodeTableName(t)).toBe('`haha`');
+  expect(dialect.encodeTableName(user), '`user`');
+  expect(dialect.encodeTableName(t), '`haha`');
 });
 
-test('DT', () => {
+it('DT', () => {
   const tests: Array<[dd.Column, string, unknown]> = [
     // PK
     [dd.pk(), 'uint64', null],
@@ -59,62 +60,63 @@ test('DT', () => {
   }
 });
 
-test('DT (not supported)', () => {
+it('DT (not supported)', () => {
   const props = new dd.ColumnType(['type1', 'type2']);
-  expect(() => dialect.colTypeToGoType(props)).toThrow('type2');
+  assert.throws(() => dialect.colTypeToGoType(props), 'type2');
 });
 
-test('as', () => {
-  expect(dialect.as('abc', 'def')).toBe('abc AS `def`');
+it('as', () => {
+  expect(dialect.as('abc', 'def'), 'abc AS `def`');
 });
 
-test('SQL calls', () => {
+it('SQL calls', () => {
   const t = dialect.sqlCall;
-  expect(t(dd.SQLCallType.dateNow)).toBe('CURDATE');
-  expect(t(dd.SQLCallType.timeNow)).toBe('CURTIME');
-  expect(t(dd.SQLCallType.datetimeNow)).toBe('NOW');
-  expect(t(dd.SQLCallType.count)).toBe('COUNT');
-  expect(t(dd.SQLCallType.coalesce)).toBe('COALESCE');
+  expect(t(dd.SQLCallType.dateNow), 'CURDATE');
+  expect(t(dd.SQLCallType.timeNow), 'CURTIME');
+  expect(t(dd.SQLCallType.datetimeNow), 'NOW');
+  expect(t(dd.SQLCallType.count), 'COUNT');
+  expect(t(dd.SQLCallType.coalesce), 'COALESCE');
 });
 
-test('objToSQL', () => {
+it('objToSQL', () => {
   // null
-  expect(dialect.objToSQL(null)).toBe('NULL');
+  expect(dialect.objToSQL(null), 'NULL');
   // number
-  expect(dialect.objToSQL(-32)).toBe('-32');
+  expect(dialect.objToSQL(-32), '-32');
   // boolean
-  expect(dialect.objToSQL(true)).toBe('1');
-  expect(dialect.objToSQL(false)).toBe('0');
+  expect(dialect.objToSQL(true), '1');
+  expect(dialect.objToSQL(false), '0');
   // string
-  expect(dialect.objToSQL('a 123 🛋')).toBe("'a 123 🛋'"); // tslint:disable-line
-  expect(dialect.objToSQL('')).toBe("''"); // tslint:disable-line
-  expect(dialect.objToSQL('\'"\\')).toBe("'''\"\\'"); // tslint:disable-line
+  expect(dialect.objToSQL('a 123 🛋'), "'a 123 🛋'"); // tslint:disable-line
+  expect(dialect.objToSQL(''), "''"); // tslint:disable-line
+  expect(dialect.objToSQL('\'"\\'), "'''\"\\'"); // tslint:disable-line
   // undefined
-  expect(() => dialect.objToSQL(undefined)).toThrow();
+  assert.throws(() => dialect.objToSQL(undefined));
   // Others
-  expect(() => dialect.objToSQL([])).toThrow();
+  assert.throws(() => dialect.objToSQL([]));
 });
 
-test('colToSQLType', () => {
+it('colToSQLType', () => {
   // Integers
-  expect(dialect.colToSQLType(dd.int())).toBe('INT NOT NULL');
-  expect(dialect.colToSQLType(dd.bigInt())).toBe('BIGINT NOT NULL');
-  expect(dialect.colToSQLType(dd.tinyInt())).toBe('TINYINT NOT NULL');
-  expect(dialect.colToSQLType(dd.smallInt())).toBe('SMALLINT NOT NULL');
-  expect(dialect.colToSQLType(dd.uInt())).toBe('INT UNSIGNED NOT NULL');
+  expect(dialect.colToSQLType(dd.int()), 'INT NOT NULL');
+  expect(dialect.colToSQLType(dd.bigInt()), 'BIGINT NOT NULL');
+  expect(dialect.colToSQLType(dd.tinyInt()), 'TINYINT NOT NULL');
+  expect(dialect.colToSQLType(dd.smallInt()), 'SMALLINT NOT NULL');
+  expect(dialect.colToSQLType(dd.uInt()), 'INT UNSIGNED NOT NULL');
   // Chars
-  expect(dialect.colToSQLType(dd.varChar(3))).toBe('VARCHAR(3) NOT NULL');
-  expect(dialect.colToSQLType(dd.char(3))).toBe('CHAR(3) NOT NULL');
-  expect(dialect.colToSQLType(dd.text())).toBe('TEXT NOT NULL');
+  expect(dialect.colToSQLType(dd.varChar(3)), 'VARCHAR(3) NOT NULL');
+  expect(dialect.colToSQLType(dd.char(3)), 'CHAR(3) NOT NULL');
+  expect(dialect.colToSQLType(dd.text()), 'TEXT NOT NULL');
   // DateTime
-  expect(dialect.colToSQLType(dd.date())).toBe('DATE NOT NULL');
-  expect(dialect.colToSQLType(dd.datetime())).toBe('DATETIME NOT NULL');
-  expect(dialect.colToSQLType(dd.time())).toBe('TIME NOT NULL');
+  expect(dialect.colToSQLType(dd.date()), 'DATE NOT NULL');
+  expect(dialect.colToSQLType(dd.datetime()), 'DATETIME NOT NULL');
+  expect(dialect.colToSQLType(dd.time()), 'TIME NOT NULL');
   // NULL
-  expect(dialect.colToSQLType(dd.int().nullable)).toBe('INT NULL DEFAULT NULL');
+  expect(dialect.colToSQLType(dd.int().nullable), 'INT NULL DEFAULT NULL');
   // Default value
-  expect(dialect.colToSQLType(dd.int(43).nullable)).toBe('INT NULL DEFAULT 43');
-  expect(dialect.colToSQLType(dd.varChar(23, 'oo').nullable)).toBe(
+  expect(dialect.colToSQLType(dd.int(43).nullable), 'INT NULL DEFAULT 43');
+  expect(
+    dialect.colToSQLType(dd.varChar(23, 'oo').nullable),
     "VARCHAR(23) NULL DEFAULT 'oo'",
   );
 });

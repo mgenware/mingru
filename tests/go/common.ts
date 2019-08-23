@@ -3,6 +3,7 @@ import * as mr from '../../';
 import * as dd from 'dd-models';
 import * as tempy from 'tempy';
 import * as mfs from 'm-fs';
+import * as assert from 'assert';
 
 const dialect = new mr.MySQL();
 const DestDataDir = 'tests/go/dest';
@@ -17,7 +18,7 @@ export async function testBuildAsync(ta: dd.TA, path: string) {
   const builder = new mr.GoBuilder(new mr.TAIO(ta, dialect));
   const actual = builder.build(true);
   if (path) {
-    expect(actual).toBe(content);
+    assert.equal(actual, content);
   }
   return builder;
 }
@@ -32,14 +33,14 @@ export async function testBuildFullAsync(ta: dd.TA, path: string) {
   const builder = new mr.GoBuilder(new mr.TAIO(ta, dialect));
   const actual = builder.build(true);
   if (path) {
-    expect(actual).toBe(content);
+    assert.equal(actual, content);
   }
 }
 
 export async function testFilesAsync(a: string, b: string) {
   const aContent = await mfs.readFileAsync(a, 'utf8');
   const bContent = await mfs.readFileAsync(b, 'utf8');
-  expect(aContent).toBe(bContent);
+  assert.equal(aContent, bContent);
 }
 
 export async function testBuildToDirAsync(

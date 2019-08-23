@@ -2,7 +2,7 @@ import * as dd from 'dd-models';
 import post from '../models/post';
 import { testBuildToDirAsync } from './common';
 
-test('Select', async () => {
+it('Select', async () => {
   class PostTA extends dd.TA {
     selectTimes = dd.selectRows(post.datetime, post.date).orderByAsc(post.id);
     selectNullableTimes = dd
@@ -13,7 +13,7 @@ test('Select', async () => {
   await testBuildToDirAsync([ta], ['post'], 'extraImportsSelect');
 });
 
-test('Select (where)', async () => {
+it('Select (where)', async () => {
   class PostTA extends dd.TA {
     selectTimes = dd
       .selectRows(post.datetime, post.date)
@@ -28,7 +28,7 @@ test('Select (where)', async () => {
   await testBuildToDirAsync([ta], ['post'], 'extraImportsSelectWhere');
 });
 
-test('Select field', async () => {
+it('Select field', async () => {
   class PostTA extends dd.TA {
     selectTime = dd.selectField(post.n_datetime);
   }
@@ -36,7 +36,7 @@ test('Select field', async () => {
   await testBuildToDirAsync([ta], ['post'], 'extraImportsSelectField');
 });
 
-test('Update', async () => {
+it('Update', async () => {
   class PostTA extends dd.TA {
     updateTimes = dd.unsafeUpdateAll().setInputs(post.datetime, post.date);
     updateNullableTimes = dd
@@ -47,7 +47,7 @@ test('Update', async () => {
   await testBuildToDirAsync([ta], ['post'], 'extraImportsUpdate');
 });
 
-test('Update (where)', async () => {
+it('Update (where)', async () => {
   class PostTA extends dd.TA {
     updateTimes = dd
       .updateSome()
@@ -62,7 +62,7 @@ test('Update (where)', async () => {
   await testBuildToDirAsync([ta], ['post'], 'extraImportsUpdateWhere');
 });
 
-test('Delete (where)', async () => {
+it('Delete (where)', async () => {
   class PostTA extends dd.TA {
     deleteTimes = dd
       .deleteOne()
@@ -76,7 +76,7 @@ test('Delete (where)', async () => {
   await testBuildToDirAsync([ta], ['post'], 'extraImportsDeleteWhere');
 });
 
-test('Insert', async () => {
+it('Insert', async () => {
   class PostTA extends dd.TA {
     insertTimes = dd
       .unsafeInsertOne()

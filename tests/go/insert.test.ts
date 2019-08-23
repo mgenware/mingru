@@ -3,7 +3,7 @@ import post from '../models/post';
 import cols from '../models/cols';
 import { testBuildAsync } from './common';
 
-test('insert', async () => {
+it('insert', async () => {
   class PostTA extends dd.TA {
     insertT = dd
       .insert()
@@ -14,7 +14,7 @@ test('insert', async () => {
   await testBuildAsync(ta, 'insert/insert');
 });
 
-test('unsafeInsert', async () => {
+it('unsafeInsert', async () => {
   class PostTA extends dd.TA {
     insertT = dd.unsafeInsert().setInputs(post.title, post.user_id);
   }
@@ -22,7 +22,7 @@ test('unsafeInsert', async () => {
   await testBuildAsync(ta, 'insert/unsafeInsert');
 });
 
-test('insertOne', async () => {
+it('insertOne', async () => {
   class Employee extends dd.Table {
     id = dd.pk(dd.int()).setDBName('emp_no');
     firstName = dd.varChar(50);
@@ -39,7 +39,7 @@ test('insertOne', async () => {
   await testBuildAsync(ta, 'insert/insertOne');
 });
 
-test('unsafeInsertOne', async () => {
+it('unsafeInsertOne', async () => {
   class PostTA extends dd.TA {
     insertT = dd.unsafeInsertOne().setInputs(post.title, post.user_id);
   }
@@ -47,7 +47,7 @@ test('unsafeInsertOne', async () => {
   await testBuildAsync(ta, 'insert/unsafeInsertOne');
 });
 
-test('Insert with non-input setters', async () => {
+it('Insert with non-input setters', async () => {
   class PostTA extends dd.TA {
     insertT = dd
       .unsafeInsert()
@@ -58,7 +58,7 @@ test('Insert with non-input setters', async () => {
   await testBuildAsync(ta, 'insert/insertWithNonInputSetters');
 });
 
-test('insertWithDefaults', async () => {
+it('insertWithDefaults', async () => {
   class ColsTA extends dd.TA {
     insertT = dd
       .insert()
@@ -69,7 +69,7 @@ test('insertWithDefaults', async () => {
   await testBuildAsync(ta, 'insert/insertWithDefaults');
 });
 
-test('Custom DB name', async () => {
+it('Custom DB name', async () => {
   class PostTA extends dd.TA {
     insertT = dd.unsafeInsert().setInputs(post.title, post.cmtCount);
   }
@@ -77,7 +77,7 @@ test('Custom DB name', async () => {
   await testBuildAsync(ta, 'insert/customDBName');
 });
 
-test('Set auto-increment as input', async () => {
+it('Set auto-increment as input', async () => {
   class Employee extends dd.Table {
     id = dd.pk(dd.int()).setDBName('emp_no');
     firstName = dd.varChar(50);

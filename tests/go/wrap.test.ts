@@ -3,7 +3,7 @@ import { testBuildAsync } from './common';
 import user from '../models/user';
 import post from '../models/post';
 
-test('Wrap', async () => {
+it('Wrap', async () => {
   class UserTA extends dd.TA {
     t = dd
       .updateOne()

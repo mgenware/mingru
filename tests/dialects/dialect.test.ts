@@ -1,19 +1,19 @@
 import * as mr from '../../';
 import * as dd from 'dd-models';
 import user from '../models/user';
+import * as assert from 'assert';
 
+const expect = assert.equal;
 const dialect = new mr.MySQL();
 
-test('inputPlaceholder', () => {
-  expect(dialect.inputPlaceholder(new dd.SQLVariable('Type', 'name'))).toBe(
-    '?',
-  );
+it('inputPlaceholder', () => {
+  expect(dialect.inputPlaceholder(new dd.SQLVariable('Type', 'name')), '?');
 });
 
-test('encodeColumnName', () => {
-  expect(dialect.encodeColumnName(user.age)).toBe('`age`');
+it('encodeColumnName', () => {
+  expect(dialect.encodeColumnName(user.age), '`age`');
 });
 
-test('encodeTableName', () => {
-  expect(dialect.encodeTableName(user)).toBe('`user`');
+it('encodeTableName', () => {
+  expect(dialect.encodeTableName(user), '`user`');
 });

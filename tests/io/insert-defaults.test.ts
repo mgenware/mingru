@@ -1,10 +1,11 @@
 import * as mr from '../../';
 import * as dd from 'dd-models';
 import cols from '../models/cols';
+import * as assert from 'assert';
 
 const dialect = new mr.MySQL();
 
-test('dtDefault', () => {
+it('dtDefault', () => {
   const { dt } = dd;
   const defaults: Array<[string, unknown]> = [
     [dt.bigInt, 0],
@@ -23,11 +24,11 @@ test('dtDefault', () => {
   ];
 
   for (const [type, def] of defaults) {
-    expect(mr.dtDefault(type)).toBe(def);
+    assert.equal(mr.dtDefault(type), def);
   }
 });
 
-test('insertWithDefaults', () => {
+it('insertWithDefaults', () => {
   class ColsTA extends dd.TA {
     insertT = dd
       .insert()
@@ -38,7 +39,8 @@ test('insertWithDefaults', () => {
   const v = ta.insertT;
   const io = mr.insertIO(v, dialect);
 
-  expect(io.sql).toBe(
+  assert.equal(
+    io.sql,
     "INSERT INTO `cols` (`fk`, `text`, `int`, `nullable`, `def_int`, `def_var_char`, `def_time`) VALUES (?, '', 0, NULL, -3, '一二', CURTIME())",
   );
 });

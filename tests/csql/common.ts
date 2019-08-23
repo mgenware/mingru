@@ -2,6 +2,7 @@ import * as nodepath from 'path';
 import * as mr from '../../';
 import * as dd from 'dd-models';
 import * as mfs from 'm-fs';
+import * as assert from 'assert';
 
 const dialect = new mr.MySQL();
 const DestDataDir = 'tests/csql/dest';
@@ -16,7 +17,7 @@ export async function testBuildAsync(table: dd.Table, path: string) {
   const builder = new mr.CSQLBuilder(table, dialect);
   const actual = builder.build(true);
   if (path) {
-    expect(actual).toBe(content);
+    assert.equal(actual, content);
   }
   return builder;
 }

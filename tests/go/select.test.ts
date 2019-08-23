@@ -4,8 +4,9 @@ import cmt from '../models/cmt';
 import rpl from '../models/postReply';
 import user from '../models/user';
 import { testBuildAsync } from './common';
+import * as assert from 'assert';
 
-test('select', async () => {
+it('select', async () => {
   class PostTA extends dd.TA {
     selectT = dd.select(post.id, post.title);
   }
@@ -13,7 +14,7 @@ test('select', async () => {
   await testBuildAsync(ta, 'select/select');
 });
 
-test('select, all rows', async () => {
+it('select, all rows', async () => {
   class PostTA extends dd.TA {
     selectT = dd.select();
   }
@@ -21,7 +22,7 @@ test('select, all rows', async () => {
   await testBuildAsync(ta, 'select/selectAll');
 });
 
-test('selectRows', async () => {
+it('selectRows', async () => {
   class PostTA extends dd.TA {
     selectT = dd.selectRows(post.id, post.title).orderByAsc(post.id);
   }
@@ -29,7 +30,7 @@ test('selectRows', async () => {
   await testBuildAsync(ta, 'select/selectRows');
 });
 
-test('selectRows', async () => {
+it('selectRows', async () => {
   class PostTA extends dd.TA {
     selectT = dd.selectRows().orderByAsc(post.id);
   }
@@ -37,7 +38,7 @@ test('selectRows', async () => {
   await testBuildAsync(ta, 'select/selectAllRows');
 });
 
-test('selectField', async () => {
+it('selectField', async () => {
   class PostTA extends dd.TA {
     selectT = dd.selectField(post.title);
   }
@@ -45,7 +46,7 @@ test('selectField', async () => {
   await testBuildAsync(ta, 'select/selectField');
 });
 
-test('WHERE', async () => {
+it('WHERE', async () => {
   class PostTA extends dd.TA {
     selectT = dd
       .select(post.id, post.title)
@@ -55,7 +56,7 @@ test('WHERE', async () => {
   await testBuildAsync(ta, 'select/where');
 });
 
-test('selectRows with WHERE', async () => {
+it('selectRows with WHERE', async () => {
   class PostTA extends dd.TA {
     selectT = dd
       .selectRows(post.id, post.title)
@@ -66,7 +67,7 @@ test('selectRows with WHERE', async () => {
   await testBuildAsync(ta, 'select/selectRowsWhere');
 });
 
-test('selectRows, WHERE, orderBy', async () => {
+it('selectRows, WHERE, orderBy', async () => {
   const cc = dd.sel('RAND()', 'n', new dd.ColumnType(dd.dt.int));
   class PostTA extends dd.TA {
     selectT = dd
@@ -80,7 +81,7 @@ test('selectRows, WHERE, orderBy', async () => {
   await testBuildAsync(ta, 'select/selectRowsWhereOrder');
 });
 
-test('selectField, WHERE', async () => {
+it('selectField, WHERE', async () => {
   class PostTA extends dd.TA {
     selectT = dd.selectField(post.user_id).byID();
   }
@@ -88,7 +89,7 @@ test('selectField, WHERE', async () => {
   await testBuildAsync(ta, 'select/whereField');
 });
 
-test('WHERE: multiple cols', async () => {
+it('WHERE: multiple cols', async () => {
   class PostTA extends dd.TA {
     selectT = dd
       .select(post.id, post.title)
@@ -102,7 +103,7 @@ test('WHERE: multiple cols', async () => {
   await testBuildAsync(ta, 'select/whereMultipleCols');
 });
 
-test('Custom params', async () => {
+it('Custom params', async () => {
   class PostTA extends dd.TA {
     selectT = dd
       .select(post.id, post.title)
@@ -117,7 +118,7 @@ test('Custom params', async () => {
   await testBuildAsync(ta, 'select/customParams');
 });
 
-test('Basic join', async () => {
+it('Basic join', async () => {
   class PostTA extends dd.TA {
     selectT = dd.select(post.user_id.join(user).url_name, post.title);
   }
@@ -125,7 +126,7 @@ test('Basic join', async () => {
   await testBuildAsync(ta, 'select/joinBasic');
 });
 
-test('Same table, multiple cols join', async () => {
+it('Same table, multiple cols join', async () => {
   class RplTA extends dd.TA {
     selectT = dd.select(
       rpl.user_id.join(user).url_name,
@@ -137,7 +138,7 @@ test('Same table, multiple cols join', async () => {
   await testBuildAsync(ta, 'select/joinCols');
 });
 
-test('Join as', async () => {
+it('Join as', async () => {
   class CmtTA extends dd.TA {
     selectT = dd.select(
       cmt.id,
@@ -154,7 +155,7 @@ test('Join as', async () => {
   await testBuildAsync(ta, 'select/joinAs');
 });
 
-test('Selected name collisions', async () => {
+it('Selected name collisions', async () => {
   class PostTA extends dd.TA {
     selectT = dd.select(
       post.title,
@@ -169,10 +170,10 @@ test('Selected name collisions', async () => {
     );
   }
   const ta = dd.ta(post, PostTA);
-  expect(testBuildAsync(ta, '')).rejects.toThrow('already exists');
+  assert.rejects(testBuildAsync(ta, ''), 'already exists');
 });
 
-test('Calculated columns', async () => {
+it('Calculated columns', async () => {
   class PostTA extends dd.TA {
     selectT = dd.select(
       // User specified types
@@ -196,7 +197,7 @@ test('Calculated columns', async () => {
   await testBuildAsync(ta, 'select/rawColumn');
 });
 
-test('Custom DB names', async () => {
+it('Custom DB names', async () => {
   class PostTA extends dd.TA {
     selectT = dd.select(
       post.cmtCount, // cmtCount is set to cmt_c in models via `setDBName`
@@ -210,7 +211,7 @@ test('Custom DB names', async () => {
   await testBuildAsync(ta, 'select/modifiedDBNames');
 });
 
-test('selectRows, paginate', async () => {
+it('selectRows, paginate', async () => {
   class PostTA extends dd.TA {
     selectT = dd
       .selectRows(post.id, post.title)
@@ -221,7 +222,7 @@ test('selectRows, paginate', async () => {
   await testBuildAsync(ta, 'select/selectRowsPaginate');
 });
 
-test('selectRows, paginate, where', async () => {
+it('selectRows, paginate, where', async () => {
   class PostTA extends dd.TA {
     selectT = dd
       .selectRows(post.id, post.title)
@@ -233,7 +234,7 @@ test('selectRows, paginate, where', async () => {
   await testBuildAsync(ta, 'select/selectRowsPaginateWithWhere');
 });
 
-test('selectPage', async () => {
+it('selectPage', async () => {
   class PostTA extends dd.TA {
     selectT = dd
       .selectPage(post.id, post.title)
@@ -244,7 +245,7 @@ test('selectPage', async () => {
   await testBuildAsync(ta, 'select/selectPage');
 });
 
-test('WHERE, inputs, joins', async () => {
+it('WHERE, inputs, joins', async () => {
   class CmtTA extends dd.TA {
     selectT = dd.select(cmt.id).where(
       dd.sql` ${cmt.id.toInput()}, ${cmt.user_id.toInput()}, ${cmt.target_id
@@ -259,7 +260,7 @@ test('WHERE, inputs, joins', async () => {
   await testBuildAsync(ta, 'select/whereInputsJoins');
 });
 
-test('Argument stubs', async () => {
+it('Argument stubs', async () => {
   class PostTA extends dd.TA {
     selectT = dd
       .select(post.id, post.title)

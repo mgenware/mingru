@@ -1,7 +1,7 @@
 import { testBuildAsync } from './common';
 import * as dd from 'dd-models';
 
-test('No inserted ID', async () => {
+it('No inserted ID', async () => {
   class Employee extends dd.Table {
     id = dd.pk(dd.int()).setDBName('emp_no').noAutoIncrement;
     firstName = dd.varChar(50);
@@ -43,7 +43,7 @@ test('No inserted ID', async () => {
   await testBuildAsync(deptManagerTA, 'tx/noInsID/deptManager');
 });
 
-test('Last inserted ID', async () => {
+it('Last inserted ID', async () => {
   class Employee extends dd.Table {
     id = dd.pk(dd.int()).setDBName('emp_no');
     firstName = dd.varChar(50);
@@ -57,7 +57,7 @@ test('Last inserted ID', async () => {
   await testBuildAsync(employeeTA, 'tx/autoInsID/employee');
 });
 
-test('Temp member actions', async () => {
+it('Temp member actions', async () => {
   class User extends dd.Table {
     id = dd.pk();
     postCount = dd.int();

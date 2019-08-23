@@ -3,7 +3,7 @@ import user from '../models/user';
 import post from '../models/post';
 import { testBuildFullAsync } from './common';
 
-test('Single action', async () => {
+it('Single action', async () => {
   class PostTA extends dd.TA {
     selectT = dd.select(post.id, post.title);
   }
@@ -11,7 +11,7 @@ test('Single action', async () => {
   await testBuildFullAsync(ta, 'goBuilder/singleAction');
 });
 
-test('Multiple actions', async () => {
+it('Multiple actions', async () => {
   class PostTA extends dd.TA {
     selectPostTitle = dd.select(post.id, post.title);
     selectPostInfo = dd.select(

@@ -2,7 +2,7 @@ import * as dd from 'dd-models';
 import post from '../models/post';
 import { testBuildAsync } from './common';
 
-test('unsafeDeleteAll', async () => {
+it('unsafeDeleteAll', async () => {
   class PostTA extends dd.TA {
     deleteT = dd.unsafeDeleteAll().byID();
   }
@@ -10,7 +10,7 @@ test('unsafeDeleteAll', async () => {
   await testBuildAsync(ta, 'delete/delete');
 });
 
-test('deleteSome', async () => {
+it('deleteSome', async () => {
   class PostTA extends dd.TA {
     deleteT = dd
       .deleteSome()
@@ -20,7 +20,7 @@ test('deleteSome', async () => {
   await testBuildAsync(ta, 'delete/deleteWithWhere');
 });
 
-test('deleteOne', async () => {
+it('deleteOne', async () => {
   class PostTA extends dd.TA {
     deleteT = dd.deleteOne().byID();
   }

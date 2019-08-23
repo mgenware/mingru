@@ -3,7 +3,7 @@ import post from '../models/post';
 import { testBuildAsync } from './common';
 import cols from '../models/cols';
 
-test('UpdateSome', async () => {
+it('UpdateSome', async () => {
   class PostTA extends dd.TA {
     updateT = dd
       .updateSome()
@@ -16,7 +16,7 @@ test('UpdateSome', async () => {
   await testBuildAsync(ta, 'update/update');
 });
 
-test('UpdateOne', async () => {
+it('UpdateOne', async () => {
   class PostTA extends dd.TA {
     updateT = dd
       .updateOne()
@@ -29,7 +29,7 @@ test('UpdateOne', async () => {
   await testBuildAsync(ta, 'update/updateOne');
 });
 
-test('Update with where', async () => {
+it('Update with where', async () => {
   class PostTA extends dd.TA {
     updateT = dd
       .updateOne()
@@ -45,7 +45,7 @@ test('Update with where', async () => {
   await testBuildAsync(ta, 'update/updateWithWhere');
 });
 
-test('Update with non-input setters', async () => {
+it('Update with non-input setters', async () => {
   class PostTA extends dd.TA {
     updateT = dd
       .unsafeUpdateAll()
@@ -56,7 +56,7 @@ test('Update with non-input setters', async () => {
   await testBuildAsync(ta, 'update/updateWithNonInputSetters');
 });
 
-test('Duplicate names in WHERE and setters', async () => {
+it('Duplicate names in WHERE and setters', async () => {
   class PostTA extends dd.TA {
     updateT = dd
       .updateSome()
@@ -71,7 +71,7 @@ test('Duplicate names in WHERE and setters', async () => {
   await testBuildAsync(ta, 'update/dupNamesWhereSetters');
 });
 
-test('Custom DB column name', async () => {
+it('Custom DB column name', async () => {
   class PostTA extends dd.TA {
     updateT = dd
       .unsafeUpdateAll()
@@ -84,7 +84,7 @@ test('Custom DB column name', async () => {
   await testBuildAsync(ta, 'update/customName');
 });
 
-test('updateWithDefaults', async () => {
+it('updateWithDefaults', async () => {
   class ColsTA extends dd.TA {
     updateT = dd
       .updateOne()

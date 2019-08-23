@@ -2,10 +2,12 @@ import * as mr from '../../';
 import * as dd from 'dd-models';
 import post from '../models/post';
 import user from '../models/user';
+import * as assert from 'assert';
 
+const expect = assert.equal;
 const dialect = new mr.MySQL();
 
-test('Insert inputs', () => {
+it('Insert inputs', () => {
   class PostTA extends dd.TA {
     t = dd.unsafeInsert().setInputs(post.title, post.user_id);
   }
@@ -13,11 +15,11 @@ test('Insert inputs', () => {
   const v = postTA.t;
   const io = mr.insertIO(v, dialect);
 
-  expect(io).toBeInstanceOf(mr.InsertIO);
-  expect(io.sql).toBe('INSERT INTO `post` (`title`, `user_id`) VALUES (?, ?)');
+  assert.ok(io instanceof mr.InsertIO);
+  expect(io.sql, 'INSERT INTO `post` (`title`, `user_id`) VALUES (?, ?)');
 });
 
-test('Insert inputs and values', () => {
+it('Insert inputs and values', () => {
   class PostTA extends dd.TA {
     t = dd
       .unsafeInsert()
@@ -28,13 +30,14 @@ test('Insert inputs and values', () => {
   const v = postTA.t;
   const io = mr.insertIO(v, dialect);
 
-  expect(io).toBeInstanceOf(mr.InsertIO);
-  expect(io.sql).toBe(
+  assert.ok(io instanceof mr.InsertIO);
+  expect(
+    io.sql,
     'INSERT INTO `post` (`title`, `user_id`, `datetime`) VALUES (?, ?, NOW())',
   );
 });
 
-test('getInputs', () => {
+it('getInputs', () => {
   class UserTA extends dd.TA {
     t = dd
       .unsafeInsert()
@@ -44,13 +47,14 @@ test('getInputs', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, new mr.MySQL());
-  expect(io.funcArgs.toString()).toBe(
+  expect(
+    io.funcArgs.toString(),
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, sig: *string, id: uint64, b: string',
   );
-  expect(io.execArgs.toString()).toBe('sig: *string, id: uint64, b: string');
+  expect(io.execArgs.toString(), 'sig: *string, id: uint64, b: string');
 });
 
-test('getReturns (isnert)', () => {
+it('getReturns (isnert)', () => {
   class UserTA extends dd.TA {
     t = dd
       .unsafeInsert()
@@ -60,10 +64,10 @@ test('getReturns (isnert)', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, new mr.MySQL());
-  expect(io.returnValues.toString()).toBe('');
+  expect(io.returnValues.toString(), '');
 });
 
-test('getReturns (insertOne)', () => {
+it('getReturns (insertOne)', () => {
   class UserTA extends dd.TA {
     t = dd
       .unsafeInsertOne()
@@ -73,5 +77,5 @@ test('getReturns (insertOne)', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, new mr.MySQL());
-  expect(io.returnValues.toString()).toBe('insertedID: uint64');
+  expect(io.returnValues.toString(), 'insertedID: uint64');
 });
