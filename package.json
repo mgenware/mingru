@@ -26,7 +26,7 @@
     "clean": "del-cli dist && del-cli dist_tests"
   },
   "engines": {
-    "node": ">=8.6.0"
+    "node": ">=10.0.0"
   },
   "devDependencies": {
     "@types/glob": "^7.1.1",
