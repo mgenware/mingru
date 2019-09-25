@@ -23,20 +23,40 @@ export class SQLIO {
     throwIfFalsy(varList, 'varList');
   }
 
-  toSQL(cb?: (element: dd.SQLElement) => string | null): string {
+  toSQL(
+    sourceTable: dd.Table | null,
+    cb?: (element: dd.SQLElement) => string | null,
+  ): string {
     const { sql } = this;
     let res = '';
     for (const element of sql.elements) {
+      if (element.type === dd.SQLElementType.column) {
+        const col = element.toColumn();
+        if (sourceTable && col.getSourceTable() !== sourceTable) {
+          throw new Error(
+            `Column source table assetion failed, expected "${
+              sourceTable.__name
+            }", got "${col.getSourceTable()!.__name}".`,
+          );
+        }
+      }
       let cbRes: string | null = null;
       if (cb) {
         cbRes = cb(element);
       }
-      res += cbRes === null ? this.handleElement(element, this.dialect) : cbRes;
+      res +=
+        cbRes === null
+          ? this.handleElement(element, this.dialect, sourceTable)
+          : cbRes;
     }
     return res;
   }
 
-  private handleElement(element: dd.SQLElement, dialect: Dialect): string {
+  private handleElement(
+    element: dd.SQLElement,
+    dialect: Dialect,
+    sourceTable: dd.Table | null,
+  ): string {
     switch (element.type) {
       case dd.SQLElementType.rawString: {
         return element.toRawString();
@@ -50,7 +70,9 @@ export class SQLIO {
         const call = element.toCall();
         const name = dialect.sqlCall(call.type);
         const params = call.params.length
-          ? call.params.map(p => sqlIO(p, dialect).toSQL()).join(', ')
+          ? call.params
+              .map(p => sqlIO(p, dialect).toSQL(sourceTable))
+              .join(', ')
           : '';
         return `${name}(${params})`;
       }

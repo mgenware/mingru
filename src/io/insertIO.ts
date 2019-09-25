@@ -35,10 +35,7 @@ export class InsertIOProcessor {
   convert(): InsertIO {
     let sql = 'INSERT INTO ';
     const { action, dialect } = this;
-    const table = action.__table;
-    if (!table) {
-      throw new Error('Action does not have a bound table');
-    }
+    const [, table] = action.ensureInitialized();
     const fetchInsertedID =
       action.ensureOneRowAffected && !!table.__pkAIs.length;
 
@@ -52,7 +49,7 @@ export class InsertIOProcessor {
     sql += ` (${colNames.join(', ')})`;
 
     // values
-    const colValues = setters.map(s => s.sql.toSQL());
+    const colValues = setters.map(s => s.sql.toSQL(table));
     sql += ` VALUES (${colValues.join(', ')})`;
 
     // funcArgs

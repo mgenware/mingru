@@ -37,13 +37,11 @@ class UpdateIOProcessor {
   convert(): UpdateIO {
     let sql = 'UPDATE ';
     const { action, dialect } = this;
-    const table = action.__table as dd.Table;
+    const [, table] = action.ensureInitialized();
 
     if (!action.whereSQL && !action.allowNoWhere) {
       throw new Error(
-        `You have to call unsafeUpdateAll to build an action without a WHERE clause, action name: "${
-          action.__name
-        }"`,
+        `You have to call unsafeUpdateAll to build an action without a WHERE clause, action name: "${action.__name}"`,
       );
     }
 
@@ -54,13 +52,13 @@ class UpdateIOProcessor {
     // Setters
     const setterIOs = SetterIO.fromAction(action, dialect);
     sql += setterIOs
-      .map(s => `${dialect.encodeColumnName(s.col)} = ${s.sql.toSQL()}`)
+      .map(s => `${dialect.encodeColumnName(s.col)} = ${s.sql.toSQL(table)}`)
       .join(', ');
 
     // WHERE
     const whereIO = action.whereSQL ? sqlIO(action.whereSQL, dialect) : null;
     if (whereIO) {
-      sql += ` WHERE ${whereIO.toSQL()}`;
+      sql += ` WHERE ${whereIO.toSQL(table)}`;
     }
 
     // funcArgs

@@ -115,10 +115,7 @@ export class SelectIOProcessor {
   convert(): SelectIO {
     let sql = 'SELECT ';
     const { action } = this;
-    const fromTable = action.__table;
-    if (!fromTable) {
-      throw new Error('Action does not have a bound table');
-    }
+    const [, fromTable] = action.ensureInitialized();
     const columns = action.columns.length
       ? action.columns
       : fromTable.__columns;
@@ -137,9 +134,7 @@ export class SelectIOProcessor {
       const selIO = this.handleSelectedColumn(col);
       if (this.selectedNames.has(selIO.varName)) {
         throw new Error(
-          `The selected column name "${
-            selIO.varName
-          }" already exists in action "${action.__name}"`,
+          `The selected column name "${selIO.varName}" already exists in action "${action.__name}"`,
         );
       }
       this.selectedNames.add(selIO.varName);
@@ -165,7 +160,7 @@ export class SelectIOProcessor {
       whereIO = sqlIO(action.whereSQL, this.dialect);
       sql +=
         ' WHERE ' +
-        whereIO.toSQL(ele => {
+        whereIO.toSQL(fromTable, ele => {
           if (ele.type === dd.SQLElementType.column) {
             return this.getColumnSQL(ele.toColumn());
           }
@@ -378,6 +373,7 @@ export class SelectIOProcessor {
 
   private handleSelectedColumn(sCol: dd.SelectActionColumns): SelectedColumnIO {
     const { dialect } = this;
+    const [, table] = this.action.ensureInitialized();
     const [col, calcCol, resultType] = this.analyzeSelectedColumn(sCol);
     if (col) {
       const colSQL = this.handleColumn(
@@ -414,7 +410,7 @@ export class SelectIOProcessor {
       const exprIO = sqlIO(rawExpr, dialect);
       // Replace the column with SQL only (no alias).
       // Imagine new RawColumn(dd.sql`COUNT(${col.as('a')})`, 'b'), the embedded column would be interpreted as `'col' AS 'a'`, but it really should be `COUNT('col') AS 'b'`, so this step replace the embedded with the SQL without its attached alias.
-      const sql = exprIO.toSQL(element => {
+      const sql = exprIO.toSQL(table, element => {
         if (element.value === col) {
           return colSQL.sql;
         }
@@ -438,7 +434,7 @@ export class SelectIOProcessor {
       // Expression with no columns inside
       const rawExpr = calcCol.core as dd.SQL;
       const exprIO = sqlIO(rawExpr, dialect);
-      const sql = exprIO.toSQL();
+      const sql = exprIO.toSQL(table);
       // If we cannot guess the result type (`resultType` is null), and neither does a user specified type (`type` is null) exists, we throw cuz we cannot determine the result type
       if (!resultType && !sCol.type) {
         throw new Error(

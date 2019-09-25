@@ -252,15 +252,15 @@ currently-unhandled@^0.4.1:
   dependencies:
     array-find-index "^1.0.1"
 
-dd-models@^0.21.0:
-  version "0.21.0"
-  resolved "https://registry.yarnpkg.com/dd-models/-/dd-models-0.21.0.tgz#c6c7dde7c70dea5d2b4015ddabc27258ac684e95"
-  integrity sha512-en0iTpx2RtSQGB5e9k313nDob26CJkgiWd9xk4fy0uLO2xPsXrbs6o3xY2KxzAGLLb/f5Wx+uzQeplNKd3ISqg==
+dd-models@^0.22.0:
+  version "0.22.0"
+  resolved "https://registry.yarnpkg.com/dd-models/-/dd-models-0.22.0.tgz#12afe74d951e01d68bdf323cb17795bfad4ac1bc"
+  integrity sha512-ggpLSUR5+datPx7rTz34WsDOFcAEFw5yy2ta1blpGMFFl4oBmoAEvKPfsgsQ8I/obje3lpPNs1M06CWw+cd34Q==
   dependencies:
     lodash.camelcase "^4.3.0"
     lodash.snakecase "^4.1.1"
-    throw-if-arg-empty "^2.0.2"
-    to-type-string "^1.0.0"
+    throw-if-arg-empty "^2.1.0"
+    to-type-string "^1.0.1"
 
 debug@3.2.6:
   version "3.2.6"
@@ -1338,11 +1338,6 @@ tempy@^0.3.0:
     type-fest "^0.3.1"
     unique-string "^1.0.0"
 
-throw-if-arg-empty@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/throw-if-arg-empty/-/throw-if-arg-empty-2.0.2.tgz#2d664757db26d9a752600a98e5fd254593985cf6"
-  integrity sha512-axVbY7WYZ3N0S0KS9KQjOqSDFwhedjgDKxVTpkbtT3bn38cqRabNsvEQ7n7WLQC4y2BiBzwa7fBaX276PPqSgw==
-
 throw-if-arg-empty@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/throw-if-arg-empty/-/throw-if-arg-empty-2.1.0.tgz#741920ff7f697b12de38cf5883cba4b3e57f0a76"
@@ -1355,7 +1350,7 @@ to-regex-range@^5.0.1:
   dependencies:
     is-number "^7.0.0"
 
-to-type-string@^1.0.0, to-type-string@^1.0.1:
+to-type-string@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/to-type-string/-/to-type-string-1.0.1.tgz#e1e58d28e6989f4c5c980cedc511218e81f494da"
   integrity sha512-mY7g+yjGN5PcF21lBO5bFUcX+kuSCu/C1ZBPHIgzS+x32BZUtxmQ30aZDdV6+n7ALMCuIRtLedQ1OqiTEmZttw==

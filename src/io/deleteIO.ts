@@ -33,13 +33,11 @@ class DeleteIOProcessor {
   convert(): DeleteIO {
     let sql = 'DELETE FROM ';
     const { action, dialect } = this;
-    const table = action.__table as dd.Table;
+    const [, table] = action.ensureInitialized();
 
     if (!action.whereSQL && !action.allowNoWhere) {
       throw new Error(
-        `You have to call unsafeDeleteAll to build an action without a WHERE clause, action name: "${
-          action.__name
-        }"`,
+        `You have to call unsafeDeleteAll to build an action without a WHERE clause, action name: "${action.__name}"`,
       );
     }
 
@@ -50,7 +48,7 @@ class DeleteIOProcessor {
     // where
     const whereIO = action.whereSQL ? sqlIO(action.whereSQL, dialect) : null;
     if (whereIO) {
-      sql += ` WHERE ${whereIO.toSQL()}`;
+      sql += ` WHERE ${whereIO.toSQL(table)}`;
     }
 
     // inputs

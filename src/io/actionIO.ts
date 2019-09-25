@@ -6,6 +6,7 @@ import VarInfo from '../lib/varInfo';
 import Dialect from '../dialect';
 
 export class ActionIO {
+  table: dd.Table;
   funcName: string = '';
   funcStubs: VarInfo[];
 
@@ -24,6 +25,7 @@ export class ActionIO {
     if (!action.__table) {
       throw new Error(`Action not initialized`);
     }
+    this.table = action.__table;
 
     // action can be a temporary wrapped action as a member of a transaction, which doesn't have a valid name.
     const actionName = action.__name;

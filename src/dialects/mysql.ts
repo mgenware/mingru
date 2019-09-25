@@ -14,7 +14,7 @@ export default class MySQL extends Dialect {
     return '`' + name + '`';
   }
 
-  objToSQL(value: unknown): string {
+  objToSQL(value: unknown, table: dd.Table | null): string {
     if (value === undefined) {
       throw new Error('value is undefined');
     }
@@ -29,7 +29,7 @@ export default class MySQL extends Dialect {
     }
     if (value instanceof dd.SQL) {
       const io = sqlIO(value as dd.SQL, this);
-      return io.toSQL();
+      return io.toSQL(table);
     }
     throw new Error(`Unsupported type of object "${toTypeString(value)}"`);
   }
@@ -61,7 +61,7 @@ export default class MySQL extends Dialect {
         types.push('DEFAULT');
 
         // MySQL doesn't allow dynamic value as default value, we simply ignore SQL expr here
-        types.push(this.objToSQL(defValue));
+        types.push(this.objToSQL(defValue, col.getSourceTable()));
       } else if (colType.nullable) {
         types.push('DEFAULT');
         types.push('NULL');

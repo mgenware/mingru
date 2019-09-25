@@ -80,20 +80,20 @@ it('SQL calls', () => {
 
 it('objToSQL', () => {
   // null
-  expect(dialect.objToSQL(null), 'NULL');
+  expect(dialect.objToSQL(null, user), 'NULL');
   // number
-  expect(dialect.objToSQL(-32), '-32');
+  expect(dialect.objToSQL(-32, user), '-32');
   // boolean
-  expect(dialect.objToSQL(true), '1');
-  expect(dialect.objToSQL(false), '0');
+  expect(dialect.objToSQL(true, user), '1');
+  expect(dialect.objToSQL(false, user), '0');
   // string
-  expect(dialect.objToSQL('a 123 🛋'), "'a 123 🛋'"); // tslint:disable-line
-  expect(dialect.objToSQL(''), "''"); // tslint:disable-line
-  expect(dialect.objToSQL('\'"\\'), "'''\"\\'"); // tslint:disable-line
+  expect(dialect.objToSQL('a 123 🛋', user), "'a 123 🛋'"); // tslint:disable-line
+  expect(dialect.objToSQL('', user), "''"); // tslint:disable-line
+  expect(dialect.objToSQL('\'"\\', user), "'''\"\\'"); // tslint:disable-line
   // undefined
-  assert.throws(() => dialect.objToSQL(undefined));
+  assert.throws(() => dialect.objToSQL(undefined, user));
   // Others
-  assert.throws(() => dialect.objToSQL([]));
+  assert.throws(() => dialect.objToSQL([], user));
 });
 
 it('colToSQLType', () => {

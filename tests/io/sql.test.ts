@@ -13,13 +13,26 @@ it('Columns and escape strings', () => {
   }`;
   const io = mr.sqlIO(sql, dialect);
   assert.ok(io instanceof mr.SQLIO);
-  expect(io.toSQL(), 'abc "aaa" `user_id` `url_name`');
+  expect(io.toSQL(post), 'abc "aaa" `user_id` `url_name`');
 });
 
 it('SQL calls', () => {
   const sql = dd.sql`${post.datetime} = ${dd.datetimeNow()}`;
   const io = mr.sqlIO(sql, dialect);
-  expect(io.toSQL(), '`datetime` = NOW()');
+  expect(io.toSQL(post), '`datetime` = NOW()');
+});
+
+it('toSQL(sourceTable)', () => {
+  assert.throws(() => {
+    const sql = dd.sql`${post.datetime} = ${dd.datetimeNow()}`;
+    const io = mr.sqlIO(sql, dialect);
+    io.toSQL(user);
+  }, 'expedcted "post"');
+  assert.throws(() => {
+    const sql = dd.sql`${post.datetime} = ${dd.datetimeNow()} ${user.id}`;
+    const io = mr.sqlIO(sql, dialect);
+    io.toSQL(post);
+  }, 'expedcted "user"');
 });
 
 it('Nested SQLs', () => {

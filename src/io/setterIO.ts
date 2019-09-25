@@ -14,10 +14,7 @@ export class SetterIO {
     );
     if (action.autoSetter) {
       const { setters: actionSetters } = action;
-      const table = action.__table;
-      if (!table) {
-        throw new Error('Action does not have a bound table');
-      }
+      const [, table] = action.ensureInitialized();
       dd.enumerateColumns(table, col => {
         // If already set, return
         if (actionSetters.get(col)) {
@@ -38,9 +35,9 @@ export class SetterIO {
           if (col.defaultValue) {
             if (col.defaultValue instanceof dd.SQL) {
               const valueIO = sqlIO(col.defaultValue as dd.SQL, dialect);
-              value = valueIO.toSQL();
+              value = valueIO.toSQL(table);
             } else {
-              value = dialect.objToSQL(col.defaultValue);
+              value = dialect.objToSQL(col.defaultValue, table);
             }
           } else if (col.type.nullable) {
             value = 'NULL';
@@ -50,12 +47,10 @@ export class SetterIO {
             // tslint:disable-next-line
             if (def === null) {
               throw new Error(
-                `Cannot determine the default value of type "${type}" at column ${
-                  col.__name
-                }`,
+                `Cannot determine the default value of type "${type}" at column ${col.__name}`,
               );
             }
-            value = dialect.objToSQL(def);
+            value = dialect.objToSQL(def, table);
           }
 
           result.push(new SetterIO(col, sqlIO(dd.sql`${value}`, dialect)));

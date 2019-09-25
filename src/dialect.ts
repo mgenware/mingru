@@ -7,7 +7,7 @@ export class Dialect {
   }
 
   // Translates a JavaScript object to SQL equivalent
-  objToSQL(_: unknown): string {
+  objToSQL(_: unknown, __: dd.Table | null): string {
     throw new Error('Not implemented yet');
   }
 
