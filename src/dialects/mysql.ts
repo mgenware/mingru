@@ -89,6 +89,28 @@ export default class MySQL extends Dialect {
         return 'COUNT';
       case dd.SQLCallType.coalesce:
         return 'COALESCE';
+      case dd.SQLCallType.avg:
+        return 'AVG';
+      case dd.SQLCallType.sum:
+        return 'SUM';
+      case dd.SQLCallType.min:
+        return 'MIN';
+      case dd.SQLCallType.max:
+        return 'MAX';
+      case dd.SQLCallType.year:
+        return 'YEAR';
+      case dd.SQLCallType.month:
+        return 'MONTH';
+      case dd.SQLCallType.day:
+        return 'DAY';
+      case dd.SQLCallType.week:
+        return 'WEEK';
+      case dd.SQLCallType.hour:
+        return 'HOUR';
+      case dd.SQLCallType.minute:
+        return 'MINUTE';
+      case dd.SQLCallType.second:
+        return 'SECOND';
       default:
         throw new Error(`Unsupported type of call "${type}"`);
     }

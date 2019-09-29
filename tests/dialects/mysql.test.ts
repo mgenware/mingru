@@ -76,6 +76,17 @@ it('SQL calls', () => {
   expect(t(dd.SQLCallType.datetimeNow), 'NOW');
   expect(t(dd.SQLCallType.count), 'COUNT');
   expect(t(dd.SQLCallType.coalesce), 'COALESCE');
+  expect(t(dd.SQLCallType.avg), 'AVG');
+  expect(t(dd.SQLCallType.sum), 'SUM');
+  expect(t(dd.SQLCallType.min), 'MIN');
+  expect(t(dd.SQLCallType.max), 'MAX');
+  expect(t(dd.SQLCallType.year), 'YEAR');
+  expect(t(dd.SQLCallType.month), 'MONTH');
+  expect(t(dd.SQLCallType.day), 'DAY');
+  expect(t(dd.SQLCallType.week), 'WEEK');
+  expect(t(dd.SQLCallType.hour), 'HOUR');
+  expect(t(dd.SQLCallType.minute), 'MINUTE');
+  expect(t(dd.SQLCallType.second), 'SECOND');
 });
 
 it('objToSQL', () => {

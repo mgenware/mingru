@@ -114,7 +114,7 @@ export class SelectIOProcessor {
 
   convert(): SelectIO {
     let sql = 'SELECT ';
-    const { action } = this;
+    const { action, dialect } = this;
     const [, fromTable] = action.ensureInitialized();
     const columns = action.columns.length
       ? action.columns
@@ -140,24 +140,24 @@ export class SelectIOProcessor {
       this.selectedNames.add(selIO.varName);
       colIOs.push(selIO);
     }
-    sql += colIOs.map(c => c.sql(this.dialect, this.hasJoin)).join(', ');
+    sql += colIOs.map(c => c.sql(dialect, this.hasJoin)).join(', ');
 
-    // from
+    // FROM
     const fromSQL = this.handleFrom(fromTable as dd.Table);
     sql += ' ' + fromSQL;
 
-    // joins
+    // Joins
     if (this.hasJoin) {
       for (const join of this.joins) {
-        const joinSQL = join.toSQL(this.dialect);
+        const joinSQL = join.toSQL(dialect);
         sql += ' ' + joinSQL;
       }
     }
 
-    // where
+    // WHERE
     let whereIO: SQLIO | null = null;
     if (action.whereSQL) {
-      whereIO = sqlIO(action.whereSQL, this.dialect);
+      whereIO = sqlIO(action.whereSQL, dialect);
       sql +=
         ' WHERE ' +
         whereIO.toSQL(fromTable, ele => {
@@ -168,10 +168,9 @@ export class SelectIOProcessor {
         });
     }
 
-    // order by
-    let orderBySQL = '';
+    // ORDER BY
     if (action.orderByColumns.length) {
-      orderBySQL =
+      const orderBySQL =
         ' ORDER BY ' +
         action.orderByColumns
           .map(oCol => {
@@ -182,8 +181,29 @@ export class SelectIOProcessor {
             return s;
           })
           .join(', ');
+      sql += orderBySQL;
     }
-    sql += orderBySQL;
+
+    // GROUP BY
+    if (action.groupByColumns.length) {
+      const groupBySQL =
+        ' GROUP BY ' +
+        action.groupByColumns.map(s => dialect.encodeName(s)).join(', ');
+      sql += groupBySQL;
+    }
+
+    // HAVING
+    if (action.havingSQL) {
+      const havingIO = sqlIO(action.havingSQL, dialect);
+      sql +=
+        ' HAVING ' +
+        havingIO.toSQL(fromTable, ele => {
+          if (ele.type === dd.SQLElementType.column) {
+            return dialect.encodeColumnName(ele.toColumn());
+          }
+          return null;
+        });
+    }
 
     // Func args
     const limitTypeInfo = new VarInfo('limit', defs.intTypeInfo);
@@ -224,7 +244,7 @@ export class SelectIOProcessor {
 
     if (selMode === dd.SelectActionMode.field) {
       const col = colIOs[0];
-      const typeInfo = this.dialect.colTypeToGoType(col.getResultType());
+      const typeInfo = dialect.colTypeToGoType(col.getResultType());
       returnValues.add(new VarInfo(SelectedResultKey, typeInfo));
     } else {
       // selMode now equals .list or .row
@@ -258,8 +278,8 @@ export class SelectIOProcessor {
     }
 
     return new SelectIO(
-      this.dialect,
-      this.action,
+      dialect,
+      action,
       sql,
       colIOs,
       whereIO,
@@ -269,7 +289,7 @@ export class SelectIOProcessor {
     );
   }
 
-  private getOrderByColumnSQL(nCol: dd.ColumnName): string {
+  private getOrderByColumnSQL(nCol: dd.OrderByColumn): string {
     const { dialect } = this;
     const col = nCol.column;
     if (typeof col === 'string') {

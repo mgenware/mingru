@@ -256,3 +256,21 @@ it('getReturns', () => {
     'result: *UserTableTResult(UserTableTResult)',
   );
 });
+
+it('GROUP BY and HAVING', () => {
+  const yearCol = dd.sel(dd.year(post.datetime), 'year');
+  class PostTA extends dd.TA {
+    t = dd
+      .select(yearCol, dd.sel(dd.sum(post.cmtCount), 'total'))
+      .byID()
+      .groupBy(yearCol, 'total')
+      .having(dd.and(dd.sql`$year > 2010`, dd.sql`total > 100`));
+  }
+  const ta = dd.ta(post, PostTA);
+  const v = ta.t;
+  const io = mr.selectIO(v, new mr.MySQL());
+  expect(
+    io.sql,
+    'SELECT YEAR(`datetime`) AS `year`, SUM(`cmt_c`) AS `total` FROM `post` WHERE `id` = ? GROUP BY `year`, `total` HAVING `year` > 2010 AND `total` > 100',
+  );
+});
