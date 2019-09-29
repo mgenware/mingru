@@ -199,7 +199,13 @@ export class SelectIOProcessor {
         ' HAVING ' +
         havingIO.toSQL(fromTable, ele => {
           if (ele.type === dd.SQLElementType.column) {
-            return dialect.encodeColumnName(ele.toColumn());
+            const col = ele.toColumn();
+            if (col.isJoinedColumn()) {
+              throw new Error(
+                `Joins are not allowed in HAVING clause, offending column "${col.__name}".`,
+              );
+            }
+            return dialect.encodeColumnName(col);
           }
           return null;
         });
