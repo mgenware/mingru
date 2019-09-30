@@ -293,18 +293,14 @@ export class SelectIOProcessor {
     );
   }
 
-  private flushInputs(
-    funcArgs: VarList,
-    execArgs: VarList,
-    sqlIO: SQLIO | null,
-  ) {
-    if (!sqlIO) {
+  private flushInputs(funcArgs: VarList, execArgs: VarList, io: SQLIO | null) {
+    if (!io) {
       return;
     }
     // WHERE or HAVING may contain duplicate vars, we only need distinct vars in func args
-    funcArgs.merge(sqlIO.distinctVars);
+    funcArgs.merge(io.distinctVars);
     // We need to pass all variables to Exec
-    execArgs.merge(sqlIO.vars);
+    execArgs.merge(io.vars);
   }
 
   private getOrderByColumnSQL(nCol: dd.OrderByColumn): string {
