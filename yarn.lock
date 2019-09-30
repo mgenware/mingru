@@ -252,10 +252,10 @@ currently-unhandled@^0.4.1:
   dependencies:
     array-find-index "^1.0.1"
 
-dd-models@^0.22.0:
-  version "0.22.0"
-  resolved "https://registry.yarnpkg.com/dd-models/-/dd-models-0.22.0.tgz#12afe74d951e01d68bdf323cb17795bfad4ac1bc"
-  integrity sha512-ggpLSUR5+datPx7rTz34WsDOFcAEFw5yy2ta1blpGMFFl4oBmoAEvKPfsgsQ8I/obje3lpPNs1M06CWw+cd34Q==
+dd-models@^0.23.0:
+  version "0.23.0"
+  resolved "https://registry.yarnpkg.com/dd-models/-/dd-models-0.23.0.tgz#b1473329614730c7ea07a2ad69b26727f1d626c0"
+  integrity sha512-cTAcUWpvDOeeqzJZQBy/a8Bah2bzbn2vri+Toz8HdOzCGBH29XjyWUsL6dru+OiU565oSjh5RuayvKQH/dThGA==
   dependencies:
     lodash.camelcase "^4.3.0"
     lodash.snakecase "^4.1.1"
