@@ -5,7 +5,7 @@ import * as assert from 'assert';
 
 const expect = assert.equal;
 const TimePkg = 'time';
-const dialect = new mr.MySQL();
+const dialect = mr.mysql;
 
 function testType(col: dd.Column, type: string, pkg?: string) {
   const info = dialect.colTypeToGoType(col.type);

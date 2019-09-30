@@ -5,7 +5,7 @@ import user from '../models/user';
 import * as assert from 'assert';
 
 const expect = assert.equal;
-const dialect = new mr.MySQL();
+const dialect = mr.mysql;
 
 it('Insert inputs', () => {
   class PostTA extends dd.TA {
@@ -46,7 +46,7 @@ it('getInputs', () => {
   }
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
-  const io = mr.insertIO(v, new mr.MySQL());
+  const io = mr.insertIO(v, mr.mysql);
   expect(
     io.funcArgs.toString(),
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, sig: *string, id: uint64, b: string',
@@ -63,7 +63,7 @@ it('getReturns (isnert)', () => {
   }
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
-  const io = mr.insertIO(v, new mr.MySQL());
+  const io = mr.insertIO(v, mr.mysql);
   expect(io.returnValues.toString(), '');
 });
 
@@ -76,6 +76,6 @@ it('getReturns (insertOne)', () => {
   }
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
-  const io = mr.insertIO(v, new mr.MySQL());
+  const io = mr.insertIO(v, mr.mysql);
   expect(io.returnValues.toString(), 'insertedID: uint64');
 });

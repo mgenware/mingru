@@ -5,7 +5,7 @@ import post from '../models/post';
 import * as assert from 'assert';
 
 const expect = assert.equal;
-const dialect = new mr.MySQL();
+const dialect = mr.mysql;
 
 it('TransactIO', () => {
   class WrapSelfTA extends dd.TA {

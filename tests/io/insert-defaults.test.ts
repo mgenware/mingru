@@ -3,7 +3,7 @@ import * as dd from 'dd-models';
 import cols from '../models/cols';
 import * as assert from 'assert';
 
-const dialect = new mr.MySQL();
+const dialect = mr.mysql;
 
 it('dtDefault', () => {
   const { dt } = dd;

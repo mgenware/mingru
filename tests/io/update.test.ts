@@ -5,7 +5,7 @@ import user from '../models/user';
 import * as assert from 'assert';
 
 const expect = assert.equal;
-const dialect = new mr.MySQL();
+const dialect = mr.mysql;
 
 it('Update', () => {
   class PostTA extends dd.TA {
@@ -59,7 +59,7 @@ it('getInputs', () => {
   }
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
-  const io = mr.updateIO(v, new mr.MySQL());
+  const io = mr.updateIO(v, mr.mysql);
   expect(io.setterArgs.toString(), 'urlName: string, sig: *string');
   expect(
     io.funcArgs.toString(),
@@ -82,6 +82,6 @@ it('getReturns', () => {
   }
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
-  const io = mr.updateIO(v, new mr.MySQL());
+  const io = mr.updateIO(v, mr.mysql);
   assert.deepEqual(io.returnValues.toString(), 'rowsAffected: int');
 });

@@ -1,4 +1,4 @@
-export { default as MySQL } from './dialects/mysql';
+export * from './dialects/mysql';
 export { default as build, IBuildOption } from './build/builder';
 export { default as dtDefault } from './build/dtDefault';
 export { default as logger } from './logger';

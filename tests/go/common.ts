@@ -5,7 +5,7 @@ import * as tempy from 'tempy';
 import * as mfs from 'm-fs';
 import * as assert from 'assert';
 
-const dialect = new mr.MySQL();
+const dialect = mr.mysql;
 const DestDataDir = 'tests/go/dest';
 
 export async function testBuildAsync(ta: dd.TA, path: string) {

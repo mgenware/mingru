@@ -8,7 +8,7 @@ const escapeString = require('sql-escape-string');
 
 const TimeType = new TypeInfo('time.Time', 'time');
 
-export default class MySQL extends Dialect {
+export class MySQL extends Dialect {
   encodeName(name: string): string {
     throwIfFalsy(name, 'name');
     return '`' + name + '`';
@@ -203,3 +203,5 @@ export default class MySQL extends Dialect {
     return new TypeInfo(`*${type}`);
   }
 }
+
+export const mysql = new MySQL();

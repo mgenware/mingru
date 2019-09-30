@@ -5,7 +5,7 @@ import user from '../models/user';
 import * as assert from 'assert';
 
 const expect = assert.equal;
-const dialect = new mr.MySQL();
+const dialect = mr.mysql;
 
 it('Delete', () => {
   class PostTA extends dd.TA {
@@ -38,7 +38,7 @@ it('getInputs', () => {
   }
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
-  const io = mr.deleteIO(v, new mr.MySQL());
+  const io = mr.deleteIO(v, mr.mysql);
   expect(
     io.funcArgs.toString(),
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, urlName: string',
@@ -54,7 +54,7 @@ it('getReturns', () => {
   }
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
-  const io = mr.deleteIO(v, new mr.MySQL());
+  const io = mr.deleteIO(v, mr.mysql);
   const returns = io.returnValues;
   expect(returns.toString(), '');
 });
@@ -65,7 +65,7 @@ it('getInputs (no WHERE)', () => {
   }
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
-  const io = mr.deleteIO(v, new mr.MySQL());
+  const io = mr.deleteIO(v, mr.mysql);
   const inputs = io.funcArgs;
   expect(inputs.list.length, 1);
 });
@@ -76,7 +76,7 @@ it('getReturns (no WHERE)', () => {
   }
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
-  const io = mr.deleteIO(v, new mr.MySQL());
+  const io = mr.deleteIO(v, mr.mysql);
   const returns = io.returnValues;
   assert.deepEqual(returns.toString(), 'rowsAffected: int');
 });

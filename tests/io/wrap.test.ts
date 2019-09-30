@@ -6,7 +6,7 @@ import { WrapIO } from '../../';
 import * as assert from 'assert';
 
 const expect = assert.equal;
-const dialect = new mr.MySQL();
+const dialect = mr.mysql;
 
 class WrapSelfTA extends dd.TA {
   s = dd

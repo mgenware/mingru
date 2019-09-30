@@ -279,7 +279,7 @@ import employeeTA from './models/userTA';
 
 (async () => {
   const actions = [employeeTA];
-  const dialect = new mr.MySQL();
+  const dialect = mr.mysql;
   // Build Go and SQL code to '../da/` directory
   await mr.build(actions, dialect, '../da/', {
     cleanBuild: true,

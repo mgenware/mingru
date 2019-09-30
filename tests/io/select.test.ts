@@ -7,7 +7,7 @@ import rpl from '../models/postReply';
 import * as assert from 'assert';
 
 const expect = assert.equal;
-const dialect = new mr.MySQL();
+const dialect = mr.mysql;
 
 it('Select', () => {
   class UserTA extends dd.TA {
@@ -202,7 +202,7 @@ it('getInputs', () => {
   }
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
-  const io = mr.selectIO(v, new mr.MySQL());
+  const io = mr.selectIO(v, mr.mysql);
   expect(
     io.funcArgs.toString(),
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, urlName: string',
@@ -215,7 +215,7 @@ it('getInputs (no WHERE)', () => {
   }
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
-  const io = mr.selectIO(v, new mr.MySQL());
+  const io = mr.selectIO(v, mr.mysql);
   expect(io.funcArgs.list.length, 1);
 });
 
@@ -229,7 +229,7 @@ it('getInputs (with foreign tables)', () => {
   }
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
-  const io = mr.selectIO(v, new mr.MySQL());
+  const io = mr.selectIO(v, mr.mysql);
   expect(
     io.funcArgs.toString(),
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, title: string',
@@ -250,7 +250,7 @@ it('getReturns', () => {
   }
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
-  const io = mr.selectIO(v, new mr.MySQL());
+  const io = mr.selectIO(v, mr.mysql);
   assert.deepEqual(
     io.returnValues.toString(),
     'result: *UserTableTResult(UserTableTResult)',
@@ -268,7 +268,7 @@ it('GROUP BY and HAVING', () => {
   }
   const ta = dd.ta(post, PostTA);
   const v = ta.t;
-  const io = mr.selectIO(v, new mr.MySQL());
+  const io = mr.selectIO(v, mr.mysql);
   expect(
     io.sql,
     'SELECT YEAR(`datetime`) AS `year`, SUM(`cmt_c`) AS `total` FROM `post` WHERE `id` = ? GROUP BY `year`, `total` HAVING `year` > 2010 AND `total` > 100',

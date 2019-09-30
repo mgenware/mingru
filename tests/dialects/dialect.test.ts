@@ -4,7 +4,7 @@ import user from '../models/user';
 import * as assert from 'assert';
 
 const expect = assert.equal;
-const dialect = new mr.MySQL();
+const dialect = mr.mysql;
 
 it('inputPlaceholder', () => {
   expect(dialect.inputPlaceholder(new dd.SQLVariable('Type', 'name')), '?');

@@ -4,7 +4,7 @@ import * as dd from 'dd-models';
 import * as mfs from 'm-fs';
 import * as assert from 'assert';
 
-const dialect = new mr.MySQL();
+const dialect = mr.mysql;
 const DestDataDir = 'tests/csql/dest';
 
 export async function testBuildAsync(table: dd.Table, path: string) {
