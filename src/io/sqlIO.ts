@@ -81,6 +81,10 @@ export class SQLIO {
         return dialect.inputPlaceholder(element.toInput());
       }
 
+      case dd.SQLElementType.rawColumn: {
+        return dialect.encodeName(element.toRawColumn().selectedName);
+      }
+
       default: {
         throw new Error(
           `Unsupported type of dd.SQLElement: ${

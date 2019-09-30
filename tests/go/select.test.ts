@@ -272,3 +272,21 @@ it('Argument stubs', async () => {
   const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'select/argStubs');
 });
+
+it('GROUP BY and HAVING', async () => {
+  const yearCol = dd.sel(dd.year(post.datetime), 'year');
+  class PostTA extends dd.TA {
+    t = dd
+      .select(yearCol, dd.sel(dd.sum(post.cmtCount), 'total'))
+      .byID()
+      .groupBy(yearCol, 'total')
+      .having(
+        dd.and(
+          dd.sql`${yearCol} > ${yearCol.toInput()}`,
+          dd.sql`\`total\` > ${dd.int().toInput('total')}`,
+        ),
+      );
+  }
+  const ta = dd.ta(post, PostTA);
+  await testBuildAsync(ta, 'select/groupByAndHaving');
+});

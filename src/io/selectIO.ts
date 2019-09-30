@@ -193,8 +193,9 @@ export class SelectIOProcessor {
     }
 
     // HAVING
+    let havingIO: SQLIO | null = null;
     if (action.havingSQL) {
-      const havingIO = sqlIO(action.havingSQL, dialect);
+      havingIO = sqlIO(action.havingSQL, dialect);
       sql +=
         ' HAVING ' +
         havingIO.toSQL(fromTable, ele => {
@@ -223,12 +224,9 @@ export class SelectIOProcessor {
       `Exec args of action "${action.__name}"`,
       true,
     );
-    if (whereIO) {
-      // WHERE may contain duplicate vars, we only need distinct vars in func args
-      funcArgs.merge(whereIO.distinctVars);
-      // We need to pass all variables to Exec
-      execArgs.merge(whereIO.vars);
-    }
+    this.flushInputs(funcArgs, execArgs, whereIO);
+    this.flushInputs(funcArgs, execArgs, havingIO);
+
     if (action.hasLimit) {
       funcArgs.add(limitTypeInfo);
       funcArgs.add(offsetTypeInfo);
@@ -293,6 +291,20 @@ export class SelectIOProcessor {
       execArgs,
       returnValues,
     );
+  }
+
+  private flushInputs(
+    funcArgs: VarList,
+    execArgs: VarList,
+    sqlIO: SQLIO | null,
+  ) {
+    if (!sqlIO) {
+      return;
+    }
+    // WHERE or HAVING may contain duplicate vars, we only need distinct vars in func args
+    funcArgs.merge(sqlIO.distinctVars);
+    // We need to pass all variables to Exec
+    execArgs.merge(sqlIO.vars);
   }
 
   private getOrderByColumnSQL(nCol: dd.OrderByColumn): string {
