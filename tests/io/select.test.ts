@@ -264,7 +264,7 @@ it('GROUP BY and HAVING', () => {
       .select(yearCol, dd.sel(dd.sum(post.cmtCount), 'total'))
       .byID()
       .groupBy(yearCol, 'total')
-      .having(dd.and(dd.sql`$year > 2010`, dd.sql`total > 100`));
+      .having(dd.and(dd.sql`\`year\` > 2010`, dd.sql`\`total\` > 100`));
   }
   const ta = dd.ta(post, PostTA);
   const v = ta.t;

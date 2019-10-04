@@ -27,7 +27,7 @@ it('Update', () => {
   );
   expect(io.setters.length, 3);
   expect(io.setters[0].col, post.title);
-  expect(io.setters[0].sql.sql.toString(), '"haha"');
+  expect(io.setters[0].sql.sql.toString(), 'SQL(E("haha", type = 0))');
   expect(io.setters[1].col, post.content);
   expect(io.setters[2].col, post.cmtCount);
 });
