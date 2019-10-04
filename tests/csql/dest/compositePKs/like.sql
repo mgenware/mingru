@@ -1,0 +1,10 @@
+CREATE TABLE `like` (
+	`user_id` BIGINT UNSIGNED NOT NULL,
+	`type` INT UNSIGNED NOT NULL,
+	`value` TINYINT NOT NULL,
+	PRIMARY KEY (`user_id`, `type`),
+	CONSTRAINT FOREIGN KEY(`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
+)
+CHARACTER SET=utf8mb4
+COLLATE=utf8mb4_unicode_ci
+;
