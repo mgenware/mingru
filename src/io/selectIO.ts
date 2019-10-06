@@ -143,7 +143,7 @@ export class SelectIOProcessor {
     sql += colIOs.map(c => c.sql(dialect, this.hasJoin)).join(', ');
 
     // FROM
-    const fromSQL = this.handleFrom(fromTable as dd.Table);
+    const fromSQL = this.handleFrom(fromTable);
     sql += ' ' + fromSQL;
 
     // Joins
@@ -307,13 +307,13 @@ export class SelectIOProcessor {
     const { dialect } = this;
     const col = nCol.column;
     if (typeof col === 'string') {
-      return dialect.encodeName(col as string);
+      return dialect.encodeName(col);
     }
     if (col instanceof dd.Column) {
-      return this.getColumnSQL(col as dd.Column);
+      return this.getColumnSQL(col);
     }
     if (col instanceof dd.RawColumn) {
-      return dialect.encodeName((col as dd.RawColumn).selectedName);
+      return dialect.encodeName(col.selectedName);
     }
     throw new Error(`Unsupported orderBy column "${toTypeString(col)}"`);
   }
@@ -367,16 +367,15 @@ export class SelectIOProcessor {
     }
     // If user uses a column directly
     if (sCol instanceof dd.Column) {
-      const col = sCol as dd.Column;
-      return [col, null, col.type];
+      return [sCol, null, sCol.type];
     }
     if (sCol instanceof dd.RawColumn === false) {
       throw new Error(`Expected an "RawColumn", got ${toTypeString(sCol)}`);
     }
     // If user uses a renamed column (a RawColumn with core = column, and selectedName = newName)
-    const rawCol = sCol as dd.RawColumn;
+    const rawCol = sCol;
     if (rawCol.core instanceof dd.Column) {
-      const col = rawCol.core as dd.Column;
+      const col = rawCol.core;
       return [col, rawCol, col.type];
     }
     if (rawCol.core instanceof dd.SQL === false) {
@@ -385,7 +384,7 @@ export class SelectIOProcessor {
       );
     }
     // Now, RawColumn.core is an SQL expression. Try to extract a column from it.
-    const sql = rawCol.core as dd.SQL;
+    const sql = rawCol.core;
     const column = sql.findColumn();
     // In this case, we can guess the result type in case user specified type is not present
     const resultType = this.guessColumnType(sql);
@@ -408,44 +407,44 @@ export class SelectIOProcessor {
   private handleSelectedColumn(sCol: dd.SelectActionColumns): SelectedColumnIO {
     const { dialect } = this;
     const [, table] = this.action.ensureInitialized();
-    const [col, calcCol, resultType] = this.analyzeSelectedColumn(sCol);
-    if (col) {
+    const [embeddedCol, rawCol, resultType] = this.analyzeSelectedColumn(sCol);
+    if (embeddedCol) {
       const colSQL = this.handleColumn(
-        col,
-        calcCol ? calcCol.selectedName : null,
+        embeddedCol,
+        rawCol ? rawCol.selectedName : null,
       );
-      if (!calcCol) {
+      if (!rawCol) {
         // Pure column-based selected column
         return new SelectedColumnIO(
           sCol,
           colSQL.sql,
           colSQL.inputName,
           colSQL.alias,
-          col,
+          embeddedCol,
           resultType,
         );
       }
 
+      const rawColCore = rawCol.core;
       // RawColumn with .core is a column (a renamed column)
-      if (calcCol.core instanceof dd.Column) {
+      if (rawColCore instanceof dd.Column) {
         // Use RawColumn.selectedName as alias
         return new SelectedColumnIO(
           sCol,
           colSQL.sql,
           colSQL.inputName,
-          calcCol.selectedName,
-          col,
+          rawCol.selectedName,
+          embeddedCol,
           resultType,
         );
       }
 
       // Here, we have a RawColumn.core is an expression with a column inside
-      const rawExpr = calcCol.core as dd.SQL;
-      const exprIO = sqlIO(rawExpr, dialect);
+      const exprIO = sqlIO(rawColCore, dialect);
       // Replace the column with SQL only (no alias).
       // Imagine new RawColumn(dd.sql`COUNT(${col.as('a')})`, 'b'), the embedded column would be interpreted as `'col' AS 'a'`, but it really should be `COUNT('col') AS 'b'`, so this step replace the embedded with the SQL without its attached alias.
       const sql = exprIO.toSQL(table, element => {
-        if (element.value === col) {
+        if (element.value === embeddedCol) {
           return colSQL.sql;
         }
         return null;
@@ -455,18 +454,21 @@ export class SelectIOProcessor {
         sCol,
         sql,
         colSQL.inputName,
-        calcCol.selectedName || colSQL.alias,
-        col,
+        rawCol.selectedName || colSQL.alias,
+        embeddedCol,
         resultType,
       );
     } else {
-      if (!calcCol) {
+      // Expression with no columns inside
+      if (!rawCol) {
         throw new Error(
-          `Unexpected null calculated column from selected column "${sCol}"`,
+          `Unexpected null raw column from selected column "${sCol}"`,
         );
       }
-      // Expression with no columns inside
-      const rawExpr = calcCol.core as dd.SQL;
+      if (rawCol.core instanceof dd.Column) {
+        throw new Error(`Unexpected column object in raw column "${rawCol}"`);
+      }
+      const rawExpr = rawCol.core;
       const exprIO = sqlIO(rawExpr, dialect);
       const sql = exprIO.toSQL(table);
       // If we cannot guess the result type (`resultType` is null), and neither does a user specified type (`type` is null) exists, we throw cuz we cannot determine the result type
@@ -480,8 +482,8 @@ export class SelectIOProcessor {
       return new SelectedColumnIO(
         sCol,
         sql,
-        calcCol.selectedName, // inputName
-        calcCol.selectedName, // alias
+        rawCol.selectedName, // inputName
+        rawCol.selectedName, // alias
         null,
         resultType,
       );

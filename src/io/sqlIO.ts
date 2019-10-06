@@ -36,7 +36,7 @@ export class SQLIO {
           throw new Error(
             `Column source table assetion failed, expected "${
               sourceTable.__name
-            }", got "${col.getSourceTable()!.__name}".`,
+            }", got "${col.getSourceTable()}".`,
           );
         }
       }
@@ -100,7 +100,7 @@ export function sqlIO(sql: dd.SQL, dialect: Dialect): SQLIO {
   const vars = new VarList(`Expression ${sql.toString()}`, true);
   for (const element of sql.elements) {
     if (element.type === dd.SQLElementType.input) {
-      const sqlVar = element.value as dd.SQLVariable;
+      const sqlVar = element.toInput();
       const varInfo = VarInfo.fromSQLVar(sqlVar, dialect);
       vars.add(varInfo);
     }

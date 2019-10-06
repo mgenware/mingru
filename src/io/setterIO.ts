@@ -34,7 +34,7 @@ export class SetterIO {
           let value: string;
           if (col.defaultValue) {
             if (col.defaultValue instanceof dd.SQL) {
-              const valueIO = sqlIO(col.defaultValue as dd.SQL, dialect);
+              const valueIO = sqlIO(col.defaultValue, dialect);
               value = valueIO.toSQL(table);
             } else {
               value = dialect.objToSQL(col.defaultValue, table);

@@ -29,7 +29,7 @@ export class MySQL extends Dialect {
       return escapeString(value);
     }
     if (value instanceof dd.SQL) {
-      const io = sqlIO(value as dd.SQL, this);
+      const io = sqlIO(value, this);
       return io.toSQL(table);
     }
     throw new Error(`Unsupported type of object "${toTypeString(value)}"`);

@@ -24,7 +24,7 @@ it('unsafeInsert', async () => {
 
 it('insertOne', async () => {
   class Employee extends dd.Table {
-    id = dd.pk(dd.int()).setDBName('emp_no');
+    id = dd.pk(dd.int()).autoIncrement.setDBName('emp_no');
     firstName = dd.varChar(50);
     lastName = dd.varChar(50);
     gender = dd.varChar(10);
@@ -79,7 +79,7 @@ it('Custom DB name', async () => {
 
 it('Set auto-increment as input', async () => {
   class Employee extends dd.Table {
-    id = dd.pk(dd.int()).setDBName('emp_no');
+    id = dd.pk(dd.int()).autoIncrement.setDBName('emp_no');
     firstName = dd.varChar(50);
     lastName = dd.varChar(50);
     gender = dd.varChar(10);

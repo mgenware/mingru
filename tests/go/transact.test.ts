@@ -45,7 +45,7 @@ it('No inserted ID', async () => {
 
 it('Last inserted ID', async () => {
   class Employee extends dd.Table {
-    id = dd.pk(dd.int()).setDBName('emp_no');
+    id = dd.pk(dd.int()).autoIncrement.setDBName('emp_no');
     firstName = dd.varChar(50);
   }
   const employee = dd.table(Employee, 'employees');

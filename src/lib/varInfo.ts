@@ -6,12 +6,15 @@ export class TypeInfo {
   static fromSQLVariable(variable: dd.SQLVariable, dialect: Dialect): TypeInfo {
     throwIfFalsy(variable, 'variable');
     throwIfFalsy(dialect, 'dialect');
+    const { type } = variable;
 
-    if (variable.type instanceof dd.Column) {
-      return dialect.colTypeToGoType((variable.type as dd.Column).type);
+    if (type instanceof dd.Column) {
+      return dialect.colTypeToGoType(type.type);
     }
-    // variable.type is a string
-    const parts = variable.type.split('|');
+    if (type instanceof dd.ColumnType) {
+      return dialect.colTypeToGoType(type);
+    }
+    const parts = type.split('|');
     const typeName = parts[0];
     let namespace: string | undefined;
     if (parts.length > 1) {
