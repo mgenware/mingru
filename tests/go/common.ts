@@ -47,7 +47,7 @@ export async function testBuildToDirAsync(
   taList: dd.TA[],
   files: string[],
   expectedDir: string,
-  option?: mr.IBuildOption,
+  option?: mr.BuildOption,
 ) {
   const opt = option || {};
   opt.noFileHeader = true;

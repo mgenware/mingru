@@ -7,7 +7,7 @@ import Dialect from '../dialect';
 
 export class ActionIO {
   table: dd.Table;
-  funcName: string = '';
+  funcName = '';
   funcStubs: VarInfo[];
 
   constructor(

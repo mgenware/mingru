@@ -9,7 +9,7 @@ import logger from '../logger';
 import { TAIO } from '../io/taIO';
 import CSQLBuilder from './csqlBuilder';
 
-export interface IBuildOption {
+export interface BuildOption {
   packageName?: string;
   noFileHeader?: boolean;
   cleanBuild?: boolean;
@@ -19,12 +19,12 @@ export interface IBuildOption {
 }
 
 class Builder {
-  opts: IBuildOption;
+  opts: BuildOption;
   constructor(
     public taList: dd.TA[],
     public dialect: Dialect,
     public outDir: string,
-    opts?: IBuildOption,
+    opts?: BuildOption,
   ) {
     throwIfFalsy(taList, 'tableActionList');
     throwIfFalsy(dialect, 'dialect');
@@ -90,7 +90,7 @@ export default async function buildAsync(
   taList: dd.TA[],
   dialect: Dialect,
   outDir: string,
-  options?: IBuildOption,
+  options?: BuildOption,
 ) {
   const builder = new Builder(taList, dialect, outDir, options);
   await builder.build();

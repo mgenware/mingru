@@ -4,6 +4,7 @@ import { throwIfFalsy } from 'throw-if-arg-empty';
 import toTypeString from 'to-type-string';
 import { TypeInfo } from '../lib/varInfo';
 import { sqlIO } from '../io/sqlIO';
+// eslint-disable-next-line
 const escapeString = require('sql-escape-string');
 
 const TimeType = new TypeInfo('time.Time', 'time');

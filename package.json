@@ -22,7 +22,7 @@
     "compile": "tsc -b tests",
     "dev": "yarn run clean && tsc -b tests -w",
     "prepublishOnly": "yarn run test",
-    "lint": "tslint --project tsconfig.json --config tslint.json",
+    "lint": "eslint \"{src,tests}/**/*.ts\" --quiet",
     "clean": "del-cli dist && del-cli dist_tests"
   },
   "engines": {
@@ -32,11 +32,13 @@
     "@types/glob": "^7.1.1",
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.7.11",
-    "mingru-models": "^0.24.0",
+    "@typescript-eslint/eslint-plugin": "^2.3.2",
+    "@typescript-eslint/parser": "^2.3.2",
     "del-cli": "^3.0.0",
+    "eslint": "^6.5.1",
+    "mingru-models": "^0.24.0",
     "mocha": "^6.2.1",
     "tempy": "^0.3.0",
-    "tslint": "^5.20.0",
     "typescript": "^3.6.3"
   },
   "dependencies": {
