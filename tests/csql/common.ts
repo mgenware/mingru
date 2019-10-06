@@ -1,6 +1,6 @@
 import * as nodepath from 'path';
 import * as mr from '../../';
-import * as dd from 'dd-models';
+import * as dd from 'mingru-models';
 import * as mfs from 'm-fs';
 import * as assert from 'assert';
 

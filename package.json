@@ -1,7 +1,7 @@
 {
   "name": "mingru",
   "version": "0.14.1",
-  "description": "SQL Generator for dd-models",
+  "description": "SQL Generator for mingru-models",
   "main": "dist/main.js",
   "types": "dist/main.d.ts",
   "author": "Mgen (https://www.mgenware.com)",
@@ -32,7 +32,7 @@
     "@types/glob": "^7.1.1",
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.7.11",
-    "dd-models": "^0.23.1",
+    "mingru-models": "^0.24.0",
     "del-cli": "^3.0.0",
     "mocha": "^6.2.1",
     "tempy": "^0.3.0",

@@ -1,5 +1,5 @@
 import * as mr from '../../';
-import * as dd from 'dd-models';
+import * as dd from 'mingru-models';
 import post from '../models/post';
 import user from '../models/user';
 import * as assert from 'assert';

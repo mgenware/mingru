@@ -1,5 +1,5 @@
 import { Dialect } from '../dialect';
-import * as dd from 'dd-models';
+import * as dd from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import toTypeString from 'to-type-string';
 import { TypeInfo } from '../lib/varInfo';

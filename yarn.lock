@@ -231,16 +231,6 @@ currently-unhandled@^0.4.1:
   dependencies:
     array-find-index "^1.0.1"
 
-dd-models@^0.23.1:
-  version "0.23.1"
-  resolved "https://registry.yarnpkg.com/dd-models/-/dd-models-0.23.1.tgz#d740927e57151d5c68e391a918e67c65e4e3bc3a"
-  integrity sha512-NdXP8EyfAWzhx4NZjKQ5qZKkSCS7q3F4zRN4kddxt14I50P0bj7OAsF2f2S4/OhczYSpDdcvFsaXEY2xCOeXtQ==
-  dependencies:
-    lodash.camelcase "^4.3.0"
-    lodash.snakecase "^4.1.1"
-    throw-if-arg-empty "^2.1.0"
-    to-type-string "^1.0.1"
-
 debug@3.2.6:
   version "3.2.6"
   resolved "https://registry.yarnpkg.com/debug/-/debug-3.2.6.tgz#e83d17de16d8a7efb7717edbe5fb10135eee629b"
@@ -724,6 +714,16 @@ micromatch@^4.0.2:
   dependencies:
     braces "^3.0.1"
     picomatch "^2.0.5"
+
+mingru-models@^0.24.0:
+  version "0.24.0"
+  resolved "https://registry.yarnpkg.com/mingru-models/-/mingru-models-0.24.0.tgz#beaf6799c0efc2f5cf44f09a5b1f261522a90b15"
+  integrity sha512-qOmQWV/9JLkdzXiXPBiNoM9eit5UO19zrmRsD4Ld6D4OuShpwjZ8tamGKWkYYFmnAc9MBNwI79sEF1aaN1FoGA==
+  dependencies:
+    lodash.camelcase "^4.3.0"
+    lodash.snakecase "^4.1.1"
+    throw-if-arg-empty "^2.1.0"
+    to-type-string "^1.0.1"
 
 minimatch@3.0.4, minimatch@^3.0.4:
   version "3.0.4"

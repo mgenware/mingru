@@ -1,4 +1,4 @@
-import * as dd from 'dd-models';
+import * as dd from 'mingru-models';
 
 export function actionPascalName(actionName: string): string {
   return dd.utils.toPascalCase(actionName);

@@ -5,7 +5,7 @@
 [![npm version](https://img.shields.io/npm/v/mingru.svg?style=flat-square)](https://npmjs.com/package/mingru)
 [![Node.js Version](http://img.shields.io/node/v/mingru.svg?style=flat-square)](https://nodejs.org/en/)
 
-Convert [dd-models](https://github.com/mgenware/dd-models) to Go code.
+Convert [mingru-models](https://github.com/mgenware/mingru-models) to Go code.
 
 **All APIs are subject to change before 1.0.0**
 
@@ -19,11 +19,11 @@ Goals:
 
 ### Step 1: Define models
 
-For example, let's define a simple user table with 3 columns using [dd-models](https://github.com/mgenware/dd-models):
+For example, let's define a simple user table with 3 columns using [mingru-models](https://github.com/mgenware/mingru-models):
 
 ```ts
 // ----------- User table model (user.ts) -----------
-import * as dd from 'dd-models';
+import * as dd from 'mingru-models';
 
 class User extends dd.Table {
   id = dd.pk();
@@ -41,7 +41,7 @@ Create a new file (`userTA.ts`) for table actions and import the user table (`us
 
 ```ts
 // ----------- User table actions (userTA.ts) -----------
-import * as dd from 'dd-models';
+import * as dd from 'mingru-models';
 import user from './user';
 
 export class UserTA extends dd.TA {
@@ -251,11 +251,11 @@ func main() {
 
 ### Defining Models and Actions
 
-mingru converts [dd-models](https://github.com/mgenware/dd-models) to Go code, to learn how to define models and actions, refer to [dd-models docs](https://github.com/mgenware/dd-models).
+mingru converts [mingru-models](https://github.com/mgenware/mingru-models) to Go code, to learn how to define models and actions, refer to [mingru-models docs](https://github.com/mgenware/mingru-models).
 
 ### Generating Go Code
 
-Once you are familiar with [dd-models](https://github.com/mgenware/dd-models), you can import your actions, and use `mingru.build` along with a dialect(e.g. MySQL) to generate Go code:
+Once you are familiar with [mingru-models](https://github.com/mgenware/mingru-models), you can import your actions, and use `mingru.build` along with a dialect(e.g. MySQL) to generate Go code:
 
 ```ts
 interface IBuildOption {

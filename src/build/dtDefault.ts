@@ -1,4 +1,4 @@
-import * as dd from 'dd-models';
+import * as dd from 'mingru-models';
 
 export default function dtDefault(type: string): unknown | null {
   const { dt } = dd;

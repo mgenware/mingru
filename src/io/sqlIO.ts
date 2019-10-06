@@ -1,5 +1,5 @@
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import * as dd from 'dd-models';
+import * as dd from 'mingru-models';
 import Dialect from '../dialect';
 import toTypeString from 'to-type-string';
 import VarList from '../lib/varList';

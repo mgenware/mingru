@@ -1,5 +1,5 @@
 import * as utils from './utils';
-import * as dd from 'dd-models';
+import * as dd from 'mingru-models';
 import VarList from '../lib/varList';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import VarInfo from '../lib/varInfo';

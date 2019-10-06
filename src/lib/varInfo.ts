@@ -1,4 +1,4 @@
-import * as dd from 'dd-models';
+import * as dd from 'mingru-models';
 import { Dialect } from '../dialect';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 

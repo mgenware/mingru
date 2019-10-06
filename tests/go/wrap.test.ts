@@ -1,4 +1,4 @@
-import * as dd from 'dd-models';
+import * as dd from 'mingru-models';
 import { testBuildAsync } from './common';
 import user from '../models/user';
 import post from '../models/post';

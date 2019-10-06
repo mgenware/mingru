@@ -1,5 +1,5 @@
 import GoBuilder from './goBuilder';
-import * as dd from 'dd-models';
+import * as dd from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import * as mfs from 'm-fs';
 import Dialect from '../dialect';

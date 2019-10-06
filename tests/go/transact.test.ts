@@ -1,5 +1,5 @@
 import { testBuildAsync } from './common';
-import * as dd from 'dd-models';
+import * as dd from 'mingru-models';
 
 it('No inserted ID', async () => {
   class Employee extends dd.Table {
