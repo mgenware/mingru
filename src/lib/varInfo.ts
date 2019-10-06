@@ -7,20 +7,19 @@ export class TypeInfo {
     throwIfFalsy(variable, 'variable');
     throwIfFalsy(dialect, 'dialect');
     const { type } = variable;
-
+    if (typeof type === 'string') {
+      const parts = type.split('|');
+      const typeName = parts[0];
+      let namespace: string | undefined;
+      if (parts.length > 1) {
+        namespace = parts[1];
+      }
+      return new TypeInfo(typeName, namespace);
+    }
     if (type instanceof dd.Column) {
       return dialect.colTypeToGoType(type.type);
     }
-    if (type instanceof dd.ColumnType) {
-      return dialect.colTypeToGoType(type);
-    }
-    const parts = type.split('|');
-    const typeName = parts[0];
-    let namespace: string | undefined;
-    if (parts.length > 1) {
-      namespace = parts[1];
-    }
-    return new TypeInfo(typeName, namespace);
+    return dialect.colTypeToGoType(type);
   }
   constructor(public typeName: string, public namespace?: string) {}
 
