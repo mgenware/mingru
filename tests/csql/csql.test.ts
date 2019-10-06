@@ -2,6 +2,7 @@ import * as dd from 'dd-models';
 import { testBuildAsync } from './common';
 import user from '../models/user';
 import post from '../models/post';
+import like from '../models/like';
 
 it('Common (NULL, defaults)', async () => {
   class User extends dd.Table {
@@ -59,4 +60,8 @@ it('No SQL expr as default value', async () => {
   }
   const t = dd.table(User);
   await testBuildAsync(t, 'noSQLExpr/user');
+});
+
+it('Composite PKs', async () => {
+  await testBuildAsync(like, 'compositePKs/like');
 });

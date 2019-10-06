@@ -133,6 +133,9 @@ export class MySQL extends Dialect {
         case DT.tinyInt: {
           return 'TINYINT';
         }
+        case DT.bool: {
+          return 'TINYINT';
+        }
         case DT.varChar: {
           return `VARCHAR(${size})`;
         }
