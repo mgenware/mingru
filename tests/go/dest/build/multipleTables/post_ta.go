@@ -15,7 +15,7 @@ var Post = &TableTypePost{}
 
 // DeleteByID ...
 func (da *TableTypePost) DeleteByID(queryable dbx.Queryable, id uint64) error {
-	result, err := queryable.Exec("DELETE FROM `post` WHERE `id` = ?", id)
+	result, err := queryable.Exec("DELETE FROM `db_post` WHERE `id` = ?", id)
 	return dbx.CheckOneRowAffectedWithError(result, err)
 }
 
@@ -29,7 +29,7 @@ type PostTableSelectPostInfoResult struct {
 // SelectPostInfo ...
 func (da *TableTypePost) SelectPostInfo(queryable dbx.Queryable) (*PostTableSelectPostInfoResult, error) {
 	result := &PostTableSelectPostInfoResult{}
-	err := queryable.QueryRow("SELECT `post`.`id` AS `id`, `post`.`content` AS `content`, `join_1`.`url_name` AS `userUrlName` FROM `post` AS `post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `post`.`user_id`").Scan(&result.ID, &result.Content, &result.UserUrlName)
+	err := queryable.QueryRow("SELECT `db_post`.`id` AS `id`, `db_post`.`content` AS `content`, `join_1`.`url_name` AS `userUrlName` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`").Scan(&result.ID, &result.Content, &result.UserUrlName)
 	if err != nil {
 		return nil, err
 	}
@@ -38,6 +38,6 @@ func (da *TableTypePost) SelectPostInfo(queryable dbx.Queryable) (*PostTableSele
 
 // UpdateContent ...
 func (da *TableTypePost) UpdateContent(queryable dbx.Queryable, content string) (int, error) {
-	result, err := queryable.Exec("UPDATE `post` SET `content` = `content` = ?", content)
+	result, err := queryable.Exec("UPDATE `db_post` SET `content` = `content` = ?", content)
 	return dbx.GetRowsAffectedIntWithError(result, err)
 }

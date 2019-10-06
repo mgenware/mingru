@@ -78,7 +78,7 @@ it('Temp member actions', async () => {
     title = dd.varChar(200);
   }
 
-  const post = dd.table(Post);
+  const post = dd.table(Post, 'db_post');
   class PostTA extends dd.TA {
     insertCore = dd.insertOne().setInputs();
     insert = dd.transact(

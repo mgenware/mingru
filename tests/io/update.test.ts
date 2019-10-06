@@ -23,7 +23,7 @@ it('Update', () => {
   assert.ok(io instanceof mr.UpdateIO);
   expect(
     io.sql,
-    'UPDATE `post` SET `title` = "haha", `content` = ?, `cmt_c` = `cmt_c` + 1 WHERE `id` = ?',
+    'UPDATE `db_post` SET `title` = "haha", `content` = ?, `cmt_c` = `cmt_c` + 1 WHERE `id` = ?',
   );
   expect(io.setters.length, 3);
   expect(io.setters[0].col, post.title);
@@ -43,7 +43,7 @@ it('Update with where', () => {
   const v = postTA.t;
   const io = mr.updateIO(v, dialect);
 
-  expect(io.sql, 'UPDATE `post` SET `title` = "haha" WHERE `id` = 1');
+  expect(io.sql, 'UPDATE `db_post` SET `title` = "haha" WHERE `id` = 1');
 });
 
 it('getInputs', () => {

@@ -16,7 +16,7 @@ var Post = &TableTypePost{}
 // SelectT ...
 func (da *TableTypePost) SelectT(queryable dbx.Queryable, id uint64) (uint64, error) {
 	var result uint64
-	err := queryable.QueryRow("SELECT `user_id` FROM `post` WHERE `id` = ?", id).Scan(&result)
+	err := queryable.QueryRow("SELECT `user_id` FROM `db_post` WHERE `id` = ?", id).Scan(&result)
 	if err != nil {
 		return result, err
 	}

@@ -16,7 +16,7 @@ it('Delete', () => {
   const io = mr.deleteIO(v, dialect);
 
   assert.ok(io instanceof mr.DeleteIO);
-  expect(io.sql, 'DELETE FROM `post` WHERE `id` = ?');
+  expect(io.sql, 'DELETE FROM `db_post` WHERE `id` = ?');
 });
 
 it('Delete with where', () => {
@@ -27,7 +27,7 @@ it('Delete with where', () => {
   const v = postTA.t;
   const io = mr.deleteIO(v, dialect);
 
-  expect(io.sql, 'DELETE FROM `post` WHERE `id` = 1');
+  expect(io.sql, 'DELETE FROM `db_post` WHERE `id` = 1');
 });
 
 it('getInputs', () => {

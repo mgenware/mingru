@@ -23,7 +23,7 @@ type PostTableSelectNullableTimesResult struct {
 
 // SelectNullableTimes ...
 func (da *TableTypePost) SelectNullableTimes(queryable dbx.Queryable) ([]*PostTableSelectNullableTimesResult, error) {
-	rows, err := queryable.Query("SELECT `n_datetime`, `n_date` FROM `post` ORDER BY `id`")
+	rows, err := queryable.Query("SELECT `n_datetime`, `n_date` FROM `db_post` ORDER BY `id`")
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ type PostTableSelectTimesResult struct {
 
 // SelectTimes ...
 func (da *TableTypePost) SelectTimes(queryable dbx.Queryable) ([]*PostTableSelectTimesResult, error) {
-	rows, err := queryable.Query("SELECT `datetime`, `date` FROM `post` ORDER BY `id`")
+	rows, err := queryable.Query("SELECT `datetime`, `date` FROM `db_post` ORDER BY `id`")
 	if err != nil {
 		return nil, err
 	}

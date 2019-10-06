@@ -75,7 +75,8 @@ it('selectRows, WHERE, orderBy', async () => {
       .where(dd.sql`${post.id} = ${post.id.toInput()} ${post.id.toInput()}`)
       .orderByAsc(post.title)
       .orderByAsc(cc)
-      .orderByDesc(post.title);
+      .orderByDesc(post.title)
+      .orderByAsc(post.cmtCount);
   }
   const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'select/selectRowsWhereOrder');
@@ -124,6 +125,17 @@ it('Basic join', async () => {
   }
   const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'select/joinBasic');
+});
+
+it('Basic join (rows)', async () => {
+  class PostTA extends dd.TA {
+    selectT = dd
+      .selectRows(post.user_id.join(user).url_name, post.title)
+      .orderByAsc(post.user_id.join(user).sig)
+      .orderByDesc(post.user_id);
+  }
+  const ta = dd.ta(post, PostTA);
+  await testBuildAsync(ta, 'select/joinBasicRows');
 });
 
 it('Same table, multiple cols join', async () => {

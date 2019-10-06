@@ -15,6 +15,6 @@ var Post = &TableTypePost{}
 
 // UpdateT ...
 func (da *TableTypePost) UpdateT(queryable dbx.Queryable, content string) (int, error) {
-	result, err := queryable.Exec("UPDATE `post` SET `title` = \"haha\", `content` = ?", content)
+	result, err := queryable.Exec("UPDATE `db_post` SET `title` = \"haha\", `content` = ?", content)
 	return dbx.GetRowsAffectedIntWithError(result, err)
 }

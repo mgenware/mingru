@@ -15,13 +15,13 @@ var Post = &TableTypePost{}
 
 // PostTableSelectTResult ...
 type PostTableSelectTResult struct {
-	ID    uint64
-	Title string
+	UserUrlName string
+	Title       string
 }
 
 // SelectT ...
-func (da *TableTypePost) SelectT(queryable dbx.Queryable, id uint64) ([]*PostTableSelectTResult, error) {
-	rows, err := queryable.Query("SELECT `id`, `title` FROM `db_post` WHERE `id` = ? ORDER BY `id`", id)
+func (da *TableTypePost) SelectT(queryable dbx.Queryable) ([]*PostTableSelectTResult, error) {
+	rows, err := queryable.Query("SELECT `join_1`.`url_name` AS `userUrlName`, `db_post`.`title` AS `title` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id` ORDER BY `join_1`.`sig`, `db_post`.`user_id` DESC")
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +29,7 @@ func (da *TableTypePost) SelectT(queryable dbx.Queryable, id uint64) ([]*PostTab
 	defer rows.Close()
 	for rows.Next() {
 		item := &PostTableSelectTResult{}
-		err = rows.Scan(&item.ID, &item.Title)
+		err = rows.Scan(&item.UserUrlName, &item.Title)
 		if err != nil {
 			return nil, err
 		}

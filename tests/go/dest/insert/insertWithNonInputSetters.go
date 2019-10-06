@@ -15,6 +15,6 @@ var Post = &TableTypePost{}
 
 // InsertT ...
 func (da *TableTypePost) InsertT(queryable dbx.Queryable, title string, userID uint64) error {
-	_, err := queryable.Exec("INSERT INTO `post` (`title`, `user_id`, `content`) VALUES (?, ?, \"haha\")", title, userID)
+	_, err := queryable.Exec("INSERT INTO `db_post` (`title`, `user_id`, `content`) VALUES (?, ?, \"haha\")", title, userID)
 	return err
 }

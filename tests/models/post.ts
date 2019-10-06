@@ -18,4 +18,4 @@ class Post extends dd.Table {
   m_user_id = dd.fk(user.id).setDBName('my_user_id');
 }
 
-export default dd.table(Post);
+export default dd.table(Post, 'db_post');

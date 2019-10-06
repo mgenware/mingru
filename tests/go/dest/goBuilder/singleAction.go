@@ -22,7 +22,7 @@ type PostTableSelectTResult struct {
 // SelectT ...
 func (da *TableTypePost) SelectT(queryable dbx.Queryable) (*PostTableSelectTResult, error) {
 	result := &PostTableSelectTResult{}
-	err := queryable.QueryRow("SELECT `id`, `title` FROM `post`").Scan(&result.ID, &result.Title)
+	err := queryable.QueryRow("SELECT `id`, `title` FROM `db_post`").Scan(&result.ID, &result.Title)
 	if err != nil {
 		return nil, err
 	}

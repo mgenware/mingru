@@ -17,7 +17,7 @@ var Post = &TableTypePost{}
 
 // S ...
 func (da *TableTypePost) S(queryable dbx.Queryable, urlName string, id uint64, sig *string, followerCount *string) (int, error) {
-	result, err := queryable.Exec("UPDATE `post` SET `url_name` = ?, `sig` = ?, `follower_c` = ? WHERE ? ? ? ?", urlName, sig, followerCount, urlName, id, sig, urlName)
+	result, err := queryable.Exec("UPDATE `db_post` SET `url_name` = ?, `sig` = ?, `follower_c` = ? WHERE ? ? ? ?", urlName, sig, followerCount, urlName, id, sig, urlName)
 	return dbx.GetRowsAffectedIntWithError(result, err)
 }
 
@@ -33,6 +33,6 @@ func (da *TableTypePost) T2(queryable dbx.Queryable, id uint64, urlName string, 
 
 // T3 ...
 func (da *TableTypePost) T3(queryable dbx.Queryable, id uint64, content string, userID uint64, reviewerID uint64, cmtCount uint, datetime time.Time, date time.Time, time time.Time, nDatetime *time.Time, nDate *time.Time, nTime *time.Time, mUserID uint64) error {
-	result, err := queryable.Exec("UPDATE `post` SET `title` = ?, `content` = ?, `user_id` = ?, `reviewer_id` = ?, `cmt_c` = ?, `datetime` = ?, `date` = ?, `time` = ?, `n_datetime` = ?, `n_date` = ?, `n_time` = ?, `my_user_id` = ? WHERE `id` = ?", "t3", content, userID, reviewerID, cmtCount, datetime, date, time, nDatetime, nDate, nTime, mUserID, id)
+	result, err := queryable.Exec("UPDATE `db_post` SET `title` = ?, `content` = ?, `user_id` = ?, `reviewer_id` = ?, `cmt_c` = ?, `datetime` = ?, `date` = ?, `time` = ?, `n_datetime` = ?, `n_date` = ?, `n_time` = ?, `my_user_id` = ? WHERE `id` = ?", "t3", content, userID, reviewerID, cmtCount, datetime, date, time, nDatetime, nDate, nTime, mUserID, id)
 	return dbx.CheckOneRowAffectedWithError(result, err)
 }

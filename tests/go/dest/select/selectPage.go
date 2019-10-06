@@ -24,7 +24,7 @@ func (da *TableTypePost) SelectT(queryable dbx.Queryable, id uint64, page int, p
 	limit := pageSize + 1
 	offset := (page - 1) * pageSize
 	max := pageSize
-	rows, err := queryable.Query("SELECT `id`, `title` FROM `post` WHERE `id` = ? ORDER BY `id` LIMIT ? OFFSET ?", id, limit, offset)
+	rows, err := queryable.Query("SELECT `id`, `title` FROM `db_post` WHERE `id` = ? ORDER BY `id` LIMIT ? OFFSET ?", id, limit, offset)
 	if err != nil {
 		return nil, false, err
 	}

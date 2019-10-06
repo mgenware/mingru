@@ -33,7 +33,7 @@ it('Multiple PKs', async () => {
     user2 = dd.pk(user.id);
     d = dd.uBigInt(12);
   }
-  const t = dd.table(Post);
+  const t = dd.table(Post, 'db_post');
   await testBuildAsync(t, 'multiplePKs/post');
 });
 

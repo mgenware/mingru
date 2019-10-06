@@ -67,7 +67,7 @@ it('Basic join', () => {
 
   expect(
     io.sql,
-    'SELECT `join_1`.`url_name` AS `userUrlName`, `post`.`title` AS `title` FROM `post` AS `post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `post`.`user_id`',
+    'SELECT `join_1`.`url_name` AS `userUrlName`, `db_post`.`title` AS `title` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`',
   );
 });
 
@@ -99,7 +99,7 @@ it('Join a table with custom table name', () => {
 
   expect(
     io.sql,
-    'SELECT `post`.`user_id` AS `userID`, `join_1`.`to_user_id` AS `userToUserID` FROM `post` AS `post` INNER JOIN `post_cmt_rpl` AS `join_1` ON `join_1`.`id` = `post`.`user_id`',
+    'SELECT `db_post`.`user_id` AS `userID`, `join_1`.`to_user_id` AS `userToUserID` FROM `db_post` AS `db_post` INNER JOIN `post_cmt_rpl` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`',
   );
 });
 
@@ -116,7 +116,7 @@ it('Join a table with custom column name', () => {
 
   expect(
     io.sql,
-    'SELECT `post`.`user_id` AS `userID`, `join_1`.`to_user_id` AS `userToUserID` FROM `post` AS `post` INNER JOIN `post_cmt_rpl` AS `join_1` ON `join_1`.`haha` = `post`.`user_id`',
+    'SELECT `db_post`.`user_id` AS `userID`, `join_1`.`to_user_id` AS `userToUserID` FROM `db_post` AS `db_post` INNER JOIN `post_cmt_rpl` AS `join_1` ON `join_1`.`haha` = `db_post`.`user_id`',
   );
 });
 
@@ -146,7 +146,7 @@ it('3-table joins and where', () => {
 
   expect(
     io.sql,
-    'SELECT `post_cmt`.`id` AS `id`, `post_cmt`.`user_id` AS `userID`, `join_1`.`title` AS `targetTitle`, `join_1`.`user_id` AS `targetUserID`, `join_2`.`url_name` AS `targetUserUrlName`, `join_2`.`id` AS `TUID2` FROM `post_cmt` AS `post_cmt` INNER JOIN `post` AS `join_1` ON `join_1`.`id` = `post_cmt`.`target_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `target`.`user_id` WHERE `post_cmt`.`user_id` = 1 AND `join_1`.`title` = 2 AND `join_2`.`url_name` = 3',
+    'SELECT `post_cmt`.`id` AS `id`, `post_cmt`.`user_id` AS `userID`, `join_1`.`title` AS `targetTitle`, `join_1`.`user_id` AS `targetUserID`, `join_2`.`url_name` AS `targetUserUrlName`, `join_2`.`id` AS `TUID2` FROM `post_cmt` AS `post_cmt` INNER JOIN `db_post` AS `join_1` ON `join_1`.`id` = `post_cmt`.`target_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `target`.`user_id` WHERE `post_cmt`.`user_id` = 1 AND `join_1`.`title` = 2 AND `join_2`.`url_name` = 3',
   );
 });
 
@@ -169,7 +169,7 @@ it('AS', () => {
 
   expect(
     io.sql,
-    'SELECT `post_cmt`.`id` AS `id`, `post_cmt`.`user_id` AS `a`, `join_1`.`title` AS `b`, `join_2`.`url_name` AS `targetUserUrlName`, `join_2`.`url_name` AS `c` FROM `post_cmt` AS `post_cmt` INNER JOIN `post` AS `join_1` ON `join_1`.`id` = `post_cmt`.`target_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `target`.`user_id`',
+    'SELECT `post_cmt`.`id` AS `id`, `post_cmt`.`user_id` AS `a`, `join_1`.`title` AS `b`, `join_2`.`url_name` AS `targetUserUrlName`, `join_2`.`url_name` AS `c` FROM `post_cmt` AS `post_cmt` INNER JOIN `db_post` AS `join_1` ON `join_1`.`id` = `post_cmt`.`target_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `target`.`user_id`',
   );
 });
 
@@ -271,6 +271,6 @@ it('GROUP BY and HAVING', () => {
   const io = mr.selectIO(v, mr.mysql);
   expect(
     io.sql,
-    'SELECT YEAR(`datetime`) AS `year`, SUM(`cmt_c`) AS `total` FROM `post` WHERE `id` = ? GROUP BY `year`, `total` HAVING `year` > 2010 AND `total` > 100',
+    'SELECT YEAR(`datetime`) AS `year`, SUM(`cmt_c`) AS `total` FROM `db_post` WHERE `id` = ? GROUP BY `year`, `total` HAVING `year` > 2010 AND `total` > 100',
   );
 });

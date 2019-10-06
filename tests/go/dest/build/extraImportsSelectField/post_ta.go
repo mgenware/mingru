@@ -18,7 +18,7 @@ var Post = &TableTypePost{}
 // SelectTime ...
 func (da *TableTypePost) SelectTime(queryable dbx.Queryable) (*time.Time, error) {
 	var result *time.Time
-	err := queryable.QueryRow("SELECT `n_datetime` FROM `post`").Scan(&result)
+	err := queryable.QueryRow("SELECT `n_datetime` FROM `db_post`").Scan(&result)
 	if err != nil {
 		return result, err
 	}

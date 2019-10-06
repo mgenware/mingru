@@ -15,6 +15,6 @@ var Post = &TableTypePost{}
 
 // DeleteT ...
 func (da *TableTypePost) DeleteT(queryable dbx.Queryable, id uint64) error {
-	result, err := queryable.Exec("DELETE FROM `post` WHERE `id` = ?", id)
+	result, err := queryable.Exec("DELETE FROM `db_post` WHERE `id` = ?", id)
 	return dbx.CheckOneRowAffectedWithError(result, err)
 }

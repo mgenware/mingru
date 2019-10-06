@@ -16,7 +16,7 @@ it('Insert inputs', () => {
   const io = mr.insertIO(v, dialect);
 
   assert.ok(io instanceof mr.InsertIO);
-  expect(io.sql, 'INSERT INTO `post` (`title`, `user_id`) VALUES (?, ?)');
+  expect(io.sql, 'INSERT INTO `db_post` (`title`, `user_id`) VALUES (?, ?)');
 });
 
 it('Insert inputs and values', () => {
@@ -33,7 +33,7 @@ it('Insert inputs and values', () => {
   assert.ok(io instanceof mr.InsertIO);
   expect(
     io.sql,
-    'INSERT INTO `post` (`title`, `user_id`, `datetime`) VALUES (?, ?, NOW())',
+    'INSERT INTO `db_post` (`title`, `user_id`, `datetime`) VALUES (?, ?, NOW())',
   );
 });
 

@@ -16,7 +16,7 @@ var Post = &TableTypePost{}
 // SelectT ...
 func (da *TableTypePost) SelectT(queryable dbx.Queryable) (string, error) {
 	var result string
-	err := queryable.QueryRow("SELECT `title` FROM `post`").Scan(&result)
+	err := queryable.QueryRow("SELECT `title` FROM `db_post`").Scan(&result)
 	if err != nil {
 		return result, err
 	}

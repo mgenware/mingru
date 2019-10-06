@@ -22,7 +22,7 @@ type PostTableSelectPostTitleResult struct {
 // SelectPostTitle ...
 func (da *TableTypePost) SelectPostTitle(queryable dbx.Queryable) (*PostTableSelectPostTitleResult, error) {
 	result := &PostTableSelectPostTitleResult{}
-	err := queryable.QueryRow("SELECT `id`, `title` FROM `post`").Scan(&result.ID, &result.Title)
+	err := queryable.QueryRow("SELECT `id`, `title` FROM `db_post`").Scan(&result.ID, &result.Title)
 	if err != nil {
 		return nil, err
 	}
