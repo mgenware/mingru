@@ -37,7 +37,7 @@ class UpdateIOProcessor {
   convert(): UpdateIO {
     let sql = 'UPDATE ';
     const { action, dialect } = this;
-    const [, table] = action.ensureInitialized();
+    const [table] = action.ensureInitialized();
 
     if (!action.whereSQL && !action.allowNoWhere) {
       throw new Error(

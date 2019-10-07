@@ -115,16 +115,13 @@ export class SelectIOProcessor {
   convert(): SelectIO {
     let sql = 'SELECT ';
     const { action, dialect } = this;
-    const [, fromTable] = action.ensureInitialized();
+    const [fromTable] = action.ensureInitialized();
     const columns = action.columns.length
       ? action.columns
       : fromTable.__columns;
     this.hasJoin = columns.some(sCol => {
       const [col] = this.analyzeSelectedColumn(sCol);
-      if (col && col.isJoinedColumn()) {
-        return true;
-      }
-      return false;
+      return col && col.__table instanceof dd.JoinedTable;
     });
     const selMode = action.mode;
 
@@ -201,7 +198,7 @@ export class SelectIOProcessor {
         havingIO.toSQL(fromTable, ele => {
           if (ele.type === dd.SQLElementType.column) {
             const col = ele.toColumn();
-            if (col.isJoinedColumn()) {
+            if (col.__table instanceof dd.JoinedTable) {
               throw new Error(
                 `Joins are not allowed in HAVING clause, offending column "${col.__name}".`,
               );
@@ -322,7 +319,7 @@ export class SelectIOProcessor {
     const { dialect } = this;
     let value = dialect.encodeColumnName(col);
     if (this.hasJoin) {
-      if (col.isJoinedColumn()) {
+      if (col.__table instanceof dd.JoinedTable) {
         const jt = col.__table as dd.JoinedTable;
         const joinPath = jt.keyPath;
         const join = this.jcMap.get(joinPath);
@@ -334,7 +331,7 @@ export class SelectIOProcessor {
         value = `${dialect.encodeName(join.tableAlias)}.${value}`;
       } else {
         // Use table name as alias
-        value = `${dialect.encodeName(col.tableName())}.${value}`;
+        value = `${dialect.encodeName(col.tableName(true))}.${value}`;
       }
     }
     return value;
@@ -406,7 +403,7 @@ export class SelectIOProcessor {
 
   private handleSelectedColumn(sCol: dd.SelectActionColumns): SelectedColumnIO {
     const { dialect } = this;
-    const [, table] = this.action.ensureInitialized();
+    const [table] = this.action.ensureInitialized();
     const [embeddedCol, rawCol, resultType] = this.analyzeSelectedColumn(sCol);
     if (embeddedCol) {
       const colSQL = this.handleColumn(
@@ -491,7 +488,7 @@ export class SelectIOProcessor {
   }
 
   private handleJoinRecursively(jc: dd.Column): JoinIO {
-    const table = jc.castToJoinedTable();
+    const table = jc.__table as dd.JoinedTable;
     const result = this.jcMap.get(table.keyPath);
     if (result) {
       return result;
@@ -499,11 +496,12 @@ export class SelectIOProcessor {
 
     let localTableName: string;
     const { srcColumn, destColumn, destTable } = table;
-    if (srcColumn.isJoinedColumn()) {
+    const [srcTable] = srcColumn.ensureInitialized();
+    if (srcTable instanceof dd.JoinedTable) {
       const srcIO = this.handleJoinRecursively(srcColumn);
       localTableName = srcIO.tableAlias;
     } else {
-      localTableName = srcColumn.tableName();
+      localTableName = srcColumn.tableName(true);
     }
 
     const joinIO = new JoinIO(
@@ -526,8 +524,8 @@ export class SelectIOProcessor {
     const { dialect } = this;
     const e = dialect.encodeName;
     const inputName = alias || col.inputName();
-    // Check for joined column
-    if (col.isJoinedColumn()) {
+    const [table] = col.ensureInitialized();
+    if (table instanceof dd.JoinedTable) {
       const joinIO = this.handleJoinRecursively(col);
       if (!col.mirroredColumn) {
         throw new Error(

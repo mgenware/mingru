@@ -48,12 +48,12 @@ export default class CSQLBuilder {
     return lines.map(line => `\t${line}`).join(sep);
   }
 
-  private fkExpression(col: dd.Column, fCol: dd.Column) {
+  private fkExpression(col: dd.Column, fCol: dd.Column): string {
     const { dialect } = this;
     return `CONSTRAINT FOREIGN KEY(${dialect.encodeColumnName(
       col,
     )}) REFERENCES ${dialect.encodeTableName(
-      fCol.castToTable(),
+      fCol.__table as dd.Table,
     )} (${dialect.encodeColumnName(fCol)}) ON DELETE CASCADE`;
   }
 }

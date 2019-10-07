@@ -131,6 +131,7 @@ it('Basic join (rows)', async () => {
   class PostTA extends dd.TA {
     selectT = dd
       .selectRows(post.user_id.join(user).url_name, post.title)
+      .where(dd.sql`${post.user_id.join(user).sig}-${post.user_id}`)
       .orderByAsc(post.user_id.join(user).sig)
       .orderByDesc(post.user_id);
   }

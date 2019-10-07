@@ -14,7 +14,7 @@ export class SetterIO {
     );
     if (action.autoSetter) {
       const { setters: actionSetters } = action;
-      const [, table] = action.ensureInitialized();
+      const [table] = action.ensureInitialized();
       dd.enumerateColumns(table, col => {
         // If already set, return
         if (actionSetters.get(col)) {
