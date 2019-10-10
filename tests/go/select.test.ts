@@ -5,6 +5,8 @@ import rpl from '../models/postReply';
 import user from '../models/user';
 import { testBuildAsync } from './common';
 import * as assert from 'assert';
+import postCategory from '../models/postCategory';
+import category from '../models/category';
 
 it('select', async () => {
   class PostTA extends dd.TA {
@@ -137,6 +139,26 @@ it('Basic join (rows)', async () => {
   }
   const ta = dd.ta(post, PostTA);
   await testBuildAsync(ta, 'select/joinBasicRows');
+});
+
+it('Inverse join (select from A on A.id = B.a_id)', async () => {
+  class PostTA extends dd.TA {
+    selectT = dd
+      .selectRows(
+        post.title,
+        post.id.join(postCategory).category_id,
+        post.id.join(postCategory).category_id.join(category).id,
+      )
+      .where(
+        dd.sql`${post.title}|${post.id.join(postCategory).category_id}|${
+          post.id.join(postCategory).category_id.join(category).id
+        }`,
+      )
+      .orderByAsc(post.id.join(postCategory).category_id.join(category).id)
+      .orderByDesc(post.user_id);
+  }
+  const ta = dd.ta(post, PostTA);
+  await testBuildAsync(ta, 'select/inverseJoin');
 });
 
 it('Same table, multiple cols join', async () => {
