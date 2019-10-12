@@ -33,7 +33,12 @@ export default class Builder {
 
   async build(callback: () => void): Promise<void> {
     throwIfFalsy(callback, 'callback');
+    const { opts, outDir } = this;
     this.buildStarted = true;
+    if (opts.cleanBuild) {
+      logger.info(`🛀  Cleaning directory "${outDir}"`);
+      await del(outDir, { force: true });
+    }
     await callback();
     this.buildStarted = false;
   }
@@ -41,11 +46,6 @@ export default class Builder {
   async buildActions(actions: dd.TableActions[]): Promise<void> {
     throwIfFalsy(actions, 'actions');
     this.checkBuildStatus();
-    const { opts, outDir } = this;
-    if (opts.cleanBuild) {
-      logger.info(`🧹  Cleaning directory "${outDir}"`);
-      await del(outDir, { force: true });
-    }
     await Promise.all(actions.map(async ta => await this.buildTA(ta)));
     logger.debug(`🎉  Action build succeeded`);
   }
@@ -53,13 +53,6 @@ export default class Builder {
   async buildCreateTableSQLFiles(tables: dd.Table[]): Promise<void> {
     throwIfFalsy(tables, 'tables');
     this.checkBuildStatus();
-    const { opts } = this;
-    let { outDir } = this;
-    outDir = nodepath.join(outDir, 'create_sql');
-    if (opts.cleanBuild) {
-      logger.info(`🧹  Cleaning directory "${outDir}"`);
-      await del(outDir, { force: true });
-    }
     await Promise.all(tables.map(async t => await this.buildCSQL(t)));
     logger.debug(`🎉  Table build succeeded`);
   }
@@ -85,7 +78,9 @@ export default class Builder {
   }
 
   private async buildCSQL(table: dd.Table): Promise<void> {
-    const { dialect, outDir } = this;
+    const { dialect } = this;
+    let { outDir } = this;
+    outDir = nodepath.join(outDir, 'create_sql');
     const builder = new CSQLBuilder(table, dialect);
     const fileName = dd.utils.toSnakeCase(table.__name);
     const outFile = nodepath.join(outDir, fileName + '.sql');

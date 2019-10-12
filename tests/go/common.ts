@@ -69,7 +69,7 @@ export async function testBuildToDirAsync(
     let expected = '';
     if (nodepath.extname(file)) {
       // An SQL file
-      actual = await nodepath.join(tmpDir, file);
+      actual = await nodepath.join(tmpDir, 'create_sql', file);
       expected = await nodepath.join(
         nodepath.resolve(nodepath.join(DestDataDir, 'build', expectedDir)),
         file,
