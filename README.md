@@ -257,19 +257,6 @@ mingru converts [mingru-models](https://github.com/mgenware/mingru-models) to Go
 
 Once you are familiar with [mingru-models](https://github.com/mgenware/mingru-models), you can import your actions, and use `mingru.build` along with a dialect(e.g. MySQL) to generate Go code:
 
-```ts
-interface BuildOption {
-    packageName?: string;
-    noFileHeader?: boolean;
-    cleanBuild?: boolean;
-    noOutput?: boolean;
-    buildCode?: boolean;
-    buildCSQL?: boolean;
-}
-
-default function buildAsync(taList: dd.TableActions[], dialect: Dialect, outDir: string, options?: BuildOption): Promise<void>;
-```
-
 Example:
 
 ```ts
