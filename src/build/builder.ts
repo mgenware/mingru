@@ -53,7 +53,9 @@ export default class Builder {
   async buildCreateTableSQLFiles(tables: dd.Table[]): Promise<void> {
     throwIfFalsy(tables, 'tables');
     this.checkBuildStatus();
-    const { opts, outDir } = this;
+    const { opts } = this;
+    let { outDir } = this;
+    outDir = nodepath.join(outDir, 'create_sql');
     if (opts.cleanBuild) {
       logger.info(`🧹  Cleaning directory "${outDir}"`);
       await del(outDir, { force: true });
