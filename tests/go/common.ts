@@ -44,7 +44,7 @@ export async function testFilesAsync(a: string, b: string) {
 }
 
 export async function testBuildToDirAsync(
-  taList: dd.TA[],
+  actions: dd.TA[],
   files: string[],
   expectedDir: string,
   option?: mr.BuildOption,
@@ -53,7 +53,11 @@ export async function testBuildToDirAsync(
   opt.noFileHeader = true;
   opt.noOutput = true;
   const tmpDir = tempy.directory();
-  await mr.build(taList, dialect, tmpDir, opt);
+
+  const builder = new mr.Builder(dialect, tmpDir, opt);
+  await builder.build(async () => {
+    await builder.buildActions(actions);
+  });
   for (const file of files) {
     let actual = '';
     let expected = '';

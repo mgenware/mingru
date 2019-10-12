@@ -1,5 +1,5 @@
 export * from './dialects/mysql';
-export { default as build, BuildOption } from './build/builder';
+export { default as Builder, BuildOption } from './build/builder';
 export { default as dtDefault } from './build/dtDefault';
 export { default as logger } from './logger';
 export { default as GoBuilder } from './build/goBuilder';

@@ -14,55 +14,61 @@ export interface BuildOption {
   noFileHeader?: boolean;
   cleanBuild?: boolean;
   noOutput?: boolean;
-  buildCode?: boolean;
-  buildCSQL?: boolean;
 }
 
-class Builder {
+export default class Builder {
   opts: BuildOption;
+  private buildStarted = false;
   constructor(
-    public taList: dd.TA[],
     public dialect: Dialect,
     public outDir: string,
     opts?: BuildOption,
   ) {
-    throwIfFalsy(taList, 'tableActionList');
     throwIfFalsy(dialect, 'dialect');
     throwIfFalsy(outDir, 'outDir');
     opts = opts || {};
-    // Some options default to true
-    if (opts.buildCode === undefined) {
-      opts.buildCode = true;
-    }
     logger.enabled = !opts.noOutput;
     this.opts = opts;
   }
 
-  async build(): Promise<void> {
+  async build(callback: () => void): Promise<void> {
+    throwIfFalsy(callback, 'callback');
+    this.buildStarted = true;
+    await callback();
+    this.buildStarted = false;
+  }
+
+  async buildActions(actions: dd.TA[]): Promise<void> {
+    throwIfFalsy(actions, 'actions');
+    this.checkBuildStatus();
     const { opts, outDir } = this;
     if (opts.cleanBuild) {
       logger.info(`🧹  Cleaning directory "${outDir}"`);
       await del(outDir, { force: true });
     }
-    await Promise.all(this.taList.map(async ta => await this.buildTA(ta)));
-    logger.debug(`🎉  Build succeeded`);
+    await Promise.all(actions.map(async ta => await this.buildTA(ta)));
+    logger.debug(`🎉  Action build succeeded`);
+  }
+
+  async buildCreateTableSQLFiles(tables: dd.Table[]): Promise<void> {
+    throwIfFalsy(tables, 'tables');
+    this.checkBuildStatus();
+    const { opts, outDir } = this;
+    if (opts.cleanBuild) {
+      logger.info(`🧹  Cleaning directory "${outDir}"`);
+      await del(outDir, { force: true });
+    }
+    await Promise.all(tables.map(async t => await this.buildCSQL(t)));
+    logger.debug(`🎉  Table build succeeded`);
+  }
+
+  private checkBuildStatus() {
+    if (!this.buildStarted) {
+      throw new Error('You should call this method inside build()');
+    }
   }
 
   private async buildTA(ta: dd.TA): Promise<void> {
-    if (!ta.__table) {
-      throw new Error('Table action group is not initialized');
-    }
-    const { opts } = this;
-    logger.info(`🚙  Building table "${ta.__table.__name}"`);
-    if (opts.buildCode) {
-      await this.buildCode(ta);
-    }
-    if (opts.buildCSQL) {
-      await this.buildCSQL(ta.__table);
-    }
-  }
-
-  private async buildCode(ta: dd.TA): Promise<void> {
     if (!ta.__table) {
       throw new Error('Table action group is not initialized');
     }
@@ -84,14 +90,4 @@ class Builder {
     const sql = builder.build();
     await mfs.writeFileAsync(outFile, sql, 'utf8');
   }
-}
-
-export default async function buildAsync(
-  taList: dd.TA[],
-  dialect: Dialect,
-  outDir: string,
-  options?: BuildOption,
-) {
-  const builder = new Builder(taList, dialect, outDir, options);
-  await builder.build();
 }
