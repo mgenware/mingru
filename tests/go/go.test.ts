@@ -3,7 +3,7 @@ import post from '../models/post';
 import { testBuildAsync } from './common';
 
 it('Escape string', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectT = dd
       .select(post.id, post.title)
       .where(dd.sql`${post.title} = "\\\\a\\\""`);

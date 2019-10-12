@@ -11,7 +11,7 @@ it('No inserted ID', async () => {
     hireDate = dd.date();
   }
   const employee = dd.table(Employee, 'employees');
-  class EmployeeTA extends dd.TA {
+  class EmployeeTA extends dd.TableActions {
     insert = dd.insert().setInputs();
   }
   const employeeTA = dd.ta(employee, EmployeeTA);
@@ -21,7 +21,7 @@ it('No inserted ID', async () => {
   }
 
   const dept = dd.table(Dept, 'departments');
-  class DeptTA extends dd.TA {
+  class DeptTA extends dd.TableActions {
     insert = dd.insert().setInputs();
   }
   const deptTA = dd.ta(dept, DeptTA);
@@ -32,7 +32,7 @@ it('No inserted ID', async () => {
     toDate = dd.date();
   }
   const deptManager = dd.table(DeptManager, 'dept_manager');
-  class DeptManagerTA extends dd.TA {
+  class DeptManagerTA extends dd.TableActions {
     insertCore = dd.insert().setInputs();
     insert = dd.transact(employeeTA.insert, deptTA.insert, this.insertCore);
   }
@@ -49,7 +49,7 @@ it('Last inserted ID', async () => {
     firstName = dd.varChar(50);
   }
   const employee = dd.table(Employee, 'employees');
-  class EmployeeTA extends dd.TA {
+  class EmployeeTA extends dd.TableActions {
     insert = dd.insertOne().setInputs();
     insert2 = dd.transact(this.insert, this.insert);
   }
@@ -63,7 +63,7 @@ it('Temp member actions', async () => {
     postCount = dd.int();
   }
   const user = dd.table(User);
-  class UserTA extends dd.TA {
+  class UserTA extends dd.TableActions {
     updatePostCount = dd
       .updateOne()
       .set(
@@ -79,7 +79,7 @@ it('Temp member actions', async () => {
   }
 
   const post = dd.table(Post, 'db_post');
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     insertCore = dd.insertOne().setInputs();
     insert = dd.transact(
       userTA.updatePostCount.wrap({ offset: 1 }),

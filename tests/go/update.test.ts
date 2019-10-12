@@ -4,7 +4,7 @@ import { testBuildAsync } from './common';
 import cols from '../models/cols';
 
 it('UpdateSome', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     updateT = dd
       .updateSome()
       .set(post.title, dd.sql`"haha"`)
@@ -17,7 +17,7 @@ it('UpdateSome', async () => {
 });
 
 it('UpdateOne', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     updateT = dd
       .updateOne()
       .set(post.title, dd.sql`"haha"`)
@@ -30,7 +30,7 @@ it('UpdateOne', async () => {
 });
 
 it('Update with where', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     updateT = dd
       .updateOne()
       .set(post.title, dd.sql`"haha"`)
@@ -46,7 +46,7 @@ it('Update with where', async () => {
 });
 
 it('Update with non-input setters', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     updateT = dd
       .unsafeUpdateAll()
       .set(post.title, dd.sql`"haha"`)
@@ -57,7 +57,7 @@ it('Update with non-input setters', async () => {
 });
 
 it('Duplicate names in WHERE and setters', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     updateT = dd
       .updateSome()
       .set(post.content, post.content.toInput())
@@ -72,7 +72,7 @@ it('Duplicate names in WHERE and setters', async () => {
 });
 
 it('Custom DB column name', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     updateT = dd
       .unsafeUpdateAll()
       .set(post.title, dd.sql`"haha"`)
@@ -85,7 +85,7 @@ it('Custom DB column name', async () => {
 });
 
 it('updateWithDefaults', async () => {
-  class ColsTA extends dd.TA {
+  class ColsTA extends dd.TableActions {
     updateT = dd
       .updateOne()
       .setInputs(cols.fk)

@@ -38,7 +38,7 @@ export default class Builder {
     this.buildStarted = false;
   }
 
-  async buildActions(actions: dd.TA[]): Promise<void> {
+  async buildActions(actions: dd.TableActions[]): Promise<void> {
     throwIfFalsy(actions, 'actions');
     this.checkBuildStatus();
     const { opts, outDir } = this;
@@ -68,7 +68,7 @@ export default class Builder {
     }
   }
 
-  private async buildTA(ta: dd.TA): Promise<void> {
+  private async buildTA(ta: dd.TableActions): Promise<void> {
     if (!ta.__table) {
       throw new Error('Table action group is not initialized');
     }

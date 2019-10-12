@@ -10,7 +10,7 @@ const expect = assert.equal;
 const dialect = mr.mysql;
 
 it('Select', () => {
-  class UserTA extends dd.TA {
+  class UserTA extends dd.TableActions {
     t = dd.select(user.id, user.url_name);
   }
   const userTA = dd.ta(user, UserTA);
@@ -23,7 +23,7 @@ it('Select', () => {
 });
 
 it('Where', () => {
-  class UserTA extends dd.TA {
+  class UserTA extends dd.TableActions {
     t = dd
       .select(user.id, user.url_name)
       .where(dd.sql`${user.id} = 1 ${user.id.toInput()} ${user.id.toInput()}`);
@@ -37,7 +37,7 @@ it('Where', () => {
 });
 
 it('Where and inputs', () => {
-  class UserTA extends dd.TA {
+  class UserTA extends dd.TableActions {
     t = dd
       .select(user.id, user.url_name)
       .where(
@@ -58,7 +58,7 @@ it('Where and inputs', () => {
 });
 
 it('Basic join', () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     t = dd.select(post.user_id.join(user).url_name, post.title);
   }
   const postTA = dd.ta(post, PostTA);
@@ -72,7 +72,7 @@ it('Basic join', () => {
 });
 
 it('Multiple cols join and custom table name', () => {
-  class RplTA extends dd.TA {
+  class RplTA extends dd.TableActions {
     t = dd.select(
       rpl.user_id.join(user).url_name,
       rpl.user_id.join(user).id,
@@ -90,7 +90,7 @@ it('Multiple cols join and custom table name', () => {
 });
 
 it('Join a table with custom table name', () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     t = dd.select(post.user_id, post.user_id.join(rpl).to_user_id);
   }
   const postTA = dd.ta(post, PostTA);
@@ -104,7 +104,7 @@ it('Join a table with custom table name', () => {
 });
 
 it('Join a table with custom column name', () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     t = dd.select(
       post.user_id,
       post.user_id.join(rpl, rpl.custom_id).to_user_id,
@@ -121,7 +121,7 @@ it('Join a table with custom column name', () => {
 });
 
 it('3-table joins and where', () => {
-  class CmtTA extends dd.TA {
+  class CmtTA extends dd.TableActions {
     t = dd
       .select(
         cmt.id,
@@ -151,7 +151,7 @@ it('3-table joins and where', () => {
 });
 
 it('AS', () => {
-  class CmtTA extends dd.TA {
+  class CmtTA extends dd.TableActions {
     t = dd.select(
       cmt.id,
       cmt.user_id.as('a'),
@@ -174,7 +174,7 @@ it('AS', () => {
 });
 
 it('Duplicate selected names', () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     t = dd.select(
       post.title,
       post.title,
@@ -193,7 +193,7 @@ it('Duplicate selected names', () => {
 });
 
 it('getInputs', () => {
-  class UserTA extends dd.TA {
+  class UserTA extends dd.TableActions {
     t = dd
       .select(user.id, user.url_name)
       .where(
@@ -210,7 +210,7 @@ it('getInputs', () => {
 });
 
 it('getInputs (no WHERE)', () => {
-  class UserTA extends dd.TA {
+  class UserTA extends dd.TableActions {
     t = dd.select(user.id, user.url_name);
   }
   const ta = dd.ta(user, UserTA);
@@ -220,7 +220,7 @@ it('getInputs (no WHERE)', () => {
 });
 
 it('getInputs (with foreign tables)', () => {
-  class UserTA extends dd.TA {
+  class UserTA extends dd.TableActions {
     t = dd
       .select(user.id, post.title)
       .where(
@@ -241,7 +241,7 @@ it('getInputs (with foreign tables)', () => {
 });
 
 it('getReturns', () => {
-  class UserTA extends dd.TA {
+  class UserTA extends dd.TableActions {
     t = dd
       .select(user.id, post.title)
       .where(
@@ -259,7 +259,7 @@ it('getReturns', () => {
 
 it('GROUP BY and HAVING', () => {
   const yearCol = dd.sel(dd.year(post.datetime), 'year');
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     t = dd
       .select(yearCol, dd.sel(dd.sum(post.cmtCount), 'total'))
       .byID()

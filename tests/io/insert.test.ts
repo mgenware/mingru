@@ -8,7 +8,7 @@ const expect = assert.equal;
 const dialect = mr.mysql;
 
 it('Insert inputs', () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     t = dd.unsafeInsert().setInputs(post.title, post.user_id);
   }
   const postTA = dd.ta(post, PostTA);
@@ -20,7 +20,7 @@ it('Insert inputs', () => {
 });
 
 it('Insert inputs and values', () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     t = dd
       .unsafeInsert()
       .setInputs(post.title, post.user_id)
@@ -38,7 +38,7 @@ it('Insert inputs and values', () => {
 });
 
 it('getInputs', () => {
-  class UserTA extends dd.TA {
+  class UserTA extends dd.TableActions {
     t = dd
       .unsafeInsert()
       .setInputs(user.sig, user.id)
@@ -55,7 +55,7 @@ it('getInputs', () => {
 });
 
 it('getReturns (isnert)', () => {
-  class UserTA extends dd.TA {
+  class UserTA extends dd.TableActions {
     t = dd
       .unsafeInsert()
       .setInputs(user.sig, user.id)
@@ -68,7 +68,7 @@ it('getReturns (isnert)', () => {
 });
 
 it('getReturns (insertOne)', () => {
-  class UserTA extends dd.TA {
+  class UserTA extends dd.TableActions {
     t = dd
       .unsafeInsertOne()
       .setInputs(user.sig, user.id)

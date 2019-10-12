@@ -4,7 +4,7 @@ import post from '../models/post';
 import { testBuildFullAsync } from './common';
 
 it('Single action', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectT = dd.select(post.id, post.title);
   }
   const ta = dd.ta(post, PostTA);
@@ -12,7 +12,7 @@ it('Single action', async () => {
 });
 
 it('Multiple actions', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectPostTitle = dd.select(post.id, post.title);
     selectPostInfo = dd.select(
       post.id,

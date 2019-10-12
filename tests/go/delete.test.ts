@@ -3,7 +3,7 @@ import post from '../models/post';
 import { testBuildAsync } from './common';
 
 it('unsafeDeleteAll', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     deleteT = dd.unsafeDeleteAll().byID();
   }
   const ta = dd.ta(post, PostTA);
@@ -11,7 +11,7 @@ it('unsafeDeleteAll', async () => {
 });
 
 it('deleteSome', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     deleteT = dd
       .deleteSome()
       .where(dd.sql`${post.user_id} = ${dd.input(post.user_id)}`);
@@ -21,7 +21,7 @@ it('deleteSome', async () => {
 });
 
 it('deleteOne', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     deleteT = dd.deleteOne().byID();
   }
   const ta = dd.ta(post, PostTA);

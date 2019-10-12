@@ -8,7 +8,7 @@ import * as assert from 'assert';
 const dialect = mr.mysql;
 const DestDataDir = 'tests/go/dest';
 
-export async function testBuildAsync(ta: dd.TA, path: string) {
+export async function testBuildAsync(ta: dd.TableActions, path: string) {
   let content = '';
   if (path) {
     path = nodepath.resolve(nodepath.join(DestDataDir, path + '.go'));
@@ -23,7 +23,7 @@ export async function testBuildAsync(ta: dd.TA, path: string) {
   return builder;
 }
 
-export async function testBuildFullAsync(ta: dd.TA, path: string) {
+export async function testBuildFullAsync(ta: dd.TableActions, path: string) {
   let content = '';
   if (path) {
     path = nodepath.resolve(nodepath.join(DestDataDir, path + '.go'));
@@ -44,19 +44,25 @@ export async function testFilesAsync(a: string, b: string) {
 }
 
 export async function testBuildToDirAsync(
-  actions: dd.TA[],
+  actions: dd.TableActions[],
   files: string[],
   expectedDir: string,
-  option?: mr.BuildOption,
+  opts?: mr.BuildOption,
+  buildCSQL = false,
 ) {
-  const opt = option || {};
-  opt.noFileHeader = true;
-  opt.noOutput = true;
+  opts = opts || {};
+  opts.noFileHeader = true;
+  opts.noOutput = true;
   const tmpDir = tempy.directory();
 
-  const builder = new mr.Builder(dialect, tmpDir, opt);
+  const builder = new mr.Builder(dialect, tmpDir, opts);
   await builder.build(async () => {
     await builder.buildActions(actions);
+    if (buildCSQL) {
+      await builder.buildCreateTableSQLFiles(
+        actions.map(a => a.__table as dd.Table),
+      );
+    }
   });
   for (const file of files) {
     let actual = '';

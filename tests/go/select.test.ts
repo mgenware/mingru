@@ -9,7 +9,7 @@ import postCategory from '../models/postCategory';
 import category from '../models/category';
 
 it('select', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectT = dd.select(post.id, post.title);
   }
   const ta = dd.ta(post, PostTA);
@@ -17,7 +17,7 @@ it('select', async () => {
 });
 
 it('select, all rows', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectT = dd.select();
   }
   const ta = dd.ta(post, PostTA);
@@ -25,7 +25,7 @@ it('select, all rows', async () => {
 });
 
 it('selectRows', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectT = dd.selectRows(post.id, post.title).orderByAsc(post.id);
   }
   const ta = dd.ta(post, PostTA);
@@ -33,7 +33,7 @@ it('selectRows', async () => {
 });
 
 it('selectRows', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectT = dd.selectRows().orderByAsc(post.id);
   }
   const ta = dd.ta(post, PostTA);
@@ -41,7 +41,7 @@ it('selectRows', async () => {
 });
 
 it('selectField', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectT = dd.selectField(post.title);
   }
   const ta = dd.ta(post, PostTA);
@@ -49,7 +49,7 @@ it('selectField', async () => {
 });
 
 it('WHERE', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectT = dd
       .select(post.id, post.title)
       .where(dd.sql`${post.id} = ${dd.input(post.id)}`);
@@ -59,7 +59,7 @@ it('WHERE', async () => {
 });
 
 it('selectRows with WHERE', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectT = dd
       .selectRows(post.id, post.title)
       .where(dd.sql`${post.id} = ${dd.input(post.id)}`)
@@ -71,7 +71,7 @@ it('selectRows with WHERE', async () => {
 
 it('selectRows, WHERE, orderBy', async () => {
   const cc = dd.sel('RAND()', 'n', new dd.ColumnType(dd.dt.int));
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectT = dd
       .selectRows(post.id, cc, post.title)
       .where(dd.sql`${post.id} = ${post.id.toInput()} ${post.id.toInput()}`)
@@ -85,7 +85,7 @@ it('selectRows, WHERE, orderBy', async () => {
 });
 
 it('selectField, WHERE', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectT = dd.selectField(post.user_id).byID();
   }
   const ta = dd.ta(post, PostTA);
@@ -93,7 +93,7 @@ it('selectField, WHERE', async () => {
 });
 
 it('WHERE: multiple cols', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectT = dd
       .select(post.id, post.title)
       .where(
@@ -107,7 +107,7 @@ it('WHERE: multiple cols', async () => {
 });
 
 it('Custom params', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectT = dd
       .select(post.id, post.title)
       .where(
@@ -122,7 +122,7 @@ it('Custom params', async () => {
 });
 
 it('Basic join', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectT = dd.select(post.user_id.join(user).url_name, post.title);
   }
   const ta = dd.ta(post, PostTA);
@@ -130,7 +130,7 @@ it('Basic join', async () => {
 });
 
 it('Basic join (rows)', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectT = dd
       .selectRows(post.user_id.join(user).url_name, post.title)
       .where(dd.sql`${post.user_id.join(user).sig}-${post.user_id}`)
@@ -142,7 +142,7 @@ it('Basic join (rows)', async () => {
 });
 
 it('Inverse join (select from A on A.id = B.a_id)', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectT = dd
       .selectRows(
         post.title,
@@ -174,7 +174,7 @@ it('Inverse join (select from A on A.id = B.a_id)', async () => {
 });
 
 it('Same table, multiple cols join', async () => {
-  class RplTA extends dd.TA {
+  class RplTA extends dd.TableActions {
     selectT = dd.select(
       rpl.user_id.join(user).url_name,
       rpl.user_id.join(user).id,
@@ -186,7 +186,7 @@ it('Same table, multiple cols join', async () => {
 });
 
 it('Join as', async () => {
-  class CmtTA extends dd.TA {
+  class CmtTA extends dd.TableActions {
     selectT = dd.select(
       cmt.id,
       cmt.user_id.as('a'),
@@ -203,7 +203,7 @@ it('Join as', async () => {
 });
 
 it('Selected name collisions', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectT = dd.select(
       post.title,
       post.title,
@@ -221,7 +221,7 @@ it('Selected name collisions', async () => {
 });
 
 it('Calculated columns', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectT = dd.select(
       // User specified types
       new dd.RawColumn(dd.sql`raw expr`, 'a', new dd.ColumnType(dd.dt.bigInt)),
@@ -245,7 +245,7 @@ it('Calculated columns', async () => {
 });
 
 it('Custom DB names', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectT = dd.select(
       post.cmtCount, // cmtCount is set to cmt_c in models via `setDBName`
       post.m_user_id,
@@ -259,7 +259,7 @@ it('Custom DB names', async () => {
 });
 
 it('selectRows, paginate', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectT = dd
       .selectRows(post.id, post.title)
       .limit()
@@ -270,7 +270,7 @@ it('selectRows, paginate', async () => {
 });
 
 it('selectRows, paginate, where', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectT = dd
       .selectRows(post.id, post.title)
       .byID()
@@ -282,7 +282,7 @@ it('selectRows, paginate, where', async () => {
 });
 
 it('selectPage', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectT = dd
       .selectPage(post.id, post.title)
       .byID()
@@ -293,7 +293,7 @@ it('selectPage', async () => {
 });
 
 it('WHERE, inputs, joins', async () => {
-  class CmtTA extends dd.TA {
+  class CmtTA extends dd.TableActions {
     selectT = dd.select(cmt.id).where(
       dd.sql` ${cmt.id.toInput()}, ${cmt.user_id.toInput()}, ${cmt.target_id
         .join(post)
@@ -308,7 +308,7 @@ it('WHERE, inputs, joins', async () => {
 });
 
 it('Argument stubs', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectT = dd
       .select(post.id, post.title)
       .argStubs(
@@ -322,7 +322,7 @@ it('Argument stubs', async () => {
 
 it('GROUP BY and HAVING', async () => {
   const yearCol = dd.sel(dd.year(post.datetime), 'year');
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     t = dd
       .select(yearCol, dd.sel(dd.sum(post.cmtCount), 'total'))
       .byID()

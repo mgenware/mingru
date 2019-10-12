@@ -8,7 +8,7 @@ const expect = assert.equal;
 const dialect = mr.mysql;
 
 it('Update', () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     t = dd
       .updateSome()
       .set(post.title, dd.sql`"haha"`)
@@ -33,7 +33,7 @@ it('Update', () => {
 });
 
 it('Update with where', () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     t = dd
       .updateOne()
       .set(post.title, dd.sql`"haha"`)
@@ -47,7 +47,7 @@ it('Update with where', () => {
 });
 
 it('getInputs', () => {
-  class UserTA extends dd.TA {
+  class UserTA extends dd.TableActions {
     t = dd
       .updateSome()
       .set(user.url_name, dd.sql`${dd.input(user.url_name)}`)
@@ -72,7 +72,7 @@ it('getInputs', () => {
 });
 
 it('getReturns', () => {
-  class UserTA extends dd.TA {
+  class UserTA extends dd.TableActions {
     t = dd
       .updateSome()
       .set(user.url_name, dd.sql`${dd.input(user.url_name)}`)

@@ -8,7 +8,7 @@ const expect = assert.equal;
 const dialect = mr.mysql;
 
 it('TransactIO', () => {
-  class WrapSelfTA extends dd.TA {
+  class WrapSelfTA extends dd.TableActions {
     s = dd
       .updateSome()
       .set(user.url_name, dd.sql`${dd.input(user.url_name)}`)
@@ -20,7 +20,7 @@ it('TransactIO', () => {
   }
   const wrapSelf = dd.ta(user, WrapSelfTA);
 
-  class WrapOtherTA extends dd.TA {
+  class WrapOtherTA extends dd.TableActions {
     standard = wrapSelf.s.wrap({ id: '123' });
     nested = wrapSelf.d.wrap({ id: '123' });
     t1 = dd.transact(wrapSelf.s, wrapSelf.d, this.standard);
@@ -37,14 +37,14 @@ it('TransactIO', () => {
 });
 
 it('Member details (normal action, wrapped, tmp wrapped)', () => {
-  class SourceTA extends dd.TA {
+  class SourceTA extends dd.TableActions {
     s = dd
       .updateSome()
       .setInputs(user.sig, user.follower_count)
       .byID();
   }
   const srcTA = dd.ta(user, SourceTA);
-  class WrapTA extends dd.TA {
+  class WrapTA extends dd.TableActions {
     s = dd
       .updateSome()
       .setInputs(user.sig, user.follower_count)

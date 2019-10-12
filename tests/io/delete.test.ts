@@ -8,7 +8,7 @@ const expect = assert.equal;
 const dialect = mr.mysql;
 
 it('Delete', () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     t = dd.unsafeDeleteAll().byID();
   }
   const postTA = dd.ta(post, PostTA);
@@ -20,7 +20,7 @@ it('Delete', () => {
 });
 
 it('Delete with where', () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     t = dd.unsafeDeleteAll().where(dd.sql`${post.id} = 1`);
   }
   const postTA = dd.ta(post, PostTA);
@@ -31,7 +31,7 @@ it('Delete with where', () => {
 });
 
 it('getInputs', () => {
-  class UserTA extends dd.TA {
+  class UserTA extends dd.TableActions {
     t = dd
       .deleteOne()
       .where(dd.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
@@ -47,7 +47,7 @@ it('getInputs', () => {
 });
 
 it('getReturns', () => {
-  class UserTA extends dd.TA {
+  class UserTA extends dd.TableActions {
     t = dd
       .deleteOne()
       .where(dd.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
@@ -60,7 +60,7 @@ it('getReturns', () => {
 });
 
 it('getInputs (no WHERE)', () => {
-  class UserTA extends dd.TA {
+  class UserTA extends dd.TableActions {
     t = dd.unsafeDeleteAll();
   }
   const ta = dd.ta(user, UserTA);
@@ -71,7 +71,7 @@ it('getInputs (no WHERE)', () => {
 });
 
 it('getReturns (no WHERE)', () => {
-  class UserTA extends dd.TA {
+  class UserTA extends dd.TableActions {
     t = dd.unsafeDeleteAll();
   }
   const ta = dd.ta(user, UserTA);

@@ -44,7 +44,7 @@ Create a new file (`userTA.ts`) for table actions and import the user table (`us
 import * as dd from 'mingru-models';
 import user from './user';
 
-export class UserTA extends dd.TA {
+export class UserTA extends dd.TableActions {
   // Select a user profile by ID.
   selectUserProfile = dd.select(user.id, user.name, user.sig).byID();
   // Select all user profiles.
@@ -267,7 +267,7 @@ interface BuildOption {
     buildCSQL?: boolean;
 }
 
-default function buildAsync(taList: dd.TA[], dialect: Dialect, outDir: string, options?: BuildOption): Promise<void>;
+default function buildAsync(taList: dd.TableActions[], dialect: Dialect, outDir: string, options?: BuildOption): Promise<void>;
 ```
 
 Example:

@@ -4,14 +4,14 @@ import user from '../models/user';
 import post from '../models/post';
 
 it('Wrap', async () => {
-  class UserTA extends dd.TA {
+  class UserTA extends dd.TableActions {
     t = dd
       .updateOne()
       .setInputs()
       .byID();
   }
   const userTA = dd.ta(user, UserTA);
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     s = dd
       .updateSome()
       .set(user.url_name, dd.sql`${dd.input(user.url_name)}`)

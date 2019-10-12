@@ -4,7 +4,7 @@ import cols from '../models/cols';
 import { testBuildAsync } from './common';
 
 it('insert', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     insertT = dd
       .insert()
       .setInputs(post.title, post.user_id)
@@ -15,7 +15,7 @@ it('insert', async () => {
 });
 
 it('unsafeInsert', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     insertT = dd.unsafeInsert().setInputs(post.title, post.user_id);
   }
   const ta = dd.ta(post, PostTA);
@@ -32,7 +32,7 @@ it('insertOne', async () => {
     hireDate = dd.date();
   }
   const employee = dd.table(Employee, 'employees');
-  class EmployeeTA extends dd.TA {
+  class EmployeeTA extends dd.TableActions {
     insertT = dd.insertOne().setInputs();
   }
   const ta = dd.ta(employee, EmployeeTA);
@@ -40,7 +40,7 @@ it('insertOne', async () => {
 });
 
 it('unsafeInsertOne', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     insertT = dd.unsafeInsertOne().setInputs(post.title, post.user_id);
   }
   const ta = dd.ta(post, PostTA);
@@ -48,7 +48,7 @@ it('unsafeInsertOne', async () => {
 });
 
 it('Insert with non-input setters', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     insertT = dd
       .unsafeInsert()
       .setInputs(post.title, post.user_id)
@@ -59,7 +59,7 @@ it('Insert with non-input setters', async () => {
 });
 
 it('insertWithDefaults', async () => {
-  class ColsTA extends dd.TA {
+  class ColsTA extends dd.TableActions {
     insertT = dd
       .insert()
       .setInputs(cols.fk)
@@ -70,7 +70,7 @@ it('insertWithDefaults', async () => {
 });
 
 it('Custom DB name', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     insertT = dd.unsafeInsert().setInputs(post.title, post.cmtCount);
   }
   const ta = dd.ta(post, PostTA);
@@ -87,7 +87,7 @@ it('Set auto-increment as input', async () => {
     hireDate = dd.date();
   }
   const employee = dd.table(Employee, 'employees');
-  class EmployeeTA extends dd.TA {
+  class EmployeeTA extends dd.TableActions {
     insertT = dd
       .insertOne()
       .setInputs(employee.id)

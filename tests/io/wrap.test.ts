@@ -8,7 +8,7 @@ import * as assert from 'assert';
 const expect = assert.equal;
 const dialect = mr.mysql;
 
-class WrapSelfTA extends dd.TA {
+class WrapSelfTA extends dd.TableActions {
   s = dd
     .updateSome()
     .set(user.url_name, dd.sql`${dd.input(user.url_name)}`)
@@ -20,7 +20,7 @@ class WrapSelfTA extends dd.TA {
 }
 const wrapSelf = dd.ta(user, WrapSelfTA);
 
-class WrapOtherTA extends dd.TA {
+class WrapOtherTA extends dd.TableActions {
   standard = wrapSelf.s.wrap({ id: '123' });
   nested = wrapSelf.d.wrap({ id: '123' });
 }
@@ -71,7 +71,7 @@ it('getInputs (wrapOther, nested)', () => {
 });
 
 it('Throws on undefined inputs', () => {
-  class UserTA extends dd.TA {
+  class UserTA extends dd.TableActions {
     t = dd
       .select(user.id, user.url_name)
       .where(

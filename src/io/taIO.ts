@@ -11,7 +11,7 @@ export class TAIO {
   className: string;
   instanceName: string;
 
-  constructor(public ta: dd.TA, public dialect: Dialect) {
+  constructor(public ta: dd.TableActions, public dialect: Dialect) {
     throwIfFalsy(ta, 'ta');
 
     const actions: ActionIO[] = [];

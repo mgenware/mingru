@@ -3,7 +3,7 @@ import post from '../models/post';
 import { testBuildToDirAsync } from './common';
 
 it('Select', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectTimes = dd.selectRows(post.datetime, post.date).orderByAsc(post.id);
     selectNullableTimes = dd
       .selectRows(post.n_datetime, post.n_date)
@@ -14,7 +14,7 @@ it('Select', async () => {
 });
 
 it('Select (where)', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectTimes = dd
       .selectRows(post.datetime, post.date)
       .where(
@@ -29,7 +29,7 @@ it('Select (where)', async () => {
 });
 
 it('Select field', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectTime = dd.selectField(post.n_datetime);
   }
   const ta = dd.ta(post, PostTA);
@@ -37,7 +37,7 @@ it('Select field', async () => {
 });
 
 it('Update', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     updateTimes = dd.unsafeUpdateAll().setInputs(post.datetime, post.date);
     updateNullableTimes = dd
       .unsafeUpdateAll()
@@ -48,7 +48,7 @@ it('Update', async () => {
 });
 
 it('Update (where)', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     updateTimes = dd
       .updateSome()
       .setInputs(post.datetime)
@@ -63,7 +63,7 @@ it('Update (where)', async () => {
 });
 
 it('Delete (where)', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     deleteTimes = dd
       .deleteOne()
       .where(
@@ -77,7 +77,7 @@ it('Delete (where)', async () => {
 });
 
 it('Insert', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     insertTimes = dd
       .unsafeInsertOne()
       .setInputs(post.datetime, post.n_datetime);

@@ -5,7 +5,7 @@ import postReply from '../models/postReply';
 import { testBuildToDirAsync } from './common';
 
 it('Single table', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectPostTitle = dd.select(post.id, post.title);
     selectPostInfo = dd.select(
       post.id,
@@ -25,14 +25,14 @@ it('Single table', async () => {
 });
 
 it('Multiple tables', async () => {
-  class UserTA extends dd.TA {
+  class UserTA extends dd.TableActions {
     selectProfile = dd.select(user.display_name, user.sig);
     updateProfile = dd.unsafeUpdateAll().setInputs(user.sig);
     deleteByID = dd.deleteOne().where(user.id.isEqualToInput());
   }
   const userTA = dd.ta(user, UserTA);
 
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectPostInfo = dd.select(
       post.id,
       post.content,
@@ -49,7 +49,7 @@ it('Multiple tables', async () => {
 });
 
 it('Custom package name', async () => {
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectPostTitle = dd.select(post.id, post.title);
   }
   const ta = dd.ta(post, PostTA);
@@ -59,7 +59,7 @@ it('Custom package name', async () => {
 });
 
 it('Table DBName', async () => {
-  class PostRplTA extends dd.TA {
+  class PostRplTA extends dd.TableActions {
     insertPostReply = dd
       .unsafeInsertOne()
       .setInputs(postReply.to_user_id, postReply.user_id);
@@ -69,14 +69,14 @@ it('Table DBName', async () => {
 });
 
 it('Multiple tables + CSQL', async () => {
-  class UserTA extends dd.TA {
+  class UserTA extends dd.TableActions {
     selectProfile = dd.select(user.display_name, user.sig);
     updateProfile = dd.unsafeUpdateAll().setInputs(user.sig);
     deleteByID = dd.deleteOne().where(user.id.isEqualToInput());
   }
   const userTA = dd.ta(user, UserTA);
 
-  class PostTA extends dd.TA {
+  class PostTA extends dd.TableActions {
     selectPostInfo = dd.select(
       post.id,
       post.content,
@@ -93,6 +93,7 @@ it('Multiple tables + CSQL', async () => {
     actions,
     ['post', 'user', 'post.sql', 'user.sql'],
     'multipleTablesCSQL',
-    { buildCSQL: true },
+    undefined,
+    true,
   );
 });

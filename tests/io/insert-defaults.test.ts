@@ -29,7 +29,7 @@ it('dtDefault', () => {
 });
 
 it('insertWithDefaults', () => {
-  class ColsTA extends dd.TA {
+  class ColsTA extends dd.TableActions {
     insertT = dd
       .insert()
       .setInputs(cols.fk)
