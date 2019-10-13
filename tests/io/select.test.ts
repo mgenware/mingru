@@ -5,6 +5,8 @@ import post from '../models/post';
 import cmt from '../models/cmt';
 import rpl from '../models/postReply';
 import * as assert from 'assert';
+import postCmt from '../models/postCmt';
+import cmt2 from '../models/cmt2';
 
 const expect = assert.equal;
 const dialect = mr.mysql;
@@ -147,6 +149,32 @@ it('3-table joins and where', () => {
   expect(
     io.sql,
     'SELECT `post_cmt`.`id` AS `id`, `post_cmt`.`user_id` AS `userID`, `join_1`.`title` AS `targetTitle`, `join_1`.`user_id` AS `targetUserID`, `join_2`.`url_name` AS `targetUserUrlName`, `join_2`.`id` AS `TUID2` FROM `post_cmt` AS `post_cmt` INNER JOIN `db_post` AS `join_1` ON `join_1`.`id` = `post_cmt`.`target_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `target`.`user_id` WHERE `post_cmt`.`user_id` = 1 AND `join_1`.`title` = 2 AND `join_2`.`url_name` = 3',
+  );
+});
+
+it('Join and from', () => {
+  const jCmt = postCmt.cmt_id.join(cmt2);
+  class PostTA extends dd.TableActions {
+    selectT = dd
+      .select(
+        jCmt.content,
+        jCmt.created_at,
+        jCmt.modified_at,
+        jCmt.rpl_count,
+        jCmt.user_id,
+        jCmt.user_id.join(user).url_name,
+      )
+      .from(postCmt)
+      .by(postCmt.post_id);
+  }
+  const ta = dd.ta(post, PostTA);
+  const io = mr.selectIO(ta.selectT, dialect);
+
+  expect(ta.__table, post);
+  expect(ta.selectT.__table, postCmt);
+  expect(
+    io.sql,
+    'SELECT `join_1`.`content` AS `cmtContent`, `join_1`.`created_at` AS `cmtCreatedAt`, `join_1`.`modified_at` AS `cmtModifiedAt`, `join_1`.`rpl_count` AS `cmtRplCount`, `join_1`.`user_id` AS `cmtUserID`, `join_2`.`url_name` AS `cmtUserUrlName` FROM `post_cmt` AS `post_cmt` INNER JOIN `cmt` AS `join_1` ON `join_1`.`id` = `post_cmt`.`cmt_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `cmt`.`user_id` WHERE `post_cmt`.`post_id` = ?',
   );
 });
 

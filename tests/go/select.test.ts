@@ -7,6 +7,8 @@ import { testBuildAsync } from './common';
 import * as assert from 'assert';
 import postCategory from '../models/postCategory';
 import category from '../models/category';
+import cmt2 from '../models/cmt2';
+import postCmt from '../models/postCmt';
 
 it('select', async () => {
   class PostTA extends dd.TableActions {
@@ -200,6 +202,25 @@ it('Join as', async () => {
   }
   const ta = dd.ta(cmt, CmtTA);
   await testBuildAsync(ta, 'select/joinAs');
+});
+
+it('Join and from', async () => {
+  const jCmt = postCmt.cmt_id.join(cmt2);
+  class CmtTA extends dd.TableActions {
+    selectT = dd
+      .select(
+        jCmt.content,
+        jCmt.created_at,
+        jCmt.modified_at,
+        jCmt.rpl_count,
+        jCmt.user_id,
+        jCmt.user_id.join(user).url_name,
+      )
+      .from(postCmt)
+      .by(postCmt.post_id);
+  }
+  const ta = dd.ta(cmt, CmtTA);
+  await testBuildAsync(ta, 'select/joinAndFrom');
 });
 
 it('Selected name collisions', async () => {
