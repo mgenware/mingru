@@ -521,11 +521,16 @@ export class SelectIOProcessor {
     col: dd.Column,
     alias: string | null, // if an user alias is present, we don't need to guess the input name just use it as alias
   ): ColumnSQL {
-    const { dialect } = this;
+    const { dialect, action } = this;
     const e = dialect.encodeName;
     const inputName = alias || col.inputName();
-    const [table] = col.ensureInitialized();
-    if (table instanceof dd.JoinedTable) {
+    // Make sure column is initialized
+    const [colTable] = col.ensureInitialized();
+    // Make sure column is from current table
+    const [sourceTable] = action.ensureInitialized();
+    col.checkSourceTable(sourceTable);
+
+    if (colTable instanceof dd.JoinedTable) {
       const joinIO = this.handleJoinRecursively(col);
       if (!col.mirroredColumn) {
         throw new Error(

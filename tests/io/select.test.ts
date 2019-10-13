@@ -219,31 +219,10 @@ it('getInputs (no WHERE)', () => {
   expect(io.funcArgs.list.length, 1);
 });
 
-it('getInputs (with foreign tables)', () => {
-  class UserTA extends dd.TableActions {
-    t = dd
-      .select(user.id, post.title)
-      .where(
-        dd.sql`${user.id.toInput()} ${post.title.toInput()} ${user.id.toInput()}`,
-      );
-  }
-  const ta = dd.ta(user, UserTA);
-  const v = ta.t;
-  const io = mr.selectIO(v, mr.mysql);
-  expect(
-    io.funcArgs.toString(),
-    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, title: string',
-  );
-  expect(
-    io.execArgs.toString(),
-    'id: uint64, title: string, id: uint64 {id: uint64, title: string}',
-  );
-});
-
 it('getReturns', () => {
   class UserTA extends dd.TableActions {
     t = dd
-      .select(user.id, post.title)
+      .select(user.id)
       .where(
         dd.sql`${user.id.toInput()} ${post.title.toInput()} ${user.id.toInput()}`,
       );
@@ -251,7 +230,7 @@ it('getReturns', () => {
   const ta = dd.ta(user, UserTA);
   const v = ta.t;
   const io = mr.selectIO(v, mr.mysql);
-  assert.deepEqual(
+  expect(
     io.returnValues.toString(),
     'result: *UserTableTResult(UserTableTResult)',
   );
@@ -273,4 +252,15 @@ it('GROUP BY and HAVING', () => {
     io.sql,
     'SELECT YEAR(`datetime`) AS `year`, SUM(`cmt_c`) AS `total` FROM `db_post` WHERE `id` = ? GROUP BY `year`, `total` HAVING `year` > 2010 AND `total` > 100',
   );
+});
+
+it('Unrelated cols', () => {
+  class UserTA extends dd.TableActions {
+    t = dd.select(post.user_id);
+  }
+  assert.throws(() => {
+    const ta = dd.ta(user, UserTA);
+    const v = ta.t;
+    mr.selectIO(v, mr.mysql);
+  });
 });

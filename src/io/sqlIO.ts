@@ -32,12 +32,8 @@ export class SQLIO {
     for (const element of sql.elements) {
       if (element.type === dd.SQLElementType.column) {
         const col = element.toColumn();
-        if (sourceTable && col.getSourceTable() !== sourceTable) {
-          throw new Error(
-            `Column source table assetion failed, expected "${
-              sourceTable.__name
-            }", got "${col.getSourceTable()}".`,
-          );
+        if (sourceTable) {
+          col.checkSourceTable(sourceTable);
         }
       }
       let cbRes: string | null = null;
