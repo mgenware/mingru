@@ -122,7 +122,7 @@ it('Join a table with custom column name', () => {
   );
 });
 
-it('3-table joins and where', () => {
+it('3-table joins and WHERE', () => {
   class CmtTA extends dd.TableActions {
     t = dd
       .select(
@@ -139,7 +139,10 @@ it('3-table joins and where', () => {
       .where(
         dd.sql`${cmt.user_id} = 1 AND ${
           cmt.target_id.join(post).title
-        } = 2 AND ${cmt.target_id.join(post).user_id.join(user).url_name} = 3`,
+        } = 2 | ${cmt.target_id
+          .join(post)
+          .user_id.join(user)
+          .url_name.isEqualToInput()} | ${cmt.id.isEqualToInput()} | ${cmt.target_id.isEqualToInput()}`,
       );
   }
   const cmtTA = dd.ta(cmt, CmtTA);
@@ -148,7 +151,7 @@ it('3-table joins and where', () => {
 
   expect(
     io.sql,
-    'SELECT `post_cmt`.`id` AS `id`, `post_cmt`.`user_id` AS `userID`, `join_1`.`title` AS `targetTitle`, `join_1`.`user_id` AS `targetUserID`, `join_2`.`url_name` AS `targetUserUrlName`, `join_2`.`id` AS `TUID2` FROM `post_cmt` AS `post_cmt` INNER JOIN `db_post` AS `join_1` ON `join_1`.`id` = `post_cmt`.`target_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `target`.`user_id` WHERE `post_cmt`.`user_id` = 1 AND `join_1`.`title` = 2 AND `join_2`.`url_name` = 3',
+    'SELECT `post_cmt`.`id` AS `id`, `post_cmt`.`user_id` AS `userID`, `join_1`.`title` AS `targetTitle`, `join_1`.`user_id` AS `targetUserID`, `join_2`.`url_name` AS `targetUserUrlName`, `join_2`.`id` AS `TUID2` FROM `post_cmt` AS `post_cmt` INNER JOIN `db_post` AS `join_1` ON `join_1`.`id` = `post_cmt`.`target_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `target`.`user_id` WHERE `post_cmt`.`user_id` = 1 AND `join_1`.`title` = 2 | `join_2`.`url_name` = ? | `post_cmt`.`id` = ? | `post_cmt`.`target_id` = ?',
   );
 });
 
@@ -283,10 +286,31 @@ it('GROUP BY and HAVING', () => {
 });
 
 it('Unrelated cols', () => {
-  class UserTA extends dd.TableActions {
-    t = dd.select(post.user_id);
-  }
+  // Selected cols
   assert.throws(() => {
+    class UserTA extends dd.TableActions {
+      t = dd.select(post.user_id);
+    }
+    const ta = dd.ta(user, UserTA);
+    const v = ta.t;
+    mr.selectIO(v, mr.mysql);
+  });
+
+  // WHERE col
+  assert.throws(() => {
+    class UserTA extends dd.TableActions {
+      t = dd.select(user.id).where(dd.sql`${post.id}`);
+    }
+    const ta = dd.ta(user, UserTA);
+    const v = ta.t;
+    mr.selectIO(v, mr.mysql);
+  });
+
+  // Do NOT throws on inputs
+  assert.doesNotThrow(() => {
+    class UserTA extends dd.TableActions {
+      t = dd.select(user.id).where(dd.sql`${post.id.toInput()}`);
+    }
     const ta = dd.ta(user, UserTA);
     const v = ta.t;
     mr.selectIO(v, mr.mysql);
