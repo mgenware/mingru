@@ -143,6 +143,16 @@ it('Basic join (rows)', async () => {
   await testBuildAsync(ta, 'select/joinBasicRows');
 });
 
+it('Join implied by WHERE', async () => {
+  class PostTA extends dd.TableActions {
+    selectT = dd
+      .select(post.title)
+      .where(post.user_id.join(user).url_name.isEqualToInput());
+  }
+  const ta = dd.ta(post, PostTA);
+  await testBuildAsync(ta, 'select/joinImpliedByWhere');
+});
+
 it('Inverse join (select from A on A.id = B.a_id)', async () => {
   class PostTA extends dd.TableActions {
     selectT = dd
