@@ -44,7 +44,6 @@ export class SetterIO {
           } else {
             const type = col.type.types[0];
             const def = dtDefault(type);
-            // tslint:disable-next-line
             if (def === null) {
               throw new Error(
                 `Cannot determine the default value of type "${type}" at column ${col.__name}`,

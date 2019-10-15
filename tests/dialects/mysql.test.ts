@@ -98,9 +98,9 @@ it('objToSQL', () => {
   expect(dialect.objToSQL(true, user), '1');
   expect(dialect.objToSQL(false, user), '0');
   // string
-  expect(dialect.objToSQL('a 123 🛋', user), "'a 123 🛋'"); // tslint:disable-line
-  expect(dialect.objToSQL('', user), "''"); // tslint:disable-line
-  expect(dialect.objToSQL('\'"\\', user), "'''\"\\'"); // tslint:disable-line
+  expect(dialect.objToSQL('a 123 🛋', user), "'a 123 🛋'");
+  expect(dialect.objToSQL('', user), "''");
+  expect(dialect.objToSQL('\'"\\', user), "'''\"\\'");
   // undefined
   assert.throws(() => dialect.objToSQL(undefined, user));
   // Others
