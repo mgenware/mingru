@@ -4,24 +4,24 @@ import (
 	"github.com/mgenware/go-packagex/v5/dbx"
 )
 
-// TableTypePost ...
-type TableTypePost struct {
+// TableTypePostCmt ...
+type TableTypePostCmt struct {
 }
 
-// Post ...
-var Post = &TableTypePost{}
+// PostCmt ...
+var PostCmt = &TableTypePostCmt{}
 
 // ------------ Actions ------------
 
-// PostTableSelectTResult ...
-type PostTableSelectTResult struct {
-	Title string
+// PostCmtTableSelectTResult ...
+type PostCmtTableSelectTResult struct {
+	ID uint64
 }
 
 // SelectT ...
-func (da *TableTypePost) SelectT(queryable dbx.Queryable, userUrlName string) (*PostTableSelectTResult, error) {
-	result := &PostTableSelectTResult{}
-	err := queryable.QueryRow("SELECT `title` FROM `db_post` WHERE `url_name` = ?", userUrlName).Scan(&result.Title)
+func (da *TableTypePostCmt) SelectT(queryable dbx.Queryable, targetUserUrlName string) (*PostCmtTableSelectTResult, error) {
+	result := &PostCmtTableSelectTResult{}
+	err := queryable.QueryRow("SELECT `post_cmt`.`id` AS `id` FROM `post_cmt` AS `post_cmt` INNER JOIN `db_post` AS `join_1` ON `join_1`.`id` = `post_cmt`.`target_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `target`.`user_id` WHERE `join_2`.`url_name` = ?", targetUserUrlName).Scan(&result.ID)
 	if err != nil {
 		return nil, err
 	}

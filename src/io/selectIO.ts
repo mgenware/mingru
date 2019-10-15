@@ -119,10 +119,18 @@ export class SelectIOProcessor {
     const columns = action.columns.length
       ? action.columns
       : fromTable.__columns;
-    this.hasJoin = columns.some(sCol => {
+    // hasJoin
+    let hasJoin = columns.some(sCol => {
       const [col] = this.analyzeSelectedColumn(sCol);
       return col && col.__table instanceof dd.JoinedTable;
     });
+    if (!hasJoin && action.whereSQL) {
+      hasJoin = action.whereSQL.enumerateColumns(
+        col => col.__table instanceof dd.JoinedTable,
+      );
+    }
+    this.hasJoin = hasJoin;
+
     const selMode = action.mode;
 
     // Process columns
@@ -143,6 +151,27 @@ export class SelectIOProcessor {
     const fromSQL = this.handleFrom(fromTable);
     sql += ' ' + fromSQL;
 
+    // WHERE
+    // Note: WHERE SQL is created here, but only appended to `sql` var after joins are handled below.
+    let whereIO: SQLIO | null = null;
+    let whereSQL = '';
+    if (action.whereSQL) {
+      whereIO = sqlIO(action.whereSQL, dialect);
+      whereSQL =
+        ' WHERE ' +
+        whereIO.toSQL(fromTable, ele => {
+          if (ele.type === dd.SQLElementType.column) {
+            const col = ele.toColumn();
+            const [colTable] = col.ensureInitialized();
+            if (colTable instanceof dd.JoinedTable) {
+              this.handleJoinRecursively(col);
+            }
+            return this.getColumnSQL(col);
+          }
+          return null;
+        });
+    }
+
     // Joins
     if (this.hasJoin) {
       for (const join of this.joins) {
@@ -151,19 +180,8 @@ export class SelectIOProcessor {
       }
     }
 
-    // WHERE
-    let whereIO: SQLIO | null = null;
-    if (action.whereSQL) {
-      whereIO = sqlIO(action.whereSQL, dialect);
-      sql +=
-        ' WHERE ' +
-        whereIO.toSQL(fromTable, ele => {
-          if (ele.type === dd.SQLElementType.column) {
-            return this.getColumnSQL(ele.toColumn());
-          }
-          return null;
-        });
-    }
+    // Append WHERE SQL after joins
+    sql += whereSQL;
 
     // ORDER BY
     if (action.orderByColumns.length) {
@@ -382,7 +400,7 @@ export class SelectIOProcessor {
     }
     // Now, RawColumn.core is an SQL expression. Try to extract a column from it.
     const sql = rawCol.core;
-    const column = sql.findColumn();
+    const column = sql.findFirstColumn();
     // In this case, we can guess the result type in case user specified type is not present
     const resultType = this.guessColumnType(sql);
     return [column, rawCol, resultType];

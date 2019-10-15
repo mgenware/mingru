@@ -144,12 +144,15 @@ it('Basic join (rows)', async () => {
 });
 
 it('Join implied by WHERE', async () => {
-  class PostTA extends dd.TableActions {
-    selectT = dd
-      .select(post.title)
-      .where(post.user_id.join(user).url_name.isEqualToInput());
+  class CmtTA extends dd.TableActions {
+    selectT = dd.select(cmt.id).where(
+      cmt.target_id
+        .join(post)
+        .user_id.join(user)
+        .url_name.isEqualToInput(),
+    );
   }
-  const ta = dd.ta(post, PostTA);
+  const ta = dd.ta(cmt, CmtTA);
   await testBuildAsync(ta, 'select/joinImpliedByWhere');
 });
 

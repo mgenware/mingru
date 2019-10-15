@@ -17,7 +17,7 @@ export class Logger {
   }
 
   private log(s: string) {
-    // tslint:disable-next-line no-console
+    // eslint-disable-next-line no-console
     console.log(s);
   }
 }
