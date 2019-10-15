@@ -1,7 +1,7 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 
 export default function dtDefault(type: string): unknown | null {
-  const { dt } = dd;
+  const { dt } = mm;
   switch (type) {
     case dt.bigInt:
     case dt.smallInt:

@@ -1,13 +1,13 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import { ActionIO } from './actionIO';
 import Dialect from '../dialect';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 
-export type HandlerType = (action: dd.Action, dialect: Dialect) => ActionIO;
+export type HandlerType = (action: mm.Action, dialect: Dialect) => ActionIO;
 
 const handlers = new Map<number, HandlerType>();
 
-export function registerHanlder(type: dd.ActionType, handler: HandlerType) {
+export function registerHanlder(type: mm.ActionType, handler: HandlerType) {
   throwIfFalsy(handler, 'handlers');
   if (handlers.has(type)) {
     throw new Error(`The type "${type}" has been registered`);
@@ -16,7 +16,7 @@ export function registerHanlder(type: dd.ActionType, handler: HandlerType) {
 }
 
 export function actionToIO(
-  action: dd.Action,
+  action: mm.Action,
   dialect: Dialect,
   dlgMsg: string,
 ): ActionIO {

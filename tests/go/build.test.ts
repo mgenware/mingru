@@ -1,93 +1,93 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import user from '../models/user';
 import post from '../models/post';
 import postReply from '../models/postReply';
 import { testBuildToDirAsync } from './common';
 
 it('Single table', async () => {
-  class PostTA extends dd.TableActions {
-    selectPostTitle = dd.select(post.id, post.title);
-    selectPostInfo = dd.select(
+  class PostTA extends mm.TableActions {
+    selectPostTitle = mm.select(post.id, post.title);
+    selectPostInfo = mm.select(
       post.id,
       post.title,
       post.user_id,
       post.user_id.join(user).url_name,
     );
-    updatePostTitle = dd
+    updatePostTitle = mm
       .unsafeUpdateAll()
-      .set(post.title, dd.sql`${dd.input(post.title)}`);
-    deleteByID = dd
+      .set(post.title, mm.sql`${mm.input(post.title)}`);
+    deleteByID = mm
       .deleteOne()
-      .where(dd.sql`${post.id} = ${dd.input(post.id)}`);
+      .where(mm.sql`${post.id} = ${mm.input(post.id)}`);
   }
-  const ta = dd.ta(post, PostTA);
+  const ta = mm.ta(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'singleTable');
 });
 
 it('Multiple tables', async () => {
-  class UserTA extends dd.TableActions {
-    selectProfile = dd.select(user.display_name, user.sig);
-    updateProfile = dd.unsafeUpdateAll().setInputs(user.sig);
-    deleteByID = dd.deleteOne().where(user.id.isEqualToInput());
+  class UserTA extends mm.TableActions {
+    selectProfile = mm.select(user.display_name, user.sig);
+    updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
+    deleteByID = mm.deleteOne().where(user.id.isEqualToInput());
   }
-  const userTA = dd.ta(user, UserTA);
+  const userTA = mm.ta(user, UserTA);
 
-  class PostTA extends dd.TableActions {
-    selectPostInfo = dd.select(
+  class PostTA extends mm.TableActions {
+    selectPostInfo = mm.select(
       post.id,
       post.content,
       post.user_id.join(user).url_name,
     );
-    updateContent = dd
+    updateContent = mm
       .unsafeUpdateAll()
       .set(post.content, post.content.isEqualToInput());
-    deleteByID = dd.deleteOne().where(post.id.isEqualToInput());
+    deleteByID = mm.deleteOne().where(post.id.isEqualToInput());
   }
-  const postTA = dd.ta(post, PostTA);
+  const postTA = mm.ta(post, PostTA);
   const actions = [userTA, postTA];
   await testBuildToDirAsync(actions, ['post', 'user'], 'multipleTables');
 });
 
 it('Custom package name', async () => {
-  class PostTA extends dd.TableActions {
-    selectPostTitle = dd.select(post.id, post.title);
+  class PostTA extends mm.TableActions {
+    selectPostTitle = mm.select(post.id, post.title);
   }
-  const ta = dd.ta(post, PostTA);
+  const ta = mm.ta(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'customPackageName', {
     packageName: 'haha',
   });
 });
 
 it('Table DBName', async () => {
-  class PostRplTA extends dd.TableActions {
-    insertPostReply = dd
+  class PostRplTA extends mm.TableActions {
+    insertPostReply = mm
       .unsafeInsertOne()
       .setInputs(postReply.to_user_id, postReply.user_id);
   }
-  const ta = dd.ta(postReply, PostRplTA);
+  const ta = mm.ta(postReply, PostRplTA);
   await testBuildToDirAsync([ta], ['post_reply'], 'tableName');
 });
 
 it('Multiple tables + CSQL', async () => {
-  class UserTA extends dd.TableActions {
-    selectProfile = dd.select(user.display_name, user.sig);
-    updateProfile = dd.unsafeUpdateAll().setInputs(user.sig);
-    deleteByID = dd.deleteOne().where(user.id.isEqualToInput());
+  class UserTA extends mm.TableActions {
+    selectProfile = mm.select(user.display_name, user.sig);
+    updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
+    deleteByID = mm.deleteOne().where(user.id.isEqualToInput());
   }
-  const userTA = dd.ta(user, UserTA);
+  const userTA = mm.ta(user, UserTA);
 
-  class PostTA extends dd.TableActions {
-    selectPostInfo = dd.select(
+  class PostTA extends mm.TableActions {
+    selectPostInfo = mm.select(
       post.id,
       post.content,
       post.user_id.join(user).url_name,
     );
-    updateContent = dd
+    updateContent = mm
       .unsafeUpdateAll()
       .set(post.content, post.content.isEqualToInput());
-    deleteByID = dd.deleteOne().where(post.id.isEqualToInput());
+    deleteByID = mm.deleteOne().where(post.id.isEqualToInput());
   }
-  const postTA = dd.ta(post, PostTA);
+  const postTA = mm.ta(post, PostTA);
   const actions = [userTA, postTA];
   await testBuildToDirAsync(
     actions,

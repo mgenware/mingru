@@ -1,5 +1,5 @@
 import * as mr from '../../';
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import user from '../models/user';
 import * as assert from 'assert';
 
@@ -7,7 +7,7 @@ const expect = assert.equal;
 const TimePkg = 'time';
 const dialect = mr.mysql;
 
-function testType(col: dd.Column, type: string, pkg?: string) {
+function testType(col: mm.Column, type: string, pkg?: string) {
   const info = dialect.colTypeToGoType(col.type);
   expect(info.typeName, type);
   expect(info.namespace || null, pkg || null);
@@ -23,35 +23,35 @@ it('encodeColumnName', () => {
 });
 
 it('encodeTableName', () => {
-  class Table extends dd.Table {}
-  const t = dd.table(Table, 'haha');
+  class Table extends mm.Table {}
+  const t = mm.table(Table, 'haha');
   expect(dialect.encodeTableName(user), '`user`');
   expect(dialect.encodeTableName(t), '`haha`');
 });
 
 it('DT', () => {
-  const tests: Array<[dd.Column, string, unknown]> = [
+  const tests: Array<[mm.Column, string, unknown]> = [
     // PK
-    [dd.pk(), 'uint64', null],
+    [mm.pk(), 'uint64', null],
     // Integer
-    [dd.int(), 'int', null],
-    [dd.uInt(), 'uint', null],
-    [dd.bigInt(), 'int64', null],
-    [dd.uBigInt(), 'uint64', null],
-    [dd.smallInt(), 'int16', null],
-    [dd.uSmallInt(), 'uint16', null],
-    [dd.tinyInt(), 'int8', null],
-    [dd.uTinyInt(), 'uint8', null],
+    [mm.int(), 'int', null],
+    [mm.uInt(), 'uint', null],
+    [mm.bigInt(), 'int64', null],
+    [mm.uBigInt(), 'uint64', null],
+    [mm.smallInt(), 'int16', null],
+    [mm.uSmallInt(), 'uint16', null],
+    [mm.tinyInt(), 'int8', null],
+    [mm.uTinyInt(), 'uint8', null],
     // String
-    [dd.varChar(10), 'string', null],
-    [dd.char(10), 'string', null],
+    [mm.varChar(10), 'string', null],
+    [mm.char(10), 'string', null],
     // Time
-    [dd.datetime(), 'time.Time', TimePkg],
-    [dd.date(), 'time.Time', TimePkg],
+    [mm.datetime(), 'time.Time', TimePkg],
+    [mm.date(), 'time.Time', TimePkg],
   ];
 
   for (const t of tests) {
-    const column = t[0] as dd.Column;
+    const column = t[0] as mm.Column;
     testType(column, t[1] as string, t[2] as string);
     if (!column.type.pk) {
       column.type.nullable = true;
@@ -61,7 +61,7 @@ it('DT', () => {
 });
 
 it('DT (not supported)', () => {
-  const props = new dd.ColumnType(['type1', 'type2']);
+  const props = new mm.ColumnType(['type1', 'type2']);
   assert.throws(() => dialect.colTypeToGoType(props), 'type2');
 });
 
@@ -71,22 +71,22 @@ it('as', () => {
 
 it('SQL calls', () => {
   const t = dialect.sqlCall;
-  expect(t(dd.SQLCallType.dateNow), 'CURDATE');
-  expect(t(dd.SQLCallType.timeNow), 'CURTIME');
-  expect(t(dd.SQLCallType.datetimeNow), 'NOW');
-  expect(t(dd.SQLCallType.count), 'COUNT');
-  expect(t(dd.SQLCallType.coalesce), 'COALESCE');
-  expect(t(dd.SQLCallType.avg), 'AVG');
-  expect(t(dd.SQLCallType.sum), 'SUM');
-  expect(t(dd.SQLCallType.min), 'MIN');
-  expect(t(dd.SQLCallType.max), 'MAX');
-  expect(t(dd.SQLCallType.year), 'YEAR');
-  expect(t(dd.SQLCallType.month), 'MONTH');
-  expect(t(dd.SQLCallType.day), 'DAY');
-  expect(t(dd.SQLCallType.week), 'WEEK');
-  expect(t(dd.SQLCallType.hour), 'HOUR');
-  expect(t(dd.SQLCallType.minute), 'MINUTE');
-  expect(t(dd.SQLCallType.second), 'SECOND');
+  expect(t(mm.SQLCallType.dateNow), 'CURDATE');
+  expect(t(mm.SQLCallType.timeNow), 'CURTIME');
+  expect(t(mm.SQLCallType.datetimeNow), 'NOW');
+  expect(t(mm.SQLCallType.count), 'COUNT');
+  expect(t(mm.SQLCallType.coalesce), 'COALESCE');
+  expect(t(mm.SQLCallType.avg), 'AVG');
+  expect(t(mm.SQLCallType.sum), 'SUM');
+  expect(t(mm.SQLCallType.min), 'MIN');
+  expect(t(mm.SQLCallType.max), 'MAX');
+  expect(t(mm.SQLCallType.year), 'YEAR');
+  expect(t(mm.SQLCallType.month), 'MONTH');
+  expect(t(mm.SQLCallType.day), 'DAY');
+  expect(t(mm.SQLCallType.week), 'WEEK');
+  expect(t(mm.SQLCallType.hour), 'HOUR');
+  expect(t(mm.SQLCallType.minute), 'MINUTE');
+  expect(t(mm.SQLCallType.second), 'SECOND');
 });
 
 it('objToSQL', () => {
@@ -109,25 +109,25 @@ it('objToSQL', () => {
 
 it('colToSQLType', () => {
   // Integers
-  expect(dialect.colToSQLType(dd.int()), 'INT NOT NULL');
-  expect(dialect.colToSQLType(dd.bigInt()), 'BIGINT NOT NULL');
-  expect(dialect.colToSQLType(dd.tinyInt()), 'TINYINT NOT NULL');
-  expect(dialect.colToSQLType(dd.smallInt()), 'SMALLINT NOT NULL');
-  expect(dialect.colToSQLType(dd.uInt()), 'INT UNSIGNED NOT NULL');
+  expect(dialect.colToSQLType(mm.int()), 'INT NOT NULL');
+  expect(dialect.colToSQLType(mm.bigInt()), 'BIGINT NOT NULL');
+  expect(dialect.colToSQLType(mm.tinyInt()), 'TINYINT NOT NULL');
+  expect(dialect.colToSQLType(mm.smallInt()), 'SMALLINT NOT NULL');
+  expect(dialect.colToSQLType(mm.uInt()), 'INT UNSIGNED NOT NULL');
   // Chars
-  expect(dialect.colToSQLType(dd.varChar(3)), 'VARCHAR(3) NOT NULL');
-  expect(dialect.colToSQLType(dd.char(3)), 'CHAR(3) NOT NULL');
-  expect(dialect.colToSQLType(dd.text()), 'TEXT NOT NULL');
+  expect(dialect.colToSQLType(mm.varChar(3)), 'VARCHAR(3) NOT NULL');
+  expect(dialect.colToSQLType(mm.char(3)), 'CHAR(3) NOT NULL');
+  expect(dialect.colToSQLType(mm.text()), 'TEXT NOT NULL');
   // DateTime
-  expect(dialect.colToSQLType(dd.date()), 'DATE NOT NULL');
-  expect(dialect.colToSQLType(dd.datetime()), 'DATETIME NOT NULL');
-  expect(dialect.colToSQLType(dd.time()), 'TIME NOT NULL');
+  expect(dialect.colToSQLType(mm.date()), 'DATE NOT NULL');
+  expect(dialect.colToSQLType(mm.datetime()), 'DATETIME NOT NULL');
+  expect(dialect.colToSQLType(mm.time()), 'TIME NOT NULL');
   // NULL
-  expect(dialect.colToSQLType(dd.int().nullable), 'INT NULL DEFAULT NULL');
+  expect(dialect.colToSQLType(mm.int().nullable), 'INT NULL DEFAULT NULL');
   // Default value
-  expect(dialect.colToSQLType(dd.int(43).nullable), 'INT NULL DEFAULT 43');
+  expect(dialect.colToSQLType(mm.int(43).nullable), 'INT NULL DEFAULT 43');
   expect(
-    dialect.colToSQLType(dd.varChar(23, 'oo').nullable),
+    dialect.colToSQLType(mm.varChar(23, 'oo').nullable),
     "VARCHAR(23) NULL DEFAULT 'oo'",
   );
 });

@@ -1,94 +1,94 @@
 import { testBuildAsync } from './common';
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 
 it('No inserted ID', async () => {
-  class Employee extends dd.Table {
-    id = dd.pk(dd.int()).setDBName('emp_no').noAutoIncrement;
-    firstName = dd.varChar(50);
-    lastName = dd.varChar(50);
-    gender = dd.varChar(10);
-    birthDate = dd.date();
-    hireDate = dd.date();
+  class Employee extends mm.Table {
+    id = mm.pk(mm.int()).setDBName('emp_no').noAutoIncrement;
+    firstName = mm.varChar(50);
+    lastName = mm.varChar(50);
+    gender = mm.varChar(10);
+    birthDate = mm.date();
+    hireDate = mm.date();
   }
-  const employee = dd.table(Employee, 'employees');
-  class EmployeeTA extends dd.TableActions {
-    insert = dd.insert().setInputs();
+  const employee = mm.table(Employee, 'employees');
+  class EmployeeTA extends mm.TableActions {
+    insert = mm.insert().setInputs();
   }
-  const employeeTA = dd.ta(employee, EmployeeTA);
-  class Dept extends dd.Table {
-    no = dd.pk(dd.char(4)).setDBName('dept_no');
-    name = dd.varChar(40).setDBName('dept_name');
+  const employeeTA = mm.ta(employee, EmployeeTA);
+  class Dept extends mm.Table {
+    no = mm.pk(mm.char(4)).setDBName('dept_no');
+    name = mm.varChar(40).setDBName('dept_name');
   }
 
-  const dept = dd.table(Dept, 'departments');
-  class DeptTA extends dd.TableActions {
-    insert = dd.insert().setInputs();
+  const dept = mm.table(Dept, 'departments');
+  class DeptTA extends mm.TableActions {
+    insert = mm.insert().setInputs();
   }
-  const deptTA = dd.ta(dept, DeptTA);
-  class DeptManager extends dd.Table {
+  const deptTA = mm.ta(dept, DeptTA);
+  class DeptManager extends mm.Table {
     empNo = employee.id;
     deptNo = dept.no;
-    fromDate = dd.date();
-    toDate = dd.date();
+    fromDate = mm.date();
+    toDate = mm.date();
   }
-  const deptManager = dd.table(DeptManager, 'dept_manager');
-  class DeptManagerTA extends dd.TableActions {
-    insertCore = dd.insert().setInputs();
-    insert = dd.transact(employeeTA.insert, deptTA.insert, this.insertCore);
+  const deptManager = mm.table(DeptManager, 'dept_manager');
+  class DeptManagerTA extends mm.TableActions {
+    insertCore = mm.insert().setInputs();
+    insert = mm.transact(employeeTA.insert, deptTA.insert, this.insertCore);
   }
 
-  const deptManagerTA = dd.ta(deptManager, DeptManagerTA);
+  const deptManagerTA = mm.ta(deptManager, DeptManagerTA);
   await testBuildAsync(employeeTA, 'tx/noInsID/employee');
   await testBuildAsync(deptTA, 'tx/noInsID/dept');
   await testBuildAsync(deptManagerTA, 'tx/noInsID/deptManager');
 });
 
 it('Last inserted ID', async () => {
-  class Employee extends dd.Table {
-    id = dd.pk(dd.int()).autoIncrement.setDBName('emp_no');
-    firstName = dd.varChar(50);
+  class Employee extends mm.Table {
+    id = mm.pk(mm.int()).autoIncrement.setDBName('emp_no');
+    firstName = mm.varChar(50);
   }
-  const employee = dd.table(Employee, 'employees');
-  class EmployeeTA extends dd.TableActions {
-    insert = dd.insertOne().setInputs();
-    insert2 = dd.transact(this.insert, this.insert);
+  const employee = mm.table(Employee, 'employees');
+  class EmployeeTA extends mm.TableActions {
+    insert = mm.insertOne().setInputs();
+    insert2 = mm.transact(this.insert, this.insert);
   }
-  const employeeTA = dd.ta(employee, EmployeeTA);
+  const employeeTA = mm.ta(employee, EmployeeTA);
   await testBuildAsync(employeeTA, 'tx/autoInsID/employee');
 });
 
 it('Temp member actions', async () => {
-  class User extends dd.Table {
-    id = dd.pk();
-    postCount = dd.int();
+  class User extends mm.Table {
+    id = mm.pk();
+    postCount = mm.int();
   }
-  const user = dd.table(User);
-  class UserTA extends dd.TableActions {
-    updatePostCount = dd
+  const user = mm.table(User);
+  class UserTA extends mm.TableActions {
+    updatePostCount = mm
       .updateOne()
       .set(
         user.postCount,
-        dd.sql`${user.postCount} + ${dd.input(dd.int(), 'offset')}`,
+        mm.sql`${user.postCount} + ${mm.input(mm.int(), 'offset')}`,
       )
       .byID();
   }
-  const userTA = dd.ta(user, UserTA);
-  class Post extends dd.Table {
-    id = dd.pk();
-    title = dd.varChar(200);
+  const userTA = mm.ta(user, UserTA);
+  class Post extends mm.Table {
+    id = mm.pk();
+    title = mm.varChar(200);
   }
 
-  const post = dd.table(Post, 'db_post');
-  class PostTA extends dd.TableActions {
-    insertCore = dd.insertOne().setInputs();
-    insert = dd.transact(
+  const post = mm.table(Post, 'db_post');
+  class PostTA extends mm.TableActions {
+    insertCore = mm.insertOne().setInputs();
+    insert = mm.transact(
       userTA.updatePostCount.wrap({ offset: 1 }),
       this.insertCore,
-      dd
+      mm
         .updateOne()
         .setInputs()
         .byID(),
-      dd
+      mm
         .updateOne()
         .setInputs()
         .byID()
@@ -96,7 +96,7 @@ it('Temp member actions', async () => {
       this.insertCore.wrap({ title: '"abc"' }),
     );
   }
-  const postTA = dd.ta(post, PostTA);
+  const postTA = mm.ta(post, PostTA);
   await testBuildAsync(userTA, 'tx/tmpActions/user');
   await testBuildAsync(postTA, 'tx/tmpActions/post');
 });

@@ -1,8 +1,8 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 
-class Category extends dd.Table {
-  id = dd.pk();
-  name = dd.varChar(200);
+class Category extends mm.Table {
+  id = mm.pk();
+  name = mm.varChar(200);
 }
 
-export default dd.table(Category);
+export default mm.table(Category);

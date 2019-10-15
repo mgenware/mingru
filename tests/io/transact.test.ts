@@ -1,5 +1,5 @@
 import * as mr from '../../';
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import user from '../models/user';
 import post from '../models/post';
 import * as assert from 'assert';
@@ -8,24 +8,24 @@ const expect = assert.equal;
 const dialect = mr.mysql;
 
 it('TransactIO', () => {
-  class WrapSelfTA extends dd.TableActions {
-    s = dd
+  class WrapSelfTA extends mm.TableActions {
+    s = mm
       .updateSome()
-      .set(user.url_name, dd.sql`${dd.input(user.url_name)}`)
+      .set(user.url_name, mm.sql`${mm.input(user.url_name)}`)
       .setInputs(user.sig, user.follower_count)
       .where(
-        dd.sql`${user.url_name.toInput()} ${user.id.toInput()} ${user.url_name.toInput()}`,
+        mm.sql`${user.url_name.toInput()} ${user.id.toInput()} ${user.url_name.toInput()}`,
       );
     d = this.s.wrap({ sig: '"haha"' });
   }
-  const wrapSelf = dd.ta(user, WrapSelfTA);
+  const wrapSelf = mm.ta(user, WrapSelfTA);
 
-  class WrapOtherTA extends dd.TableActions {
+  class WrapOtherTA extends mm.TableActions {
     standard = wrapSelf.s.wrap({ id: '123' });
     nested = wrapSelf.d.wrap({ id: '123' });
-    t1 = dd.transact(wrapSelf.s, wrapSelf.d, this.standard);
+    t1 = mm.transact(wrapSelf.s, wrapSelf.d, this.standard);
   }
-  const wrapOther = dd.ta(post, WrapOtherTA);
+  const wrapOther = mm.ta(post, WrapOtherTA);
   const io = mr.transactIO(wrapOther.t1, dialect);
   assert.ok(io instanceof mr.TransactIO);
   expect(
@@ -37,25 +37,25 @@ it('TransactIO', () => {
 });
 
 it('Member details (normal action, wrapped, tmp wrapped)', () => {
-  class SourceTA extends dd.TableActions {
-    s = dd
+  class SourceTA extends mm.TableActions {
+    s = mm
       .updateSome()
       .setInputs(user.sig, user.follower_count)
       .byID();
   }
-  const srcTA = dd.ta(user, SourceTA);
-  class WrapTA extends dd.TableActions {
-    s = dd
+  const srcTA = mm.ta(user, SourceTA);
+  class WrapTA extends mm.TableActions {
+    s = mm
       .updateSome()
       .setInputs(user.sig, user.follower_count)
       .byID();
     s2 = this.s.wrap({ sig: '"haha"' });
-    t = dd.transact(this.s.wrap({ sig: '"haha"' }));
-    t2 = dd.transact(this.s2);
-    t3 = dd.transact(this.s);
-    t4 = dd.transact(srcTA.s);
+    t = mm.transact(this.s.wrap({ sig: '"haha"' }));
+    t2 = mm.transact(this.s2);
+    t3 = mm.transact(this.s);
+    t4 = mm.transact(srcTA.s);
   }
-  const wrapTA = dd.ta(user, WrapTA);
+  const wrapTA = mm.ta(user, WrapTA);
 
   const io = mr.transactIO(wrapTA.t, dialect);
   assert.ok(io instanceof mr.TransactIO);

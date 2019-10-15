@@ -1,13 +1,13 @@
 import * as nodepath from 'path';
 import * as mr from '../../';
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import * as mfs from 'm-fs';
 import * as assert from 'assert';
 
 const dialect = mr.mysql;
 const DestDataDir = 'tests/csql/dest';
 
-export async function testBuildAsync(table: dd.Table, path: string) {
+export async function testBuildAsync(table: mm.Table, path: string) {
   let content = '';
   if (path) {
     path = nodepath.resolve(nodepath.join(DestDataDir, path + '.sql'));

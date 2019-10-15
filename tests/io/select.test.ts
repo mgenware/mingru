@@ -1,5 +1,5 @@
 import * as mr from '../../';
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import user from '../models/user';
 import post from '../models/post';
 import cmt from '../models/cmt';
@@ -12,10 +12,10 @@ const expect = assert.equal;
 const dialect = mr.mysql;
 
 it('Select', () => {
-  class UserTA extends dd.TableActions {
-    t = dd.select(user.id, user.url_name);
+  class UserTA extends mm.TableActions {
+    t = mm.select(user.id, user.url_name);
   }
-  const userTA = dd.ta(user, UserTA);
+  const userTA = mm.ta(user, UserTA);
   const v = userTA.t;
   const io = mr.selectIO(v, dialect);
 
@@ -25,12 +25,12 @@ it('Select', () => {
 });
 
 it('Where', () => {
-  class UserTA extends dd.TableActions {
-    t = dd
+  class UserTA extends mm.TableActions {
+    t = mm
       .select(user.id, user.url_name)
-      .where(dd.sql`${user.id} = 1 ${user.id.toInput()} ${user.id.toInput()}`);
+      .where(mm.sql`${user.id} = 1 ${user.id.toInput()} ${user.id.toInput()}`);
   }
-  const userTA = dd.ta(user, UserTA);
+  const userTA = mm.ta(user, UserTA);
   const v = userTA.t;
   const io = mr.selectIO(v, dialect);
 
@@ -39,16 +39,16 @@ it('Where', () => {
 });
 
 it('Where and inputs', () => {
-  class UserTA extends dd.TableActions {
-    t = dd
+  class UserTA extends mm.TableActions {
+    t = mm
       .select(user.id, user.url_name)
       .where(
-        dd.sql`${user.id} = ${dd.input(user.id)} && ${
+        mm.sql`${user.id} = ${mm.input(user.id)} && ${
           user.url_name
-        } = ${dd.input('string', 'userName')}`,
+        } = ${mm.input('string', 'userName')}`,
       );
   }
-  const userTA = dd.ta(user, UserTA);
+  const userTA = mm.ta(user, UserTA);
   const v = userTA.t;
   const io = mr.selectIO(v, dialect);
 
@@ -60,10 +60,10 @@ it('Where and inputs', () => {
 });
 
 it('Basic join', () => {
-  class PostTA extends dd.TableActions {
-    t = dd.select(post.user_id.join(user).url_name, post.title);
+  class PostTA extends mm.TableActions {
+    t = mm.select(post.user_id.join(user).url_name, post.title);
   }
-  const postTA = dd.ta(post, PostTA);
+  const postTA = mm.ta(post, PostTA);
   const v = postTA.t;
   const io = mr.selectIO(v, dialect);
 
@@ -74,14 +74,14 @@ it('Basic join', () => {
 });
 
 it('Multiple cols join and custom table name', () => {
-  class RplTA extends dd.TableActions {
-    t = dd.select(
+  class RplTA extends mm.TableActions {
+    t = mm.select(
       rpl.user_id.join(user).url_name,
       rpl.user_id.join(user).id,
       rpl.to_user_id.join(user).url_name,
     );
   }
-  const rplTA = dd.ta(rpl, RplTA);
+  const rplTA = mm.ta(rpl, RplTA);
   const v = rplTA.t;
   const io = mr.selectIO(v, dialect);
 
@@ -92,10 +92,10 @@ it('Multiple cols join and custom table name', () => {
 });
 
 it('Join a table with custom table name', () => {
-  class PostTA extends dd.TableActions {
-    t = dd.select(post.user_id, post.user_id.join(rpl).to_user_id);
+  class PostTA extends mm.TableActions {
+    t = mm.select(post.user_id, post.user_id.join(rpl).to_user_id);
   }
-  const postTA = dd.ta(post, PostTA);
+  const postTA = mm.ta(post, PostTA);
   const v = postTA.t;
   const io = mr.selectIO(v, dialect);
 
@@ -106,13 +106,13 @@ it('Join a table with custom table name', () => {
 });
 
 it('Join a table with custom column name', () => {
-  class PostTA extends dd.TableActions {
-    t = dd.select(
+  class PostTA extends mm.TableActions {
+    t = mm.select(
       post.user_id,
       post.user_id.join(rpl, rpl.custom_id).to_user_id,
     );
   }
-  const postTA = dd.ta(post, PostTA);
+  const postTA = mm.ta(post, PostTA);
   const v = postTA.t;
   const io = mr.selectIO(v, dialect);
 
@@ -123,8 +123,8 @@ it('Join a table with custom column name', () => {
 });
 
 it('3-table joins and WHERE', () => {
-  class CmtTA extends dd.TableActions {
-    t = dd
+  class CmtTA extends mm.TableActions {
+    t = mm
       .select(
         cmt.id,
         cmt.user_id,
@@ -137,7 +137,7 @@ it('3-table joins and WHERE', () => {
           .id.as('TUID2'),
       )
       .where(
-        dd.sql`${cmt.user_id} = 1 AND ${
+        mm.sql`${cmt.user_id} = 1 AND ${
           cmt.target_id.join(post).title
         } = 2 | ${cmt.target_id
           .join(post)
@@ -145,7 +145,7 @@ it('3-table joins and WHERE', () => {
           .url_name.isEqualToInput()} | ${cmt.id.isEqualToInput()} | ${cmt.target_id.isEqualToInput()}`,
       );
   }
-  const cmtTA = dd.ta(cmt, CmtTA);
+  const cmtTA = mm.ta(cmt, CmtTA);
   const v = cmtTA.t;
   const io = mr.selectIO(v, dialect);
 
@@ -157,8 +157,8 @@ it('3-table joins and WHERE', () => {
 
 it('Join and from', () => {
   const jCmt = postCmt.cmt_id.join(cmt2);
-  class PostTA extends dd.TableActions {
-    selectT = dd
+  class PostTA extends mm.TableActions {
+    selectT = mm
       .select(
         jCmt.content,
         jCmt.created_at,
@@ -170,7 +170,7 @@ it('Join and from', () => {
       .from(postCmt)
       .by(postCmt.post_id);
   }
-  const ta = dd.ta(post, PostTA);
+  const ta = mm.ta(post, PostTA);
   const io = mr.selectIO(ta.selectT, dialect);
 
   expect(ta.__table, post);
@@ -182,8 +182,8 @@ it('Join and from', () => {
 });
 
 it('AS', () => {
-  class CmtTA extends dd.TableActions {
-    t = dd.select(
+  class CmtTA extends mm.TableActions {
+    t = mm.select(
       cmt.id,
       cmt.user_id.as('a'),
       cmt.target_id.join(post).title.as('b'),
@@ -194,7 +194,7 @@ it('AS', () => {
         .url_name.as('c'),
     );
   }
-  const cmtTA = dd.ta(cmt, CmtTA);
+  const cmtTA = mm.ta(cmt, CmtTA);
   const v = cmtTA.t;
   const io = mr.selectIO(v, dialect);
 
@@ -205,8 +205,8 @@ it('AS', () => {
 });
 
 it('Duplicate selected names', () => {
-  class PostTA extends dd.TableActions {
-    t = dd.select(
+  class PostTA extends mm.TableActions {
+    t = mm.select(
       post.title,
       post.title,
       post.title.as('a'),
@@ -218,20 +218,20 @@ it('Duplicate selected names', () => {
       post.user_id.join(user).url_name.as('a'),
     );
   }
-  const postTA = dd.ta(post, PostTA);
+  const postTA = mm.ta(post, PostTA);
   const v = postTA.t;
   assert.throws(() => mr.selectIO(v, dialect), 'already exists');
 });
 
 it('getInputs', () => {
-  class UserTA extends dd.TableActions {
-    t = dd
+  class UserTA extends mm.TableActions {
+    t = mm
       .select(user.id, user.url_name)
       .where(
-        dd.sql`${user.id.toInput()} ${user.url_name.toInput()} ${user.id.toInput()}`,
+        mm.sql`${user.id.toInput()} ${user.url_name.toInput()} ${user.id.toInput()}`,
       );
   }
-  const ta = dd.ta(user, UserTA);
+  const ta = mm.ta(user, UserTA);
   const v = ta.t;
   const io = mr.selectIO(v, mr.mysql);
   expect(
@@ -241,24 +241,24 @@ it('getInputs', () => {
 });
 
 it('getInputs (no WHERE)', () => {
-  class UserTA extends dd.TableActions {
-    t = dd.select(user.id, user.url_name);
+  class UserTA extends mm.TableActions {
+    t = mm.select(user.id, user.url_name);
   }
-  const ta = dd.ta(user, UserTA);
+  const ta = mm.ta(user, UserTA);
   const v = ta.t;
   const io = mr.selectIO(v, mr.mysql);
   expect(io.funcArgs.list.length, 1);
 });
 
 it('getReturns', () => {
-  class UserTA extends dd.TableActions {
-    t = dd
+  class UserTA extends mm.TableActions {
+    t = mm
       .select(user.id)
       .where(
-        dd.sql`${user.id.toInput()} ${post.title.toInput()} ${user.id.toInput()}`,
+        mm.sql`${user.id.toInput()} ${post.title.toInput()} ${user.id.toInput()}`,
       );
   }
-  const ta = dd.ta(user, UserTA);
+  const ta = mm.ta(user, UserTA);
   const v = ta.t;
   const io = mr.selectIO(v, mr.mysql);
   expect(
@@ -268,15 +268,15 @@ it('getReturns', () => {
 });
 
 it('GROUP BY and HAVING', () => {
-  const yearCol = dd.sel(dd.year(post.datetime), 'year');
-  class PostTA extends dd.TableActions {
-    t = dd
-      .select(yearCol, dd.sel(dd.sum(post.cmtCount), 'total'))
+  const yearCol = mm.sel(mm.year(post.datetime), 'year');
+  class PostTA extends mm.TableActions {
+    t = mm
+      .select(yearCol, mm.sel(mm.sum(post.cmtCount), 'total'))
       .byID()
       .groupBy(yearCol, 'total')
-      .having(dd.and(dd.sql`${yearCol} > 2010`, dd.sql`\`total\` > 100`));
+      .having(mm.and(mm.sql`${yearCol} > 2010`, mm.sql`\`total\` > 100`));
   }
-  const ta = dd.ta(post, PostTA);
+  const ta = mm.ta(post, PostTA);
   const v = ta.t;
   const io = mr.selectIO(v, mr.mysql);
   expect(
@@ -288,30 +288,30 @@ it('GROUP BY and HAVING', () => {
 it('Unrelated cols', () => {
   // Selected cols
   assert.throws(() => {
-    class UserTA extends dd.TableActions {
-      t = dd.select(post.user_id);
+    class UserTA extends mm.TableActions {
+      t = mm.select(post.user_id);
     }
-    const ta = dd.ta(user, UserTA);
+    const ta = mm.ta(user, UserTA);
     const v = ta.t;
     mr.selectIO(v, mr.mysql);
   });
 
   // WHERE col
   assert.throws(() => {
-    class UserTA extends dd.TableActions {
-      t = dd.select(user.id).where(dd.sql`${post.id}`);
+    class UserTA extends mm.TableActions {
+      t = mm.select(user.id).where(mm.sql`${post.id}`);
     }
-    const ta = dd.ta(user, UserTA);
+    const ta = mm.ta(user, UserTA);
     const v = ta.t;
     mr.selectIO(v, mr.mysql);
   });
 
   // Do NOT throws on inputs
   assert.doesNotThrow(() => {
-    class UserTA extends dd.TableActions {
-      t = dd.select(user.id).where(dd.sql`${post.id.toInput()}`);
+    class UserTA extends mm.TableActions {
+      t = mm.select(user.id).where(mm.sql`${post.id.toInput()}`);
     }
-    const ta = dd.ta(user, UserTA);
+    const ta = mm.ta(user, UserTA);
     const v = ta.t;
     mr.selectIO(v, mr.mysql);
   });

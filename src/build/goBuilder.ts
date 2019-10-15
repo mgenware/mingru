@@ -1,5 +1,5 @@
 import { Dialect } from '../dialect';
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import { SelectIO } from '../io/selectIO';
 import { UpdateIO } from '../io/updateIO';
@@ -113,32 +113,32 @@ export default class GoBuilder {
 
     let bodyMap: CodeMap;
     switch (io.action.actionType) {
-      case dd.ActionType.select: {
+      case mm.ActionType.select: {
         bodyMap = this.select(io as SelectIO);
         break;
       }
 
-      case dd.ActionType.update: {
+      case mm.ActionType.update: {
         bodyMap = this.update(io as UpdateIO);
         break;
       }
 
-      case dd.ActionType.insert: {
+      case mm.ActionType.insert: {
         bodyMap = this.insert(io as InsertIO);
         break;
       }
 
-      case dd.ActionType.delete: {
+      case mm.ActionType.delete: {
         bodyMap = this.delete(io as DeleteIO);
         break;
       }
 
-      case dd.ActionType.wrap: {
+      case mm.ActionType.wrap: {
         bodyMap = this.wrap(io as WrapIO);
         break;
       }
 
-      case dd.ActionType.transact: {
+      case mm.ActionType.transact: {
         bodyMap = this.transact(io as TransactIO);
         break;
       }
@@ -171,14 +171,14 @@ export default class GoBuilder {
     const { className, instanceName } = this.taIO;
     let code = go.struct(className, []);
     code += `\n// ${instanceName} ...
-var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
+var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     return code;
   }
 
   private select(io: SelectIO): CodeMap {
     const { action } = io;
     const selMode = action.mode;
-    const isPageMode = selMode === dd.SelectActionMode.page;
+    const isPageMode = selMode === mm.SelectActionMode.page;
     let { hasLimit } = action;
     if (isPageMode) {
       // Page mode can be considered a special case of hasLimit
@@ -228,7 +228,7 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     }
 
     // Generate result type definition
-    if (selMode !== dd.SelectActionMode.field) {
+    if (selMode !== mm.SelectActionMode.field) {
       resultTypeDef = go.struct(originalResultType, selectedFields);
     }
 
@@ -240,7 +240,7 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       sqlSource += ' LIMIT ? OFFSET ?';
     }
     const sqlLiteral = go.makeStringLiteral(sqlSource);
-    if (selMode === dd.SelectActionMode.list || isPageMode) {
+    if (selMode === mm.SelectActionMode.list || isPageMode) {
       const scanParams = joinParams(selectedFields.map(p => `&item.${p.name}`));
       if (isPageMode) {
         codeBuilder.pushLines(
@@ -303,7 +303,7 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       // select/selectField
       let scanParams: string;
       // Declare the result variable
-      if (selMode === dd.SelectActionMode.field) {
+      if (selMode === mm.SelectActionMode.field) {
         scanParams = `&${defs.resultVarName}`;
         codeBuilder.push(`var ${defs.resultVarName} ${resultType}`);
       } else {
@@ -316,7 +316,7 @@ var ${dd.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       }
       // For selectField, we return the default value, for select, return nil
       const resultVarOnError =
-        selMode === dd.SelectActionMode.field ? 'result' : 'nil';
+        selMode === mm.SelectActionMode.field ? 'result' : 'nil';
       codeBuilder.push();
 
       // Call query func

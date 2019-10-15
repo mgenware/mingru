@@ -1,11 +1,11 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import user from './user';
 
-class PostReply extends dd.Table {
-  id = dd.pk();
+class PostReply extends mm.Table {
+  id = mm.pk();
   user_id = user.id;
   to_user_id = user.id;
-  custom_id = dd.uBigInt().setDBName('haha');
+  custom_id = mm.uBigInt().setDBName('haha');
 }
 
-export default dd.table(PostReply, 'post_cmt_rpl');
+export default mm.table(PostReply, 'post_cmt_rpl');

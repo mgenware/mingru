@@ -1,4 +1,4 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import { SQLIO, sqlIO } from './sqlIO';
 import VarList from '../lib/varList';
@@ -7,7 +7,7 @@ import VarInfo from '../lib/varInfo';
 import dtDefault from '../build/dtDefault';
 
 export class SetterIO {
-  static fromAction(action: dd.CoreUpdateAction, dialect: Dialect): SetterIO[] {
+  static fromAction(action: mm.CoreUpdateAction, dialect: Dialect): SetterIO[] {
     const result = Array.from(
       action.setters,
       ([key, value]) => new SetterIO(key, sqlIO(value, dialect)),
@@ -15,7 +15,7 @@ export class SetterIO {
     if (action.autoSetter) {
       const { setters: actionSetters } = action;
       const [table] = action.ensureInitialized();
-      dd.enumerateColumns(table, col => {
+      mm.enumerateColumns(table, col => {
         // If already set, return
         if (actionSetters.get(col)) {
           return;
@@ -28,12 +28,12 @@ export class SetterIO {
 
         if (action.autoSetter === 'input') {
           result.push(
-            new SetterIO(col, sqlIO(dd.sql`${col.toInput()}`, dialect)),
+            new SetterIO(col, sqlIO(mm.sql`${col.toInput()}`, dialect)),
           );
         } else {
           let value: string;
           if (col.defaultValue) {
-            if (col.defaultValue instanceof dd.SQL) {
+            if (col.defaultValue instanceof mm.SQL) {
               const valueIO = sqlIO(col.defaultValue, dialect);
               value = valueIO.toSQL(table);
             } else {
@@ -53,14 +53,14 @@ export class SetterIO {
             value = dialect.objToSQL(def, table);
           }
 
-          result.push(new SetterIO(col, sqlIO(dd.sql`${value}`, dialect)));
+          result.push(new SetterIO(col, sqlIO(mm.sql`${value}`, dialect)));
         }
       });
     }
     return result;
   }
 
-  constructor(public col: dd.Column, public sql: SQLIO) {
+  constructor(public col: mm.Column, public sql: SQLIO) {
     throwIfFalsy(col, 'col');
     throwIfFalsy(sql, 'sql');
   }

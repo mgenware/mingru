@@ -1,7 +1,7 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 
 export function actionPascalName(actionName: string): string {
-  return dd.utils.toPascalCase(actionName);
+  return mm.utils.toPascalCase(actionName);
 }
 
 export function tableTypeName(tableName: string): string {
@@ -9,7 +9,7 @@ export function tableTypeName(tableName: string): string {
 }
 
 export function tablePascalName(tableName: string): string {
-  return dd.utils.toPascalCase(tableName);
+  return mm.utils.toPascalCase(tableName);
 }
 
 export function actionCallPath(

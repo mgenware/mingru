@@ -1,9 +1,9 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import * as defs from '../defs';
 import Dialect from '../dialect';
 
 export default class CSQLBuilder {
-  constructor(public table: dd.Table, public dialect: Dialect) {}
+  constructor(public table: mm.Table, public dialect: Dialect) {}
 
   build(noHeader?: boolean): string {
     const { table, dialect } = this;
@@ -48,12 +48,12 @@ export default class CSQLBuilder {
     return lines.map(line => `\t${line}`).join(sep);
   }
 
-  private fkExpression(col: dd.Column, fCol: dd.Column): string {
+  private fkExpression(col: mm.Column, fCol: mm.Column): string {
     const { dialect } = this;
     return `CONSTRAINT FOREIGN KEY(${dialect.encodeColumnName(
       col,
     )}) REFERENCES ${dialect.encodeTableName(
-      fCol.__table as dd.Table,
+      fCol.__table as mm.Table,
     )} (${dialect.encodeColumnName(fCol)}) ON DELETE CASCADE`;
   }
 }

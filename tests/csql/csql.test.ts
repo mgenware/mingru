@@ -1,39 +1,39 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import { testBuildAsync } from './common';
 import user from '../models/user';
 import post from '../models/post';
 import like from '../models/like';
 
 it('Common (NULL, defaults)', async () => {
-  class User extends dd.Table {
-    a = dd.varChar(100);
-    b = dd.varChar(100).nullable;
-    c = dd.varChar(100, 'haha');
-    d = dd.uInt(432);
-    e = dd.uBigInt();
+  class User extends mm.Table {
+    a = mm.varChar(100);
+    b = mm.varChar(100).nullable;
+    c = mm.varChar(100, 'haha');
+    d = mm.uInt(432);
+    e = mm.uBigInt();
   }
-  const t = dd.table(User);
+  const t = mm.table(User);
   await testBuildAsync(t, 'common/user');
 });
 
 it('PK', async () => {
-  class User extends dd.Table {
-    a = dd.pk();
-    b = dd.uBigInt(12);
+  class User extends mm.Table {
+    a = mm.pk();
+    b = mm.uBigInt(12);
   }
-  const t = dd.table(User);
+  const t = mm.table(User);
   await testBuildAsync(t, 'pk/user');
 });
 
 it('Multiple PKs', async () => {
-  class Post extends dd.Table {
-    a = dd.pk();
-    b = dd.pk(dd.char(4));
-    user1 = dd.pk(user.id);
-    user2 = dd.pk(user.id);
-    d = dd.uBigInt(12);
+  class Post extends mm.Table {
+    a = mm.pk();
+    b = mm.pk(mm.char(4));
+    user1 = mm.pk(user.id);
+    user2 = mm.pk(user.id);
+    d = mm.uBigInt(12);
   }
-  const t = dd.table(Post, 'db_post');
+  const t = mm.table(Post, 'db_post');
   await testBuildAsync(t, 'multiplePKs/post');
 });
 
@@ -43,22 +43,22 @@ it('FK', async () => {
 });
 
 it('noDefaultOnCSQL', async () => {
-  class User extends dd.Table {
-    a = dd.int(1);
-    b = dd.int(1).noDefaultOnCSQL;
+  class User extends mm.Table {
+    a = mm.int(1);
+    b = mm.int(1).noDefaultOnCSQL;
   }
-  const t = dd.table(User);
+  const t = mm.table(User);
   await testBuildAsync(t, 'noDefaultOnCSQL/user');
 });
 
 it('No SQL expr as default value', async () => {
-  class User extends dd.Table {
-    a = dd.int(1);
-    b = dd.datetime(true);
-    c = dd.datetime(false);
-    d = dd.datetime().setDefault('2012-12-20');
+  class User extends mm.Table {
+    a = mm.int(1);
+    b = mm.datetime(true);
+    c = mm.datetime(false);
+    d = mm.datetime().setDefault('2012-12-20');
   }
-  const t = dd.table(User);
+  const t = mm.table(User);
   await testBuildAsync(t, 'noSQLExpr/user');
 });
 

@@ -1,5 +1,5 @@
 import { Dialect } from '../dialect';
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import toTypeString from 'to-type-string';
 import { TypeInfo } from '../lib/varInfo';
@@ -15,7 +15,7 @@ export class MySQL extends Dialect {
     return '`' + name + '`';
   }
 
-  objToSQL(value: unknown, table: dd.Table | null): string {
+  objToSQL(value: unknown, table: mm.Table | null): string {
     if (value === undefined) {
       throw new Error('value is undefined');
     }
@@ -28,14 +28,14 @@ export class MySQL extends Dialect {
     if (typeof value === 'string') {
       return escapeString(value);
     }
-    if (value instanceof dd.SQL) {
+    if (value instanceof mm.SQL) {
       const io = sqlIO(value, this);
       return io.toSQL(table);
     }
     throw new Error(`Unsupported type of object "${toTypeString(value)}"`);
   }
 
-  colTypeToGoType(colType: dd.ColumnType): TypeInfo {
+  colTypeToGoType(colType: mm.ColumnType): TypeInfo {
     throwIfFalsy(colType, 'colType');
     const type = this.goTypeNonNull(colType);
     if (colType.nullable) {
@@ -48,7 +48,7 @@ export class MySQL extends Dialect {
     return new TypeInfo(type);
   }
 
-  colToSQLType(col: dd.Column): string {
+  colToSQLType(col: mm.Column): string {
     throwIfFalsy(col, 'col');
     const colType = col.type;
     const types = [this.absoluteSQLType(colType)];
@@ -58,7 +58,7 @@ export class MySQL extends Dialect {
     types.push(colType.nullable ? 'NULL' : 'NOT NULL');
     if (!col.isNoDefaultOnCSQL) {
       const defValue = col.defaultValue;
-      if (defValue && defValue instanceof dd.SQL === false) {
+      if (defValue && defValue instanceof mm.SQL === false) {
         types.push('DEFAULT');
 
         // MySQL doesn't allow dynamic value as default value, we simply ignore SQL expr here
@@ -78,47 +78,47 @@ export class MySQL extends Dialect {
     return `${sql} AS ${this.encodeName(name)}`;
   }
 
-  sqlCall(type: dd.SQLCallType): string {
+  sqlCall(type: mm.SQLCallType): string {
     switch (type) {
-      case dd.SQLCallType.datetimeNow:
+      case mm.SQLCallType.datetimeNow:
         return 'NOW';
-      case dd.SQLCallType.dateNow:
+      case mm.SQLCallType.dateNow:
         return 'CURDATE';
-      case dd.SQLCallType.timeNow:
+      case mm.SQLCallType.timeNow:
         return 'CURTIME';
-      case dd.SQLCallType.count:
+      case mm.SQLCallType.count:
         return 'COUNT';
-      case dd.SQLCallType.coalesce:
+      case mm.SQLCallType.coalesce:
         return 'COALESCE';
-      case dd.SQLCallType.avg:
+      case mm.SQLCallType.avg:
         return 'AVG';
-      case dd.SQLCallType.sum:
+      case mm.SQLCallType.sum:
         return 'SUM';
-      case dd.SQLCallType.min:
+      case mm.SQLCallType.min:
         return 'MIN';
-      case dd.SQLCallType.max:
+      case mm.SQLCallType.max:
         return 'MAX';
-      case dd.SQLCallType.year:
+      case mm.SQLCallType.year:
         return 'YEAR';
-      case dd.SQLCallType.month:
+      case mm.SQLCallType.month:
         return 'MONTH';
-      case dd.SQLCallType.day:
+      case mm.SQLCallType.day:
         return 'DAY';
-      case dd.SQLCallType.week:
+      case mm.SQLCallType.week:
         return 'WEEK';
-      case dd.SQLCallType.hour:
+      case mm.SQLCallType.hour:
         return 'HOUR';
-      case dd.SQLCallType.minute:
+      case mm.SQLCallType.minute:
         return 'MINUTE';
-      case dd.SQLCallType.second:
+      case mm.SQLCallType.second:
         return 'SECOND';
       default:
         throw new Error(`Unsupported type of call "${type}"`);
     }
   }
 
-  private absoluteSQLType(colType: dd.ColumnType): string {
-    const DT = dd.dt;
+  private absoluteSQLType(colType: mm.ColumnType): string {
+    const DT = mm.dt;
     const size = colType.length;
     for (const type of colType.types) {
       switch (type) {
@@ -160,8 +160,8 @@ export class MySQL extends Dialect {
     throw new Error(`Type not supported: ${this.inspectTypes(colType.types)}`);
   }
 
-  private goTypeNonNull(colType: dd.ColumnType): TypeInfo | string {
-    const DT = dd.dt;
+  private goTypeNonNull(colType: mm.ColumnType): TypeInfo | string {
+    const DT = mm.dt;
     const unsigned = colType.unsigned;
     for (const type of colType.types) {
       switch (type) {

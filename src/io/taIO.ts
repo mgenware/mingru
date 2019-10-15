@@ -1,4 +1,4 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
 import * as utils from './utils';
@@ -11,11 +11,11 @@ export class TAIO {
   className: string;
   instanceName: string;
 
-  constructor(public ta: dd.TableActions, public dialect: Dialect) {
+  constructor(public ta: mm.TableActions, public dialect: Dialect) {
     throwIfFalsy(ta, 'ta');
 
     const actions: ActionIO[] = [];
-    dd.enumerateActions(
+    mm.enumerateActions(
       ta,
       (action, prop) => {
         actions.push(actionToIO(action, dialect, `action "${prop}"`));

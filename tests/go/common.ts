@@ -1,6 +1,6 @@
 import * as nodepath from 'path';
 import * as mr from '../../';
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import * as tempy from 'tempy';
 import * as mfs from 'm-fs';
 import * as assert from 'assert';
@@ -8,7 +8,7 @@ import * as assert from 'assert';
 const dialect = mr.mysql;
 const DestDataDir = 'tests/go/dest';
 
-export async function testBuildAsync(ta: dd.TableActions, path: string) {
+export async function testBuildAsync(ta: mm.TableActions, path: string) {
   let content = '';
   if (path) {
     path = nodepath.resolve(nodepath.join(DestDataDir, path + '.go'));
@@ -23,7 +23,7 @@ export async function testBuildAsync(ta: dd.TableActions, path: string) {
   return builder;
 }
 
-export async function testBuildFullAsync(ta: dd.TableActions, path: string) {
+export async function testBuildFullAsync(ta: mm.TableActions, path: string) {
   let content = '';
   if (path) {
     path = nodepath.resolve(nodepath.join(DestDataDir, path + '.go'));
@@ -44,7 +44,7 @@ export async function testFilesAsync(a: string, b: string) {
 }
 
 export async function testBuildToDirAsync(
-  actions: dd.TableActions[],
+  actions: mm.TableActions[],
   files: string[],
   expectedDir: string,
   opts?: mr.BuildOption,
@@ -60,7 +60,7 @@ export async function testBuildToDirAsync(
     await builder.buildActions(actions);
     if (buildCSQL) {
       await builder.buildCreateTableSQLFiles(
-        actions.map(a => a.__table as dd.Table),
+        actions.map(a => a.__table as mm.Table),
       );
     }
   });

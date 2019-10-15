@@ -1,4 +1,4 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
 import toTypeString from 'to-type-string';
@@ -16,9 +16,9 @@ export class JoinIO {
     public tableAlias: string,
     // Note that localTable can also be an alias of another join
     public localTable: string,
-    public localColumn: dd.Column,
+    public localColumn: mm.Column,
     public remoteTable: string,
-    public remoteColumn: dd.Column,
+    public remoteColumn: mm.Column,
   ) {}
 
   toSQL(dialect: Dialect): string {
@@ -34,12 +34,12 @@ export class JoinIO {
 
 export class SelectedColumnIO {
   constructor(
-    public selectedColumn: dd.SelectActionColumns,
+    public selectedColumn: mm.SelectActionColumns,
     public valueSQL: string,
     public varName: string, // is alias if it's present, otherwise auto generated from column name
     public alias: string | null,
-    public column: dd.Column | null,
-    public resultType: dd.ColumnType | null, // Available when we can guess the evaluated type, e.g. an expression containing only one column or SQLCall
+    public column: mm.Column | null,
+    public resultType: mm.ColumnType | null, // Available when we can guess the evaluated type, e.g. an expression containing only one column or SQLCall
   ) {
     throwIfFalsy(selectedColumn, 'selectedColumn');
     throwIfFalsy(valueSQL, 'valueSQL');
@@ -52,7 +52,7 @@ export class SelectedColumnIO {
     return this.valueSQL;
   }
 
-  getResultType(): dd.ColumnType {
+  getResultType(): mm.ColumnType {
     if (this.resultType) {
       return this.resultType;
     }
@@ -72,7 +72,7 @@ export const SelectedResultKey = 'result';
 export class SelectIO extends ActionIO {
   constructor(
     dialect: Dialect,
-    public action: dd.SelectAction,
+    public action: mm.SelectAction,
     public sql: string,
     public cols: SelectedColumnIO[],
     public where: SQLIO | null,
@@ -107,7 +107,7 @@ export class SelectIOProcessor {
   // Tracks all selected column names, and throw on duplicates
   selectedNames = new Set<string>();
 
-  constructor(public action: dd.SelectAction, public dialect: Dialect) {
+  constructor(public action: mm.SelectAction, public dialect: Dialect) {
     throwIfFalsy(action, 'action');
     throwIfFalsy(dialect, 'dialect');
   }
@@ -122,11 +122,11 @@ export class SelectIOProcessor {
     // hasJoin
     let hasJoin = columns.some(sCol => {
       const [col] = this.analyzeSelectedColumn(sCol);
-      return col && col.__table instanceof dd.JoinedTable;
+      return col && col.__table instanceof mm.JoinedTable;
     });
     if (!hasJoin && action.whereSQL) {
       hasJoin = action.whereSQL.enumerateColumns(
-        col => col.__table instanceof dd.JoinedTable,
+        col => col.__table instanceof mm.JoinedTable,
       );
     }
     this.hasJoin = hasJoin;
@@ -160,10 +160,10 @@ export class SelectIOProcessor {
       whereSQL =
         ' WHERE ' +
         whereIO.toSQL(fromTable, ele => {
-          if (ele.type === dd.SQLElementType.column) {
+          if (ele.type === mm.SQLElementType.column) {
             const col = ele.toColumn();
             const [colTable] = col.ensureInitialized();
-            if (colTable instanceof dd.JoinedTable) {
+            if (colTable instanceof mm.JoinedTable) {
               this.handleJoinRecursively(col);
             }
             return this.getColumnSQL(col);
@@ -214,9 +214,9 @@ export class SelectIOProcessor {
       sql +=
         ' HAVING ' +
         havingIO.toSQL(fromTable, ele => {
-          if (ele.type === dd.SQLElementType.column) {
+          if (ele.type === mm.SQLElementType.column) {
             const col = ele.toColumn();
-            if (col.__table instanceof dd.JoinedTable) {
+            if (col.__table instanceof mm.JoinedTable) {
               throw new Error(
                 `Joins are not allowed in HAVING clause, offending column "${col.__name}".`,
               );
@@ -248,7 +248,7 @@ export class SelectIOProcessor {
       funcArgs.add(new VarInfo('max', defs.intTypeInfo));
       execArgs.add(limitTypeInfo);
       execArgs.add(offsetTypeInfo);
-    } else if (selMode === dd.SelectActionMode.page) {
+    } else if (selMode === mm.SelectActionMode.page) {
       funcArgs.add(new VarInfo('page', defs.intTypeInfo));
       funcArgs.add(new VarInfo('pageSize', defs.intTypeInfo));
       execArgs.add(limitTypeInfo);
@@ -261,7 +261,7 @@ export class SelectIOProcessor {
       true,
     );
 
-    if (selMode === dd.SelectActionMode.field) {
+    if (selMode === mm.SelectActionMode.field) {
       const col = colIOs[0];
       const typeInfo = dialect.colTypeToGoType(col.getResultType());
       returnValues.add(new VarInfo(SelectedResultKey, typeInfo));
@@ -277,8 +277,8 @@ export class SelectIOProcessor {
       const originalResultType = `${tableName}Table${funcName}Result`;
       let resultType = `*${originalResultType}`;
       if (
-        selMode === dd.SelectActionMode.list ||
-        selMode === dd.SelectActionMode.page
+        selMode === mm.SelectActionMode.list ||
+        selMode === mm.SelectActionMode.page
       ) {
         resultType = '[]' + resultType;
       }
@@ -291,7 +291,7 @@ export class SelectIOProcessor {
       );
       if (action.hasLimit) {
         returnValues.add(new VarInfo('max', defs.intTypeInfo));
-      } else if (action.mode === dd.SelectActionMode.page) {
+      } else if (action.mode === mm.SelectActionMode.page) {
         returnValues.add(new VarInfo('hasNext', defs.boolTypeInfo));
       }
     }
@@ -318,27 +318,27 @@ export class SelectIOProcessor {
     execArgs.merge(io.vars);
   }
 
-  private getOrderByColumnSQL(nCol: dd.OrderByColumn): string {
+  private getOrderByColumnSQL(nCol: mm.OrderByColumn): string {
     const { dialect } = this;
     const col = nCol.column;
     if (typeof col === 'string') {
       return dialect.encodeName(col);
     }
-    if (col instanceof dd.Column) {
+    if (col instanceof mm.Column) {
       return this.getColumnSQL(col);
     }
-    if (col instanceof dd.RawColumn) {
+    if (col instanceof mm.RawColumn) {
       return dialect.encodeName(col.selectedName);
     }
     throw new Error(`Unsupported orderBy column "${toTypeString(col)}"`);
   }
 
-  private getColumnSQL(col: dd.Column): string {
+  private getColumnSQL(col: mm.Column): string {
     const { dialect } = this;
     let value = dialect.encodeColumnName(col);
     if (this.hasJoin) {
-      if (col.__table instanceof dd.JoinedTable) {
-        const jt = col.__table as dd.JoinedTable;
+      if (col.__table instanceof mm.JoinedTable) {
+        const jt = col.__table as mm.JoinedTable;
         const joinPath = jt.keyPath;
         const join = this.jcMap.get(joinPath);
         if (!join) {
@@ -355,7 +355,7 @@ export class SelectIOProcessor {
     return value;
   }
 
-  private handleFrom(table: dd.Table): string {
+  private handleFrom(table: mm.Table): string {
     const e = this.dialect.encodeName;
     const tableDBName = table.getDBName();
     const encodedTableName = e(tableDBName);
@@ -375,25 +375,25 @@ export class SelectIOProcessor {
   ]
   */
   private analyzeSelectedColumn(
-    sCol: dd.SelectActionColumns,
-  ): [dd.Column | null, dd.RawColumn | null, dd.ColumnType | null] {
+    sCol: mm.SelectActionColumns,
+  ): [mm.Column | null, mm.RawColumn | null, mm.ColumnType | null] {
     if (!sCol) {
       throw new Error(`Unexpected null column at fetchColumns`);
     }
     // If user uses a column directly
-    if (sCol instanceof dd.Column) {
+    if (sCol instanceof mm.Column) {
       return [sCol, null, sCol.type];
     }
-    if (sCol instanceof dd.RawColumn === false) {
+    if (sCol instanceof mm.RawColumn === false) {
       throw new Error(`Expected an "RawColumn", got ${toTypeString(sCol)}`);
     }
     // If user uses a renamed column (a RawColumn with core = column, and selectedName = newName)
     const rawCol = sCol;
-    if (rawCol.core instanceof dd.Column) {
+    if (rawCol.core instanceof mm.Column) {
       const col = rawCol.core;
       return [col, rawCol, col.type];
     }
-    if (rawCol.core instanceof dd.SQL === false) {
+    if (rawCol.core instanceof mm.SQL === false) {
       throw new Error(
         `Expected an "SQL" object, got ${toTypeString(rawCol.core)}`,
       );
@@ -406,20 +406,20 @@ export class SelectIOProcessor {
     return [column, rawCol, resultType];
   }
 
-  private guessColumnType(sql: dd.SQL): dd.ColumnType | null {
+  private guessColumnType(sql: mm.SQL): mm.ColumnType | null {
     if (sql.elements.length === 1) {
       const first = sql.elements[0];
-      if (first.type === dd.SQLElementType.column) {
+      if (first.type === mm.SQLElementType.column) {
         return first.toColumn().type;
       }
-      if (first.type === dd.SQLElementType.call) {
+      if (first.type === mm.SQLElementType.call) {
         return first.toCall().returnType;
       }
     }
     return null;
   }
 
-  private handleSelectedColumn(sCol: dd.SelectActionColumns): SelectedColumnIO {
+  private handleSelectedColumn(sCol: mm.SelectActionColumns): SelectedColumnIO {
     const { dialect } = this;
     const [table] = this.action.ensureInitialized();
     const [embeddedCol, rawCol, resultType] = this.analyzeSelectedColumn(sCol);
@@ -442,7 +442,7 @@ export class SelectIOProcessor {
 
       const rawColCore = rawCol.core;
       // RawColumn with .core is a column (a renamed column)
-      if (rawColCore instanceof dd.Column) {
+      if (rawColCore instanceof mm.Column) {
         // Use RawColumn.selectedName as alias
         return new SelectedColumnIO(
           sCol,
@@ -457,7 +457,7 @@ export class SelectIOProcessor {
       // Here, we have a RawColumn.core is an expression with a column inside
       const exprIO = sqlIO(rawColCore, dialect);
       // Replace the column with SQL only (no alias).
-      // Imagine new RawColumn(dd.sql`COUNT(${col.as('a')})`, 'b'), the embedded column would be interpreted as `'col' AS 'a'`, but it really should be `COUNT('col') AS 'b'`, so this step replace the embedded with the SQL without its attached alias.
+      // Imagine new RawColumn(mm.sql`COUNT(${col.as('a')})`, 'b'), the embedded column would be interpreted as `'col' AS 'a'`, but it really should be `COUNT('col') AS 'b'`, so this step replace the embedded with the SQL without its attached alias.
       const sql = exprIO.toSQL(table, element => {
         if (element.value === embeddedCol) {
           return colSQL.sql;
@@ -480,7 +480,7 @@ export class SelectIOProcessor {
           `Unexpected null raw column from selected column "${sCol}"`,
         );
       }
-      if (rawCol.core instanceof dd.Column) {
+      if (rawCol.core instanceof mm.Column) {
         throw new Error(`Unexpected column object in raw column "${rawCol}"`);
       }
       const rawExpr = rawCol.core;
@@ -505,8 +505,8 @@ export class SelectIOProcessor {
     }
   }
 
-  private handleJoinRecursively(jc: dd.Column): JoinIO {
-    const table = jc.__table as dd.JoinedTable;
+  private handleJoinRecursively(jc: mm.Column): JoinIO {
+    const table = jc.__table as mm.JoinedTable;
     const result = this.jcMap.get(table.keyPath);
     if (result) {
       return result;
@@ -515,7 +515,7 @@ export class SelectIOProcessor {
     let localTableName: string;
     const { srcColumn, destColumn, destTable } = table;
     const [srcTable] = srcColumn.ensureInitialized();
-    if (srcTable instanceof dd.JoinedTable) {
+    if (srcTable instanceof mm.JoinedTable) {
       const srcIO = this.handleJoinRecursively(srcColumn);
       localTableName = srcIO.tableAlias;
     } else {
@@ -536,7 +536,7 @@ export class SelectIOProcessor {
   }
 
   private handleColumn(
-    col: dd.Column,
+    col: mm.Column,
     alias: string | null, // if an user alias is present, we don't need to guess the input name just use it as alias
   ): ColumnSQL {
     const { dialect, action } = this;
@@ -548,7 +548,7 @@ export class SelectIOProcessor {
     const [sourceTable] = action.ensureInitialized();
     col.checkSourceTable(sourceTable);
 
-    if (colTable instanceof dd.JoinedTable) {
+    if (colTable instanceof mm.JoinedTable) {
       const joinIO = this.handleJoinRecursively(col);
       if (!col.mirroredColumn) {
         throw new Error(
@@ -580,9 +580,9 @@ export class SelectIOProcessor {
   }
 }
 
-export function selectIO(action: dd.Action, dialect: Dialect): SelectIO {
-  const converter = new SelectIOProcessor(action as dd.SelectAction, dialect);
+export function selectIO(action: mm.Action, dialect: Dialect): SelectIO {
+  const converter = new SelectIOProcessor(action as mm.SelectAction, dialect);
   return converter.convert();
 }
 
-registerHanlder(dd.ActionType.select, selectIO);
+registerHanlder(mm.ActionType.select, selectIO);

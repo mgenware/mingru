@@ -1,5 +1,5 @@
 import * as mr from '../../';
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import post from '../models/post';
 import user from '../models/user';
 import * as assert from 'assert';
@@ -8,10 +8,10 @@ const expect = assert.equal;
 const dialect = mr.mysql;
 
 it('Delete', () => {
-  class PostTA extends dd.TableActions {
-    t = dd.unsafeDeleteAll().byID();
+  class PostTA extends mm.TableActions {
+    t = mm.unsafeDeleteAll().byID();
   }
-  const postTA = dd.ta(post, PostTA);
+  const postTA = mm.ta(post, PostTA);
   const v = postTA.t;
   const io = mr.deleteIO(v, dialect);
 
@@ -20,10 +20,10 @@ it('Delete', () => {
 });
 
 it('Delete with where', () => {
-  class PostTA extends dd.TableActions {
-    t = dd.unsafeDeleteAll().where(dd.sql`${post.id} = 1`);
+  class PostTA extends mm.TableActions {
+    t = mm.unsafeDeleteAll().where(mm.sql`${post.id} = 1`);
   }
-  const postTA = dd.ta(post, PostTA);
+  const postTA = mm.ta(post, PostTA);
   const v = postTA.t;
   const io = mr.deleteIO(v, dialect);
 
@@ -31,12 +31,12 @@ it('Delete with where', () => {
 });
 
 it('getInputs', () => {
-  class UserTA extends dd.TableActions {
-    t = dd
+  class UserTA extends mm.TableActions {
+    t = mm
       .deleteOne()
-      .where(dd.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
+      .where(mm.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
   }
-  const ta = dd.ta(user, UserTA);
+  const ta = mm.ta(user, UserTA);
   const v = ta.t;
   const io = mr.deleteIO(v, mr.mysql);
   expect(
@@ -47,12 +47,12 @@ it('getInputs', () => {
 });
 
 it('getReturns', () => {
-  class UserTA extends dd.TableActions {
-    t = dd
+  class UserTA extends mm.TableActions {
+    t = mm
       .deleteOne()
-      .where(dd.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
+      .where(mm.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
   }
-  const ta = dd.ta(user, UserTA);
+  const ta = mm.ta(user, UserTA);
   const v = ta.t;
   const io = mr.deleteIO(v, mr.mysql);
   const returns = io.returnValues;
@@ -60,10 +60,10 @@ it('getReturns', () => {
 });
 
 it('getInputs (no WHERE)', () => {
-  class UserTA extends dd.TableActions {
-    t = dd.unsafeDeleteAll();
+  class UserTA extends mm.TableActions {
+    t = mm.unsafeDeleteAll();
   }
-  const ta = dd.ta(user, UserTA);
+  const ta = mm.ta(user, UserTA);
   const v = ta.t;
   const io = mr.deleteIO(v, mr.mysql);
   const inputs = io.funcArgs;
@@ -71,10 +71,10 @@ it('getInputs (no WHERE)', () => {
 });
 
 it('getReturns (no WHERE)', () => {
-  class UserTA extends dd.TableActions {
-    t = dd.unsafeDeleteAll();
+  class UserTA extends mm.TableActions {
+    t = mm.unsafeDeleteAll();
   }
-  const ta = dd.ta(user, UserTA);
+  const ta = mm.ta(user, UserTA);
   const v = ta.t;
   const io = mr.deleteIO(v, mr.mysql);
   const returns = io.returnValues;

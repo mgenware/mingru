@@ -1,5 +1,5 @@
 import * as mr from '../../';
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import user from '../models/user';
 import * as assert from 'assert';
 
@@ -7,7 +7,7 @@ const expect = assert.equal;
 const dialect = mr.mysql;
 
 it('inputPlaceholder', () => {
-  expect(dialect.inputPlaceholder(new dd.SQLVariable('Type', 'name')), '?');
+  expect(dialect.inputPlaceholder(new mm.SQLVariable('Type', 'name')), '?');
 });
 
 it('encodeColumnName', () => {

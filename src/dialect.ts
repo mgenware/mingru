@@ -1,4 +1,4 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import { TypeInfo } from './lib/varInfo';
 
 export class Dialect {
@@ -7,15 +7,15 @@ export class Dialect {
   }
 
   // Translates a JavaScript object to SQL equivalent
-  objToSQL(_: unknown, __: dd.Table | null): string {
+  objToSQL(_: unknown, __: mm.Table | null): string {
     throw new Error('Not implemented yet');
   }
 
-  colTypeToGoType(_: dd.ColumnType): TypeInfo {
+  colTypeToGoType(_: mm.ColumnType): TypeInfo {
     throw new Error('Not implemented yet');
   }
 
-  colToSQLType(_: dd.Column): string {
+  colToSQLType(_: mm.Column): string {
     throw new Error('Not implemented yet');
   }
 
@@ -23,19 +23,19 @@ export class Dialect {
     throw new Error('Not implemented yet');
   }
 
-  encodeColumnName(column: dd.Column): string {
+  encodeColumnName(column: mm.Column): string {
     return this.encodeName(column.getDBName());
   }
 
-  encodeTableName(table: dd.Table): string {
+  encodeTableName(table: mm.Table): string {
     return this.encodeName(table.getDBName());
   }
 
-  inputPlaceholder(_: dd.SQLVariable | null): string {
+  inputPlaceholder(_: mm.SQLVariable | null): string {
     return '?';
   }
 
-  sqlCall(_: dd.SQLCallType): string {
+  sqlCall(_: mm.SQLCallType): string {
     throw new Error('Not implemented yet');
   }
 }

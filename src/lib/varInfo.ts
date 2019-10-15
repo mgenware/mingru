@@ -1,9 +1,9 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import { Dialect } from '../dialect';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 
 export class TypeInfo {
-  static fromSQLVariable(variable: dd.SQLVariable, dialect: Dialect): TypeInfo {
+  static fromSQLVariable(variable: mm.SQLVariable, dialect: Dialect): TypeInfo {
     throwIfFalsy(variable, 'variable');
     throwIfFalsy(dialect, 'dialect');
     const { type } = variable;
@@ -16,7 +16,7 @@ export class TypeInfo {
       }
       return new TypeInfo(typeName, namespace);
     }
-    if (type instanceof dd.Column) {
+    if (type instanceof mm.Column) {
       return dialect.colTypeToGoType(type.type);
     }
     return dialect.colTypeToGoType(type);
@@ -33,7 +33,7 @@ export class TypeInfo {
 }
 
 export class VarInfo {
-  static fromSQLVar(v: dd.SQLVariable, dialect: Dialect): VarInfo {
+  static fromSQLVar(v: mm.SQLVariable, dialect: Dialect): VarInfo {
     throwIfFalsy(v, 'v');
     throwIfFalsy(dialect, 'dialect');
     const typeInfo = TypeInfo.fromSQLVariable(v, dialect);

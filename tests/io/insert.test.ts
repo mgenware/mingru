@@ -1,5 +1,5 @@
 import * as mr from '../../';
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import post from '../models/post';
 import user from '../models/user';
 import * as assert from 'assert';
@@ -8,10 +8,10 @@ const expect = assert.equal;
 const dialect = mr.mysql;
 
 it('Insert inputs', () => {
-  class PostTA extends dd.TableActions {
-    t = dd.unsafeInsert().setInputs(post.title, post.user_id);
+  class PostTA extends mm.TableActions {
+    t = mm.unsafeInsert().setInputs(post.title, post.user_id);
   }
-  const postTA = dd.ta(post, PostTA);
+  const postTA = mm.ta(post, PostTA);
   const v = postTA.t;
   const io = mr.insertIO(v, dialect);
 
@@ -20,13 +20,13 @@ it('Insert inputs', () => {
 });
 
 it('Insert inputs and values', () => {
-  class PostTA extends dd.TableActions {
-    t = dd
+  class PostTA extends mm.TableActions {
+    t = mm
       .unsafeInsert()
       .setInputs(post.title, post.user_id)
-      .set(post.datetime, dd.sql`NOW()`);
+      .set(post.datetime, mm.sql`NOW()`);
   }
-  const postTA = dd.ta(post, PostTA);
+  const postTA = mm.ta(post, PostTA);
   const v = postTA.t;
   const io = mr.insertIO(v, dialect);
 
@@ -38,13 +38,13 @@ it('Insert inputs and values', () => {
 });
 
 it('getInputs', () => {
-  class UserTA extends dd.TableActions {
-    t = dd
+  class UserTA extends mm.TableActions {
+    t = mm
       .unsafeInsert()
       .setInputs(user.sig, user.id)
       .set(user.url_name, user.url_name.toInput('b'));
   }
-  const ta = dd.ta(user, UserTA);
+  const ta = mm.ta(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, mr.mysql);
   expect(
@@ -55,26 +55,26 @@ it('getInputs', () => {
 });
 
 it('getReturns (isnert)', () => {
-  class UserTA extends dd.TableActions {
-    t = dd
+  class UserTA extends mm.TableActions {
+    t = mm
       .unsafeInsert()
       .setInputs(user.sig, user.id)
       .set(user.url_name, user.url_name.toInput('b'));
   }
-  const ta = dd.ta(user, UserTA);
+  const ta = mm.ta(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, mr.mysql);
   expect(io.returnValues.toString(), '');
 });
 
 it('getReturns (insertOne)', () => {
-  class UserTA extends dd.TableActions {
-    t = dd
+  class UserTA extends mm.TableActions {
+    t = mm
       .unsafeInsertOne()
       .setInputs(user.sig, user.id)
       .set(user.url_name, user.url_name.toInput('b'));
   }
-  const ta = dd.ta(user, UserTA);
+  const ta = mm.ta(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, mr.mysql);
   expect(io.returnValues.toString(), 'insertedID: uint64');

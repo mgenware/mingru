@@ -1,5 +1,5 @@
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import Dialect from '../dialect';
 import toTypeString from 'to-type-string';
 import VarList from '../lib/varList';
@@ -15,7 +15,7 @@ export class SQLIO {
   }
 
   constructor(
-    public sql: dd.SQL,
+    public sql: mm.SQL,
     public dialect: Dialect,
     public varList: VarList,
   ) {
@@ -24,13 +24,13 @@ export class SQLIO {
   }
 
   toSQL(
-    sourceTable: dd.Table | null,
-    cb?: (element: dd.SQLElement) => string | null,
+    sourceTable: mm.Table | null,
+    cb?: (element: mm.SQLElement) => string | null,
   ): string {
     const { sql } = this;
     let res = '';
     for (const element of sql.elements) {
-      if (element.type === dd.SQLElementType.column) {
+      if (element.type === mm.SQLElementType.column) {
         const col = element.toColumn();
         if (sourceTable) {
           col.checkSourceTable(sourceTable);
@@ -49,20 +49,20 @@ export class SQLIO {
   }
 
   private handleElement(
-    element: dd.SQLElement,
+    element: mm.SQLElement,
     dialect: Dialect,
-    sourceTable: dd.Table | null,
+    sourceTable: mm.Table | null,
   ): string {
     switch (element.type) {
-      case dd.SQLElementType.rawString: {
+      case mm.SQLElementType.rawString: {
         return element.toRawString();
       }
 
-      case dd.SQLElementType.column: {
+      case mm.SQLElementType.column: {
         return dialect.encodeColumnName(element.toColumn());
       }
 
-      case dd.SQLElementType.call: {
+      case mm.SQLElementType.call: {
         const call = element.toCall();
         const name = dialect.sqlCall(call.type);
         const params = call.params.length
@@ -73,17 +73,17 @@ export class SQLIO {
         return `${name}(${params})`;
       }
 
-      case dd.SQLElementType.input: {
+      case mm.SQLElementType.input: {
         return dialect.inputPlaceholder(element.toInput());
       }
 
-      case dd.SQLElementType.rawColumn: {
+      case mm.SQLElementType.rawColumn: {
         return dialect.encodeName(element.toRawColumn().selectedName);
       }
 
       default: {
         throw new Error(
-          `Unsupported type of dd.SQLElement: ${
+          `Unsupported type of mm.SQLElement: ${
             element.type
           }, value: "${toTypeString(element)}"`,
         );
@@ -92,10 +92,10 @@ export class SQLIO {
   }
 }
 
-export function sqlIO(sql: dd.SQL, dialect: Dialect): SQLIO {
+export function sqlIO(sql: mm.SQL, dialect: Dialect): SQLIO {
   const vars = new VarList(`Expression ${sql.toString()}`, true);
   for (const element of sql.elements) {
-    if (element.type === dd.SQLElementType.input) {
+    if (element.type === mm.SQLElementType.input) {
       const sqlVar = element.toInput();
       const varInfo = VarInfo.fromSQLVar(sqlVar, dialect);
       vars.add(varInfo);

@@ -1,12 +1,12 @@
 import * as mr from '../../';
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import cols from '../models/cols';
 import * as assert from 'assert';
 
 const dialect = mr.mysql;
 
 it('dtDefault', () => {
-  const { dt } = dd;
+  const { dt } = mm;
   const defaults: Array<[string, unknown]> = [
     [dt.bigInt, 0],
     [dt.int, 0],
@@ -29,13 +29,13 @@ it('dtDefault', () => {
 });
 
 it('insertWithDefaults', () => {
-  class ColsTA extends dd.TableActions {
-    insertT = dd
+  class ColsTA extends mm.TableActions {
+    insertT = mm
       .insert()
       .setInputs(cols.fk)
       .setDefaults();
   }
-  const ta = dd.ta(cols, ColsTA);
+  const ta = mm.ta(cols, ColsTA);
   const v = ta.insertT;
   const io = mr.insertIO(v, dialect);
 

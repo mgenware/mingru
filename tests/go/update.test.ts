@@ -1,97 +1,97 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import post from '../models/post';
 import { testBuildAsync } from './common';
 import cols from '../models/cols';
 
 it('UpdateSome', async () => {
-  class PostTA extends dd.TableActions {
-    updateT = dd
+  class PostTA extends mm.TableActions {
+    updateT = mm
       .updateSome()
-      .set(post.title, dd.sql`"haha"`)
-      .set(post.content, dd.sql`${dd.input(post.content)}`)
-      .set(post.cmtCount, dd.sql`${post.cmtCount} + 1`)
+      .set(post.title, mm.sql`"haha"`)
+      .set(post.content, mm.sql`${mm.input(post.content)}`)
+      .set(post.cmtCount, mm.sql`${post.cmtCount} + 1`)
       .byID();
   }
-  const ta = dd.ta(post, PostTA);
+  const ta = mm.ta(post, PostTA);
   await testBuildAsync(ta, 'update/update');
 });
 
 it('UpdateOne', async () => {
-  class PostTA extends dd.TableActions {
-    updateT = dd
+  class PostTA extends mm.TableActions {
+    updateT = mm
       .updateOne()
-      .set(post.title, dd.sql`"haha"`)
-      .set(post.content, dd.sql`${dd.input(post.content)}`)
-      .set(post.cmtCount, dd.sql`${post.cmtCount} + 1`)
+      .set(post.title, mm.sql`"haha"`)
+      .set(post.content, mm.sql`${mm.input(post.content)}`)
+      .set(post.cmtCount, mm.sql`${post.cmtCount} + 1`)
       .byID();
   }
-  const ta = dd.ta(post, PostTA);
+  const ta = mm.ta(post, PostTA);
   await testBuildAsync(ta, 'update/updateOne');
 });
 
 it('Update with where', async () => {
-  class PostTA extends dd.TableActions {
-    updateT = dd
+  class PostTA extends mm.TableActions {
+    updateT = mm
       .updateOne()
-      .set(post.title, dd.sql`"haha"`)
+      .set(post.title, mm.sql`"haha"`)
       .set(post.content, post.content.toInput())
       .where(
-        dd.sql`${post.id} = ${post.id.toInput()} AND ${
+        mm.sql`${post.id} = ${post.id.toInput()} AND ${
           post.content
         } = ${post.content.toInput('content2')}`,
       );
   }
-  const ta = dd.ta(post, PostTA);
+  const ta = mm.ta(post, PostTA);
   await testBuildAsync(ta, 'update/updateWithWhere');
 });
 
 it('Update with non-input setters', async () => {
-  class PostTA extends dd.TableActions {
-    updateT = dd
+  class PostTA extends mm.TableActions {
+    updateT = mm
       .unsafeUpdateAll()
-      .set(post.title, dd.sql`"haha"`)
+      .set(post.title, mm.sql`"haha"`)
       .set(post.content, post.content.toInput());
   }
-  const ta = dd.ta(post, PostTA);
+  const ta = mm.ta(post, PostTA);
   await testBuildAsync(ta, 'update/updateWithNonInputSetters');
 });
 
 it('Duplicate names in WHERE and setters', async () => {
-  class PostTA extends dd.TableActions {
-    updateT = dd
+  class PostTA extends mm.TableActions {
+    updateT = mm
       .updateSome()
       .set(post.content, post.content.toInput())
-      .set(post.title, dd.sql`"haha"`)
+      .set(post.title, mm.sql`"haha"`)
       .set(post.m_user_id, post.m_user_id.toInput())
       .where(
-        dd.sql`${post.title.isEqualToInput()} ${post.title.isEqualToInput()} AND ${post.content.isEqualToInput()}`,
+        mm.sql`${post.title.isEqualToInput()} ${post.title.isEqualToInput()} AND ${post.content.isEqualToInput()}`,
       );
   }
-  const ta = dd.ta(post, PostTA);
+  const ta = mm.ta(post, PostTA);
   await testBuildAsync(ta, 'update/dupNamesWhereSetters');
 });
 
 it('Custom DB column name', async () => {
-  class PostTA extends dd.TableActions {
-    updateT = dd
+  class PostTA extends mm.TableActions {
+    updateT = mm
       .unsafeUpdateAll()
-      .set(post.title, dd.sql`"haha"`)
-      .set(post.content, dd.sql`${dd.input(post.content)}`)
-      .set(post.cmtCount, dd.sql`${post.cmtCount} + 1`)
+      .set(post.title, mm.sql`"haha"`)
+      .set(post.content, mm.sql`${mm.input(post.content)}`)
+      .set(post.cmtCount, mm.sql`${post.cmtCount} + 1`)
       .byID();
   }
-  const ta = dd.ta(post, PostTA);
+  const ta = mm.ta(post, PostTA);
   await testBuildAsync(ta, 'update/customName');
 });
 
 it('updateWithDefaults', async () => {
-  class ColsTA extends dd.TableActions {
-    updateT = dd
+  class ColsTA extends mm.TableActions {
+    updateT = mm
       .updateOne()
       .setInputs(cols.fk)
       .setDefaults()
       .byID();
   }
-  const ta = dd.ta(cols, ColsTA);
+  const ta = mm.ta(cols, ColsTA);
   await testBuildAsync(ta, 'update/updateWithDefaults');
 });

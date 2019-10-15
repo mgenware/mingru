@@ -1,10 +1,10 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 
 export class InstanceVariable {
   name: string;
 
   constructor(name: string, public type: string) {
-    this.name = dd.utils.capitalizeColumnName(dd.utils.toCamelCase(name));
+    this.name = mm.utils.capitalizeColumnName(mm.utils.toCamelCase(name));
   }
 }
 

@@ -1,4 +1,4 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
 import { ActionIO } from './actionIO';
@@ -21,7 +21,7 @@ export class TransactIO extends ActionIO {
 
   constructor(
     dialect: Dialect,
-    public action: dd.TransactAction,
+    public action: mm.TransactAction,
     public memberIOs: TransactMemberIO[],
     funcArgs: VarList,
     execArgs: VarList,
@@ -33,7 +33,7 @@ export class TransactIO extends ActionIO {
 }
 
 class TransactIOProcessor {
-  constructor(public action: dd.TransactAction, public dialect: Dialect) {
+  constructor(public action: mm.TransactAction, public dialect: Dialect) {
     throwIfFalsy(action, 'action');
     throwIfFalsy(dialect, 'dialect');
   }
@@ -69,7 +69,7 @@ class TransactIOProcessor {
       );
       const memberIO = new TransactMemberIO(io, callPath, m.isTemp);
       if (
-        mAction.actionType === dd.ActionType.insert &&
+        mAction.actionType === mm.ActionType.insert &&
         (memberIO.actionIO as InsertIO).fetchInsertedID
       ) {
         lastInsertMember = memberIO;
@@ -117,9 +117,9 @@ class TransactIOProcessor {
   }
 }
 
-export function transactIO(action: dd.Action, dialect: Dialect): TransactIO {
-  const pro = new TransactIOProcessor(action as dd.TransactAction, dialect);
+export function transactIO(action: mm.Action, dialect: Dialect): TransactIO {
+  const pro = new TransactIOProcessor(action as mm.TransactAction, dialect);
   return pro.convert();
 }
 
-registerHanlder(dd.ActionType.transact, transactIO);
+registerHanlder(mm.ActionType.transact, transactIO);

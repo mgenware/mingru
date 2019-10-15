@@ -1,5 +1,5 @@
 import * as mr from '../../';
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import user from '../models/user';
 import post from '../models/post';
 import * as assert from 'assert';
@@ -8,7 +8,7 @@ const expect = assert.equal;
 const dialect = mr.mysql;
 
 it('Columns and escape strings', () => {
-  const sql = dd.sql`abc "aaa" ${post.user_id} ${
+  const sql = mm.sql`abc "aaa" ${post.user_id} ${
     post.user_id.join(user).url_name
   }`;
   const io = mr.sqlIO(sql, dialect);
@@ -17,32 +17,32 @@ it('Columns and escape strings', () => {
 });
 
 it('SQL calls', () => {
-  const sql = dd.sql`${post.datetime} = ${dd.datetimeNow()}`;
+  const sql = mm.sql`${post.datetime} = ${mm.datetimeNow()}`;
   const io = mr.sqlIO(sql, dialect);
   expect(io.toSQL(post), '`datetime` = NOW()');
 });
 
 it('toSQL(sourceTable)', () => {
   assert.throws(() => {
-    const sql = dd.sql`${post.datetime} = ${dd.datetimeNow()}`;
+    const sql = mm.sql`${post.datetime} = ${mm.datetimeNow()}`;
     const io = mr.sqlIO(sql, dialect);
     io.toSQL(user);
   }, 'expedcted "post"');
   assert.throws(() => {
-    const sql = dd.sql`${post.datetime} = ${dd.datetimeNow()} ${user.id}`;
+    const sql = mm.sql`${post.datetime} = ${mm.datetimeNow()} ${user.id}`;
     const io = mr.sqlIO(sql, dialect);
     io.toSQL(post);
   }, 'expedcted "user"');
 });
 
 it('Nested SQLs', () => {
-  const i1 = dd.input(user.id);
+  const i1 = mm.input(user.id);
   const i2 = user.url_name.toInput();
-  const sql1 = dd.sql`${user.url_name} = ${i2} ${dd.input('a', 'b')}`;
-  const i3 = dd.input(user.sig);
-  const sql2 = dd.sql`_${user.id} = ${i1} AND ${sql1}`;
-  const i4 = dd.input('a', 'b');
-  const sql = dd.sql`START${sql2} OR ${user.sig} = ${i3} = ${dd.input(
+  const sql1 = mm.sql`${user.url_name} = ${i2} ${mm.input('a', 'b')}`;
+  const i3 = mm.input(user.sig);
+  const sql2 = mm.sql`_${user.id} = ${i1} AND ${sql1}`;
+  const i4 = mm.input('a', 'b');
+  const sql = mm.sql`START${sql2} OR ${user.sig} = ${i3} = ${mm.input(
     user.sig,
   )} ${i4}`;
 
@@ -54,9 +54,9 @@ it('Nested SQLs', () => {
 });
 
 it('list and distinctList', () => {
-  const i1 = dd.input(user.id);
-  const i2 = dd.sql`${i1} ${i1}`;
-  const sql = dd.sql`${i1} ${i2} ${user.age.toInput()}`;
+  const i1 = mm.input(user.id);
+  const i2 = mm.sql`${i1} ${i1}`;
+  const sql = mm.sql`${i1} ${i2} ${user.age.toInput()}`;
 
   const io = mr.sqlIO(sql, dialect);
   assert.deepEqual(
@@ -67,11 +67,11 @@ it('list and distinctList', () => {
 
 it('Conflicting names', () => {
   assert.throws(() => {
-    const sql = dd.sql`${user.id.toInput()}${dd.input('b', 'id')}`;
+    const sql = mm.sql`${user.id.toInput()}${mm.input('b', 'id')}`;
     mr.sqlIO(sql, dialect);
   }, 'id');
   assert.throws(() => {
-    const sql = dd.sql`${dd.input('a', 'v1')}${dd.input('b', 'v1')}`;
+    const sql = mm.sql`${mm.input('a', 'v1')}${mm.input('b', 'v1')}`;
     mr.sqlIO(sql, dialect);
   }, 'v1');
 });

@@ -1,4 +1,4 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
 import { ActionIO } from './actionIO';
@@ -11,7 +11,7 @@ import * as defs from '../defs';
 export class DeleteIO extends ActionIO {
   constructor(
     dialect: Dialect,
-    public action: dd.DeleteAction,
+    public action: mm.DeleteAction,
     public sql: string,
     public where: SQLIO | null,
     funcArgs: VarList,
@@ -25,7 +25,7 @@ export class DeleteIO extends ActionIO {
 }
 
 class DeleteIOProcessor {
-  constructor(public action: dd.DeleteAction, public dialect: Dialect) {
+  constructor(public action: mm.DeleteAction, public dialect: Dialect) {
     throwIfFalsy(action, 'action');
     throwIfFalsy(dialect, 'dialect');
   }
@@ -75,7 +75,7 @@ class DeleteIOProcessor {
       returnValues.add(
         new VarInfo(
           defs.rowsAffectedKey,
-          dialect.colTypeToGoType(dd.int().type),
+          dialect.colTypeToGoType(mm.int().type),
         ),
       );
     }
@@ -91,15 +91,15 @@ class DeleteIOProcessor {
     );
   }
 
-  private handleFrom(table: dd.Table): string {
+  private handleFrom(table: mm.Table): string {
     const e = this.dialect.encodeName;
     return e(table.getDBName());
   }
 }
 
-export function deleteIO(action: dd.Action, dialect: Dialect): DeleteIO {
-  const pro = new DeleteIOProcessor(action as dd.DeleteAction, dialect);
+export function deleteIO(action: mm.Action, dialect: Dialect): DeleteIO {
+  const pro = new DeleteIOProcessor(action as mm.DeleteAction, dialect);
   return pro.convert();
 }
 
-registerHanlder(dd.ActionType.delete, deleteIO);
+registerHanlder(mm.ActionType.delete, deleteIO);

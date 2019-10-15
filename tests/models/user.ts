@@ -1,12 +1,12 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 
-class User extends dd.Table {
-  id = dd.pk();
-  url_name = dd.varChar(100);
-  display_name = dd.varChar(100);
-  sig = dd.varChar(300).nullable;
-  age = dd.int(0);
-  follower_count = dd.varChar(300).setDBName('follower_c').nullable;
+class User extends mm.Table {
+  id = mm.pk();
+  url_name = mm.varChar(100);
+  display_name = mm.varChar(100);
+  sig = mm.varChar(300).nullable;
+  age = mm.int(0);
+  follower_count = mm.varChar(300).setDBName('follower_c').nullable;
 }
 
-export default dd.table(User);
+export default mm.table(User);

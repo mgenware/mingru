@@ -1,87 +1,87 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import post from '../models/post';
 import { testBuildToDirAsync } from './common';
 
 it('Select', async () => {
-  class PostTA extends dd.TableActions {
-    selectTimes = dd.selectRows(post.datetime, post.date).orderByAsc(post.id);
-    selectNullableTimes = dd
+  class PostTA extends mm.TableActions {
+    selectTimes = mm.selectRows(post.datetime, post.date).orderByAsc(post.id);
+    selectNullableTimes = mm
       .selectRows(post.n_datetime, post.n_date)
       .orderByAsc(post.id);
   }
-  const ta = dd.ta(post, PostTA);
+  const ta = mm.ta(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'extraImportsSelect');
 });
 
 it('Select (where)', async () => {
-  class PostTA extends dd.TableActions {
-    selectTimes = dd
+  class PostTA extends mm.TableActions {
+    selectTimes = mm
       .selectRows(post.datetime, post.date)
       .where(
-        dd.sql`${post.n_datetime} = ${post.n_datetime.toInput()} OR ${
+        mm.sql`${post.n_datetime} = ${post.n_datetime.toInput()} OR ${
           post.n_date
         } = ${post.n_date.toInput()}`,
       )
       .orderByAsc(post.id);
   }
-  const ta = dd.ta(post, PostTA);
+  const ta = mm.ta(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'extraImportsSelectWhere');
 });
 
 it('Select field', async () => {
-  class PostTA extends dd.TableActions {
-    selectTime = dd.selectField(post.n_datetime);
+  class PostTA extends mm.TableActions {
+    selectTime = mm.selectField(post.n_datetime);
   }
-  const ta = dd.ta(post, PostTA);
+  const ta = mm.ta(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'extraImportsSelectField');
 });
 
 it('Update', async () => {
-  class PostTA extends dd.TableActions {
-    updateTimes = dd.unsafeUpdateAll().setInputs(post.datetime, post.date);
-    updateNullableTimes = dd
+  class PostTA extends mm.TableActions {
+    updateTimes = mm.unsafeUpdateAll().setInputs(post.datetime, post.date);
+    updateNullableTimes = mm
       .unsafeUpdateAll()
       .setInputs(post.n_datetime, post.n_date);
   }
-  const ta = dd.ta(post, PostTA);
+  const ta = mm.ta(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'extraImportsUpdate');
 });
 
 it('Update (where)', async () => {
-  class PostTA extends dd.TableActions {
-    updateTimes = dd
+  class PostTA extends mm.TableActions {
+    updateTimes = mm
       .updateSome()
       .setInputs(post.datetime)
       .where(
-        dd.sql`${post.n_datetime} = ${post.n_datetime.toInput()} OR ${
+        mm.sql`${post.n_datetime} = ${post.n_datetime.toInput()} OR ${
           post.n_date
         } = ${post.n_date.toInput()}`,
       );
   }
-  const ta = dd.ta(post, PostTA);
+  const ta = mm.ta(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'extraImportsUpdateWhere');
 });
 
 it('Delete (where)', async () => {
-  class PostTA extends dd.TableActions {
-    deleteTimes = dd
+  class PostTA extends mm.TableActions {
+    deleteTimes = mm
       .deleteOne()
       .where(
-        dd.sql`${post.n_datetime} = ${post.n_datetime.toInput()} OR ${
+        mm.sql`${post.n_datetime} = ${post.n_datetime.toInput()} OR ${
           post.n_date
         } = ${post.n_date.toInput()}`,
       );
   }
-  const ta = dd.ta(post, PostTA);
+  const ta = mm.ta(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'extraImportsDeleteWhere');
 });
 
 it('Insert', async () => {
-  class PostTA extends dd.TableActions {
-    insertTimes = dd
+  class PostTA extends mm.TableActions {
+    insertTimes = mm
       .unsafeInsertOne()
       .setInputs(post.datetime, post.n_datetime);
   }
-  const ta = dd.ta(post, PostTA);
+  const ta = mm.ta(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'extraImportsInsert');
 });

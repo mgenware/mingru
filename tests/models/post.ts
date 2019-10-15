@@ -1,21 +1,21 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import user from './user';
 
-class Post extends dd.Table {
-  id = dd.pk();
-  title = dd.varChar(100);
-  content = dd.varChar(100);
+class Post extends mm.Table {
+  id = mm.pk();
+  title = mm.varChar(100);
+  content = mm.varChar(100);
   user_id = user.id;
   reviewer_id = user.id;
-  cmtCount = dd.uInt(0).setDBName('cmt_c');
+  cmtCount = mm.uInt(0).setDBName('cmt_c');
 
-  datetime = dd.datetime();
-  date = dd.date();
-  time = dd.time();
-  n_datetime = dd.datetime().nullable;
-  n_date = dd.date().nullable;
-  n_time = dd.time().nullable;
-  m_user_id = dd.fk(user.id).setDBName('my_user_id');
+  datetime = mm.datetime();
+  date = mm.date();
+  time = mm.time();
+  n_datetime = mm.datetime().nullable;
+  n_date = mm.date().nullable;
+  n_time = mm.time().nullable;
+  m_user_id = mm.fk(user.id).setDBName('my_user_id');
 }
 
-export default dd.table(Post, 'db_post');
+export default mm.table(Post, 'db_post');

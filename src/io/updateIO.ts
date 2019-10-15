@@ -1,4 +1,4 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
 import { settersToVarList, SetterIO } from './setterIO';
@@ -12,7 +12,7 @@ import * as defs from '../defs';
 export class UpdateIO extends ActionIO {
   constructor(
     dialect: Dialect,
-    public action: dd.UpdateAction,
+    public action: mm.UpdateAction,
     public sql: string,
     public setters: SetterIO[],
     public where: SQLIO | null,
@@ -29,7 +29,7 @@ export class UpdateIO extends ActionIO {
 }
 
 class UpdateIOProcessor {
-  constructor(public action: dd.UpdateAction, public dialect: Dialect) {
+  constructor(public action: mm.UpdateAction, public dialect: Dialect) {
     throwIfFalsy(action, 'action');
     throwIfFalsy(dialect, 'dialect');
   }
@@ -90,7 +90,7 @@ class UpdateIOProcessor {
       returnValues.add(
         new VarInfo(
           defs.rowsAffectedKey,
-          dialect.colTypeToGoType(dd.int().type),
+          dialect.colTypeToGoType(mm.int().type),
         ),
       );
     }
@@ -108,15 +108,15 @@ class UpdateIOProcessor {
     );
   }
 
-  private handleFrom(table: dd.Table): string {
+  private handleFrom(table: mm.Table): string {
     const e = this.dialect.encodeName;
     return `${e(table.getDBName())}`;
   }
 }
 
-export function updateIO(action: dd.Action, dialect: Dialect): UpdateIO {
-  const pro = new UpdateIOProcessor(action as dd.UpdateAction, dialect);
+export function updateIO(action: mm.Action, dialect: Dialect): UpdateIO {
+  const pro = new UpdateIOProcessor(action as mm.UpdateAction, dialect);
   return pro.convert();
 }
 
-registerHanlder(dd.ActionType.update, updateIO);
+registerHanlder(mm.ActionType.update, updateIO);

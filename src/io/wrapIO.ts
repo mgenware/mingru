@@ -1,4 +1,4 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
 import { ActionIO } from './actionIO';
@@ -11,7 +11,7 @@ import * as defs from '../defs';
 export class WrapIO extends ActionIO {
   constructor(
     dialect: Dialect,
-    public action: dd.WrappedAction,
+    public action: mm.WrappedAction,
     funcArgs: VarList,
     execArgs: VarList,
     returnValues: VarList,
@@ -23,7 +23,7 @@ export class WrapIO extends ActionIO {
 }
 
 class WrapIOProcessor {
-  constructor(public action: dd.WrappedAction, public dialect: Dialect) {
+  constructor(public action: mm.WrappedAction, public dialect: Dialect) {
     throwIfFalsy(action, 'action');
     throwIfFalsy(dialect, 'dialect');
   }
@@ -70,7 +70,7 @@ class WrapIOProcessor {
     }
 
     // For temp actions, inner and outer actions are merged into one
-    //   dd.update().wrap(args) -> dd.update(args)
+    //   mm.update().wrap(args) -> mm.update(args)
     // For non-temp actions:
     //   this.t.wrap(args) -> inner: this.t, outer: this.t(args)
     const funcPath = utils.actionCallPath(
@@ -111,9 +111,9 @@ class WrapIOProcessor {
   }
 }
 
-export function wrapIO(action: dd.Action, dialect: Dialect): ActionIO {
-  const pro = new WrapIOProcessor(action as dd.WrappedAction, dialect);
+export function wrapIO(action: mm.Action, dialect: Dialect): ActionIO {
+  const pro = new WrapIOProcessor(action as mm.WrappedAction, dialect);
   return pro.convert();
 }
 
-registerHanlder(dd.ActionType.wrap, wrapIO);
+registerHanlder(mm.ActionType.wrap, wrapIO);

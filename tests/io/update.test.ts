@@ -1,5 +1,5 @@
 import * as mr from '../../';
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import post from '../models/post';
 import user from '../models/user';
 import * as assert from 'assert';
@@ -8,15 +8,15 @@ const expect = assert.equal;
 const dialect = mr.mysql;
 
 it('Update', () => {
-  class PostTA extends dd.TableActions {
-    t = dd
+  class PostTA extends mm.TableActions {
+    t = mm
       .updateSome()
-      .set(post.title, dd.sql`"haha"`)
-      .set(post.content, dd.sql`${dd.input(post.content)}`)
-      .set(post.cmtCount, dd.sql`${post.cmtCount} + 1`)
+      .set(post.title, mm.sql`"haha"`)
+      .set(post.content, mm.sql`${mm.input(post.content)}`)
+      .set(post.cmtCount, mm.sql`${post.cmtCount} + 1`)
       .byID();
   }
-  const postTA = dd.ta(post, PostTA);
+  const postTA = mm.ta(post, PostTA);
   const v = postTA.t;
   const io = mr.updateIO(v, dialect);
 
@@ -33,13 +33,13 @@ it('Update', () => {
 });
 
 it('Update with where', () => {
-  class PostTA extends dd.TableActions {
-    t = dd
+  class PostTA extends mm.TableActions {
+    t = mm
       .updateOne()
-      .set(post.title, dd.sql`"haha"`)
-      .where(dd.sql`${post.id} = 1`);
+      .set(post.title, mm.sql`"haha"`)
+      .where(mm.sql`${post.id} = 1`);
   }
-  const postTA = dd.ta(post, PostTA);
+  const postTA = mm.ta(post, PostTA);
   const v = postTA.t;
   const io = mr.updateIO(v, dialect);
 
@@ -47,17 +47,17 @@ it('Update with where', () => {
 });
 
 it('getInputs', () => {
-  class UserTA extends dd.TableActions {
-    t = dd
+  class UserTA extends mm.TableActions {
+    t = mm
       .updateSome()
-      .set(user.url_name, dd.sql`${dd.input(user.url_name)}`)
+      .set(user.url_name, mm.sql`${mm.input(user.url_name)}`)
       .setInputs(user.sig)
-      .set(user.follower_count, dd.sql`${user.follower_count} + 1`)
+      .set(user.follower_count, mm.sql`${user.follower_count} + 1`)
       .where(
-        dd.sql`${user.url_name.toInput()} ${user.id.toInput()} ${user.url_name.toInput()}`,
+        mm.sql`${user.url_name.toInput()} ${user.id.toInput()} ${user.url_name.toInput()}`,
       );
   }
-  const ta = dd.ta(user, UserTA);
+  const ta = mm.ta(user, UserTA);
   const v = ta.t;
   const io = mr.updateIO(v, mr.mysql);
   expect(io.setterArgs.toString(), 'urlName: string, sig: *string');
@@ -72,15 +72,15 @@ it('getInputs', () => {
 });
 
 it('getReturns', () => {
-  class UserTA extends dd.TableActions {
-    t = dd
+  class UserTA extends mm.TableActions {
+    t = mm
       .updateSome()
-      .set(user.url_name, dd.sql`${dd.input(user.url_name)}`)
+      .set(user.url_name, mm.sql`${mm.input(user.url_name)}`)
       .setInputs(user.sig)
-      .set(user.follower_count, dd.sql`${user.follower_count} + 1`)
-      .where(dd.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
+      .set(user.follower_count, mm.sql`${user.follower_count} + 1`)
+      .where(mm.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
   }
-  const ta = dd.ta(user, UserTA);
+  const ta = mm.ta(user, UserTA);
   const v = ta.t;
   const io = mr.updateIO(v, mr.mysql);
   assert.deepEqual(io.returnValues.toString(), 'rowsAffected: int');

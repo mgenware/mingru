@@ -1,13 +1,13 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import post from '../models/post';
 import { testBuildAsync } from './common';
 
 it('Escape string', async () => {
-  class PostTA extends dd.TableActions {
-    selectT = dd
+  class PostTA extends mm.TableActions {
+    selectT = mm
       .select(post.id, post.title)
-      .where(dd.sql`${post.title} = "\\\\a\\\""`);
+      .where(mm.sql`${post.title} = "\\\\a\\\""`);
   }
-  const ta = dd.ta(post, PostTA);
+  const ta = mm.ta(post, PostTA);
   await testBuildAsync(ta, 'go/escapeString');
 });

@@ -1,4 +1,4 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
 import { settersToVarList, SetterIO } from './setterIO';
@@ -12,7 +12,7 @@ export class InsertIO extends ActionIO {
 
   constructor(
     dialect: Dialect,
-    public action: dd.InsertAction,
+    public action: mm.InsertAction,
     public sql: string,
     public setters: SetterIO[],
     public fetchInsertedID: boolean,
@@ -27,7 +27,7 @@ export class InsertIO extends ActionIO {
 }
 
 export class InsertIOProcessor {
-  constructor(public action: dd.InsertAction, public dialect: Dialect) {
+  constructor(public action: mm.InsertAction, public dialect: Dialect) {
     throwIfFalsy(action, 'action');
     throwIfFalsy(dialect, 'dialect');
   }
@@ -80,15 +80,15 @@ export class InsertIOProcessor {
     );
   }
 
-  private handleFrom(table: dd.Table): string {
+  private handleFrom(table: mm.Table): string {
     const e = this.dialect.encodeName;
     return `${e(table.getDBName())}`;
   }
 }
 
-export function insertIO(action: dd.Action, dialect: Dialect): InsertIO {
-  const pro = new InsertIOProcessor(action as dd.InsertAction, dialect);
+export function insertIO(action: mm.Action, dialect: Dialect): InsertIO {
+  const pro = new InsertIOProcessor(action as mm.InsertAction, dialect);
   return pro.convert();
 }
 
-registerHanlder(dd.ActionType.insert, insertIO);
+registerHanlder(mm.ActionType.insert, insertIO);

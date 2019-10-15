@@ -1,15 +1,15 @@
-import * as dd from 'mingru-models';
+import * as mm from 'mingru-models';
 import user from './user';
 
-class Cols extends dd.Table {
-  id = dd.pk();
-  text = dd.text();
-  int = dd.int();
-  nullable = dd.int().nullable;
+class Cols extends mm.Table {
+  id = mm.pk();
+  text = mm.text();
+  int = mm.int();
+  nullable = mm.int().nullable;
   fk = user.id;
-  defInt = dd.int(-3);
-  defVarChar = dd.varChar(100, '一二');
-  defTime = dd.time(true);
+  defInt = mm.int(-3);
+  defVarChar = mm.varChar(100, '一二');
+  defTime = mm.time(true);
 }
 
-export default dd.table(Cols);
+export default mm.table(Cols);
