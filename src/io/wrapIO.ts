@@ -31,13 +31,11 @@ class WrapIOProcessor {
   convert(): ActionIO {
     const { action, dialect } = this;
     const innerAction = action.action;
-    if (!action.__table || !action.__name) {
-      throw new Error('Action not initialized');
-    }
+    const [, actionName] = action.ensureInitialized();
     const innerIO = actionToIO(
       innerAction,
       dialect,
-      `WrappedAction "${action.__name}"`,
+      `WrappedAction "${actionName}"`,
     );
     const innerActionTable = innerAction.__table;
     if (!innerActionTable) {
@@ -75,7 +73,7 @@ class WrapIOProcessor {
     //   this.t.wrap(args) -> inner: this.t, outer: this.t(args)
     const funcPath = utils.actionCallPath(
       innerActionTable === action.__table ? null : innerActionTable.__name,
-      innerAction.__name || action.__name,
+      innerAction.__name || actionName,
     );
     let execArgs: VarList;
     if (action.isTemp) {

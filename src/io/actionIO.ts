@@ -15,23 +15,16 @@ export class ActionIO {
     public action: mm.Action,
     public funcArgs: VarList,
     public execArgs: VarList,
-    public returnValues: VarList,
+    public returnValues: VarList, // `returnValues` doesn't contain the last error param.
   ) {
     throwIfFalsy(action, 'action');
     throwIfFalsy(funcArgs, 'funcArgs');
     throwIfFalsy(execArgs, 'execArgs');
     throwIfFalsy(returnValues, 'returnValues');
 
-    if (!action.__table) {
-      throw new Error(`Action not initialized`);
-    }
-    this.table = action.__table;
-
-    // action can be a temporary wrapped action as a member of a transaction, which doesn't have a valid name.
-    const actionName = action.__name;
-    if (actionName) {
-      this.funcName = utils.actionPascalName(actionName);
-    }
+    const [table, name] = action.ensureInitialized();
+    this.table = table;
+    this.funcName = utils.actionPascalName(name);
 
     this.funcStubs = action.__argStubs.map(v => VarInfo.fromSQLVar(v, dialect));
   }

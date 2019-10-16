@@ -42,11 +42,7 @@ class TransactIOProcessor {
     const { action, dialect } = this;
     const { members } = action;
     let lastInsertMember: TransactMemberIO | undefined;
-    const outerActionName = action.__name;
-    const outerActionTable = action.__table;
-    if (!outerActionName || !outerActionTable) {
-      throw new Error('Action not initialized');
-    }
+    action.ensureInitialized();
     const memberIOs = members.map((m, idx) => {
       const mAction = m.action;
       if (!mAction.__table || !mAction.__name) {
