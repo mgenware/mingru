@@ -4,6 +4,7 @@ import user from '../models/user';
 import post from '../models/post';
 import { WrapIO } from '../../';
 import * as assert from 'assert';
+import itThrows from 'it-throws';
 
 const expect = assert.equal;
 const dialect = mr.mysql;
@@ -83,5 +84,8 @@ it('Throws on undefined inputs', () => {
   }
   const ta = mm.ta(user, UserTA);
   const v = ta.t2;
-  assert.throws(() => mr.wrapIO(v, dialect), 'haha');
+  itThrows(
+    () => mr.wrapIO(v, dialect),
+    `The argument "haha" doesn't exist in action "t2"`,
+  );
 });

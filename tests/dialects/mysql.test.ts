@@ -2,6 +2,7 @@ import * as mr from '../../';
 import * as mm from 'mingru-models';
 import user from '../models/user';
 import * as assert from 'assert';
+import itThrows from 'it-throws';
 
 const expect = assert.equal;
 const TimePkg = 'time';
@@ -62,7 +63,10 @@ it('DT', () => {
 
 it('DT (not supported)', () => {
   const props = new mm.ColumnType(['type1', 'type2']);
-  assert.throws(() => dialect.colTypeToGoType(props), 'type2');
+  itThrows(
+    () => dialect.colTypeToGoType(props),
+    'Type not supported: [type1,type2]',
+  );
 });
 
 it('as', () => {
@@ -102,9 +106,12 @@ it('objToSQL', () => {
   expect(dialect.objToSQL('', user), "''");
   expect(dialect.objToSQL('\'"\\', user), "'''\"\\'");
   // undefined
-  assert.throws(() => dialect.objToSQL(undefined, user));
+  itThrows(() => dialect.objToSQL(undefined, user), 'value is undefined');
   // Others
-  assert.throws(() => dialect.objToSQL([], user));
+  itThrows(
+    () => dialect.objToSQL([], user),
+    'Unsupported type of object "Array"',
+  );
 });
 
 it('colToSQLType', () => {

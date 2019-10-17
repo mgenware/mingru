@@ -3,6 +3,7 @@ import * as mm from 'mingru-models';
 import user from '../models/user';
 import post from '../models/post';
 import * as assert from 'assert';
+import itThrows from 'it-throws';
 
 const expect = assert.equal;
 const dialect = mr.mysql;
@@ -23,16 +24,17 @@ it('SQL calls', () => {
 });
 
 it('toSQL(sourceTable)', () => {
-  assert.throws(() => {
+  itThrows(() => {
     const sql = mm.sql`${post.datetime} = ${mm.datetimeNow()}`;
     const io = mr.sqlIO(sql, dialect);
     io.toSQL(user);
-  }, 'expedcted "post"');
-  assert.throws(() => {
+  }, 'Source table assertion failed, expected "Table(user)", got "Table(post|db_post)".');
+
+  itThrows(() => {
     const sql = mm.sql`${post.datetime} = ${mm.datetimeNow()} ${user.id}`;
     const io = mr.sqlIO(sql, dialect);
     io.toSQL(post);
-  }, 'expedcted "user"');
+  }, 'Source table assertion failed, expected "Table(post|db_post)", got "Table(user)".');
 });
 
 it('Nested SQLs', () => {
@@ -66,12 +68,13 @@ it('list and distinctList', () => {
 });
 
 it('Conflicting names', () => {
-  assert.throws(() => {
+  itThrows(() => {
     const sql = mm.sql`${user.id.toInput()}${mm.input('b', 'id')}`;
     mr.sqlIO(sql, dialect);
-  }, 'id');
-  assert.throws(() => {
+  }, 'Cannot handle two variables with same names "id" but different types ("uint64" and "b") in "Expression SQL(E(SQLVar(id, desc = Column(id, Table(user))), type = 2), E(SQLVar(id, desc = String(b)), type = 2))"');
+
+  itThrows(() => {
     const sql = mm.sql`${mm.input('a', 'v1')}${mm.input('b', 'v1')}`;
     mr.sqlIO(sql, dialect);
-  }, 'v1');
+  }, 'Cannot handle two variables with same names "v1" but different types ("a" and "b") in "Expression SQL(E(SQLVar(v1, desc = String(a)), type = 2), E(SQLVar(v1, desc = String(b)), type = 2))"');
 });

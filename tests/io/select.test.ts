@@ -7,6 +7,7 @@ import rpl from '../models/postReply';
 import * as assert from 'assert';
 import postCmt from '../models/postCmt';
 import cmt2 from '../models/cmt2';
+import itThrows from 'it-throws';
 
 const expect = assert.equal;
 const dialect = mr.mysql;
@@ -220,7 +221,10 @@ it('Duplicate selected names', () => {
   }
   const postTA = mm.ta(post, PostTA);
   const v = postTA.t;
-  assert.throws(() => mr.selectIO(v, dialect), 'already exists');
+  itThrows(
+    () => mr.selectIO(v, dialect),
+    'The selected column name "title" already exists in action "t"',
+  );
 });
 
 it('getInputs', () => {
@@ -287,24 +291,24 @@ it('GROUP BY and HAVING', () => {
 
 it('Unrelated cols', () => {
   // Selected cols
-  assert.throws(() => {
+  itThrows(() => {
     class UserTA extends mm.TableActions {
       t = mm.select(post.user_id);
     }
     const ta = mm.ta(user, UserTA);
     const v = ta.t;
     mr.selectIO(v, mr.mysql);
-  });
+  }, 'Source table assertion failed, expected "Table(user)", got "Table(post|db_post)".');
 
   // WHERE col
-  assert.throws(() => {
+  itThrows(() => {
     class UserTA extends mm.TableActions {
       t = mm.select(user.id).where(mm.sql`${post.id}`);
     }
     const ta = mm.ta(user, UserTA);
     const v = ta.t;
     mr.selectIO(v, mr.mysql);
-  });
+  }, 'Source table assertion failed, expected "Table(user)", got "Table(post|db_post)".');
 
   // Do NOT throws on inputs
   assert.doesNotThrow(() => {
