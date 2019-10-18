@@ -17,7 +17,7 @@
   "license": "MIT",
   "scripts": {
     "test": "yarn run clean && yarn run compile && yarn run lint && yarn run t",
-    "t": "mocha dist_tests/**/*.test.js",
+    "t": "mocha --require source-map-support/register dist_tests/**/*.test.js",
     "build": "yarn test",
     "compile": "tsc -b tests",
     "dev": "yarn run clean && tsc -b tests -w",
@@ -38,6 +38,7 @@
     "eslint": "^6.5.1",
     "mingru-models": "^0.25.0",
     "mocha": "^6.2.1",
+    "source-map-support": "^0.5.13",
     "tempy": "^0.3.0",
     "typescript": "^3.6.4"
   },
