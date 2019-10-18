@@ -6,6 +6,7 @@ import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
 import { registerHanlder } from './actionToIO';
 import * as defs from '../defs';
+import * as utils from './utils';
 
 export class InsertIO extends ActionIO {
   returnMember: ActionIO | undefined;
@@ -44,6 +45,7 @@ export class InsertIOProcessor {
     sql += tableSQL;
 
     // setters
+    utils.validateSetters(action.setters, table);
     const setters = SetterIO.fromAction(action, dialect);
     const colNames = setters.map(s => dialect.encodeColumnName(s.col));
     sql += ` (${colNames.join(', ')})`;

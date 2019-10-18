@@ -17,7 +17,7 @@ var Post = &TableTypePost{}
 
 // S ...
 func (da *TableTypePost) S(queryable dbx.Queryable, urlName string, id uint64, sig *string, followerCount *string) (int, error) {
-	result, err := queryable.Exec("UPDATE `db_post` SET `url_name` = ?, `sig` = ?, `follower_c` = ? WHERE ? ? ? ?", urlName, sig, followerCount, urlName, id, sig, urlName)
+	result, err := queryable.Exec("UPDATE `user` SET `url_name` = ?, `sig` = ?, `follower_c` = ? WHERE ? ? ? ?", urlName, sig, followerCount, urlName, id, sig, urlName)
 	return dbx.GetRowsAffectedIntWithError(result, err)
 }
 

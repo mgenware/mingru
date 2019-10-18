@@ -139,7 +139,7 @@ export class SelectIOProcessor {
       const selIO = this.handleSelectedColumn(col);
       if (this.selectedNames.has(selIO.varName)) {
         throw new Error(
-          `The selected column name "${selIO.varName}" already exists in action "${action.__name}"`,
+          `The selected column name "${selIO.varName}" already exists`,
         );
       }
       this.selectedNames.add(selIO.varName);

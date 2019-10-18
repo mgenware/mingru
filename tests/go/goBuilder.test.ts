@@ -1,7 +1,8 @@
 import * as mm from 'mingru-models';
 import user from '../models/user';
 import post from '../models/post';
-import { testBuildFullAsync } from './common';
+import { testBuildFullAsync, testBuildAsync } from './common';
+import { itRejects } from 'it-throws';
 
 it('Single action', async () => {
   class PostTA extends mm.TableActions {
@@ -29,4 +30,14 @@ it('Multiple actions', async () => {
   }
   const ta = mm.ta(post, PostTA);
   await testBuildFullAsync(ta, 'goBuilder/multipleActions');
+});
+
+it('Action info appended to error message', async () => {
+  await itRejects(async () => {
+    class PostTA extends mm.TableActions {
+      t = mm.unsafeInsert().setInputs(user.id);
+    }
+    const ta = mm.ta(post, PostTA);
+    await testBuildAsync(ta, '');
+  }, 'Source table assertion failed, expected "Table(post|db_post)", got "Table(user)". [action "t"]');
 });

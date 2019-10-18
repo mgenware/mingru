@@ -14,6 +14,7 @@ it('Wrap', async () => {
   class PostTA extends mm.TableActions {
     s = mm
       .updateSome()
+      .from(user)
       .set(user.url_name, mm.sql`${mm.input(user.url_name)}`)
       .setInputs(user.sig, user.follower_count)
       .where(

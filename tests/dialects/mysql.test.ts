@@ -2,7 +2,7 @@ import * as mr from '../../';
 import * as mm from 'mingru-models';
 import user from '../models/user';
 import * as assert from 'assert';
-import itThrows from 'it-throws';
+import { itThrows } from 'it-throws';
 
 const expect = assert.equal;
 const TimePkg = 'time';

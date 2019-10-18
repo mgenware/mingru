@@ -3,6 +3,7 @@ import * as mm from 'mingru-models';
 import post from '../models/post';
 import user from '../models/user';
 import * as assert from 'assert';
+import { itThrows } from 'it-throws';
 
 const expect = assert.equal;
 const dialect = mr.mysql;
@@ -84,4 +85,17 @@ it('getReturns', () => {
   const v = ta.t;
   const io = mr.updateIO(v, mr.mysql);
   assert.deepEqual(io.returnValues.toString(), 'rowsAffected: int');
+});
+
+it('Validate setters', () => {
+  itThrows(() => {
+    class PostTA extends mm.TableActions {
+      t = mm
+        .unsafeUpdateAll()
+        .setInputs(user.id)
+        .setInputs();
+    }
+    const ta = mm.ta(post, PostTA);
+    mr.insertIO(ta.t, mr.mysql);
+  }, 'Source table assertion failed, expected "Table(post|db_post)", got "Table(user)".');
 });

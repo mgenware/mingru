@@ -8,6 +8,7 @@ import VarList from '../lib/varList';
 import VarInfo from '../lib/varInfo';
 import { registerHanlder } from './actionToIO';
 import * as defs from '../defs';
+import * as utils from './utils';
 
 export class UpdateIO extends ActionIO {
   constructor(
@@ -41,7 +42,7 @@ class UpdateIOProcessor {
 
     if (!action.whereSQL && !action.allowNoWhere) {
       throw new Error(
-        `You have to call unsafeUpdateAll to build an action without a WHERE clause, action name: "${action.__name}"`,
+        'You have to call `unsafeUpdateAll` to build an action without a WHERE clause',
       );
     }
 
@@ -50,6 +51,7 @@ class UpdateIOProcessor {
     sql += `${fromSQL} SET `;
 
     // Setters
+    utils.validateSetters(action.setters, table);
     const setterIOs = SetterIO.fromAction(action, dialect);
     sql += setterIOs
       .map(s => `${dialect.encodeColumnName(s.col)} = ${s.sql.toSQL(table)}`)

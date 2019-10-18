@@ -7,7 +7,7 @@ import rpl from '../models/postReply';
 import * as assert from 'assert';
 import postCmt from '../models/postCmt';
 import cmt2 from '../models/cmt2';
-import itThrows from 'it-throws';
+import { itThrows } from 'it-throws';
 
 const expect = assert.equal;
 const dialect = mr.mysql;
@@ -223,7 +223,7 @@ it('Duplicate selected names', () => {
   const v = postTA.t;
   itThrows(
     () => mr.selectIO(v, dialect),
-    'The selected column name "title" already exists in action "t"',
+    'The selected column name "title" already exists',
   );
 });
 

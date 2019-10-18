@@ -34,3 +34,12 @@ export function lowercaseFirstChar(s: string): string {
   }
   return `${s.charAt(0).toLowerCase()}${s.substr(1)}`;
 }
+
+export function validateSetters(
+  setters: Map<mm.Column, mm.SQL>,
+  table: mm.Table,
+) {
+  for (const setter of setters.keys()) {
+    setter.checkSourceTable(table);
+  }
+}

@@ -4,11 +4,11 @@ import cmt from '../models/cmt';
 import rpl from '../models/postReply';
 import user from '../models/user';
 import { testBuildAsync } from './common';
-import * as assert from 'assert';
 import postCategory from '../models/postCategory';
 import category from '../models/category';
 import cmt2 from '../models/cmt2';
 import postCmt from '../models/postCmt';
+import { itRejects } from 'it-throws';
 
 it('select', async () => {
   class PostTA extends mm.TableActions {
@@ -251,7 +251,10 @@ it('Selected name collisions', async () => {
     );
   }
   const ta = mm.ta(post, PostTA);
-  assert.rejects(testBuildAsync(ta, ''), 'already exists');
+  await itRejects(
+    testBuildAsync(ta, ''),
+    'The selected column name "title" already exists [action "selectT"]',
+  );
 });
 
 it('Calculated columns', async () => {
