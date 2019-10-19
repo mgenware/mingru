@@ -22,7 +22,7 @@ type PostTableSelectTResult struct {
 
 // SelectT ...
 func (da *TableTypePost) SelectT(queryable dbx.Queryable) ([]*PostTableSelectTResult, error) {
-	rows, err := queryable.Query("SELECT `db_post`.`title` AS `title`, `join_1`.`category_id` AS `category_id`, `join_2`.`id` AS `id` FROM `db_post` AS `db_post` INNER JOIN `post_category` AS `join_1` ON `join_1`.`post_id` = `db_post`.`id` INNER JOIN `category` AS `join_2` ON `join_2`.`id` = `id`.`category_id` WHERE `db_post`.`title`|`join_1`.`category_id`|`join_2`.`id` ORDER BY `join_2`.`id`, `db_post`.`user_id` DESC")
+	rows, err := queryable.Query("SELECT `db_post`.`title` AS `title`, `join_1`.`category_id` AS `category_id`, `join_2`.`id` AS `id` FROM `db_post` AS `db_post` INNER JOIN `post_category` AS `join_1` ON `join_1`.`post_id` = `db_post`.`id` INNER JOIN `category` AS `join_2` ON `join_2`.`id` = `join_1`.`category_id` WHERE `db_post`.`title`|`join_1`.`category_id`|`join_2`.`id` ORDER BY `join_2`.`id`, `db_post`.`user_id` DESC")
 	if err != nil {
 		return nil, err
 	}
