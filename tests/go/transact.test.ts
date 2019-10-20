@@ -1,5 +1,8 @@
 import { testBuildAsync } from './common';
 import * as mm from 'mingru-models';
+import cmt2 from '../models/cmt2';
+import postCmt from '../models/postCmt';
+import post from '../models/post';
 
 it('No inserted ID', async () => {
   class Employee extends mm.Table {
@@ -99,4 +102,21 @@ it('Temp member actions', async () => {
   const postTA = mm.ta(post, PostTA);
   await testBuildAsync(userTA, 'tx/tmpActions/user');
   await testBuildAsync(postTA, 'tx/tmpActions/post');
+});
+
+it('Temp member actions (with from)', async () => {
+  class PostTA extends mm.TableActions {
+    t = mm.transact(
+      mm
+        .insertOne()
+        .from(cmt2)
+        .setInputs(),
+      mm
+        .insertOne()
+        .from(postCmt)
+        .setInputs(),
+    );
+  }
+  const postTA = mm.ta(post, PostTA);
+  await testBuildAsync(postTA, 'tx/tmpActionsWithFrom/post');
 });

@@ -44,28 +44,27 @@ class TransactIOProcessor {
     let lastInsertMember: TransactMemberIO | undefined;
     action.ensureInitialized();
     const memberIOs = members.map((m, idx) => {
-      const mAction = m.action;
-      if (!mAction.__table || !mAction.__name) {
-        throw new Error('Unexpected error, member action is not initialized');
-      }
-      const memberActionTable = mAction.__table;
-      const memberActionName = mAction.__name;
+      const childAction = m.action;
+      const [childTable, childName] = childAction.ensureInitialized();
 
       // Call actionToIO after initialization
       const io = actionToIO(
-        mAction,
+        childAction,
         dialect,
         `transaction child index "${idx}"`,
       );
 
+      // This indicates if the member function is generate locally
+      // Tmp members are always generated locally
+      const isChildFuncPrivate = m.isTemp || action.__table === childTable;
       const callPath = utils.actionCallPath(
-        action.__table === mAction.__table ? null : memberActionTable.__name,
-        memberActionName,
-        m.isTemp ? true : false, // Temp member func is generated as private member
+        isChildFuncPrivate ? null : childTable.__name,
+        childName,
+        m.isTemp, // Temp members generated generated locally, thus are always private
       );
       const memberIO = new TransactMemberIO(io, callPath, m.isTemp);
       if (
-        mAction.actionType === mm.ActionType.insert &&
+        childAction.actionType === mm.ActionType.insert &&
         (memberIO.actionIO as InsertIO).fetchInsertedID
       ) {
         lastInsertMember = memberIO;
