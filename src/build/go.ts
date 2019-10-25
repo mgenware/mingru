@@ -31,9 +31,13 @@ export function struct(
 type ${typeName} struct {
 `;
   // Find the max length of var names
-  const max = Math.max(...members.map(m => m.name.length));
+  const nameMaxLen = Math.max(...members.map(m => m.name.length));
+  let typeMaxLen = 0;
+  if (nameStyle !== MemberJSONKeyStyle.none) {
+    typeMaxLen = Math.max(...members.map(m => m.type.length));
+  }
   for (const mem of members) {
-    code += `\t${mem.name.padEnd(max)} ${mem.type}`;
+    code += `\t${mem.name.padEnd(nameMaxLen)} ${mem.type.padEnd(typeMaxLen)}`;
     if (nameStyle === MemberJSONKeyStyle.camelCase) {
       mem.makeCamelCaseJSONTag();
     } else if (nameStyle === MemberJSONKeyStyle.snakeCase) {
