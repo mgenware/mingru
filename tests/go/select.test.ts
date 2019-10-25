@@ -1,4 +1,5 @@
 import * as mm from 'mingru-models';
+import * as mr from '../../';
 import post from '../models/post';
 import cmt from '../models/cmt';
 import rpl from '../models/postReply';
@@ -373,4 +374,34 @@ it('GROUP BY and HAVING', async () => {
   }
   const ta = mm.ta(post, PostTA);
   await testBuildAsync(ta, 'select/groupByAndHaving');
+});
+
+it('Snake case keys', async () => {
+  class RplTA extends mm.TableActions {
+    selectT = mm.select(
+      rpl.user_id.join(user).url_name,
+      rpl.user_id.join(user).id,
+      rpl.to_user_id.join(user).url_name,
+    );
+  }
+  const ta = mm.ta(rpl, RplTA);
+  await testBuildAsync(ta, 'select/snakeCaseKeys', {
+    noFileHeader: true,
+    memberJSONKeyStyle: mr.MemberJSONKeyStyle.snakeCase,
+  });
+});
+
+it('Camel case keys', async () => {
+  class RplTA extends mm.TableActions {
+    selectT = mm.select(
+      rpl.user_id.join(user).url_name,
+      rpl.user_id.join(user).id,
+      rpl.to_user_id.join(user).url_name,
+    );
+  }
+  const ta = mm.ta(rpl, RplTA);
+  await testBuildAsync(ta, 'select/camelCaseKeys', {
+    noFileHeader: true,
+    memberJSONKeyStyle: mr.MemberJSONKeyStyle.camelCase,
+  });
 });

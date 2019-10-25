@@ -8,13 +8,7 @@ import * as del from 'del';
 import logger from '../logger';
 import { TAIO } from '../io/taIO';
 import CSQLBuilder from './csqlBuilder';
-
-export interface BuildOption {
-  packageName?: string;
-  noFileHeader?: boolean;
-  cleanBuild?: boolean;
-  noOutput?: boolean;
-}
+import { BuildOption } from './buildOption';
 
 export default class Builder {
   opts: BuildOption;
@@ -70,8 +64,8 @@ export default class Builder {
 
     const { dialect, outDir, opts } = this;
     const taIO = new TAIO(ta, dialect);
-    const builder = new GoBuilder(taIO, opts.packageName);
-    const code = builder.build(!!opts.noFileHeader);
+    const builder = new GoBuilder(taIO, opts);
+    const code = builder.build();
     const fileName = mm.utils.toSnakeCase(ta.__table.__name) + '_ta'; // Add a "_ta" suffix to table actions file
     const outFile = nodepath.join(outDir, fileName + '.go');
     await mfs.writeFileAsync(outFile, code, 'utf8');

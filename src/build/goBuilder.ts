@@ -15,6 +15,7 @@ import { WrapIO } from '../io/wrapIO';
 import { TransactIO } from '../io/transactIO';
 import LinesBuilder from './linesBuilder';
 import * as utils from '../io/utils';
+import { BuildOption, MemberJSONKeyStyle } from './buildOption';
 
 function joinParams(arr: string[]): string {
   return arr.join(', ');
@@ -37,17 +38,20 @@ class CodeMap {
 }
 
 export default class GoBuilder {
+  private options: BuildOption;
   private imports = new Set<string>();
   private dialect: Dialect;
 
-  constructor(public taIO: TAIO, public packageName = 'da') {
+  constructor(public taIO: TAIO, public opts: BuildOption) {
     throwIfFalsy(taIO, 'taIO');
     this.dialect = taIO.dialect;
+    this.options = opts;
   }
 
-  build(noHeader: boolean): string {
-    let code = noHeader ? '' : defs.fileHeader;
-    code += `package ${this.packageName}\n\n`;
+  build(): string {
+    const { options } = this;
+    let code = options.noFileHeader ? '' : defs.fileHeader;
+    code += `package ${options.packageName || 'da'}\n\n`;
 
     // this.buildActions will set this.systemImports and this.userImports
     let body = '';
@@ -145,9 +149,7 @@ export default class GoBuilder {
 
       default: {
         throw new Error(
-          `Not supported action type "${
-            io.action.actionType
-          }" in goBuilder.processActionIO`,
+          `Not supported action type "${io.action.actionType}" in goBuilder.processActionIO`,
         );
       }
     }
@@ -169,7 +171,7 @@ export default class GoBuilder {
 
   private buildTableObject(): string {
     const { className, instanceName } = this.taIO;
-    let code = go.struct(className, []);
+    let code = go.struct(className, [], MemberJSONKeyStyle.none);
     code += `\n// ${instanceName} ...
 var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     return code;
@@ -229,7 +231,11 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
     // Generate result type definition
     if (selMode !== mm.SelectActionMode.field) {
-      resultTypeDef = go.struct(originalResultType, selectedFields);
+      resultTypeDef = go.struct(
+        originalResultType,
+        selectedFields,
+        this.options.memberJSONKeyStyle || MemberJSONKeyStyle.none,
+      );
     }
 
     const queryParamsCode = io.execArgs.list
@@ -251,9 +257,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       }
       // Call the Query method
       codeBuilder.push(
-        `rows, err := ${
-          defs.queryableParam
-        }.Query(${sqlLiteral}${queryParamsCode})`,
+        `rows, err := ${defs.queryableParam}.Query(${sqlLiteral}${queryParamsCode})`,
       );
       codeBuilder.push('if err != nil {');
       codeBuilder.incrementIndent();
@@ -321,9 +325,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
       // Call query func
       codeBuilder.push(
-        `err := ${
-          defs.queryableParam
-        }.QueryRow(${sqlLiteral}${queryParamsCode}).Scan(${scanParams})`,
+        `err := ${defs.queryableParam}.QueryRow(${sqlLiteral}${queryParamsCode}).Scan(${scanParams})`,
       );
       codeBuilder.push('if err != nil {');
       codeBuilder.incrementIndent();
@@ -345,19 +347,13 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       .map(p => `, ${p.valueOrName}`)
       .join('');
     const sqlLiteral = go.makeStringLiteral(io.sql);
-    code += `${defs.resultVarName}, err := ${
-      defs.queryableParam
-    }.Exec(${sqlLiteral}${queryParamsCode})\n`;
+    code += `${defs.resultVarName}, err := ${defs.queryableParam}.Exec(${sqlLiteral}${queryParamsCode})\n`;
 
     // Return the result
     if (action.ensureOneRowAffected) {
-      code += `return dbx.CheckOneRowAffectedWithError(${
-        defs.resultVarName
-      }, err)`;
+      code += `return dbx.CheckOneRowAffectedWithError(${defs.resultVarName}, err)`;
     } else {
-      code += `return dbx.GetRowsAffectedIntWithError(${
-        defs.resultVarName
-      }, err)`;
+      code += `return dbx.GetRowsAffectedIntWithError(${defs.resultVarName}, err)`;
     }
     return new CodeMap(code);
   }
@@ -377,9 +373,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
     // Return the result
     if (fetchInsertedID) {
-      code += `return dbx.GetLastInsertIDUint64WithError(${
-        defs.resultVarName
-      }, err)`;
+      code += `return dbx.GetLastInsertIDUint64WithError(${defs.resultVarName}, err)`;
     } else {
       code += 'return err';
     }
@@ -394,18 +388,12 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       .map(p => `, ${p.valueOrName}`)
       .join('');
     const sqlLiteral = go.makeStringLiteral(io.sql);
-    code += `${defs.resultVarName}, err := ${
-      defs.queryableParam
-    }.Exec(${sqlLiteral}${queryParamsCode})\n`;
+    code += `${defs.resultVarName}, err := ${defs.queryableParam}.Exec(${sqlLiteral}${queryParamsCode})\n`;
     // Return the result
     if (action.ensureOneRowAffected) {
-      code += `return dbx.CheckOneRowAffectedWithError(${
-        defs.resultVarName
-      }, err)`;
+      code += `return dbx.CheckOneRowAffectedWithError(${defs.resultVarName}, err)`;
     } else {
-      code += `return dbx.GetRowsAffectedIntWithError(${
-        defs.resultVarName
-      }, err)`;
+      code += `return dbx.GetRowsAffectedIntWithError(${defs.resultVarName}, err)`;
     }
     return new CodeMap(code);
   }

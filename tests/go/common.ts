@@ -8,30 +8,53 @@ import * as assert from 'assert';
 const dialect = mr.mysql;
 const DestDataDir = 'tests/go/dest';
 
-export async function testBuildAsync(ta: mm.TableActions, path: string) {
+function defaultOptions(opts?: mr.BuildOption) {
+  if (opts) {
+    return opts;
+  }
+  const defOpts: mr.BuildOption = {};
+  defOpts.noFileHeader = true;
+  return defOpts;
+}
+
+export async function testBuildAsync(
+  ta: mm.TableActions,
+  path: string,
+  opts?: mr.BuildOption,
+) {
   let content = '';
   if (path) {
     path = nodepath.resolve(nodepath.join(DestDataDir, path + '.go'));
     content = await mfs.readFileAsync(path, 'utf8');
   }
   mr.logger.enabled = false;
-  const builder = new mr.GoBuilder(new mr.TAIO(ta, dialect));
-  const actual = builder.build(true);
+  const builder = new mr.GoBuilder(
+    new mr.TAIO(ta, dialect),
+    defaultOptions(opts),
+  );
+  const actual = builder.build();
   if (path) {
     assert.equal(actual, content);
   }
   return builder;
 }
 
-export async function testBuildFullAsync(ta: mm.TableActions, path: string) {
+export async function testBuildFullAsync(
+  ta: mm.TableActions,
+  path: string,
+  opts?: mr.BuildOption,
+) {
   let content = '';
   if (path) {
     path = nodepath.resolve(nodepath.join(DestDataDir, path + '.go'));
     content = await mfs.readFileAsync(path, 'utf8');
   }
   mr.logger.enabled = false;
-  const builder = new mr.GoBuilder(new mr.TAIO(ta, dialect));
-  const actual = builder.build(true);
+  const builder = new mr.GoBuilder(
+    new mr.TAIO(ta, dialect),
+    defaultOptions(opts),
+  );
+  const actual = builder.build();
   if (path) {
     assert.equal(actual, content);
   }

@@ -1,22 +1,48 @@
 import * as mm from 'mingru-models';
+import { MemberJSONKeyStyle } from './buildOption';
 
 export class InstanceVariable {
   name: string;
+  tag = '';
 
   constructor(name: string, public type: string) {
     this.name = mm.utils.capitalizeColumnName(mm.utils.toCamelCase(name));
   }
+
+  makeSnakeCaseJSONTag() {
+    this.setJSONTag(mm.utils.toSnakeCase(this.name));
+  }
+
+  makeCamelCaseJSONTag() {
+    this.setJSONTag(mm.utils.toCamelCase(this.name));
+  }
+
+  private setJSONTag(name: string) {
+    this.tag = '`json:"' + name + '"`';
+  }
 }
 
-export function struct(typeName: string, members: InstanceVariable[]): string {
+export function struct(
+  typeName: string,
+  members: InstanceVariable[],
+  nameStyle: MemberJSONKeyStyle,
+): string {
   let code = `// ${typeName} ...
 type ${typeName} struct {
 `;
   // Find the max length of var names
   const max = Math.max(...members.map(m => m.name.length));
   for (const mem of members) {
-    code += `\t${mem.name.padEnd(max)} ${mem.type}
-`;
+    code += `\t${mem.name.padEnd(max)} ${mem.type}`;
+    if (nameStyle === MemberJSONKeyStyle.camelCase) {
+      mem.makeCamelCaseJSONTag();
+    } else if (nameStyle === MemberJSONKeyStyle.snakeCase) {
+      mem.makeSnakeCaseJSONTag();
+    }
+    if (mem.tag) {
+      code += ` ${mem.tag}`;
+    }
+    code += '\n';
   }
   code += `}\n`;
   return code;
