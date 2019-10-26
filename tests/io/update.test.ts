@@ -17,7 +17,7 @@ it('Update', () => {
       .set(post.cmtCount, mm.sql`${post.cmtCount} + 1`)
       .byID();
   }
-  const postTA = mm.ta(post, PostTA);
+  const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
   const io = mr.updateIO(v, dialect);
 
@@ -40,7 +40,7 @@ it('Update with where', () => {
       .set(post.title, mm.sql`"haha"`)
       .where(mm.sql`${post.id} = 1`);
   }
-  const postTA = mm.ta(post, PostTA);
+  const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
   const io = mr.updateIO(v, dialect);
 
@@ -58,7 +58,7 @@ it('getInputs', () => {
         mm.sql`${user.url_name.toInput()} ${user.id.toInput()} ${user.url_name.toInput()}`,
       );
   }
-  const ta = mm.ta(user, UserTA);
+  const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.updateIO(v, mr.mysql);
   expect(io.setterArgs.toString(), 'urlName: string, sig: *string');
@@ -81,7 +81,7 @@ it('getReturns', () => {
       .set(user.follower_count, mm.sql`${user.follower_count} + 1`)
       .where(mm.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
   }
-  const ta = mm.ta(user, UserTA);
+  const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.updateIO(v, mr.mysql);
   assert.deepEqual(io.returnValues.toString(), 'rowsAffected: int');
@@ -95,7 +95,7 @@ it('Validate setters', () => {
         .setInputs(user.id)
         .setInputs();
     }
-    const ta = mm.ta(post, PostTA);
+    const ta = mm.tableActions(post, PostTA);
     mr.insertIO(ta.t, mr.mysql);
   }, 'Source table assertion failed, expected "Table(post|db_post)", got "Table(user)".');
 });

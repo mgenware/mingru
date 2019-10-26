@@ -18,14 +18,14 @@ it('TransactIO', () => {
       );
     d = this.s.wrap({ sig: '"haha"' });
   }
-  const wrapSelf = mm.ta(user, WrapSelfTA);
+  const wrapSelf = mm.tableActions(user, WrapSelfTA);
 
   class WrapOtherTA extends mm.TableActions {
     standard = wrapSelf.s.wrap({ id: '123' });
     nested = wrapSelf.d.wrap({ id: '123' });
     t1 = mm.transact(wrapSelf.s, wrapSelf.d, this.standard);
   }
-  const wrapOther = mm.ta(post, WrapOtherTA);
+  const wrapOther = mm.tableActions(post, WrapOtherTA);
   const io = mr.transactIO(wrapOther.t1, dialect);
   assert.ok(io instanceof mr.TransactIO);
   expect(
@@ -43,7 +43,7 @@ it('Member details (normal action, wrapped, tmp wrapped)', () => {
       .setInputs(user.sig, user.follower_count)
       .byID();
   }
-  const srcTA = mm.ta(user, SourceTA);
+  const srcTA = mm.tableActions(user, SourceTA);
   class WrapTA extends mm.TableActions {
     s = mm
       .updateSome()
@@ -55,7 +55,7 @@ it('Member details (normal action, wrapped, tmp wrapped)', () => {
     t3 = mm.transact(this.s);
     t4 = mm.transact(srcTA.s);
   }
-  const wrapTA = mm.ta(user, WrapTA);
+  const wrapTA = mm.tableActions(user, WrapTA);
 
   const io = mr.transactIO(wrapTA.t, dialect);
   assert.ok(io instanceof mr.TransactIO);

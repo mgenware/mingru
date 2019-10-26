@@ -10,7 +10,7 @@ it('insert', async () => {
       .setInputs(post.title, post.user_id)
       .setInputs();
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'insert/insert');
 });
 
@@ -18,7 +18,7 @@ it('unsafeInsert', async () => {
   class PostTA extends mm.TableActions {
     insertT = mm.unsafeInsert().setInputs(post.title, post.user_id);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'insert/unsafeInsert');
 });
 
@@ -35,7 +35,7 @@ it('insertOne', async () => {
   class EmployeeTA extends mm.TableActions {
     insertT = mm.insertOne().setInputs();
   }
-  const ta = mm.ta(employee, EmployeeTA);
+  const ta = mm.tableActions(employee, EmployeeTA);
   await testBuildAsync(ta, 'insert/insertOne');
 });
 
@@ -43,7 +43,7 @@ it('unsafeInsertOne', async () => {
   class PostTA extends mm.TableActions {
     insertT = mm.unsafeInsertOne().setInputs(post.title, post.user_id);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'insert/unsafeInsertOne');
 });
 
@@ -54,7 +54,7 @@ it('Insert with non-input setters', async () => {
       .setInputs(post.title, post.user_id)
       .set(post.content, mm.sql`"haha"`);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'insert/insertWithNonInputSetters');
 });
 
@@ -65,7 +65,7 @@ it('insertWithDefaults', async () => {
       .setInputs(cols.fk)
       .setDefaults();
   }
-  const ta = mm.ta(cols, ColsTA);
+  const ta = mm.tableActions(cols, ColsTA);
   await testBuildAsync(ta, 'insert/insertWithDefaults');
 });
 
@@ -73,7 +73,7 @@ it('Custom DB name', async () => {
   class PostTA extends mm.TableActions {
     insertT = mm.unsafeInsert().setInputs(post.title, post.cmtCount);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'insert/customDBName');
 });
 
@@ -93,6 +93,6 @@ it('Set auto-increment as input', async () => {
       .setInputs(employee.id)
       .setInputs();
   }
-  const ta = mm.ta(employee, EmployeeTA);
+  const ta = mm.tableActions(employee, EmployeeTA);
   await testBuildAsync(ta, 'insert/aiColumnAsInput');
 });

@@ -10,7 +10,7 @@ it('Wrap', async () => {
       .setInputs()
       .byID();
   }
-  const userTA = mm.ta(user, UserTA);
+  const userTA = mm.tableActions(user, UserTA);
   class PostTA extends mm.TableActions {
     s = mm
       .updateSome()
@@ -28,6 +28,6 @@ it('Wrap', async () => {
       .byID()
       .wrap({ title: '"t3"' });
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'wrap/wrap');
 });

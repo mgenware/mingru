@@ -8,7 +8,7 @@ it('Single action', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm.select(post.id, post.title);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildFullAsync(ta, 'goBuilder/singleAction');
 });
 
@@ -28,7 +28,7 @@ it('Multiple actions', async () => {
       .deleteSome()
       .where(mm.sql`${post.id} = ${mm.input(post.id)}`);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildFullAsync(ta, 'goBuilder/multipleActions');
 });
 
@@ -37,7 +37,7 @@ it('Action info appended to error message', async () => {
     class PostTA extends mm.TableActions {
       t = mm.unsafeInsert().setInputs(user.id);
     }
-    const ta = mm.ta(post, PostTA);
+    const ta = mm.tableActions(post, PostTA);
     await testBuildAsync(ta, '');
   }, 'Source table assertion failed, expected "Table(post|db_post)", got "Table(user)". [action "t"]');
 });

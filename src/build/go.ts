@@ -9,12 +9,16 @@ export class InstanceVariable {
     this.name = mm.utils.capitalizeColumnName(mm.utils.toCamelCase(name));
   }
 
-  makeSnakeCaseJSONTag() {
+  setSnakeCaseJSONTag() {
     this.setJSONTag(mm.utils.toSnakeCase(this.name));
   }
 
-  makeCamelCaseJSONTag() {
+  setCamelCaseJSONTag() {
     this.setJSONTag(mm.utils.toCamelCase(this.name));
+  }
+
+  setIgnoreJSONTag() {
+    this.setJSONTag('-');
   }
 
   private setJSONTag(name: string) {
@@ -26,6 +30,7 @@ export function struct(
   typeName: string,
   members: InstanceVariable[],
   nameStyle: MemberJSONKeyStyle,
+  ignored: Set<InstanceVariable> | null,
 ): string {
   let code = `// ${typeName} ...
 type ${typeName} struct {
@@ -38,10 +43,12 @@ type ${typeName} struct {
   }
   for (const mem of members) {
     code += `\t${mem.name.padEnd(nameMaxLen)} ${mem.type.padEnd(typeMaxLen)}`;
-    if (nameStyle === MemberJSONKeyStyle.camelCase) {
-      mem.makeCamelCaseJSONTag();
+    if (ignored && ignored.has(mem)) {
+      mem.setIgnoreJSONTag();
+    } else if (nameStyle === MemberJSONKeyStyle.camelCase) {
+      mem.setCamelCaseJSONTag();
     } else if (nameStyle === MemberJSONKeyStyle.snakeCase) {
-      mem.makeSnakeCaseJSONTag();
+      mem.setSnakeCaseJSONTag();
     }
     if (mem.tag) {
       code += ` ${mem.tag}`;

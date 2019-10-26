@@ -19,13 +19,13 @@ class WrapSelfTA extends mm.TableActions {
     );
   d = this.s.wrap({ sig: '"haha"' });
 }
-const wrapSelf = mm.ta(user, WrapSelfTA);
+const wrapSelf = mm.tableActions(user, WrapSelfTA);
 
 class WrapOtherTA extends mm.TableActions {
   standard = wrapSelf.s.wrap({ id: '123' });
   nested = wrapSelf.d.wrap({ id: '123' });
 }
-const wrapOther = mm.ta(post, WrapOtherTA);
+const wrapOther = mm.tableActions(post, WrapOtherTA);
 
 it('WrapIO', () => {
   const io = mr.wrapIO(wrapSelf.d, dialect);
@@ -82,7 +82,7 @@ it('Throws on undefined inputs', () => {
       haha: `"tony"`,
     });
   }
-  const ta = mm.ta(user, UserTA);
+  const ta = mm.tableActions(user, UserTA);
   const v = ta.t2;
   itThrows(
     () => mr.wrapIO(v, dialect),

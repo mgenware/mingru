@@ -77,7 +77,7 @@ export class UserTA extends mm.TableActions {
     .setInputs(user.name, user.age);
 }
 
-export default mm.ta(user, UserTA);
+export default mm.tableActions(user, UserTA);
 ```
 
 ### Step 3: Generate Go Code

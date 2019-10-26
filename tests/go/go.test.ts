@@ -8,6 +8,6 @@ it('Escape string', async () => {
       .select(post.id, post.title)
       .where(mm.sql`${post.title} = "\\\\a\\\""`);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'go/escapeString');
 });

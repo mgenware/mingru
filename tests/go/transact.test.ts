@@ -17,7 +17,7 @@ it('No inserted ID', async () => {
   class EmployeeTA extends mm.TableActions {
     insert = mm.insert().setInputs();
   }
-  const employeeTA = mm.ta(employee, EmployeeTA);
+  const employeeTA = mm.tableActions(employee, EmployeeTA);
   class Dept extends mm.Table {
     no = mm.pk(mm.char(4)).setDBName('dept_no');
     name = mm.varChar(40).setDBName('dept_name');
@@ -27,7 +27,7 @@ it('No inserted ID', async () => {
   class DeptTA extends mm.TableActions {
     insert = mm.insert().setInputs();
   }
-  const deptTA = mm.ta(dept, DeptTA);
+  const deptTA = mm.tableActions(dept, DeptTA);
   class DeptManager extends mm.Table {
     empNo = employee.id;
     deptNo = dept.no;
@@ -40,7 +40,7 @@ it('No inserted ID', async () => {
     insert = mm.transact(employeeTA.insert, deptTA.insert, this.insertCore);
   }
 
-  const deptManagerTA = mm.ta(deptManager, DeptManagerTA);
+  const deptManagerTA = mm.tableActions(deptManager, DeptManagerTA);
   await testBuildAsync(employeeTA, 'tx/noInsID/employee');
   await testBuildAsync(deptTA, 'tx/noInsID/dept');
   await testBuildAsync(deptManagerTA, 'tx/noInsID/deptManager');
@@ -56,7 +56,7 @@ it('Last inserted ID', async () => {
     insert = mm.insertOne().setInputs();
     insert2 = mm.transact(this.insert, this.insert);
   }
-  const employeeTA = mm.ta(employee, EmployeeTA);
+  const employeeTA = mm.tableActions(employee, EmployeeTA);
   await testBuildAsync(employeeTA, 'tx/autoInsID/employee');
 });
 
@@ -75,7 +75,7 @@ it('Temp member actions', async () => {
       )
       .byID();
   }
-  const userTA = mm.ta(user, UserTA);
+  const userTA = mm.tableActions(user, UserTA);
   class Post extends mm.Table {
     id = mm.pk();
     title = mm.varChar(200);
@@ -99,7 +99,7 @@ it('Temp member actions', async () => {
       this.insertCore.wrap({ title: '"abc"' }),
     );
   }
-  const postTA = mm.ta(post, PostTA);
+  const postTA = mm.tableActions(post, PostTA);
   await testBuildAsync(userTA, 'tx/tmpActions/user');
   await testBuildAsync(postTA, 'tx/tmpActions/post');
 });
@@ -117,6 +117,6 @@ it('Temp member actions (with from)', async () => {
         .setInputs(),
     );
   }
-  const postTA = mm.ta(post, PostTA);
+  const postTA = mm.tableActions(post, PostTA);
   await testBuildAsync(postTA, 'tx/tmpActionsWithFrom/post');
 });

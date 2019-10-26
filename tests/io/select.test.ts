@@ -16,7 +16,7 @@ it('Select', () => {
   class UserTA extends mm.TableActions {
     t = mm.select(user.id, user.url_name);
   }
-  const userTA = mm.ta(user, UserTA);
+  const userTA = mm.tableActions(user, UserTA);
   const v = userTA.t;
   const io = mr.selectIO(v, dialect);
 
@@ -31,7 +31,7 @@ it('Where', () => {
       .select(user.id, user.url_name)
       .where(mm.sql`${user.id} = 1 ${user.id.toInput()} ${user.id.toInput()}`);
   }
-  const userTA = mm.ta(user, UserTA);
+  const userTA = mm.tableActions(user, UserTA);
   const v = userTA.t;
   const io = mr.selectIO(v, dialect);
 
@@ -49,7 +49,7 @@ it('Where and inputs', () => {
         } = ${mm.input('string', 'userName')}`,
       );
   }
-  const userTA = mm.ta(user, UserTA);
+  const userTA = mm.tableActions(user, UserTA);
   const v = userTA.t;
   const io = mr.selectIO(v, dialect);
 
@@ -64,7 +64,7 @@ it('Basic join', () => {
   class PostTA extends mm.TableActions {
     t = mm.select(post.user_id.join(user).url_name, post.title);
   }
-  const postTA = mm.ta(post, PostTA);
+  const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
   const io = mr.selectIO(v, dialect);
 
@@ -82,7 +82,7 @@ it('Multiple cols join and custom table name', () => {
       rpl.to_user_id.join(user).url_name,
     );
   }
-  const rplTA = mm.ta(rpl, RplTA);
+  const rplTA = mm.tableActions(rpl, RplTA);
   const v = rplTA.t;
   const io = mr.selectIO(v, dialect);
 
@@ -96,7 +96,7 @@ it('Join a table with custom table name', () => {
   class PostTA extends mm.TableActions {
     t = mm.select(post.user_id, post.user_id.join(rpl).to_user_id);
   }
-  const postTA = mm.ta(post, PostTA);
+  const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
   const io = mr.selectIO(v, dialect);
 
@@ -113,7 +113,7 @@ it('Join a table with custom column name', () => {
       post.user_id.join(rpl, rpl.custom_id).to_user_id,
     );
   }
-  const postTA = mm.ta(post, PostTA);
+  const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
   const io = mr.selectIO(v, dialect);
 
@@ -146,7 +146,7 @@ it('3-table joins and WHERE', () => {
           .url_name.isEqualToInput()} | ${cmt.id.isEqualToInput()} | ${cmt.target_id.isEqualToInput()}`,
       );
   }
-  const cmtTA = mm.ta(cmt, CmtTA);
+  const cmtTA = mm.tableActions(cmt, CmtTA);
   const v = cmtTA.t;
   const io = mr.selectIO(v, dialect);
 
@@ -171,7 +171,7 @@ it('Join and from', () => {
       .from(postCmt)
       .by(postCmt.post_id);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   const io = mr.selectIO(ta.selectT, dialect);
 
   expect(ta.__table, post);
@@ -195,7 +195,7 @@ it('AS', () => {
         .url_name.as('c'),
     );
   }
-  const cmtTA = mm.ta(cmt, CmtTA);
+  const cmtTA = mm.tableActions(cmt, CmtTA);
   const v = cmtTA.t;
   const io = mr.selectIO(v, dialect);
 
@@ -219,7 +219,7 @@ it('Duplicate selected names', () => {
       post.user_id.join(user).url_name.as('a'),
     );
   }
-  const postTA = mm.ta(post, PostTA);
+  const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
   itThrows(
     () => mr.selectIO(v, dialect),
@@ -235,7 +235,7 @@ it('getInputs', () => {
         mm.sql`${user.id.toInput()} ${user.url_name.toInput()} ${user.id.toInput()}`,
       );
   }
-  const ta = mm.ta(user, UserTA);
+  const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.selectIO(v, mr.mysql);
   expect(
@@ -248,7 +248,7 @@ it('getInputs (no WHERE)', () => {
   class UserTA extends mm.TableActions {
     t = mm.select(user.id, user.url_name);
   }
-  const ta = mm.ta(user, UserTA);
+  const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.selectIO(v, mr.mysql);
   expect(io.funcArgs.list.length, 1);
@@ -262,7 +262,7 @@ it('getReturns', () => {
         mm.sql`${user.id.toInput()} ${post.title.toInput()} ${user.id.toInput()}`,
       );
   }
-  const ta = mm.ta(user, UserTA);
+  const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.selectIO(v, mr.mysql);
   expect(
@@ -280,7 +280,7 @@ it('GROUP BY and HAVING', () => {
       .groupBy(yearCol, 'total')
       .having(mm.and(mm.sql`${yearCol} > 2010`, mm.sql`\`total\` > 100`));
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   const v = ta.t;
   const io = mr.selectIO(v, mr.mysql);
   expect(
@@ -295,7 +295,7 @@ it('Unrelated cols', () => {
     class UserTA extends mm.TableActions {
       t = mm.select(post.user_id);
     }
-    const ta = mm.ta(user, UserTA);
+    const ta = mm.tableActions(user, UserTA);
     const v = ta.t;
     mr.selectIO(v, mr.mysql);
   }, 'Source table assertion failed, expected "Table(user)", got "Table(post|db_post)".');
@@ -305,7 +305,7 @@ it('Unrelated cols', () => {
     class UserTA extends mm.TableActions {
       t = mm.select(user.id).where(mm.sql`${post.id}`);
     }
-    const ta = mm.ta(user, UserTA);
+    const ta = mm.tableActions(user, UserTA);
     const v = ta.t;
     mr.selectIO(v, mr.mysql);
   }, 'Source table assertion failed, expected "Table(user)", got "Table(post|db_post)".');
@@ -315,7 +315,7 @@ it('Unrelated cols', () => {
     class UserTA extends mm.TableActions {
       t = mm.select(user.id).where(mm.sql`${post.id.toInput()}`);
     }
-    const ta = mm.ta(user, UserTA);
+    const ta = mm.tableActions(user, UserTA);
     const v = ta.t;
     mr.selectIO(v, mr.mysql);
   });

@@ -6,7 +6,7 @@ it('unsafeDeleteAll', async () => {
   class PostTA extends mm.TableActions {
     deleteT = mm.unsafeDeleteAll().byID();
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'delete/delete');
 });
 
@@ -16,7 +16,7 @@ it('deleteSome', async () => {
       .deleteSome()
       .where(mm.sql`${post.user_id} = ${mm.input(post.user_id)}`);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'delete/deleteWithWhere');
 });
 
@@ -24,6 +24,6 @@ it('deleteOne', async () => {
   class PostTA extends mm.TableActions {
     deleteT = mm.deleteOne().byID();
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'delete/deleteOne');
 });

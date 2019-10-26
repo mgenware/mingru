@@ -12,7 +12,7 @@ it('Insert inputs', () => {
   class PostTA extends mm.TableActions {
     t = mm.unsafeInsert().setInputs(post.title, post.user_id);
   }
-  const postTA = mm.ta(post, PostTA);
+  const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
   const io = mr.insertIO(v, dialect);
 
@@ -27,7 +27,7 @@ it('Insert inputs and values', () => {
       .setInputs(post.title, post.user_id)
       .set(post.datetime, mm.sql`NOW()`);
   }
-  const postTA = mm.ta(post, PostTA);
+  const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
   const io = mr.insertIO(v, dialect);
 
@@ -45,7 +45,7 @@ it('getInputs', () => {
       .setInputs(user.sig, user.id)
       .set(user.url_name, user.url_name.toInput('b'));
   }
-  const ta = mm.ta(user, UserTA);
+  const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, mr.mysql);
   expect(
@@ -62,7 +62,7 @@ it('getReturns (isnert)', () => {
       .setInputs(user.sig, user.id)
       .set(user.url_name, user.url_name.toInput('b'));
   }
-  const ta = mm.ta(user, UserTA);
+  const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, mr.mysql);
   expect(io.returnValues.toString(), '');
@@ -75,7 +75,7 @@ it('getReturns (insertOne)', () => {
       .setInputs(user.sig, user.id)
       .set(user.url_name, user.url_name.toInput('b'));
   }
-  const ta = mm.ta(user, UserTA);
+  const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, mr.mysql);
   expect(io.returnValues.toString(), 'insertedID: uint64');
@@ -86,7 +86,7 @@ it('Validate setters', () => {
     class PostTA extends mm.TableActions {
       t = mm.unsafeInsert().setInputs(user.id);
     }
-    const ta = mm.ta(post, PostTA);
+    const ta = mm.tableActions(post, PostTA);
     mr.insertIO(ta.t, mr.mysql);
   }, 'Source table assertion failed, expected "Table(post|db_post)", got "Table(user)".');
 });

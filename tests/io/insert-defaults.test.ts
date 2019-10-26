@@ -35,7 +35,7 @@ it('insertWithDefaults', () => {
       .setInputs(cols.fk)
       .setDefaults();
   }
-  const ta = mm.ta(cols, ColsTA);
+  const ta = mm.tableActions(cols, ColsTA);
   const v = ta.insertT;
   const io = mr.insertIO(v, dialect);
 

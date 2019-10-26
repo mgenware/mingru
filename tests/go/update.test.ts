@@ -12,7 +12,7 @@ it('UpdateSome', async () => {
       .set(post.cmtCount, mm.sql`${post.cmtCount} + 1`)
       .byID();
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'update/update');
 });
 
@@ -25,7 +25,7 @@ it('UpdateOne', async () => {
       .set(post.cmtCount, mm.sql`${post.cmtCount} + 1`)
       .byID();
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'update/updateOne');
 });
 
@@ -41,7 +41,7 @@ it('Update with where', async () => {
         } = ${post.content.toInput('content2')}`,
       );
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'update/updateWithWhere');
 });
 
@@ -52,7 +52,7 @@ it('Update with non-input setters', async () => {
       .set(post.title, mm.sql`"haha"`)
       .set(post.content, post.content.toInput());
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'update/updateWithNonInputSetters');
 });
 
@@ -67,7 +67,7 @@ it('Duplicate names in WHERE and setters', async () => {
         mm.sql`${post.title.isEqualToInput()} ${post.title.isEqualToInput()} AND ${post.content.isEqualToInput()}`,
       );
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'update/dupNamesWhereSetters');
 });
 
@@ -80,7 +80,7 @@ it('Custom DB column name', async () => {
       .set(post.cmtCount, mm.sql`${post.cmtCount} + 1`)
       .byID();
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'update/customName');
 });
 
@@ -92,6 +92,6 @@ it('updateWithDefaults', async () => {
       .setDefaults()
       .byID();
   }
-  const ta = mm.ta(cols, ColsTA);
+  const ta = mm.tableActions(cols, ColsTA);
   await testBuildAsync(ta, 'update/updateWithDefaults');
 });

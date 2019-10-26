@@ -15,7 +15,7 @@ it('select', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm.select(post.id, post.title);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/select');
 });
 
@@ -23,7 +23,7 @@ it('select, all rows', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm.select();
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectAll');
 });
 
@@ -31,7 +31,7 @@ it('selectRows', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm.selectRows(post.id, post.title).orderByAsc(post.id);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectRows');
 });
 
@@ -39,7 +39,7 @@ it('selectRows', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm.selectRows().orderByAsc(post.id);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectAllRows');
 });
 
@@ -47,7 +47,7 @@ it('selectField', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm.selectField(post.title);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectField');
 });
 
@@ -57,7 +57,7 @@ it('WHERE', async () => {
       .select(post.id, post.title)
       .where(mm.sql`${post.id} = ${mm.input(post.id)}`);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/where');
 });
 
@@ -68,7 +68,7 @@ it('selectRows with WHERE', async () => {
       .where(mm.sql`${post.id} = ${mm.input(post.id)}`)
       .orderByAsc(post.id);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectRowsWhere');
 });
 
@@ -83,7 +83,7 @@ it('selectRows, WHERE, orderBy', async () => {
       .orderByDesc(post.title)
       .orderByAsc(post.cmtCount);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectRowsWhereOrder');
 });
 
@@ -91,7 +91,7 @@ it('selectField, WHERE', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm.selectField(post.user_id).byID();
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/whereField');
 });
 
@@ -105,7 +105,7 @@ it('WHERE: multiple cols', async () => {
         )}`,
       );
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/whereMultipleCols');
 });
 
@@ -120,7 +120,7 @@ it('Custom params', async () => {
         )}`,
       );
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/customParams');
 });
 
@@ -128,7 +128,7 @@ it('Basic join', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm.select(post.user_id.join(user).url_name, post.title);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/joinBasic');
 });
 
@@ -140,7 +140,7 @@ it('Basic join (rows)', async () => {
       .orderByAsc(post.user_id.join(user).sig)
       .orderByDesc(post.user_id);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/joinBasicRows');
 });
 
@@ -153,7 +153,7 @@ it('Join implied by WHERE', async () => {
         .url_name.isEqualToInput(),
     );
   }
-  const ta = mm.ta(cmt, CmtTA);
+  const ta = mm.tableActions(cmt, CmtTA);
   await testBuildAsync(ta, 'select/joinImpliedByWhere');
 });
 
@@ -185,7 +185,7 @@ it('Inverse join (select from A on A.id = B.a_id)', async () => {
       )
       .orderByDesc(post.user_id);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/inverseJoin');
 });
 
@@ -197,7 +197,7 @@ it('Same table, multiple cols join', async () => {
       rpl.to_user_id.join(user).url_name,
     );
   }
-  const ta = mm.ta(rpl, RplTA);
+  const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/joinCols');
 });
 
@@ -214,7 +214,7 @@ it('Join as', async () => {
         .url_name.as('c'),
     );
   }
-  const ta = mm.ta(cmt, CmtTA);
+  const ta = mm.tableActions(cmt, CmtTA);
   await testBuildAsync(ta, 'select/joinAs');
 });
 
@@ -233,7 +233,7 @@ it('Join and from', async () => {
       .from(postCmt)
       .by(postCmt.post_id);
   }
-  const ta = mm.ta(cmt, CmtTA);
+  const ta = mm.tableActions(cmt, CmtTA);
   await testBuildAsync(ta, 'select/joinAndFrom');
 });
 
@@ -251,7 +251,7 @@ it('Selected name collisions', async () => {
       post.user_id.join(user).url_name.as('a'),
     );
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await itRejects(
     testBuildAsync(ta, ''),
     'The selected column name "title" already exists [action "selectT"]',
@@ -278,7 +278,7 @@ it('Calculated columns', async () => {
       new mm.RawColumn(mm.count(post.n_datetime)),
     );
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/rawColumn');
 });
 
@@ -292,7 +292,7 @@ it('Custom DB names', async () => {
       post.m_user_id.join(user).follower_count.as('fc'),
     );
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/modifiedDBNames');
 });
 
@@ -303,7 +303,7 @@ it('selectRows, paginate', async () => {
       .limit()
       .orderByAsc(post.id);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectRowsPaginate');
 });
 
@@ -315,7 +315,7 @@ it('selectRows, paginate, where', async () => {
       .limit()
       .orderByAsc(post.id);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectRowsPaginateWithWhere');
 });
 
@@ -326,7 +326,7 @@ it('selectPage', async () => {
       .byID()
       .orderByAsc(post.id);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectPage');
 });
 
@@ -341,7 +341,7 @@ it('WHERE, inputs, joins', async () => {
         .url_name.toInput()}`,
     );
   }
-  const ta = mm.ta(cmt, CmtTA);
+  const ta = mm.tableActions(cmt, CmtTA);
   await testBuildAsync(ta, 'select/whereInputsJoins');
 });
 
@@ -354,7 +354,7 @@ it('Argument stubs', async () => {
         new mm.SQLVariable('int', 'id2'),
       );
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/argStubs');
 });
 
@@ -372,11 +372,11 @@ it('GROUP BY and HAVING', async () => {
         ),
       );
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/groupByAndHaving');
 });
 
-it('Snake case keys', async () => {
+it('snake_case keys', async () => {
   class RplTA extends mm.TableActions {
     selectT = mm.select(
       rpl.user_id.join(user).url_name,
@@ -384,14 +384,14 @@ it('Snake case keys', async () => {
       rpl.to_user_id.join(user).url_name,
     );
   }
-  const ta = mm.ta(rpl, RplTA);
+  const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/snakeCaseKeys', {
     noFileHeader: true,
     memberJSONKeyStyle: mr.MemberJSONKeyStyle.snakeCase,
   });
 });
 
-it('Camel case keys', async () => {
+it('camelCase keys', async () => {
   class RplTA extends mm.TableActions {
     selectT = mm.select(
       rpl.user_id.join(user).url_name,
@@ -399,8 +399,23 @@ it('Camel case keys', async () => {
       rpl.to_user_id.join(user).url_name,
     );
   }
-  const ta = mm.ta(rpl, RplTA);
+  const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/camelCaseKeys', {
+    noFileHeader: true,
+    memberJSONKeyStyle: mr.MemberJSONKeyStyle.camelCase,
+  });
+});
+
+it('Ignored keys', async () => {
+  class RplTA extends mm.TableActions {
+    selectT = mm.select(
+      rpl.user_id.join(user).url_name.attr(mr.ColumnAttributes.jsonIgnore),
+      rpl.user_id.join(user).id.attr(mr.ColumnAttributes.jsonIgnore),
+      rpl.to_user_id.join(user).url_name,
+    );
+  }
+  const ta = mm.tableActions(rpl, RplTA);
+  await testBuildAsync(ta, 'select/ignoredKeys', {
     noFileHeader: true,
     memberJSONKeyStyle: mr.MemberJSONKeyStyle.camelCase,
   });

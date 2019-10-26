@@ -9,7 +9,7 @@ it('Select', async () => {
       .selectRows(post.n_datetime, post.n_date)
       .orderByAsc(post.id);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'extraImportsSelect');
 });
 
@@ -24,7 +24,7 @@ it('Select (where)', async () => {
       )
       .orderByAsc(post.id);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'extraImportsSelectWhere');
 });
 
@@ -32,7 +32,7 @@ it('Select field', async () => {
   class PostTA extends mm.TableActions {
     selectTime = mm.selectField(post.n_datetime);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'extraImportsSelectField');
 });
 
@@ -43,7 +43,7 @@ it('Update', async () => {
       .unsafeUpdateAll()
       .setInputs(post.n_datetime, post.n_date);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'extraImportsUpdate');
 });
 
@@ -58,7 +58,7 @@ it('Update (where)', async () => {
         } = ${post.n_date.toInput()}`,
       );
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'extraImportsUpdateWhere');
 });
 
@@ -72,7 +72,7 @@ it('Delete (where)', async () => {
         } = ${post.n_date.toInput()}`,
       );
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'extraImportsDeleteWhere');
 });
 
@@ -82,6 +82,6 @@ it('Insert', async () => {
       .unsafeInsertOne()
       .setInputs(post.datetime, post.n_datetime);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'extraImportsInsert');
 });

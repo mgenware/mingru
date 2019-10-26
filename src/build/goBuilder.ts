@@ -16,6 +16,7 @@ import { TransactIO } from '../io/transactIO';
 import LinesBuilder from './linesBuilder';
 import * as utils from '../io/utils';
 import { BuildOption, MemberJSONKeyStyle } from './buildOption';
+import { ColumnAttributes } from '../attrs';
 
 function joinParams(arr: string[]): string {
   return arr.join(', ');
@@ -171,7 +172,7 @@ export default class GoBuilder {
 
   private buildTableObject(): string {
     const { className, instanceName } = this.taIO;
-    let code = go.struct(className, [], MemberJSONKeyStyle.none);
+    let code = go.struct(className, [], MemberJSONKeyStyle.none, null);
     code += `\n// ${instanceName} ...
 var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     return code;
@@ -190,7 +191,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     // We only need the type name here, the namespace(import) is already handled in `processActionIO`
     const firstReturn = io.returnValues.getByIndex(0);
     const resultType = firstReturn.type.typeName;
-    // originalResultType is used to generate additional type definition, e.g. resultType is '[]*Person', the origianlResultType is 'Person'
+    // originalResultType is used to generate additional type definition, e.g. resultType is '[]*Person', the originalResultType is 'Person'
     const originalResultType = firstReturn.originalName || resultType;
     // Additional type definition for result type, empty on select field action
     let resultTypeDef: string | undefined;
@@ -218,14 +219,17 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
     // Selected columns
     const selectedFields: go.InstanceVariable[] = [];
+    const jsonIgnoreFields = new Set<go.InstanceVariable>();
     for (const col of io.cols) {
       const fieldName = col.varName;
       const typeInfo = this.dialect.colTypeToGoType(col.getResultType());
-      selectedFields.push(
-        new go.InstanceVariable(fieldName, typeInfo.typeName),
-      );
+      const ivar = new go.InstanceVariable(fieldName, typeInfo.typeName);
+      selectedFields.push(ivar);
       if (typeInfo.namespace) {
         this.imports.add(typeInfo.namespace);
+      }
+      if (col.selectedColumn.__attrs[ColumnAttributes.jsonIgnore] === true) {
+        jsonIgnoreFields.add(ivar);
       }
     }
 
@@ -235,6 +239,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         originalResultType,
         selectedFields,
         this.options.memberJSONKeyStyle || MemberJSONKeyStyle.none,
+        jsonIgnoreFields,
       );
     }
 

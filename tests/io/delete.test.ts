@@ -11,7 +11,7 @@ it('Delete', () => {
   class PostTA extends mm.TableActions {
     t = mm.unsafeDeleteAll().byID();
   }
-  const postTA = mm.ta(post, PostTA);
+  const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
   const io = mr.deleteIO(v, dialect);
 
@@ -23,7 +23,7 @@ it('Delete with where', () => {
   class PostTA extends mm.TableActions {
     t = mm.unsafeDeleteAll().where(mm.sql`${post.id} = 1`);
   }
-  const postTA = mm.ta(post, PostTA);
+  const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
   const io = mr.deleteIO(v, dialect);
 
@@ -36,7 +36,7 @@ it('getInputs', () => {
       .deleteOne()
       .where(mm.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
   }
-  const ta = mm.ta(user, UserTA);
+  const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.deleteIO(v, mr.mysql);
   expect(
@@ -52,7 +52,7 @@ it('getReturns', () => {
       .deleteOne()
       .where(mm.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
   }
-  const ta = mm.ta(user, UserTA);
+  const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.deleteIO(v, mr.mysql);
   const returns = io.returnValues;
@@ -63,7 +63,7 @@ it('getInputs (no WHERE)', () => {
   class UserTA extends mm.TableActions {
     t = mm.unsafeDeleteAll();
   }
-  const ta = mm.ta(user, UserTA);
+  const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.deleteIO(v, mr.mysql);
   const inputs = io.funcArgs;
@@ -74,7 +74,7 @@ it('getReturns (no WHERE)', () => {
   class UserTA extends mm.TableActions {
     t = mm.unsafeDeleteAll();
   }
-  const ta = mm.ta(user, UserTA);
+  const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.deleteIO(v, mr.mysql);
   const returns = io.returnValues;

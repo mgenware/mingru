@@ -20,7 +20,7 @@ it('Single table', async () => {
       .deleteOne()
       .where(mm.sql`${post.id} = ${mm.input(post.id)}`);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'singleTable');
 });
 
@@ -30,7 +30,7 @@ it('Multiple tables', async () => {
     updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
     deleteByID = mm.deleteOne().where(user.id.isEqualToInput());
   }
-  const userTA = mm.ta(user, UserTA);
+  const userTA = mm.tableActions(user, UserTA);
 
   class PostTA extends mm.TableActions {
     selectPostInfo = mm.select(
@@ -43,7 +43,7 @@ it('Multiple tables', async () => {
       .set(post.content, post.content.isEqualToInput());
     deleteByID = mm.deleteOne().where(post.id.isEqualToInput());
   }
-  const postTA = mm.ta(post, PostTA);
+  const postTA = mm.tableActions(post, PostTA);
   const actions = [userTA, postTA];
   await testBuildToDirAsync(actions, ['post', 'user'], 'multipleTables');
 });
@@ -52,7 +52,7 @@ it('Custom package name', async () => {
   class PostTA extends mm.TableActions {
     selectPostTitle = mm.select(post.id, post.title);
   }
-  const ta = mm.ta(post, PostTA);
+  const ta = mm.tableActions(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'customPackageName', {
     packageName: 'haha',
   });
@@ -64,7 +64,7 @@ it('Table DBName', async () => {
       .unsafeInsertOne()
       .setInputs(postReply.to_user_id, postReply.user_id);
   }
-  const ta = mm.ta(postReply, PostRplTA);
+  const ta = mm.tableActions(postReply, PostRplTA);
   await testBuildToDirAsync([ta], ['post_reply'], 'tableName');
 });
 
@@ -74,7 +74,7 @@ it('Multiple tables + CSQL', async () => {
     updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
     deleteByID = mm.deleteOne().where(user.id.isEqualToInput());
   }
-  const userTA = mm.ta(user, UserTA);
+  const userTA = mm.tableActions(user, UserTA);
 
   class PostTA extends mm.TableActions {
     selectPostInfo = mm.select(
@@ -87,7 +87,7 @@ it('Multiple tables + CSQL', async () => {
       .set(post.content, post.content.isEqualToInput());
     deleteByID = mm.deleteOne().where(post.id.isEqualToInput());
   }
-  const postTA = mm.ta(post, PostTA);
+  const postTA = mm.tableActions(post, PostTA);
   const actions = [userTA, postTA];
   await testBuildToDirAsync(
     actions,
