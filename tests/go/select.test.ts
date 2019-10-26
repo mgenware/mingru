@@ -420,3 +420,19 @@ it('Ignored keys', async () => {
     memberJSONKeyStyle: mr.MemberJSONKeyStyle.camelCase,
   });
 });
+
+it('Ignored keys (raw columns)', async () => {
+  class RplTA extends mm.TableActions {
+    selectT = mm.select(
+      mm.sel(mm.sql`1`, 'a', mm.int().type),
+      mm
+        .sel(mm.sql`1`, 'b', mm.int().type)
+        .attr(mr.ColumnAttributes.jsonIgnore),
+    );
+  }
+  const ta = mm.tableActions(rpl, RplTA);
+  await testBuildAsync(ta, 'select/ignoredKeysRawCols', {
+    noFileHeader: true,
+    memberJSONKeyStyle: mr.MemberJSONKeyStyle.camelCase,
+  });
+});
