@@ -228,7 +228,10 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       if (typeInfo.namespace) {
         this.imports.add(typeInfo.namespace);
       }
-      if (col.selectedColumn.__attrs[ColumnAttributes.jsonIgnore] === true) {
+      if (
+        col.selectedColumn instanceof mm.RawColumn &&
+        col.selectedColumn.__attrs[ColumnAttributes.jsonIgnore] === true
+      ) {
         jsonIgnoreFields.add(ivar);
       }
     }
