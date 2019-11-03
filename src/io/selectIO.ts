@@ -327,7 +327,13 @@ export class SelectIOProcessor {
       return this.getColumnSQL(col);
     }
     if (col instanceof mm.RawColumn) {
-      return dialect.encodeName(col.selectedName);
+      if (col.selectedName) {
+        return dialect.encodeName(col.selectedName);
+      }
+      if (col.core instanceof mm.Column) {
+        return this.getColumnSQL(col.core);
+      }
+      col.throwNameNotAvailableError();
     }
     throw new Error(`Unsupported orderBy column "${toTypeString(col)}"`);
   }
@@ -425,7 +431,7 @@ export class SelectIOProcessor {
     if (embeddedCol) {
       const colSQL = this.handleColumn(
         embeddedCol,
-        rawCol ? rawCol.selectedName : null,
+        rawCol ? rawCol.selectedName || null : null,
       );
       if (!rawCol) {
         // Pure column-based selected column
@@ -447,7 +453,7 @@ export class SelectIOProcessor {
           sCol,
           colSQL.sql,
           colSQL.inputName,
-          rawCol.selectedName,
+          rawCol.selectedName || null,
           embeddedCol,
           resultType,
         );
@@ -491,6 +497,11 @@ export class SelectIOProcessor {
           `Column type is required for a "${toTypeString(
             sCol,
           )}" without any embedded columns`,
+        );
+      }
+      if (!rawCol.selectedName) {
+        throw new Error(
+          'The argument "selectedName" is required for an SQL expression without any columns inside',
         );
       }
       return new SelectedColumnIO(

@@ -218,6 +218,30 @@ it('Join as', async () => {
   await testBuildAsync(ta, 'select/joinAs');
 });
 
+it('Join as (attr should not affect other things)', async () => {
+  class CmtTA extends mm.TableActions {
+    selectT = mm.select(
+      cmt.id.attr('foo'),
+      cmt.user_id.as('a').attr('foo'),
+      cmt.target_id
+        .join(post)
+        .title.as('b')
+        .attr('foo'),
+      cmt.target_id
+        .join(post)
+        .user_id.join(user)
+        .url_name.attr('foo'),
+      cmt.target_id
+        .join(post)
+        .user_id.join(user)
+        .url_name.as('c')
+        .attr('foo'),
+    );
+  }
+  const ta = mm.tableActions(cmt, CmtTA);
+  await testBuildAsync(ta, 'select/joinAs');
+});
+
 it('Join and from', async () => {
   const jCmt = postCmt.cmt_id.join(cmt2);
   class CmtTA extends mm.TableActions {

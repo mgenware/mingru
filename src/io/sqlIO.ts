@@ -78,7 +78,14 @@ export class SQLIO {
       }
 
       case mm.SQLElementType.rawColumn: {
-        return dialect.encodeName(element.toRawColumn().selectedName);
+        const rawCol = element.toRawColumn();
+        if (rawCol.selectedName) {
+          return dialect.encodeName(rawCol.selectedName);
+        }
+        if (rawCol.core instanceof mm.Column) {
+          return dialect.encodeColumnName(rawCol.core);
+        }
+        rawCol.throwNameNotAvailableError();
       }
 
       default: {
