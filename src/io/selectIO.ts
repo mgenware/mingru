@@ -344,7 +344,8 @@ export class SelectIOProcessor {
     const { dialect } = this;
     let value = dialect.encodeColumnName(col);
     if (this.hasJoin) {
-      if (col.__table instanceof mm.JoinedTable) {
+      const [colTable] = col.ensureInitialized();
+      if (colTable instanceof mm.JoinedTable) {
         const jt = col.__table as mm.JoinedTable;
         const joinPath = jt.keyPath;
         const join = this.jcMap.get(joinPath);
@@ -356,7 +357,9 @@ export class SelectIOProcessor {
         value = `${dialect.encodeName(join.tableAlias)}.${value}`;
       } else {
         // Use table name as alias
-        value = `${dialect.encodeName(col.tableName(true))}.${value}`;
+        value = `${dialect.encodeName(
+          this.localTableAlias(colTable),
+        )}.${value}`;
       }
     }
     return value;
@@ -531,7 +534,7 @@ export class SelectIOProcessor {
       const srcIO = this.handleJoinRecursively(srcColumn);
       localTableName = srcIO.tableAlias;
     } else {
-      localTableName = srcColumn.tableName(true);
+      localTableName = this.localTableAlias(srcTable);
     }
 
     const joinIO = new JoinIO(
@@ -579,7 +582,7 @@ export class SelectIOProcessor {
       if (this.hasJoin) {
         // Each column must have a prefix in a SQL with joins
         // NOTE: use table DBName as alias
-        sql = `${e(col.tableName(true))}.`;
+        sql = `${e(this.localTableAlias(colTable))}.`;
       }
       sql += e(col.getDBName());
       return new ColumnSQL(sql, inputName, alias);
@@ -589,6 +592,10 @@ export class SelectIOProcessor {
   private nextJoinedTableName(): string {
     this.joinedTableCounter++;
     return `join_${this.joinedTableCounter}`;
+  }
+
+  private localTableAlias(table: mm.Table): string {
+    return table.getDBName();
   }
 }
 
