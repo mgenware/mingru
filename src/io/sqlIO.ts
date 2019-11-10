@@ -85,7 +85,9 @@ export class SQLIO {
         if (rawCol.core instanceof mm.Column) {
           return dialect.encodeColumnName(rawCol.core);
         }
-        rawCol.throwNameNotAvailableError();
+        throw new Error(
+          'The argument "selectedName" is required for an SQL expression without any columns inside',
+        );
       }
 
       default: {

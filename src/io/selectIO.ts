@@ -333,7 +333,9 @@ export class SelectIOProcessor {
       if (col.core instanceof mm.Column) {
         return this.getColumnSQL(col.core);
       }
-      col.throwNameNotAvailableError();
+      throw new Error(
+        'The argument "selectedName" is required for an SQL expression without any columns inside',
+      );
     }
     throw new Error(`Unsupported orderBy column "${toTypeString(col)}"`);
   }

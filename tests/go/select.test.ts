@@ -282,7 +282,7 @@ it('Selected name collisions', async () => {
   );
 });
 
-it('Calculated columns', async () => {
+it('Raw columns', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm.select(
       // User specified types
