@@ -272,6 +272,9 @@ import user from './models/user';
   const builder = new mr.Builder(dialect, '../da/', {
     cleanBuild: true, // Cleans build directory on each build
   });
+
+  const actions = [userTA];
+  const tables = [user];
   await builder.build(async () => {
     builder.buildActions(actions);
     builder.buildCreateTableSQLFiles(tables);
