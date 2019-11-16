@@ -6,7 +6,6 @@ import Dialect from '../dialect';
 import * as nodepath from 'path';
 import * as del from 'del';
 import logger from '../logger';
-import { TAIO } from '../io/taIO';
 import CSQLBuilder from './csqlBuilder';
 import { BuildOption } from './buildOption';
 
@@ -25,7 +24,7 @@ export default class Builder {
     this.opts = opts;
   }
 
-  async build(callback: () => void): Promise<void> {
+  async build(callback: () => Promise<void>): Promise<void> {
     throwIfFalsy(callback, 'callback');
     const { opts, outDir } = this;
     this.buildStarted = true;
@@ -37,14 +36,15 @@ export default class Builder {
     this.buildStarted = false;
   }
 
-  async buildActions(actions: mm.TableActions[]): Promise<void> {
+  async buildActionsAsync(actions: mm.TableActions[]): Promise<void> {
     throwIfFalsy(actions, 'actions');
     this.checkBuildStatus();
-    await Promise.all(actions.map(async ta => await this.buildTA(ta)));
+    const goBuilder = new GoBuilder();
+    await goBuilder.buildAsync(actions, this.outDir, this.dialect, this.opts);
     logger.debug(`🎉  Action build succeeded`);
   }
 
-  async buildCreateTableSQLFiles(tables: mm.Table[]): Promise<void> {
+  async buildCreateTableSQLFilesAsync(tables: mm.Table[]): Promise<void> {
     throwIfFalsy(tables, 'tables');
     this.checkBuildStatus();
     await Promise.all(tables.map(async t => await this.buildCSQL(t)));
@@ -55,20 +55,6 @@ export default class Builder {
     if (!this.buildStarted) {
       throw new Error('You should call this method inside build()');
     }
-  }
-
-  private async buildTA(ta: mm.TableActions): Promise<void> {
-    if (!ta.__table) {
-      throw new Error('Table action group is not initialized');
-    }
-
-    const { dialect, outDir, opts } = this;
-    const taIO = new TAIO(ta, dialect);
-    const builder = new GoBuilder(taIO, opts);
-    const code = builder.build();
-    const fileName = mm.utils.toSnakeCase(ta.__table.__name) + '_ta'; // Add a "_ta" suffix to table actions file
-    const outFile = nodepath.join(outDir, fileName + '.go');
-    await mfs.writeFileAsync(outFile, code, 'utf8');
   }
 
   private async buildCSQL(table: mm.Table): Promise<void> {

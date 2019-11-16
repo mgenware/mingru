@@ -21,6 +21,7 @@ export async function testBuildAsync(
   ta: mm.TableActions,
   path: string,
   opts?: mr.BuildOption,
+  ctx?: mr.GoBuilderContext,
 ) {
   let content = '';
   if (path) {
@@ -28,9 +29,10 @@ export async function testBuildAsync(
     content = await mfs.readFileAsync(path, 'utf8');
   }
   mr.logger.enabled = false;
-  const builder = new mr.GoBuilder(
+  const builder = new mr.GoTABuilder(
     new mr.TAIO(ta, dialect),
     defaultOptions(opts),
+    ctx || new mr.GoBuilderContext(),
   );
   const actual = builder.build();
   if (path) {
@@ -43,6 +45,7 @@ export async function testBuildFullAsync(
   ta: mm.TableActions,
   path: string,
   opts?: mr.BuildOption,
+  ctx?: mr.GoBuilderContext,
 ) {
   let content = '';
   if (path) {
@@ -50,9 +53,10 @@ export async function testBuildFullAsync(
     content = await mfs.readFileAsync(path, 'utf8');
   }
   mr.logger.enabled = false;
-  const builder = new mr.GoBuilder(
+  const builder = new mr.GoTABuilder(
     new mr.TAIO(ta, dialect),
     defaultOptions(opts),
+    ctx || new mr.GoBuilderContext(),
   );
   const actual = builder.build();
   if (path) {
@@ -80,9 +84,9 @@ export async function testBuildToDirAsync(
 
   const builder = new mr.Builder(dialect, tmpDir, opts);
   await builder.build(async () => {
-    await builder.buildActions(actions);
+    await builder.buildActionsAsync(actions);
     if (buildCSQL) {
-      await builder.buildCreateTableSQLFiles(
+      await builder.buildCreateTableSQLFilesAsync(
         actions.map(a => a.__table as mm.Table),
       );
     }

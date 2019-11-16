@@ -261,23 +261,26 @@ Example:
 
 ```ts
 import * as mr from 'mingru';
-// Import table actions
+// Import table actions.
 import userTA from './models/userTA';
-// Import tables (if you need to generate create table SQL files)
+// Import tables (if you need to generate create table SQL files).
 import user from './models/user';
 
 (async () => {
   const dialect = new mr.MySQL();
-  // Build Go code to '../da/` directory
+  // Build Go code to '../da/` directory.
   const builder = new mr.Builder(dialect, '../da/', {
-    cleanBuild: true, // Cleans build directory on each build
+    cleanBuild: true, // Cleans build directory on each build.
   });
 
   const actions = [userTA];
   const tables = [user];
+  // Start the build process by calling the `build` method.
   await builder.build(async () => {
-    builder.buildActions(actions);
-    builder.buildCreateTableSQLFiles(tables);
+    // Build table actions to Go source files.
+    await builder.buildActionsAsync(actions);
+    // Build SQL files for creating tables.
+    await builder.buildCreateTableSQLFilesAsync(tables);
   });
 })();
 ```
