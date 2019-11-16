@@ -47,6 +47,8 @@ export default class Builder {
   async buildCreateTableSQLFilesAsync(tables: mm.Table[]): Promise<void> {
     throwIfFalsy(tables, 'tables');
     this.checkBuildStatus();
+    // Remove duplicate values.
+    tables = [...new Set(tables)];
     await Promise.all(tables.map(async t => await this.buildCSQL(t)));
     logger.debug(`🎉  Table build succeeded`);
   }
