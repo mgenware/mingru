@@ -104,8 +104,13 @@ it('Types', async () => {
     selectByID = mm
       .select(user.id)
       .byID()
-      .attrs({ [mr.ActionAttributes.interfaceName]: 'Type1' });
-    selectProfile = mm.select(user.display_name, user.sig);
+      .attrs({
+        [mr.ActionAttributes.interfaceName]: 'Type1',
+        [mr.ActionAttributes.resultName]: 'Res1',
+      });
+    selectProfile = mm.select(user.display_name, user.sig).attrs({
+      [mr.ActionAttributes.resultName]: 'Res2',
+    });
     deleteByID = mm.deleteOne().where(user.id.isEqualToInput());
   }
   const userTA = mm.tableActions(user, UserTA);
@@ -114,10 +119,16 @@ it('Types', async () => {
     selectByID = mm
       .select(post.id)
       .byID()
-      .attrs({ [mr.ActionAttributes.interfaceName]: 'Type1' });
+      .attrs({
+        [mr.ActionAttributes.interfaceName]: 'Type1',
+        [mr.ActionAttributes.resultName]: 'Res1',
+      });
     selectPostInfo = mm
-      .select(post.id, post.content, post.user_id.join(user).url_name)
+      .select(post.n_datetime, post.user_id.join(user).url_name)
       .attrs({ [mr.ActionAttributes.interfaceName]: 'Type2' });
+    selectTime = mm.select(post.n_datetime).attrs({
+      [mr.ActionAttributes.resultName]: 'Res3',
+    });
   }
   const postTA = mm.tableActions(post, PostTA);
   const actions = [userTA, postTA];

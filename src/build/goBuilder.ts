@@ -34,32 +34,60 @@ export default class GoBuilder {
       await mfs.writeFileAsync(outFile, code);
     }
 
+    let code = `package ${opts.packageName || defs.defaultPackageName}\n\n`;
+    const imports = new go.ImportList();
+    let resultTypesCode = '';
+
+    // Generating renamed result types.
+    const resultTypes = Object.keys(context.resultTypes);
+    if (resultTypes.length) {
+      resultTypesCode += go.sep('Result types');
+      // Sort types alphabetically.
+      resultTypes.sort((a, b) => a.localeCompare(b));
+      for (const name of resultTypes) {
+        const info = context.resultTypes[name];
+        imports.addVars(info.members);
+        resultTypesCode += go.struct(
+          info.typeName,
+          info.members,
+          info.nameStyle,
+          info.ignored,
+        );
+        resultTypesCode += '\n';
+      }
+    }
+
     // Generating additional interface types.
     const interfaces = Object.keys(context.interfaces);
+    let interfacesCode = '';
     if (interfaces.length) {
-      const imports = new go.ImportList();
-      let body = '';
+      interfacesCode += go.sep('Interfaces');
+      // Sort interfaces alphabetically.
       interfaces.sort((a, b) => a.localeCompare(b));
       for (const name of interfaces) {
-        // Sort members alphabetically.
+        // Sort interface members alphabetically.
         const members = [...context.interfaces[name].values()];
         members.sort((a, b) => a.name.localeCompare(b.name));
 
-        body += go.interfaceType(
+        interfacesCode += go.interfaceType(
           name,
           members.map(m => m.sig),
         );
-        body += '\n';
+        interfacesCode += '\n';
 
         for (const mem of members) {
           imports.addVars(mem.params);
           imports.addVars(mem.returnType);
         }
       }
+    }
 
-      let code = `package ${opts.packageName || defs.defaultPackageName}\n\n`;
-      code += imports.code() + '\n';
-      code += body;
+    if (resultTypesCode || interfacesCode) {
+      code += imports.code();
+      code += resultTypesCode + interfacesCode;
+      if (code.endsWith('\n\n')) {
+        code = code.substr(0, code.length - 1);
+      }
       const outFile = nodepath.join(outDir, 'types.go');
       await mfs.writeFileAsync(outFile, code);
     }
