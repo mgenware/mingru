@@ -24,7 +24,7 @@ export default class Builder {
     this.opts = opts;
   }
 
-  async build(callback: () => Promise<void>): Promise<void> {
+  async buildAsync(callback: () => Promise<void>): Promise<void> {
     throwIfFalsy(callback, 'callback');
     const { opts, outDir } = this;
     this.buildStarted = true;
@@ -55,7 +55,7 @@ export default class Builder {
 
   private checkBuildStatus() {
     if (!this.buildStarted) {
-      throw new Error('You should call this method inside build()');
+      throw new Error('You should call this method inside buildAsync()');
     }
   }
 

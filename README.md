@@ -276,7 +276,7 @@ import user from './models/user';
   const actions = [userTA];
   const tables = [user];
   // Start the build process by calling the `build` method.
-  await builder.build(async () => {
+  await builder.buildAsync(async () => {
     // Build table actions to Go source files.
     await builder.buildActionsAsync(actions);
     // Build SQL files for creating tables.

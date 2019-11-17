@@ -83,7 +83,7 @@ export async function testBuildToDirAsync(
   const tmpDir = tempy.directory();
 
   const builder = new mr.Builder(dialect, tmpDir, opts);
-  await builder.build(async () => {
+  await builder.buildAsync(async () => {
     await builder.buildActionsAsync(actions);
     if (buildCSQL) {
       await builder.buildCreateTableSQLFilesAsync(
