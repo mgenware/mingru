@@ -7,7 +7,7 @@ import { sqlIO } from '../io/sqlIO';
 // eslint-disable-next-line
 const escapeString = require('sql-escape-string');
 
-const TimeType = new TypeInfo('time.Time', 'time');
+const TimeType = TypeInfo.type('Time', 'time');
 
 export class MySQL extends Dialect {
   encodeName(name: string): string {
@@ -37,15 +37,13 @@ export class MySQL extends Dialect {
 
   colTypeToGoType(colType: mm.ColumnType): TypeInfo {
     throwIfFalsy(colType, 'colType');
-    const type = this.goTypeNonNull(colType);
+    const typeString = this.goTypeNonNull(colType);
+    const typeInfo =
+      typeof typeString === 'string' ? TypeInfo.type(typeString) : typeString;
     if (colType.nullable) {
-      return this.toPointerType(type);
+      return TypeInfo.compoundType(typeInfo, true, false);
     }
-    if (type instanceof TypeInfo) {
-      return type;
-    }
-    // Convert string to TypeInfo
-    return new TypeInfo(type);
+    return typeInfo;
   }
 
   colToSQLType(col: mm.Column): string {
@@ -160,7 +158,7 @@ export class MySQL extends Dialect {
     throw new Error(`Type not supported: ${this.inspectTypes(colType.types)}`);
   }
 
-  private goTypeNonNull(colType: mm.ColumnType): TypeInfo | string {
+  private goTypeNonNull(colType: mm.ColumnType): string | TypeInfo {
     const DT = mm.dt;
     const unsigned = colType.unsigned;
     for (const type of colType.types) {
@@ -198,13 +196,6 @@ export class MySQL extends Dialect {
       return 'null';
     }
     return `[${types.join()}]`;
-  }
-
-  private toPointerType(type: string | TypeInfo): TypeInfo {
-    if (type instanceof TypeInfo) {
-      return new TypeInfo(`*${type.typeName}`, type.namespace);
-    }
-    return new TypeInfo(`*${type}`);
   }
 }
 

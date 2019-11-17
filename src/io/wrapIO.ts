@@ -75,37 +75,42 @@ class WrapIOProcessor {
       innerActionTable === action.__table ? null : innerActionTable.__name,
       innerAction.__name || actionName,
     );
-    let execArgs: VarList;
     if (action.isTemp) {
       // We can change innerIO in-place as no other place is using it
       innerIO.funcArgs = funcArgs;
       for (const v of innerFuncArgs.distinctList) {
         if (args[v.name]) {
-          // Replace the variable with a value
-          v.value = args[v.name] as string;
+          // Replace the variable with a value.
+          innerFuncArgs.replace(
+            v.name,
+            VarInfo.withValue(v, args[v.name] as string),
+          );
         }
       }
       return innerIO;
-    } else {
-      execArgs = new VarList(`Exec args of action "${action.__name}"`, true);
-      // Pass the queryable param
-      for (const v of innerFuncArgs.distinctList) {
-        if (args[v.name]) {
-          // Replace the variable with a value
-          execArgs.add(VarInfo.withValue(v, args[v.name] as string));
-        } else {
-          execArgs.add(v);
-        }
-      }
-      return new WrapIO(
-        dialect,
-        action,
-        funcArgs,
-        execArgs,
-        innerIO.returnValues,
-        funcPath,
-      );
     }
+
+    const execArgs = new VarList(
+      `Exec args of action "${action.__name}"`,
+      true,
+    );
+    // Pass the queryable param
+    for (const v of innerFuncArgs.distinctList) {
+      if (args[v.name]) {
+        // Replace the variable with a value
+        execArgs.add(VarInfo.withValue(v, args[v.name] as string));
+      } else {
+        execArgs.add(v);
+      }
+    }
+    return new WrapIO(
+      dialect,
+      action,
+      funcArgs,
+      execArgs,
+      innerIO.returnValues,
+      funcPath,
+    );
   }
 }
 

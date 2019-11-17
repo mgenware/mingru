@@ -265,10 +265,7 @@ it('getReturns', () => {
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.selectIO(v, mr.mysql);
-  expect(
-    io.returnValues.toString(),
-    'result: *UserTableTResult(UserTableTResult)',
-  );
+  expect(io.returnValues.toString(), 'result: *UserTableTResult');
 });
 
 it('GROUP BY and HAVING', () => {

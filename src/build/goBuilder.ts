@@ -7,8 +7,9 @@ import Dialect from '../dialect';
 import { BuildOption } from './buildOption';
 import * as nodepath from 'path';
 import * as mfs from 'm-fs';
+import * as go from './goCode';
 
-export default class GoBuidler {
+export default class GoBuilder {
   async buildAsync(
     tas: mm.TableActions[],
     outDir: string,
@@ -29,6 +30,27 @@ export default class GoBuidler {
       const code = builder.build();
       const fileName = mm.utils.toSnakeCase(ta.__table.__name) + '_ta'; // Add a "_ta" suffix to table actions file.
       const outFile = nodepath.join(outDir, fileName + '.go');
+      await mfs.writeFileAsync(outFile, code);
+    }
+
+    // Generating additional interface types.
+    const interfaces = Object.keys(context.interfaces);
+    if (interfaces.length) {
+      let code = '';
+      interfaces.sort((a, b) => a.localeCompare(b));
+      for (const name of interfaces) {
+        // Sort members alphabetically.
+        const members = [...context.interfaces[name].values()];
+        members.sort((a, b) => a.name.localeCompare(b.name));
+
+        code += go.interfaceType(
+          name,
+          members.map(m => m.sig),
+        );
+        code += '\n';
+      }
+
+      const outFile = nodepath.join(outDir, 'interfaces.go');
       await mfs.writeFileAsync(outFile, code);
     }
   }

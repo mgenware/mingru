@@ -6,7 +6,7 @@ import { UpdateIO } from '../io/updateIO';
 import { InsertIO } from '../io/insertIO';
 import { DeleteIO } from '../io/deleteIO';
 import VarInfo, { TypeInfo } from '../lib/varInfo';
-import * as go from './go';
+import * as go from './goCode';
 import * as defs from '../defs';
 import logger from '../logger';
 import { TAIO } from '../io/taIO';
@@ -84,7 +84,8 @@ export default class GoTABuilder {
 
     // Prepare variables
     const funcName = pri ? utils.lowercaseFirstChar(io.funcName) : io.funcName;
-    let funcSig = '';
+    // Used for generating interface member if needed
+    let funcSigString = '';
     // Use funcArgs.distinctList cuz duplicate vars are not allowed
     const funcArgs = io.funcArgs.distinctList;
     const returnValues = io.returnValues.list;
@@ -93,38 +94,49 @@ export default class GoTABuilder {
 
     // Build func head
     if (!pri) {
-      funcSig += `// ${funcName} ...\n`;
+      code += `// ${funcName} ...\n`;
     }
-    funcSig += `func (da *${tableClassName}) ${funcName}`;
+    funcSigString += `func (da *${tableClassName}) ${funcName}`;
 
     // Build func params
     // allFuncArgs = original func args + arg stubs
     const allFuncArgs = [...funcArgs, ...io.funcStubs];
     this.scanImports(allFuncArgs);
     const funcParamsCode = allFuncArgs
-      .map(p => `${p.name} ${p.type.typeName}`)
+      .map(p => `${p.name} ${p.type.typeString}`)
       .join(', ');
     // Wrap all params with parentheses
-    funcSig += `(${funcParamsCode})`;
+    funcSigString += `(${funcParamsCode})`;
 
     // Build return values
     this.scanImports(returnValues);
     const returnsWithError = this.appendErrorType(returnValues);
-    let returnCode = returnsWithError.map(v => v.type.typeName).join(', ');
+    let returnCode = returnsWithError.map(v => v.type.typeString).join(', ');
     if (returnsWithError.length > 1) {
       returnCode = `(${returnCode})`;
     }
     if (returnCode) {
       returnCode = ' ' + returnCode;
     }
-    funcSig += returnCode;
-    code += funcSig;
+    funcSigString += returnCode;
+    code += funcSigString;
 
     const actionAttr = io.action.__attrs;
     if (actionAttr[ActionAttributes.interfaceName]) {
+      // Remove the type name from signature:
+      // example: func (a) name() ret -> name() ret
+      const idx = funcSigString.indexOf(')');
+      funcSigString = funcSigString.substr(idx + 2);
+
+      const funcSig = new go.FuncSignature(
+        funcName,
+        funcSigString,
+        allFuncArgs,
+        returnsWithError,
+      );
+
       this.context.handleInterfaceMember(
         actionAttr[ActionAttributes.interfaceName] as string,
-        funcName,
         funcSig,
       );
     }
@@ -206,9 +218,9 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
     // We only need the type name here, the namespace(import) is already handled in `processActionIO`
     const firstReturn = io.returnValues.getByIndex(0);
-    const resultType = firstReturn.type.typeName;
+    const resultType = firstReturn.type.typeString;
     // originalResultType is used to generate additional type definition, e.g. resultType is '[]*Person', the originalResultType is 'Person'
-    const originalResultType = firstReturn.originalName || resultType;
+    const originalResultType = firstReturn.type.sourceTypeString || resultType;
     // Additional type definition for result type, empty on select field action
     let resultTypeDef: string | undefined;
     let errReturnCode = '';
@@ -234,32 +246,50 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const codeBuilder = new LinesBuilder();
 
     // Selected columns
-    const selectedFields: go.InstanceVariable[] = [];
-    const jsonIgnoreFields = new Set<go.InstanceVariable>();
+    const selectedFields: VarInfo[] = [];
+    const jsonIgnoreFields = new Set<VarInfo>();
     for (const col of io.cols) {
-      const fieldName = col.varName;
+      const fieldName = mm.utils.toPascalCase(col.varName);
       const typeInfo = this.dialect.colTypeToGoType(col.getResultType());
-      const ivar = new go.InstanceVariable(fieldName, typeInfo.typeName);
-      selectedFields.push(ivar);
-      if (typeInfo.namespace) {
-        this.imports.add(typeInfo.namespace);
-      }
+      const varInfo = new VarInfo(fieldName, typeInfo);
+
+      selectedFields.push(varInfo);
       if (
         col.selectedColumn instanceof mm.RawColumn &&
         col.selectedColumn.__attrs[ColumnAttributes.jsonIgnore] === true
       ) {
-        jsonIgnoreFields.add(ivar);
+        jsonIgnoreFields.add(varInfo);
       }
     }
 
     // Generate result type definition
+    const resultMemberJSONStyle =
+      this.options.memberJSONKeyStyle || MemberJSONKeyStyle.none;
     if (selMode !== mm.SelectActionMode.field) {
-      resultTypeDef = go.struct(
-        originalResultType,
-        selectedFields,
-        this.options.memberJSONKeyStyle || MemberJSONKeyStyle.none,
-        jsonIgnoreFields,
-      );
+      if (action.__attrs[ActionAttributes.resultName]) {
+        this.context.handleResultType(
+          originalResultType,
+          new go.StructInfo(
+            originalResultType,
+            selectedFields,
+            resultMemberJSONStyle,
+            jsonIgnoreFields,
+          ),
+        );
+      } else {
+        resultTypeDef = go.struct(
+          originalResultType,
+          selectedFields,
+          resultMemberJSONStyle,
+          jsonIgnoreFields,
+        );
+
+        for (const field of selectedFields) {
+          if (field.type.namespace) {
+            this.imports.add(field.type.namespace);
+          }
+        }
+      }
     }
 
     const queryParamsCode = io.execArgs.list
@@ -486,7 +516,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     if (returnValues.length) {
       this.scanImports(returnValues.list);
       for (const v of returnValues.list) {
-        body += `var ${v.name} ${v.type.typeName}\n`;
+        body += `var ${v.name} ${v.type.typeString}\n`;
       }
     }
     body += 'txErr := dbx.Transact(db, func(tx *sql.Tx) error {\n';
@@ -503,15 +533,15 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
   private scanImports(vars: VarInfo[]) {
     for (const info of vars) {
-      if (info.type.namespace) {
-        this.imports.add(info.type.namespace);
+      if (info.type.importPath) {
+        this.imports.add(info.type.importPath);
       }
     }
   }
 
   // A varList usually ends without an error type, call this to append an Go error type to the varList
   private appendErrorType(vars: VarInfo[]): VarInfo[] {
-    return [...vars, new VarInfo('error', new TypeInfo('error'))];
+    return [...vars, new VarInfo('error', TypeInfo.type('error'))];
   }
 
   private increaseIndent(code: string): string {

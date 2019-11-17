@@ -2,17 +2,20 @@ import VarInfo, { TypeInfo } from './lib/varInfo';
 
 export const queryableParam = 'queryable';
 export const dbParam = 'db';
-export const sqlDBType = new TypeInfo('*sql.DB', 'database/sql');
-export const sqlTxType = new TypeInfo('*sql.Tx', 'database/sql');
-export const dbxQueryableType = new TypeInfo(
-  'dbx.Queryable',
-  'github.com/mgenware/go-packagex/v5/dbx',
+export const sqlDBType = TypeInfo.type('DB', 'sql|database/sql').toPointer();
+export const sqlTxType = TypeInfo.type('Tx', 'sql|database/sql').toPointer();
+export const dbxQueryableType = TypeInfo.type(
+  'Queryable',
+  'dbx|github.com/mgenware/go-packagex/v5/dbx',
 );
 export const dbxQueryableVar = new VarInfo(queryableParam, dbxQueryableType);
 export const sqlDBVar = new VarInfo(dbParam, sqlDBType);
 export const insertedIDKey = 'insertedID';
 export const rowsAffectedKey = 'rowsAffected';
-export const insertedIDVar = new VarInfo(insertedIDKey, new TypeInfo('uint64'));
+export const insertedIDVar = new VarInfo(
+  insertedIDKey,
+  TypeInfo.type('uint64'),
+);
 
 export const resultVarName = 'result';
 export const fileHeader = ` /${'*'.repeat(90)}
@@ -22,7 +25,7 @@ export const fileHeader = ` /${'*'.repeat(90)}
 
 `;
 export const limitVarName = 'limit';
-export const intTypeInfo = new TypeInfo('int');
-export const boolTypeInfo = new TypeInfo('bool');
+export const intTypeInfo = TypeInfo.type('int');
+export const boolTypeInfo = TypeInfo.type('bool');
 
 export const mathxNS = 'github.com/mgenware/go-packagex/v5/mathx';

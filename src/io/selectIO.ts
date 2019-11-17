@@ -9,6 +9,7 @@ import VarInfo, { TypeInfo } from '../lib/varInfo';
 import VarList from '../lib/varList';
 import { registerHanlder } from './actionToIO';
 import * as defs from '../defs';
+import { ActionAttributes } from '../attrs';
 
 export class JoinIO {
   constructor(
@@ -273,19 +274,27 @@ export class SelectIOProcessor {
         throw new Error('Action not initialized');
       }
       const funcName = utils.actionPascalName(actionNameSrc);
-      const originalResultType = `${tableName}Table${funcName}Result`;
-      let resultType = `*${originalResultType}`;
+      let resultType: string;
+      // Check if result type is renamed
+      if (action.__attrs[ActionAttributes.resultName]) {
+        resultType = `${action.__attrs[ActionAttributes.resultName]}`;
+      } else {
+        resultType = `${tableName}Table${funcName}Result`;
+      }
+
+      let isResultTypeArray = false;
       if (
         selMode === mm.SelectActionMode.list ||
         selMode === mm.SelectActionMode.page
       ) {
-        resultType = '[]' + resultType;
+        isResultTypeArray = true;
       }
+      const resultTypeInfo = TypeInfo.type(resultType);
+
       returnValues.add(
         new VarInfo(
           SelectedResultKey,
-          new TypeInfo(resultType),
-          originalResultType,
+          TypeInfo.compoundType(resultTypeInfo, true, isResultTypeArray),
         ),
       );
       if (action.hasLimit) {

@@ -14,21 +14,99 @@ export class TypeInfo {
       if (parts.length > 1) {
         namespace = parts[1];
       }
-      return new TypeInfo(typeName, namespace);
+      return TypeInfo.type(typeName, namespace);
     }
     if (type instanceof mm.Column) {
       return dialect.colTypeToGoType(type.type);
     }
     return dialect.colTypeToGoType(type);
   }
-  constructor(public typeName: string, public namespace?: string) {}
+
+  static type(typeName: string, namespace?: string): TypeInfo {
+    return new TypeInfo(typeName, namespace, false, false);
+  }
+
+  static compoundType(
+    type: TypeInfo,
+    isPointer: boolean,
+    isArray: boolean,
+  ): TypeInfo {
+    return new TypeInfo(type, undefined, isPointer, isArray);
+  }
+
+  typeString: string;
+  sourceTypeString: string;
+  namespace = '';
+  importPath?: string;
+
+  private constructor(
+    public type: string | TypeInfo,
+    // [namespace]|import path
+    pathInfo: string | undefined,
+    public isPointer: boolean,
+    public isArray: boolean,
+  ) {
+    if (typeof type === 'string') {
+      if (pathInfo) {
+        const parts = pathInfo.split('|');
+        if (parts.length === 2) {
+          this.namespace = parts[0];
+          this.importPath = parts[1];
+        } else {
+          this.namespace = this.importPath = parts[0];
+        }
+      }
+    } else {
+      this.namespace = type.namespace;
+      this.importPath = type.importPath;
+    }
+    // `sourceTypeString` and`getTypeString` should be called at last cuz they depend on other properties like `namespace`.
+    this.sourceTypeString = this.getSourceTypeString();
+    this.typeString = this.getTypeString();
+    Object.freeze(this);
+  }
+
+  toPointer(): TypeInfo {
+    return TypeInfo.compoundType(this, true, false);
+  }
+
+  toArray(): TypeInfo {
+    return TypeInfo.compoundType(this, false, true);
+  }
 
   toString(): string {
-    let s = this.typeName;
-    if (this.namespace) {
-      s += '|' + this.namespace;
+    // `this.namespace` is already included in `this.typeString`.
+    let s = this.typeString;
+    if (this.importPath) {
+      s += `|${this.importPath}`;
     }
     return s;
+  }
+
+  private getTypeString() {
+    const { type, sourceTypeString } = this;
+    if (typeof type === 'string') {
+      return sourceTypeString;
+    }
+    let s = `${sourceTypeString}`;
+    if (this.isPointer) {
+      s = `*${s}`;
+    }
+    if (this.isArray) {
+      s = `[]${s}`;
+    }
+    return s;
+  }
+
+  private getSourceTypeString() {
+    const { type } = this;
+    if (typeof type === 'string') {
+      if (this.namespace) {
+        return `${this.namespace}.${type}`;
+      }
+      return type;
+    }
+    return type.sourceTypeString;
   }
 }
 
@@ -42,15 +120,16 @@ export class VarInfo {
 
   static withValue(v: VarInfo, value: string): VarInfo {
     throwIfFalsy(v, 'v');
-    return new VarInfo(v.name, v.type, v.originalName, value);
+    return new VarInfo(v.name, v.type, value);
   }
 
   constructor(
     public name: string,
     public type: TypeInfo,
-    public originalName?: string, // e.g. name: []*Person, originalName: Person
     public value?: string,
-  ) {}
+  ) {
+    Object.freeze(this);
+  }
 
   get valueOrName(): string {
     return this.value || this.name;
@@ -58,9 +137,6 @@ export class VarInfo {
 
   toString(): string {
     let s = `${this.name}: ${this.type.toString()}`;
-    if (this.originalName) {
-      s += `(${this.originalName})`;
-    }
     if (this.value) {
       s += `=${this.value}`;
     }

@@ -1,36 +1,59 @@
 import * as mm from 'mingru-models';
 import { MemberJSONKeyStyle } from './buildOption';
+import VarInfo from '../lib/varInfo';
 
-export class InstanceVariable {
-  name: string;
-  tag = '';
+export class FuncSignature {
+  constructor(
+    public name: string,
+    public sig: string,
+    public params: VarInfo[],
+    public returnType: VarInfo[],
+  ) {}
+}
 
-  constructor(name: string, public type: string) {
-    this.name = mm.utils.capitalizeColumnName(mm.utils.toCamelCase(name));
+export class MemberTagUtil {
+  static getSnakeCaseJSONTag(name: string) {
+    return this.getJSONTag(mm.utils.toSnakeCase(name));
   }
 
-  setSnakeCaseJSONTag() {
-    this.setJSONTag(mm.utils.toSnakeCase(this.name));
+  static getCamelCaseJSONTag(name: string): string {
+    return this.getJSONTag(mm.utils.toCamelCase(name));
   }
 
-  setCamelCaseJSONTag() {
-    this.setJSONTag(mm.utils.toCamelCase(this.name));
+  static getIgnoreJSONTag(): string {
+    return this.getJSONTag('-');
   }
 
-  setIgnoreJSONTag() {
-    this.setJSONTag('-');
+  private static getJSONTag(name: string): string {
+    return '`json:"' + name + '"`';
   }
+}
 
-  private setJSONTag(name: string) {
-    this.tag = '`json:"' + name + '"`';
+export class StructInfo {
+  constructor(
+    public typeName: string,
+    public members: VarInfo[],
+    public nameStyle: MemberJSONKeyStyle,
+    public ignored: Set<VarInfo> | null,
+  ) {}
+}
+
+export function interfaceType(typeName: string, members: string[]): string {
+  let code = `// ${typeName} ...
+type ${typeName} interface {
+`;
+  for (const mem of members) {
+    code += `\t${mem}\n`;
   }
+  code += `}\n`;
+  return code;
 }
 
 export function struct(
   typeName: string,
-  members: InstanceVariable[],
+  members: VarInfo[],
   nameStyle: MemberJSONKeyStyle,
-  ignored: Set<InstanceVariable> | null,
+  ignored: Set<VarInfo> | null,
 ): string {
   let code = `// ${typeName} ...
 type ${typeName} struct {
@@ -39,19 +62,22 @@ type ${typeName} struct {
   const nameMaxLen = Math.max(...members.map(m => m.name.length));
   let typeMaxLen = 0;
   if (nameStyle !== MemberJSONKeyStyle.none) {
-    typeMaxLen = Math.max(...members.map(m => m.type.length));
+    typeMaxLen = Math.max(...members.map(m => m.type.typeString.length));
   }
   for (const mem of members) {
-    code += `\t${mem.name.padEnd(nameMaxLen)} ${mem.type.padEnd(typeMaxLen)}`;
+    let tag: string | null = null;
+    code += `\t${mem.name.padEnd(nameMaxLen)} ${mem.type.typeString.padEnd(
+      typeMaxLen,
+    )}`;
     if (ignored && ignored.has(mem)) {
-      mem.setIgnoreJSONTag();
+      tag = MemberTagUtil.getIgnoreJSONTag();
     } else if (nameStyle === MemberJSONKeyStyle.camelCase) {
-      mem.setCamelCaseJSONTag();
+      tag = MemberTagUtil.getCamelCaseJSONTag(mem.name);
     } else if (nameStyle === MemberJSONKeyStyle.snakeCase) {
-      mem.setSnakeCaseJSONTag();
+      tag = MemberTagUtil.getSnakeCaseJSONTag(mem.name);
     }
-    if (mem.tag) {
-      code += ` ${mem.tag}`;
+    if (tag) {
+      code += ` ${tag}`;
     }
     code += '\n';
   }

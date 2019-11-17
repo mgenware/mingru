@@ -2,14 +2,16 @@ import VarInfo from './varInfo';
 import { throwIfFalsy, throwIfFalsyStrict } from 'throw-if-arg-empty';
 
 /**
- * IMP: two variables with same names and types are considered duplicates, variables with same names but different types always end with exception!
- * allowDuplicates:
- *   Used in SQLIO: all variables are tracked in order
- * disallowDuplicates:
- *   Used in selected columns, setters, throws on duplicate items
+ * Note that variables with same names and types are considered duplicates. Variables with same names but different types are always invalid and will trigger exceptions.
+ * When duplicates are allowed:
+ *   Used in SQLIO (for example, WHERE expressions): all variables are tracked in insertion order.
+ * When duplicates are NOT allowed:
+ *   Used in selected columns, setters. Exceptions are thrown in this case.
  */
 export default class VarList {
+  // A list of variables in insertion order.
   list: VarInfo[] = [];
+  // A map containing all unique variables.
   private map = new Map<string, VarInfo>();
 
   constructor(public name: string, public allowDuplicates = false) {}
@@ -32,19 +34,25 @@ export default class VarList {
     return this.map.get(name);
   }
 
+  replace(name: string, v: VarInfo) {
+    if (this.map.has(name)) {
+      this.map.set(name, v);
+    }
+  }
+
   add(v: VarInfo) {
     throwIfFalsy(v, 'v');
 
     const prev = this.getByName(v.name);
     if (prev) {
-      // Found an existing var with the same name, check if their types are identical
+      // Found an existing var with the same name, check if their types are identical.
       if (prev.type.toString() === v.type.toString()) {
         if (!this.allowDuplicates) {
           throw new Error(
             `Duplicate variables "${v.name}" found in "${this.name}"`,
           );
         }
-        // duplicatesHandling === allow
+        // Duplicates are allowed here.
         this.list.push(v);
         return;
       }

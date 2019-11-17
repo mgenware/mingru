@@ -91,10 +91,17 @@ export async function testBuildToDirAsync(
       );
     }
   });
-  for (const file of files) {
+  for (let file of files) {
     let actual = '';
     let expected = '';
-    if (nodepath.extname(file)) {
+    if (file.startsWith('#')) {
+      file = file.substr(1);
+      actual = await nodepath.join(tmpDir, file);
+      expected = await nodepath.join(
+        nodepath.resolve(nodepath.join(DestDataDir, 'build', expectedDir)),
+        file,
+      );
+    } else if (nodepath.extname(file)) {
       // An SQL file
       actual = await nodepath.join(tmpDir, 'create_sql', file);
       expected = await nodepath.join(
