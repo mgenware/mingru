@@ -221,21 +221,21 @@ it('Join as', async () => {
 it('Join as (attr should not affect other things)', async () => {
   class CmtTA extends mm.TableActions {
     selectT = mm.select(
-      cmt.id.attr('foo'),
-      cmt.user_id.as('a').attr('foo'),
+      cmt.id.attrs({ foo: true }),
+      cmt.user_id.as('a').attrs({ foo: true }),
       cmt.target_id
         .join(post)
         .title.as('b')
-        .attr('foo'),
+        .attrs({ foo: true }),
       cmt.target_id
         .join(post)
         .user_id.join(user)
-        .url_name.attr('foo'),
+        .url_name.attrs({ foo: true }),
       cmt.target_id
         .join(post)
         .user_id.join(user)
         .url_name.as('c')
-        .attr('foo'),
+        .attrs({ foo: true }),
     );
   }
   const ta = mm.tableActions(cmt, CmtTA);
@@ -433,8 +433,12 @@ it('camelCase keys', async () => {
 it('Ignored keys', async () => {
   class RplTA extends mm.TableActions {
     selectT = mm.select(
-      rpl.user_id.join(user).url_name.attr(mr.ColumnAttributes.jsonIgnore),
-      rpl.user_id.join(user).id.attr(mr.ColumnAttributes.jsonIgnore),
+      rpl.user_id
+        .join(user)
+        .url_name.attrs({ [mr.ColumnAttributes.jsonIgnore]: true }),
+      rpl.user_id
+        .join(user)
+        .id.attrs({ [mr.ColumnAttributes.jsonIgnore]: true }),
       rpl.to_user_id.join(user).url_name,
     );
   }
@@ -451,7 +455,7 @@ it('Ignored keys (raw columns)', async () => {
       mm.sel(mm.sql`1`, 'a', mm.int().type),
       mm
         .sel(mm.sql`1`, 'b', mm.int().type)
-        .attr(mr.ColumnAttributes.jsonIgnore),
+        .attrs({ [mr.ColumnAttributes.jsonIgnore]: true }),
     );
   }
   const ta = mm.tableActions(rpl, RplTA);
