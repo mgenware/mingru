@@ -34,12 +34,6 @@ export default class VarList {
     return this.map.get(name);
   }
 
-  replace(name: string, v: VarInfo) {
-    if (this.map.has(name)) {
-      this.map.set(name, v);
-    }
-  }
-
   add(v: VarInfo) {
     throwIfFalsy(v, 'v');
 

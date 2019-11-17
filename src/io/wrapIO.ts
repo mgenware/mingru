@@ -76,15 +76,14 @@ class WrapIOProcessor {
       innerAction.__name || actionName,
     );
     if (action.isTemp) {
-      // We can change innerIO in-place as no other place is using it
+      // We can change innerIO in-place and return it as no other place is using it.
       innerIO.funcArgs = funcArgs;
-      for (const v of innerFuncArgs.distinctList) {
+      const innerExecArgs = innerIO.execArgs;
+      for (let i = 0; i < innerExecArgs.list.length; i++) {
+        const v = innerExecArgs.list[i];
         if (args[v.name]) {
           // Replace the variable with a value.
-          innerFuncArgs.replace(
-            v.name,
-            VarInfo.withValue(v, args[v.name] as string),
-          );
+          innerExecArgs.list[i] = VarInfo.withValue(v, args[v.name] as string);
         }
       }
       return innerIO;
