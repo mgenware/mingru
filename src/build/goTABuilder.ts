@@ -41,7 +41,7 @@ class CodeMap {
 
 export default class GoTABuilder {
   private options: BuildOption;
-  private imports = new Set<string>();
+  private imports = new go.ImportList();
   private dialect: Dialect;
 
   constructor(
@@ -57,7 +57,7 @@ export default class GoTABuilder {
   build(): string {
     const { options } = this;
     let code = options.noFileHeader ? '' : defs.fileHeader;
-    code += `package ${options.packageName || 'da'}\n\n`;
+    code += `package ${options.packageName || defs.defaultPackageName}\n\n`;
 
     // this.buildActions will set this.systemImports and this.userImports
     let body = '';
@@ -66,7 +66,7 @@ export default class GoTABuilder {
     body += this.buildActions();
 
     // Add imports
-    code = code + go.makeImports([...this.imports]) + body;
+    code = code + this.imports.code() + body;
     return code;
   }
 
@@ -101,7 +101,7 @@ export default class GoTABuilder {
     // Build func params
     // allFuncArgs = original func args + arg stubs
     const allFuncArgs = [...funcArgs, ...io.funcStubs];
-    this.scanImports(allFuncArgs);
+    this.imports.addVars(allFuncArgs);
     const funcParamsCode = allFuncArgs
       .map(p => `${p.name} ${p.type.typeString}`)
       .join(', ');
@@ -109,7 +109,7 @@ export default class GoTABuilder {
     funcSigString += `(${funcParamsCode})`;
 
     // Build return values
-    this.scanImports(returnValues);
+    this.imports.addVars(returnValues);
     const returnsWithError = this.appendErrorType(returnValues);
     let returnCode = returnsWithError.map(v => v.type.typeString).join(', ');
     if (returnsWithError.length > 1) {
@@ -284,11 +284,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
           jsonIgnoreFields,
         );
 
-        for (const field of selectedFields) {
-          if (field.type.namespace) {
-            this.imports.add(field.type.namespace);
-          }
-        }
+        this.imports.addVars(selectedFields);
       }
     }
 
@@ -468,7 +464,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const { memberIOs, returnValues, lastInsertedMember } = io;
 
     // We don't use queryable in transaction arguments but we still need to import the dbx namespace as we're calling dbx.transact.
-    this.scanImports([defs.dbxQueryableVar]);
+    this.imports.addVars([defs.dbxQueryableVar]);
 
     // Declare err
     innerBody += 'var err error\n';
@@ -514,7 +510,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     let body = '';
     // Declare return variables if needed
     if (returnValues.length) {
-      this.scanImports(returnValues.list);
+      this.imports.addVars(returnValues.list);
       for (const v of returnValues.list) {
         body += `var ${v.name} ${v.type.typeString}\n`;
       }
@@ -529,14 +525,6 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     }
     body += 'txErr\n';
     return new CodeMap(body, headCode);
-  }
-
-  private scanImports(vars: VarInfo[]) {
-    for (const info of vars) {
-      if (info.type.importPath) {
-        this.imports.add(info.type.importPath);
-      }
-    }
   }
 
   // A varList usually ends without an error type, call this to append an Go error type to the varList

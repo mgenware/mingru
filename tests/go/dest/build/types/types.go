@@ -1,6 +1,8 @@
 package da
 
-import "github.com/mgenware/go-packagex/dbx"
+import (
+	 "github.com/mgenware/go-packagex/v5/dbx"
+)
 
 // Type1 ...
 type Type1 interface {

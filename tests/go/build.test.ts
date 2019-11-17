@@ -1,4 +1,5 @@
 import * as mm from 'mingru-models';
+import * as mr from '../../';
 import user from '../models/user';
 import post from '../models/post';
 import postReply from '../models/postReply';
@@ -96,4 +97,29 @@ it('Multiple tables + CSQL', async () => {
     undefined,
     true,
   );
+});
+
+it('Types', async () => {
+  class UserTA extends mm.TableActions {
+    selectByID = mm
+      .select(user.id)
+      .byID()
+      .attr(mr.ActionAttributes.interfaceName, 'Type1');
+    selectProfile = mm.select(user.display_name, user.sig);
+    deleteByID = mm.deleteOne().where(user.id.isEqualToInput());
+  }
+  const userTA = mm.tableActions(user, UserTA);
+
+  class PostTA extends mm.TableActions {
+    selectByID = mm
+      .select(post.id)
+      .byID()
+      .attr(mr.ActionAttributes.interfaceName, 'Type1');
+    selectPostInfo = mm
+      .select(post.id, post.content, post.user_id.join(user).url_name)
+      .attr(mr.ActionAttributes.interfaceName, 'Type2');
+  }
+  const postTA = mm.tableActions(post, PostTA);
+  const actions = [userTA, postTA];
+  await testBuildToDirAsync(actions, ['#types.go'], 'types');
 });

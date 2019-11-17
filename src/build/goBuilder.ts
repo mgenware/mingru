@@ -8,6 +8,7 @@ import { BuildOption } from './buildOption';
 import * as nodepath from 'path';
 import * as mfs from 'm-fs';
 import * as go from './goCode';
+import * as defs from '../defs';
 
 export default class GoBuilder {
   async buildAsync(
@@ -36,21 +37,30 @@ export default class GoBuilder {
     // Generating additional interface types.
     const interfaces = Object.keys(context.interfaces);
     if (interfaces.length) {
-      let code = '';
+      const imports = new go.ImportList();
+      let body = '';
       interfaces.sort((a, b) => a.localeCompare(b));
       for (const name of interfaces) {
         // Sort members alphabetically.
         const members = [...context.interfaces[name].values()];
         members.sort((a, b) => a.name.localeCompare(b.name));
 
-        code += go.interfaceType(
+        body += go.interfaceType(
           name,
           members.map(m => m.sig),
         );
-        code += '\n';
+        body += '\n';
+
+        for (const mem of members) {
+          imports.addVars(mem.params);
+          imports.addVars(mem.returnType);
+        }
       }
 
-      const outFile = nodepath.join(outDir, 'interfaces.go');
+      let code = `package ${opts.packageName || defs.defaultPackageName}\n\n`;
+      code += imports.code() + '\n';
+      code += body;
+      const outFile = nodepath.join(outDir, 'types.go');
       await mfs.writeFileAsync(outFile, code);
     }
   }

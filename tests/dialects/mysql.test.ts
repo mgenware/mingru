@@ -11,7 +11,7 @@ const dialect = mr.mysql;
 function testType(col: mm.Column, type: string, pkg?: string) {
   const info = dialect.colTypeToGoType(col.type);
   expect(info.typeString, type);
-  expect(info.namespace || null, pkg || null);
+  expect(info.moduleName || null, pkg || null);
 }
 
 it('encodeName', () => {

@@ -150,3 +150,19 @@ ${code})
 export function makeStringLiteral(s: string): string {
   return JSON.stringify(s);
 }
+
+export class ImportList {
+  private imports = new Set<string>();
+
+  addVars(vars: VarInfo[]) {
+    for (const info of vars) {
+      if (info.type.importPath) {
+        this.imports.add(info.type.importPath);
+      }
+    }
+  }
+
+  code(): string {
+    return makeImports([...this.imports]);
+  }
+}

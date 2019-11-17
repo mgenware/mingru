@@ -36,7 +36,7 @@ export class TypeInfo {
 
   typeString: string;
   sourceTypeString: string;
-  namespace = '';
+  moduleName = '';
   importPath?: string;
 
   private constructor(
@@ -50,14 +50,14 @@ export class TypeInfo {
       if (pathInfo) {
         const parts = pathInfo.split('|');
         if (parts.length === 2) {
-          this.namespace = parts[0];
+          this.moduleName = parts[0];
           this.importPath = parts[1];
         } else {
-          this.namespace = this.importPath = parts[0];
+          this.moduleName = this.importPath = parts[0];
         }
       }
     } else {
-      this.namespace = type.namespace;
+      this.moduleName = type.moduleName;
       this.importPath = type.importPath;
     }
     // `sourceTypeString` and`getTypeString` should be called at last cuz they depend on other properties like `namespace`.
@@ -101,8 +101,8 @@ export class TypeInfo {
   private getSourceTypeString() {
     const { type } = this;
     if (typeof type === 'string') {
-      if (this.namespace) {
-        return `${this.namespace}.${type}`;
+      if (this.moduleName) {
+        return `${this.moduleName}.${type}`;
       }
       return type;
     }

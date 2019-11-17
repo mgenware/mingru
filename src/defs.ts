@@ -29,3 +29,4 @@ export const intTypeInfo = TypeInfo.type('int');
 export const boolTypeInfo = TypeInfo.type('bool');
 
 export const mathxNS = 'github.com/mgenware/go-packagex/v5/mathx';
+export const defaultPackageName = 'da';
