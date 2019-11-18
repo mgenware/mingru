@@ -7,6 +7,7 @@ import (
 )
 
 // ------------ Result types ------------
+
 // Res1 ...
 type Res1 struct {
 	ID uint64
@@ -24,6 +25,7 @@ type Res3 struct {
 }
 
 // ------------ Interfaces ------------
+
 // Type1 ...
 type Type1 interface {
 	SelectByID(queryable dbx.Queryable, id uint64) (*Res1, error)

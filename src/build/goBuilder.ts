@@ -41,7 +41,7 @@ export default class GoBuilder {
     // Generating renamed result types.
     const resultTypes = Object.keys(context.resultTypes);
     if (resultTypes.length) {
-      resultTypesCode += go.sep('Result types');
+      resultTypesCode += go.sep('Result types') + '\n';
       // Sort types alphabetically.
       resultTypes.sort((a, b) => a.localeCompare(b));
       for (const name of resultTypes) {
@@ -61,7 +61,7 @@ export default class GoBuilder {
     const interfaces = Object.keys(context.interfaces);
     let interfacesCode = '';
     if (interfaces.length) {
-      interfacesCode += go.sep('Interfaces');
+      interfacesCode += go.sep('Interfaces') + '\n';
       // Sort interfaces alphabetically.
       interfaces.sort((a, b) => a.localeCompare(b));
       for (const name of interfaces) {
