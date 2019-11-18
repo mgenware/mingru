@@ -132,5 +132,5 @@ it('Types', async () => {
   }
   const postTA = mm.tableActions(post, PostTA);
   const actions = [userTA, postTA];
-  await testBuildToDirAsync(actions, ['#types.go'], 'types');
+  await testBuildToDirAsync(actions, ['#types.go', 'post', 'user'], 'types');
 });
