@@ -75,7 +75,7 @@ class DeleteIOProcessor {
       returnValues.add(
         new VarInfo(
           defs.rowsAffectedKey,
-          dialect.colTypeToGoType(mm.int().type),
+          dialect.colTypeToGoType(mm.int().__type),
         ),
       );
     }

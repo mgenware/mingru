@@ -27,13 +27,13 @@ export class SetterIO {
       }
 
       // Skip AUTO_INCREMENT PKs
-      if (col.type.autoIncrement) {
+      if (col.__type.autoIncrement) {
         return;
       }
 
       let isValueSet = false;
       for (const autoSetter of action.autoSetters) {
-        const defValue = col.defaultValue;
+        const defValue = col.__defaultValue;
         if (
           autoSetter === mm.AutoSetterType.default &&
           defValue === undefined
@@ -63,17 +63,18 @@ export class SetterIO {
       return new SetterIO(col, sqlIO(mm.sql`${col.toInput()}`, dialect));
     } else if (autoSetter === mm.AutoSetterType.default) {
       let value: string;
-      if (col.defaultValue) {
-        if (col.defaultValue instanceof mm.SQL) {
-          const valueIO = sqlIO(col.defaultValue, dialect);
+      const defValue = col.__defaultValue;
+      if (defValue) {
+        if (defValue instanceof mm.SQL) {
+          const valueIO = sqlIO(defValue, dialect);
           value = valueIO.toSQL(table);
         } else {
-          value = dialect.objToSQL(col.defaultValue, table);
+          value = dialect.objToSQL(defValue, table);
         }
-      } else if (col.type.nullable) {
+      } else if (col.__type.nullable) {
         value = 'NULL';
       } else {
-        const type = col.type.types[0];
+        const type = col.__type.types[0];
         const def = dtDefault(type);
         if (def === null) {
           throw new Error(

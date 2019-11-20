@@ -452,9 +452,9 @@ it('Ignored keys', async () => {
 it('Ignored keys (raw columns)', async () => {
   class RplTA extends mm.TableActions {
     selectT = mm.select(
-      mm.sel(mm.sql`1`, 'a', mm.int().type),
+      mm.sel(mm.sql`1`, 'a', mm.int().__type),
       mm
-        .sel(mm.sql`1`, 'b', mm.int().type)
+        .sel(mm.sql`1`, 'b', mm.int().__type)
         .attrs({ [mr.ColumnAttributes.jsonIgnore]: true }),
     );
   }

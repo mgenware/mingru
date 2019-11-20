@@ -9,7 +9,7 @@ const TimePkg = 'time';
 const dialect = mr.mysql;
 
 function testType(col: mm.Column, type: string, pkg?: string) {
-  const info = dialect.colTypeToGoType(col.type);
+  const info = dialect.colTypeToGoType(col.__type);
   expect(info.typeString, type);
   expect(info.moduleName || null, pkg || null);
 }
@@ -54,8 +54,8 @@ it('DT', () => {
   for (const t of tests) {
     const column = t[0] as mm.Column;
     testType(column, t[1] as string, t[2] as string);
-    if (!column.type.pk) {
-      column.type.nullable = true;
+    if (!column.__type.pk) {
+      column.__type.nullable = true;
       testType(column, ('*' + t[1]) as string, t[2] as string);
     }
   }

@@ -56,14 +56,14 @@ export class SelectedColumnIO {
     if (this.resultType) {
       return this.resultType;
     }
-    if (!this.selectedColumn.type) {
+    if (!this.selectedColumn.__type) {
       throw new Error(
         `No column type found on column "${toTypeString(
           this.selectedColumn,
         )}", SQL: "${this.valueSQL.toString()}"`,
       );
     }
-    return this.selectedColumn.type;
+    return this.selectedColumn.__type;
   }
 }
 
@@ -401,7 +401,7 @@ export class SelectIOProcessor {
     }
     // If user uses a column directly
     if (sCol instanceof mm.Column) {
-      return [sCol, null, sCol.type];
+      return [sCol, null, sCol.__type];
     }
     if (sCol instanceof mm.RawColumn === false) {
       throw new Error(`Expected an "RawColumn", got ${toTypeString(sCol)}`);
@@ -410,7 +410,7 @@ export class SelectIOProcessor {
     const rawCol = sCol;
     if (rawCol.core instanceof mm.Column) {
       const col = rawCol.core;
-      return [col, rawCol, col.type];
+      return [col, rawCol, col.__type];
     }
     if (rawCol.core instanceof mm.SQL === false) {
       throw new Error(
@@ -429,7 +429,7 @@ export class SelectIOProcessor {
     if (sql.elements.length === 1) {
       const first = sql.elements[0];
       if (first.type === mm.SQLElementType.column) {
-        return first.toColumn().type;
+        return first.toColumn().__type;
       }
       if (first.type === mm.SQLElementType.call) {
         return first.toCall().returnType;
@@ -506,7 +506,7 @@ export class SelectIOProcessor {
       const exprIO = sqlIO(rawExpr, dialect);
       const sql = exprIO.toSQL(table);
       // If we cannot guess the result type (`resultType` is null), and neither does a user specified type (`type` is null) exists, we throw cuz we cannot determine the result type
-      if (!resultType && !sCol.type) {
+      if (!resultType && !sCol.__type) {
         throw new Error(
           `Column type is required for a "${toTypeString(
             sCol,
@@ -574,7 +574,7 @@ export class SelectIOProcessor {
 
     if (colTable instanceof mm.JoinedTable) {
       const joinIO = this.handleJoinRecursively(col);
-      if (!col.mirroredColumn) {
+      if (!col.__mirroredColumn) {
         throw new Error(
           `Internal error: unexpected empty mirroredColumn in joined column "${toTypeString(
             col,
@@ -582,7 +582,7 @@ export class SelectIOProcessor {
         );
       }
       const sql = `${e(joinIO.tableAlias)}.${e(
-        col.mirroredColumn.getDBName(),
+        col.__mirroredColumn.getDBName(),
       )}`;
       return new ColumnSQL(sql, inputName, alias);
     } else {

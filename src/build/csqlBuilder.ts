@@ -13,12 +13,12 @@ export default class CSQLBuilder {
     const pks: string[] = [];
     const fks: string[] = [];
     for (const col of columns) {
-      const colType = col.type;
+      const colType = col.__type;
       if (colType.pk) {
         pks.push(col.getDBName());
       }
-      if (col.foreignColumn) {
-        const exp = this.fkExpression(col, col.foreignColumn);
+      if (col.__foreignColumn) {
+        const exp = this.fkExpression(col, col.__foreignColumn);
         fks.push(exp);
       }
       body.push(

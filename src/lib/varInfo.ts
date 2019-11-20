@@ -17,7 +17,7 @@ export class TypeInfo {
       return TypeInfo.type(typeName, namespace);
     }
     if (type instanceof mm.Column) {
-      return dialect.colTypeToGoType(type.type);
+      return dialect.colTypeToGoType(type.__type);
     }
     return dialect.colTypeToGoType(type);
   }

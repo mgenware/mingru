@@ -48,14 +48,14 @@ export class MySQL extends Dialect {
 
   colToSQLType(col: mm.Column): string {
     throwIfFalsy(col, 'col');
-    const colType = col.type;
+    const colType = col.__type;
     const types = [this.absoluteSQLType(colType)];
     if (colType.unsigned) {
       types.push('UNSIGNED');
     }
     types.push(colType.nullable ? 'NULL' : 'NOT NULL');
-    if (!col.isNoDefaultOnCSQL) {
-      const defValue = col.defaultValue;
+    if (!col.__isNoDefaultOnCSQL) {
+      const defValue = col.__defaultValue;
       if (defValue && defValue instanceof mm.SQL === false) {
         types.push('DEFAULT');
 
