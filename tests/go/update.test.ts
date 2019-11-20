@@ -84,7 +84,7 @@ it('Custom DB column name', async () => {
   await testBuildAsync(ta, 'update/customName');
 });
 
-it('updateWithDefaults', async () => {
+it('Update with defaults', async () => {
   class ColsTA extends mm.TableActions {
     updateT = mm
       .updateOne()
@@ -94,4 +94,16 @@ it('updateWithDefaults', async () => {
   }
   const ta = mm.tableActions(cols, ColsTA);
   await testBuildAsync(ta, 'update/updateWithDefaults');
+});
+
+it('Update with defaults and inputs', async () => {
+  class ColsTA extends mm.TableActions {
+    updateT = mm
+      .updateOne()
+      .setDefaults()
+      .setInputs()
+      .byID();
+  }
+  const ta = mm.tableActions(cols, ColsTA);
+  await testBuildAsync(ta, 'update/updateWithDefaultsAndInputs');
 });

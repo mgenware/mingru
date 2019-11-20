@@ -46,7 +46,11 @@ export class InsertIOProcessor {
 
     // setters
     utils.validateSetters(action.setters, table);
-    const setters = SetterIO.fromAction(action, dialect);
+    const setters = SetterIO.fromAction(
+      action,
+      dialect,
+      action.allowUnsetColumns,
+    );
     const colNames = setters.map(s => dialect.encodeColumnName(s.col));
     sql += ` (${colNames.join(', ')})`;
 

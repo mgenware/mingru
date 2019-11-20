@@ -7,56 +7,85 @@ import VarInfo from '../lib/varInfo';
 import dtDefault from '../build/dtDefault';
 
 export class SetterIO {
-  static fromAction(action: mm.CoreUpdateAction, dialect: Dialect): SetterIO[] {
-    const result = Array.from(
+  static fromAction(
+    action: mm.CoreUpdateAction,
+    dialect: Dialect,
+    allowUnsetValues: boolean,
+  ): SetterIO[] {
+    const [table] = action.ensureInitialized();
+    const { setters: actionSetters } = action;
+    // User setters come first.
+    const res = Array.from(
       action.setters,
       ([key, value]) => new SetterIO(key, sqlIO(value, dialect)),
     );
-    if (action.autoSetter) {
-      const { setters: actionSetters } = action;
-      const [table] = action.ensureInitialized();
-      mm.enumerateColumns(table, col => {
-        // If already set, return
-        if (actionSetters.get(col)) {
-          return;
-        }
 
-        // Skip AUTO_INCREMENT PKs
-        if (col.type.autoIncrement) {
-          return;
-        }
+    mm.enumerateColumns(table, col => {
+      // Skip user setter.
+      if (actionSetters.get(col)) {
+        return;
+      }
 
-        if (action.autoSetter === 'input') {
-          result.push(
-            new SetterIO(col, sqlIO(mm.sql`${col.toInput()}`, dialect)),
-          );
+      // Skip AUTO_INCREMENT PKs
+      if (col.type.autoIncrement) {
+        return;
+      }
+
+      let isValueSet = false;
+      for (const autoSetter of action.autoSetters) {
+        const defValue = col.defaultValue;
+        if (
+          autoSetter === mm.AutoSetterType.default &&
+          defValue === undefined
+        ) {
+          continue;
+        }
+        isValueSet = true;
+        res.push(this.getAutoSetterValue(col, autoSetter, table, dialect));
+        // If value is set, no need to check other auto setter values.
+        break;
+      }
+      if (!isValueSet && !allowUnsetValues) {
+        throw new Error(`${col} is not set by any setter`);
+      }
+    });
+
+    return res;
+  }
+
+  private static getAutoSetterValue(
+    col: mm.Column,
+    autoSetter: mm.AutoSetterType,
+    table: mm.Table,
+    dialect: Dialect,
+  ): SetterIO {
+    if (autoSetter === mm.AutoSetterType.input) {
+      return new SetterIO(col, sqlIO(mm.sql`${col.toInput()}`, dialect));
+    } else if (autoSetter === mm.AutoSetterType.default) {
+      let value: string;
+      if (col.defaultValue) {
+        if (col.defaultValue instanceof mm.SQL) {
+          const valueIO = sqlIO(col.defaultValue, dialect);
+          value = valueIO.toSQL(table);
         } else {
-          let value: string;
-          if (col.defaultValue) {
-            if (col.defaultValue instanceof mm.SQL) {
-              const valueIO = sqlIO(col.defaultValue, dialect);
-              value = valueIO.toSQL(table);
-            } else {
-              value = dialect.objToSQL(col.defaultValue, table);
-            }
-          } else if (col.type.nullable) {
-            value = 'NULL';
-          } else {
-            const type = col.type.types[0];
-            const def = dtDefault(type);
-            if (def === null) {
-              throw new Error(
-                `Cannot determine the default value of type "${type}" at column ${col.__name}`,
-              );
-            }
-            value = dialect.objToSQL(def, table);
-          }
-
-          result.push(new SetterIO(col, sqlIO(mm.sql`${value}`, dialect)));
+          value = dialect.objToSQL(col.defaultValue, table);
         }
-      });
+      } else if (col.type.nullable) {
+        value = 'NULL';
+      } else {
+        const type = col.type.types[0];
+        const def = dtDefault(type);
+        if (def === null) {
+          throw new Error(
+            `Cannot determine the default value of type "${type}" at column ${col.__name}`,
+          );
+        }
+        value = dialect.objToSQL(def, table);
+      }
+
+      return new SetterIO(col, sqlIO(mm.sql`${value}`, dialect));
     }
-    return result;
+    throw new Error(`Unsupported auto setter type "${autoSetter}"`);
   }
 
   constructor(public col: mm.Column, public sql: SQLIO) {
