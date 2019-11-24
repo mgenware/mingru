@@ -10,6 +10,7 @@ import VarList from '../lib/varList';
 import { registerHanlder } from './actionToIO';
 import * as defs from '../defs';
 import { ActionAttributes } from '../attrs';
+import { ReturnValues } from './taIO';
 
 export class JoinIO {
   constructor(
@@ -66,8 +67,6 @@ export class SelectedColumnIO {
     return this.selectedColumn.__type;
   }
 }
-
-export const SelectedResultKey = 'result';
 
 export class SelectIO extends ActionIO {
   constructor(
@@ -264,7 +263,7 @@ export class SelectIOProcessor {
     if (selMode === mm.SelectActionMode.field) {
       const col = colIOs[0];
       const typeInfo = dialect.colTypeToGoType(col.getResultType());
-      returnValues.add(new VarInfo(SelectedResultKey, typeInfo));
+      returnValues.add(new VarInfo(ReturnValues.result, typeInfo));
     } else {
       // selMode now equals .list or .row
       const tableNameSrc = fromTable.__name;
@@ -293,7 +292,7 @@ export class SelectIOProcessor {
 
       returnValues.add(
         new VarInfo(
-          SelectedResultKey,
+          ReturnValues.result,
           TypeInfo.compoundType(resultTypeInfo, true, isResultTypeArray),
         ),
       );

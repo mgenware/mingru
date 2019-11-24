@@ -7,6 +7,7 @@ import VarList from '../lib/varList';
 import VarInfo from '../lib/varInfo';
 import { registerHanlder } from './actionToIO';
 import * as defs from '../defs';
+import { ReturnValues } from './taIO';
 
 export class DeleteIO extends ActionIO {
   constructor(
@@ -74,7 +75,7 @@ class DeleteIOProcessor {
     if (!action.ensureOneRowAffected) {
       returnValues.add(
         new VarInfo(
-          defs.rowsAffectedKey,
+          ReturnValues.rowsAffected,
           dialect.colTypeToGoType(mm.int().__type),
         ),
       );

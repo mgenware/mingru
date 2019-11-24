@@ -1,4 +1,5 @@
 import VarInfo, { TypeInfo } from './lib/varInfo';
+import { ReturnValues } from './io/taIO';
 
 export const queryableParam = 'queryable';
 export const dbParam = 'db';
@@ -10,10 +11,8 @@ export const dbxQueryableType = TypeInfo.type(
 );
 export const dbxQueryableVar = new VarInfo(queryableParam, dbxQueryableType);
 export const sqlDBVar = new VarInfo(dbParam, sqlDBType);
-export const insertedIDKey = 'insertedID';
-export const rowsAffectedKey = 'rowsAffected';
 export const insertedIDVar = new VarInfo(
-  insertedIDKey,
+  ReturnValues.insertedID,
   TypeInfo.type('uint64'),
 );
 
