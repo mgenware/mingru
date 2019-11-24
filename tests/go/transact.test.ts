@@ -3,6 +3,7 @@ import * as mm from 'mingru-models';
 import cmt2 from '../models/cmt2';
 import postCmt from '../models/postCmt';
 import post from '../models/post';
+import * as mr from '../../';
 
 it('No inserted ID', async () => {
   class Employee extends mm.Table {
@@ -46,7 +47,7 @@ it('No inserted ID', async () => {
   await testBuildAsync(deptManagerTA, 'tx/noInsID/deptManager');
 });
 
-it('Last inserted ID', async () => {
+it('Declare return types', async () => {
   class Employee extends mm.Table {
     id = mm.pk(mm.int()).autoIncrement.setDBName('emp_no');
     firstName = mm.varChar(50);
@@ -54,10 +55,17 @@ it('Last inserted ID', async () => {
   const employee = mm.table(Employee, 'employees');
   class EmployeeTA extends mm.TableActions {
     insert = mm.insertOne().setInputs();
-    insert2 = mm.transact(this.insert, this.insert);
+    insert2 = mm
+      .transact(
+        this.insert,
+        this.insert.declareReturnValues({
+          [mr.ReturnValues.insertedID]: 'id2',
+        }),
+      )
+      .setReturnValues('id2');
   }
   const employeeTA = mm.tableActions(employee, EmployeeTA);
-  await testBuildAsync(employeeTA, 'tx/autoInsID/employee');
+  await testBuildAsync(employeeTA, 'tx/declareRet1/employee');
 });
 
 it('Temp member actions', async () => {

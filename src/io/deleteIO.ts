@@ -5,7 +5,7 @@ import { ActionIO } from './actionIO';
 import { SQLIO, sqlIO } from './sqlIO';
 import VarList from '../lib/varList';
 import VarInfo from '../lib/varInfo';
-import { registerHanlder } from './actionToIO';
+import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
 import { ReturnValues } from './taIO';
 
@@ -103,4 +103,4 @@ export function deleteIO(action: mm.Action, dialect: Dialect): DeleteIO {
   return pro.convert();
 }
 
-registerHanlder(mm.ActionType.delete, deleteIO);
+registerHandler(mm.ActionType.delete, deleteIO);

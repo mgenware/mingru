@@ -34,15 +34,14 @@ func (da *TableTypePost) insertChild5(queryable dbx.Queryable) (uint64, error) {
 }
 
 // Insert ...
-func (da *TableTypePost) Insert(db *sql.DB, id uint64, title string) (uint64, error) {
-	var insertedID uint64
+func (da *TableTypePost) Insert(db *sql.DB, id uint64, title string) error {
 	txErr := dbx.Transact(db, func(tx *sql.Tx) error {
 		var err error
 		err = da.insertChild1(tx, id)
 		if err != nil {
 			return err
 		}
-		insertedID, err = da.InsertCore(tx, title)
+		_, err = da.InsertCore(tx, title)
 		if err != nil {
 			return err
 		}
@@ -60,7 +59,7 @@ func (da *TableTypePost) Insert(db *sql.DB, id uint64, title string) (uint64, er
 		}
 		return nil
 	})
-	return insertedID, txErr
+	return txErr
 }
 
 // InsertCore ...

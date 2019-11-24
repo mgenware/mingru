@@ -461,7 +461,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
   private transact(io: TransactIO): CodeMap {
     let headCode = '';
     let innerBody = '';
-    const { memberIOs, returnValues, lastInsertedMember } = io;
+    const { memberIOs, returnValues } = io;
 
     // We don't use queryable in transaction arguments but we still need to import the dbx namespace as we're calling dbx.transact.
     this.imports.addVars([defs.dbxQueryableVar]);
@@ -474,17 +474,21 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     for (const memberIO of memberIOs) {
       memberIdx++;
       const mActionIO = memberIO.actionIO;
-      if (lastInsertedMember === memberIO) {
-        innerBody += `${mActionIO.returnValues.list[0].name}, `;
-      } else if (mActionIO.returnValues.length) {
-        // Ignore all return values: _, _, _, err = action(a, b, ...)
-        innerBody += '_, '.repeat(mActionIO.returnValues.length);
+
+      // Return value code:
+      // e.g. _, val1, _, val2, err = action(a, b, ...)
+      const declaredReturnValues = memberIO.declaredReturnValues || {};
+      for (const ret of mActionIO.returnValues.list) {
+        const varName = declaredReturnValues[ret.name]
+          ? declaredReturnValues[ret.name]
+          : '_';
+        innerBody += `${varName}, `;
       }
       innerBody += 'err = ';
       innerBody += memberIO.callPath;
       // Generating the calling code of this member
       const queryParamsCode = mActionIO.funcArgs.list
-        .slice(1) // Stripe the first queryable param
+        .slice(1) // Strip the first queryable param
         .map(p => `${p.name}`)
         .join(', ');
       // If this is a temp member (created inside transaction),

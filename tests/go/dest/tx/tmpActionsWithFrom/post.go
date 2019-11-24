@@ -27,11 +27,10 @@ func (da *TableTypePost) tChild2(queryable dbx.Queryable, postID uint64, cmtID u
 }
 
 // T ...
-func (da *TableTypePost) T(db *sql.DB, content string, userID uint64, createdAt time.Time, modifiedAt time.Time, rplCount uint, postID uint64, cmtID uint64) (uint64, error) {
-	var insertedID uint64
+func (da *TableTypePost) T(db *sql.DB, content string, userID uint64, createdAt time.Time, modifiedAt time.Time, rplCount uint, postID uint64, cmtID uint64) error {
 	txErr := dbx.Transact(db, func(tx *sql.Tx) error {
 		var err error
-		insertedID, err = da.tChild1(tx, content, userID, createdAt, modifiedAt, rplCount)
+		_, err = da.tChild1(tx, content, userID, createdAt, modifiedAt, rplCount)
 		if err != nil {
 			return err
 		}
@@ -41,5 +40,5 @@ func (da *TableTypePost) T(db *sql.DB, content string, userID uint64, createdAt 
 		}
 		return nil
 	})
-	return insertedID, txErr
+	return txErr
 }

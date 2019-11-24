@@ -7,7 +7,7 @@ import { ActionIO } from './actionIO';
 import * as utils from './utils';
 import VarInfo, { TypeInfo } from '../lib/varInfo';
 import VarList from '../lib/varList';
-import { registerHanlder } from './actionToIO';
+import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
 import { ActionAttributes } from '../attrs';
 import { ReturnValues } from './taIO';
@@ -612,4 +612,4 @@ export function selectIO(action: mm.Action, dialect: Dialect): SelectIO {
   return converter.convert();
 }
 
-registerHanlder(mm.ActionType.select, selectIO);
+registerHandler(mm.ActionType.select, selectIO);

@@ -7,7 +7,7 @@ export type HandlerType = (action: mm.Action, dialect: Dialect) => ActionIO;
 
 const handlers = new Map<number, HandlerType>();
 
-export function registerHanlder(type: mm.ActionType, handler: HandlerType) {
+export function registerHandler(type: mm.ActionType, handler: HandlerType) {
   throwIfFalsy(handler, 'handlers');
   if (handlers.has(type)) {
     throw new Error(`The type "${type}" has been registered`);

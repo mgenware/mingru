@@ -4,7 +4,7 @@ import Dialect from '../dialect';
 import { settersToVarList, SetterIO } from './setterIO';
 import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
-import { registerHanlder } from './actionToIO';
+import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
 import * as utils from './utils';
 
@@ -97,4 +97,4 @@ export function insertIO(action: mm.Action, dialect: Dialect): InsertIO {
   return pro.convert();
 }
 
-registerHanlder(mm.ActionType.insert, insertIO);
+registerHandler(mm.ActionType.insert, insertIO);

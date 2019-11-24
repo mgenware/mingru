@@ -5,7 +5,7 @@ import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
 import VarInfo from '../lib/varInfo';
 import * as utils from './utils';
-import actionToIO, { registerHanlder } from './actionToIO';
+import actionToIO, { registerHandler } from './actionToIO';
 import * as defs from '../defs';
 
 export class WrapIO extends ActionIO {
@@ -75,6 +75,7 @@ class WrapIOProcessor {
       innerActionTable === action.__table ? null : innerActionTable.__name,
       innerAction.__name || actionName,
     );
+
     if (action.isTemp) {
       // We can change innerIO in-place and return it as no other place is using it.
       innerIO.funcArgs = funcArgs;
@@ -83,7 +84,7 @@ class WrapIOProcessor {
         const v = innerExecArgs.list[i];
         if (args[v.name]) {
           // Replace the variable with a value.
-          innerExecArgs.list[i] = VarInfo.withValue(v, args[v.name] as string);
+          innerExecArgs.list[i] = VarInfo.withValue(v, `${args[v.name]}`);
         }
       }
       return innerIO;
@@ -118,4 +119,4 @@ export function wrapIO(action: mm.Action, dialect: Dialect): ActionIO {
   return pro.convert();
 }
 
-registerHanlder(mm.ActionType.wrap, wrapIO);
+registerHandler(mm.ActionType.wrap, wrapIO);

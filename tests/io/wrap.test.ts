@@ -18,6 +18,14 @@ class WrapSelfTA extends mm.TableActions {
       mm.sql`${user.url_name.toInput()} ${user.id.toInput()} ${user.url_name.toInput()}`,
     );
   d = this.s.wrap({ sig: '"haha"' });
+  dTmp = mm
+    .updateSome()
+    .set(user.url_name, mm.sql`${mm.input(user.url_name)}`)
+    .setInputs(user.sig, user.follower_count)
+    .where(
+      mm.sql`${user.url_name.toInput()} ${user.id.toInput()} ${user.url_name.toInput()}`,
+    )
+    .wrap({ sig: '"haha"' });
 }
 const wrapSelf = mm.tableActions(user, WrapSelfTA);
 
@@ -28,8 +36,13 @@ class WrapOtherTA extends mm.TableActions {
 const wrapOther = mm.tableActions(post, WrapOtherTA);
 
 it('WrapIO', () => {
-  const io = mr.wrapIO(wrapSelf.d, dialect);
-  assert.ok(io instanceof mr.WrapIO);
+  const wrappedIO = mr.wrapIO(wrapSelf.d, dialect);
+  assert.ok(wrappedIO instanceof mr.WrapIO);
+
+  // tmp inner action results in tmp inner IO gets updated in-place with
+  // wrap IO created.
+  const innerIO = mr.wrapIO(wrapSelf.dTmp, dialect);
+  assert.ok(innerIO instanceof mr.UpdateIO);
 });
 
 it('getInputs (wrapSelf and innerIO)', () => {

@@ -6,7 +6,7 @@ import { SQLIO, sqlIO } from './sqlIO';
 import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
 import VarInfo from '../lib/varInfo';
-import { registerHanlder } from './actionToIO';
+import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
 import * as utils from './utils';
 import { ReturnValues } from './taIO';
@@ -122,4 +122,4 @@ export function updateIO(action: mm.Action, dialect: Dialect): UpdateIO {
   return pro.convert();
 }
 
-registerHanlder(mm.ActionType.update, updateIO);
+registerHandler(mm.ActionType.update, updateIO);

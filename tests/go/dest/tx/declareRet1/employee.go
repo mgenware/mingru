@@ -23,18 +23,18 @@ func (da *TableTypeEmployee) Insert(queryable dbx.Queryable, firstName string) (
 
 // Insert2 ...
 func (da *TableTypeEmployee) Insert2(db *sql.DB, firstName string) (uint64, error) {
-	var insertedID uint64
+	var id2 uint64
 	txErr := dbx.Transact(db, func(tx *sql.Tx) error {
 		var err error
 		_, err = da.Insert(tx, firstName)
 		if err != nil {
 			return err
 		}
-		insertedID, err = da.Insert(tx, firstName)
+		id2, err = da.Insert(tx, firstName)
 		if err != nil {
 			return err
 		}
 		return nil
 	})
-	return insertedID, txErr
+	return id2, txErr
 }

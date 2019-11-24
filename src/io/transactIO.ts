@@ -3,22 +3,21 @@ import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
 import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
-import actionToIO, { registerHanlder } from './actionToIO';
+import actionToIO, { registerHandler } from './actionToIO';
 import * as utils from './utils';
 import * as defs from '../defs';
-import { InsertIO } from './insertIO';
+import VarInfo from '../lib/varInfo';
 
 export class TransactMemberIO {
   constructor(
     public actionIO: ActionIO,
     public callPath: string,
     public isTemp: boolean,
+    public declaredReturnValues?: { [name: string]: string },
   ) {}
 }
 
 export class TransactIO extends ActionIO {
-  lastInsertedMember?: TransactMemberIO;
-
   constructor(
     dialect: Dialect,
     public action: mm.TransactAction,
@@ -41,35 +40,27 @@ class TransactIOProcessor {
   convert(): TransactIO {
     const { action, dialect } = this;
     const { members } = action;
-    let lastInsertMember: TransactMemberIO | undefined;
     action.ensureInitialized();
-    const memberIOs = members.map((m, idx) => {
-      const childAction = m.action;
+    const memberIOs = members.map((mem, idx) => {
+      const childAction = mem.action;
       const [childTable, childName] = childAction.ensureInitialized();
 
-      // Call actionToIO after initialization
+      // Call actionToIO after initialization.
       const io = actionToIO(
         childAction,
         dialect,
         `transaction child index "${idx}"`,
       );
 
-      // This indicates if the member function is generate locally
-      // Tmp members are always generated locally
-      const isChildFuncPrivate = m.isTemp || action.__table === childTable;
+      // This indicates if the member function is generated locally.
+      // Tmp members are always generated locally.
+      const isChildFuncPrivate = mem.isTemp || action.__table === childTable;
       const callPath = utils.actionCallPath(
         isChildFuncPrivate ? null : childTable.__name,
         childName,
-        m.isTemp, // Temp members generated generated locally, thus are always private
+        mem.isTemp, // Temp members generated generated locally, thus are always private
       );
-      const memberIO = new TransactMemberIO(io, callPath, m.isTemp);
-      if (
-        childAction.actionType === mm.ActionType.insert &&
-        (memberIO.actionIO as InsertIO).fetchInsertedID
-      ) {
-        lastInsertMember = memberIO;
-      }
-      return memberIO;
+      return new TransactMemberIO(io, callPath, mem.isTemp, mem.returnValues);
     });
 
     // funcArgs
@@ -78,8 +69,8 @@ class TransactIOProcessor {
       true,
     );
     funcArgs.add(defs.sqlDBVar);
-    for (const m of memberIOs) {
-      const mAction = m.actionIO;
+    for (const mem of memberIOs) {
+      const mAction = mem.actionIO;
       // Skip the first param of member functions, which is dbx.Queryable
       for (const v of mAction.funcArgs.list.slice(1)) {
         funcArgs.add(v);
@@ -95,8 +86,48 @@ class TransactIOProcessor {
       `Returns of action ${action.__name}`,
       false,
     );
-    if (lastInsertMember) {
-      returnValues.add(defs.insertedIDVar);
+
+    // Collecting all declared return values from members.
+    // K: declared value name, V: source info (original var info in action return list).
+    const declaredReturnValues: { [name: string]: VarInfo } = {};
+    for (const mem of memberIOs) {
+      if (!mem.declaredReturnValues) {
+        continue;
+      }
+      for (const key of Object.keys(mem.declaredReturnValues)) {
+        const value = mem.declaredReturnValues[key];
+        // Checking if this value has been declared.
+        // declaredReturnValues stores things in reverse order, declared value as key.
+        if (declaredReturnValues[value]) {
+          throw new Error(`The return value "${value}" has been declared`);
+        }
+
+        // Try fetching the return value info in action return list.
+        const srcVarInfo = mem.actionIO.returnValues.getByName(key);
+        if (!srcVarInfo) {
+          throw new Error(
+            `The return value "${key}" doesn't exist in action ${mem.actionIO.action}`,
+          );
+        }
+
+        // Now both value and key are valid.
+        declaredReturnValues[value] = new VarInfo(
+          value,
+          srcVarInfo.type,
+          srcVarInfo.value,
+        );
+      }
+    }
+
+    if (action.__returnValues) {
+      for (const name of action.__returnValues) {
+        if (!declaredReturnValues[name]) {
+          throw new Error(
+            `The return value "${name}" is not declared by any member`,
+          );
+        }
+        returnValues.add(declaredReturnValues[name]);
+      }
     }
 
     const result = new TransactIO(
@@ -107,7 +138,6 @@ class TransactIOProcessor {
       execArgs,
       returnValues,
     );
-    result.lastInsertedMember = lastInsertMember;
     return result;
   }
 }
@@ -117,4 +147,4 @@ export function transactIO(action: mm.Action, dialect: Dialect): TransactIO {
   return pro.convert();
 }
 
-registerHanlder(mm.ActionType.transact, transactIO);
+registerHandler(mm.ActionType.transact, transactIO);
