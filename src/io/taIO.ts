@@ -5,12 +5,6 @@ import * as utils from './utils';
 import { ActionIO } from './actionIO';
 import actionToIO from './actionToIO';
 
-export enum ReturnValues {
-  result = 'result',
-  rowsAffected = 'rowsAffected',
-  insertedID = 'insertedID',
-}
-
 // IO object for TA(Tabla actions)
 export class TAIO {
   actions: ActionIO[];

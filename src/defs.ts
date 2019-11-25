@@ -1,5 +1,5 @@
+import * as mm from 'mingru-models';
 import VarInfo, { TypeInfo } from './lib/varInfo';
-import { ReturnValues } from './io/taIO';
 
 export const queryableParam = 'queryable';
 export const dbParam = 'db';
@@ -12,7 +12,7 @@ export const dbxQueryableType = TypeInfo.type(
 export const dbxQueryableVar = new VarInfo(queryableParam, dbxQueryableType);
 export const sqlDBVar = new VarInfo(dbParam, sqlDBType);
 export const insertedIDVar = new VarInfo(
-  ReturnValues.insertedID,
+  mm.ReturnValues.insertedID,
   TypeInfo.type('uint64'),
 );
 

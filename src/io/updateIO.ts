@@ -9,7 +9,6 @@ import VarInfo from '../lib/varInfo';
 import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
 import * as utils from './utils';
-import { ReturnValues } from './taIO';
 
 export class UpdateIO extends ActionIO {
   constructor(
@@ -92,7 +91,7 @@ class UpdateIOProcessor {
     if (!action.ensureOneRowAffected) {
       returnValues.add(
         new VarInfo(
-          ReturnValues.rowsAffected,
+          mm.ReturnValues.rowsAffected,
           dialect.colTypeToGoType(mm.int().__type),
         ),
       );

@@ -3,7 +3,6 @@ import * as mm from 'mingru-models';
 import cmt2 from '../models/cmt2';
 import postCmt from '../models/postCmt';
 import post from '../models/post';
-import * as mr from '../../';
 
 it('Declare return types', async () => {
   class Employee extends mm.Table {
@@ -17,7 +16,7 @@ it('Declare return types', async () => {
       .transact(
         this.insert,
         this.insert.declareReturnValues({
-          [mr.ReturnValues.insertedID]: 'id2',
+          [mm.ReturnValues.insertedID]: 'id2',
         }),
       )
       .setReturnValues('id2');
@@ -64,11 +63,11 @@ it('Return multiple values', async () => {
     insert = mm
       .transact(
         employeeTA.insertEmp.declareReturnValue(
-          mr.ReturnValues.insertedID,
+          mm.ReturnValues.insertedID,
           empNo,
         ),
         deptTA.insertDept.declareReturnValue(
-          mr.ReturnValues.insertedID,
+          mm.ReturnValues.insertedID,
           deptNo,
         ),
         this.insertCore.wrapAsRefs({

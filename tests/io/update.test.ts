@@ -84,7 +84,7 @@ it('getReturns', () => {
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.updateIO(v, mr.mysql);
-  assert.deepEqual(io.returnValues.toString(), 'rowsAffected: int');
+  assert.deepEqual(io.returnValues.toString(), '__rowsAffected: int');
 });
 
 it('Validate setters', () => {

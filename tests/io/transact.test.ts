@@ -146,7 +146,7 @@ it('TX member IOs', () => {
       .transact(
         this.insert,
         this.insert.declareReturnValues({
-          [mr.ReturnValues.insertedID]: 'id2',
+          [mm.ReturnValues.insertedID]: 'id2',
         }),
       )
       .setReturnValues('id2');
@@ -160,15 +160,15 @@ it('TX member IOs', () => {
   );
   assert.equal(
     members[1].toString(),
-    'TransactMemberIO(InsertAction(insert, Table(employee|employees)), da.Insert, false, {"insertedID":"id2"})',
+    'TransactMemberIO(InsertAction(insert, Table(employee|employees)), da.Insert, false, {"__insertedID":"id2"})',
   );
   assert.equal(
     members[0].actionIO.returnValues.toString(),
-    'insertedID: uint64',
+    '__insertedID: uint64',
   );
   assert.equal(
     members[1].actionIO.returnValues.toString(),
-    'insertedID: uint64',
+    '__insertedID: uint64',
   );
-  assert.deepEqual(members[1].declaredReturnValues, { insertedID: 'id2' });
+  assert.deepEqual(members[1].declaredReturnValues, { __insertedID: 'id2' });
 });

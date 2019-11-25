@@ -78,7 +78,7 @@ it('getReturns (insertOne)', () => {
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, mr.mysql);
-  expect(io.returnValues.toString(), 'insertedID: uint64');
+  expect(io.returnValues.toString(), '__insertedID: uint64');
 });
 
 it('Validate setters', () => {

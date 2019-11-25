@@ -78,5 +78,5 @@ it('getReturns (no WHERE)', () => {
   const v = ta.t;
   const io = mr.deleteIO(v, mr.mysql);
   const returns = io.returnValues;
-  assert.deepEqual(returns.toString(), 'rowsAffected: int');
+  assert.deepEqual(returns.toString(), '__rowsAffected: int');
 });
