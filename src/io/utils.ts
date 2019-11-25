@@ -15,12 +15,14 @@ export function tablePascalName(tableName: string): string {
 export function actionCallPath(
   tableName: string | null,
   actionName: string,
-  pri?: boolean,
+  isPrivate: boolean,
 ): string {
   const funcName = actionPascalName(actionName);
   const resolvedTableName = tableName ? tablePascalName(tableName) : 'da';
   return (
-    resolvedTableName + '.' + (pri ? lowercaseFirstChar(funcName) : funcName)
+    resolvedTableName +
+    '.' +
+    (isPrivate ? lowercaseFirstChar(funcName) : funcName)
   );
 }
 

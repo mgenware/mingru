@@ -32,6 +32,7 @@ const wrapSelf = mm.tableActions(user, WrapSelfTA);
 class WrapOtherTA extends mm.TableActions {
   standard = wrapSelf.s.wrap({ id: '123' });
   nested = wrapSelf.d.wrap({ id: '123' });
+  retValue = wrapSelf.d.wrap({ id: new mm.ValueRef('extID') });
 }
 const wrapOther = mm.tableActions(post, WrapOtherTA);
 
@@ -99,6 +100,19 @@ it('Throws on undefined inputs', () => {
   const v = ta.t2;
   itThrows(
     () => mr.wrapIO(v, dialect),
-    `The argument "haha" doesn't exist in action "t2"`,
+    `The argument "haha" doesn't exist in action "t2", available keys "queryable, id, urlName"`,
   );
+});
+
+it('ReturnRef', () => {
+  const io = mr.wrapIO(wrapOther.retValue, dialect) as WrapIO;
+  expect(
+    io.funcArgs.toString(),
+    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, extID: uint64, urlName: string, followerCount: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, extID: uint64, followerCount: *string}',
+  );
+  expect(
+    io.execArgs.toString(),
+    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, extID: uint64, followerCount: *string',
+  );
+  expect(io.funcPath, 'User.D');
 });

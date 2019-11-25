@@ -18,7 +18,7 @@ export function registerHandler(type: mm.ActionType, handler: HandlerType) {
 export function actionToIO(
   action: mm.Action,
   dialect: Dialect,
-  dlgMsg: string,
+  descMsg: string, // used for debugging / logging purposes.
 ): ActionIO {
   try {
     throwIfFalsy(action, 'action');
@@ -33,7 +33,7 @@ export function actionToIO(
     return handler(action, dialect);
   } catch (err) {
     if (err.message) {
-      err.message += ` [${dlgMsg}]`;
+      err.message += ` [${descMsg}]`;
     }
     throw err;
   }

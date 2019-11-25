@@ -15,6 +15,12 @@ export class TransactMemberIO {
     public isTemp: boolean,
     public declaredReturnValues?: { [name: string]: string },
   ) {}
+
+  toString(): string {
+    return `TransactMemberIO(${this.actionIO.action}, ${this.callPath}, ${
+      this.isTemp
+    }, ${JSON.stringify(this.declaredReturnValues)})`;
+  }
 }
 
 export class TransactIO extends ActionIO {
@@ -52,13 +58,13 @@ class TransactIOProcessor {
         `transaction child index "${idx}"`,
       );
 
-      // This indicates if the member function is generated locally.
-      // Tmp members are always generated locally.
-      const isChildFuncPrivate = mem.isTemp || action.__table === childTable;
+      // `isMemberSibling` describes if this member and current TX action
+      // belong to save parent.
+      const isMemberSibling = mem.isTemp || action.__table === childTable;
       const callPath = utils.actionCallPath(
-        isChildFuncPrivate ? null : childTable.__name,
+        isMemberSibling ? null : childTable.__name,
         childName,
-        mem.isTemp, // Temp members generated generated locally, thus are always private
+        mem.isTemp,
       );
       return new TransactMemberIO(io, callPath, mem.isTemp, mem.returnValues);
     });
@@ -71,9 +77,12 @@ class TransactIOProcessor {
     funcArgs.add(defs.sqlDBVar);
     for (const mem of memberIOs) {
       const mAction = mem.actionIO;
-      // Skip the first param of member functions, which is dbx.Queryable
+      // Skip the first param of all member functions, which is dbx.Queryable.
       for (const v of mAction.funcArgs.list.slice(1)) {
-        funcArgs.add(v);
+        if (!v.isRef) {
+          // See `isRef` for details
+          funcArgs.add(v);
+        }
       }
     }
     // execArgs is empty for transact io
@@ -106,7 +115,9 @@ class TransactIOProcessor {
         const srcVarInfo = mem.actionIO.returnValues.getByName(key);
         if (!srcVarInfo) {
           throw new Error(
-            `The return value "${key}" doesn't exist in action ${mem.actionIO.action}`,
+            `The return value "${key}" doesn't exist in member action "${
+              mem.actionIO.action
+            }", available keys "${mem.actionIO.returnValues.getKeysString()}"`,
           );
         }
 

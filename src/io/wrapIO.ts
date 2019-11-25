@@ -16,6 +16,7 @@ export class WrapIO extends ActionIO {
     execArgs: VarList,
     returnValues: VarList,
     public funcPath: string | null,
+    public innerIO: ActionIO,
   ) {
     super(dialect, action, funcArgs, execArgs, returnValues);
     throwIfFalsy(action, 'action');
@@ -48,7 +49,9 @@ class WrapIOProcessor {
     for (const key of Object.keys(args)) {
       if (!innerFuncArgs.getByName(key)) {
         throw new Error(
-          `The argument "${key}" doesn't exist in action "${action.__name}"`,
+          `The argument "${key}" doesn't exist in action "${
+            action.__name
+          }", available keys "${innerFuncArgs.getKeysString()}"`,
         );
       }
     }
@@ -61,19 +64,27 @@ class WrapIOProcessor {
 
     // Skip the first param, which is always either dbx.Queryable or db.Tx
     for (let i = 1; i < innerFuncArgs.list.length; i++) {
-      const v = innerFuncArgs.list[i];
-      if (!args[v.name]) {
-        funcArgs.add(v);
+      const arg = innerFuncArgs.list[i];
+      const newValue = args[arg.name];
+      if (!newValue) {
+        // If this argument doesn't appear on `args`, it will still
+        // be an func argument.
+        funcArgs.add(arg);
+      } else if (newValue instanceof mm.ValueRef) {
+        // If this argument appears on `args` with a `ValueRef`,
+        // it's being replaced by another name.
+        funcArgs.add(new VarInfo(newValue.name, arg.type, arg.value, true));
       }
     }
 
-    // For temp actions, inner and outer actions are merged into one
+    // For temp actions, inner and outer actions are merged into one:
     //   mm.update().wrap(args) -> mm.update(args)
     // For non-temp actions:
-    //   this.t.wrap(args) -> inner: this.t, outer: this.t(args)
+    //   this.t.wrap(args) -> inner = this.t, outer = this.t(args)
     const funcPath = utils.actionCallPath(
       innerActionTable === action.__table ? null : innerActionTable.__name,
       innerAction.__name || actionName,
+      false,
     );
 
     if (action.isTemp) {
@@ -82,9 +93,13 @@ class WrapIOProcessor {
       const innerExecArgs = innerIO.execArgs;
       for (let i = 0; i < innerExecArgs.list.length; i++) {
         const v = innerExecArgs.list[i];
-        if (args[v.name]) {
-          // Replace the variable with a value.
-          innerExecArgs.list[i] = VarInfo.withValue(v, `${args[v.name]}`);
+        const value = args[v.name];
+        if (value) {
+          if (value instanceof mm.ValueRef) {
+            innerExecArgs.list[i] = VarInfo.withValue(v, value.name);
+          } else {
+            innerExecArgs.list[i] = VarInfo.withValue(v, `${value}`);
+          }
         }
       }
       return innerIO;
@@ -94,11 +109,14 @@ class WrapIOProcessor {
       `Exec args of action "${action.__name}"`,
       true,
     );
-    // Pass the queryable param
     for (const v of innerFuncArgs.distinctList) {
-      if (args[v.name]) {
-        // Replace the variable with a value
-        execArgs.add(VarInfo.withValue(v, args[v.name] as string));
+      const value = args[v.name];
+      if (value) {
+        if (value instanceof mm.ValueRef) {
+          execArgs.add(new VarInfo(value.name, v.type, v.value));
+        } else {
+          execArgs.add(VarInfo.withValue(v, `${value}`));
+        }
       } else {
         execArgs.add(v);
       }
@@ -110,6 +128,7 @@ class WrapIOProcessor {
       execArgs,
       innerIO.returnValues,
       funcPath,
+      innerIO,
     );
   }
 }

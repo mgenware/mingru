@@ -34,6 +34,10 @@ export default class VarList {
     return this.map.get(name);
   }
 
+  getKeysString(): string {
+    return [...this.map.keys()].join(', ');
+  }
+
   add(v: VarInfo) {
     throwIfFalsy(v, 'v');
 

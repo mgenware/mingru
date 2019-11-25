@@ -65,10 +65,10 @@ export class InsertIOProcessor {
       [defs.dbxQueryableVar],
     );
     const execArgs = new VarList(`Exec args of action ${action.__name}`);
-    // Skip the first items, which is queryable
+    // Skip the first param, which is queryable.
     execArgs.merge(funcArgs.list.slice(1));
 
-    // returns
+    // Return values.
     const returnValue = new VarList(`Returns of action ${action.__name}`);
     if (fetchInsertedID) {
       returnValue.add(defs.insertedIDVar);

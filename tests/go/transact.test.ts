@@ -5,48 +5,6 @@ import postCmt from '../models/postCmt';
 import post from '../models/post';
 import * as mr from '../../';
 
-it('No inserted ID', async () => {
-  class Employee extends mm.Table {
-    id = mm.pk(mm.int()).setDBName('emp_no').noAutoIncrement;
-    firstName = mm.varChar(50);
-    lastName = mm.varChar(50);
-    gender = mm.varChar(10);
-    birthDate = mm.date();
-    hireDate = mm.date();
-  }
-  const employee = mm.table(Employee, 'employees');
-  class EmployeeTA extends mm.TableActions {
-    insert = mm.insert().setInputs();
-  }
-  const employeeTA = mm.tableActions(employee, EmployeeTA);
-  class Dept extends mm.Table {
-    no = mm.pk(mm.char(4)).setDBName('dept_no');
-    name = mm.varChar(40).setDBName('dept_name');
-  }
-
-  const dept = mm.table(Dept, 'departments');
-  class DeptTA extends mm.TableActions {
-    insert = mm.insert().setInputs();
-  }
-  const deptTA = mm.tableActions(dept, DeptTA);
-  class DeptManager extends mm.Table {
-    empNo = employee.id;
-    deptNo = dept.no;
-    fromDate = mm.date();
-    toDate = mm.date();
-  }
-  const deptManager = mm.table(DeptManager, 'dept_manager');
-  class DeptManagerTA extends mm.TableActions {
-    insertCore = mm.insert().setInputs();
-    insert = mm.transact(employeeTA.insert, deptTA.insert, this.insertCore);
-  }
-
-  const deptManagerTA = mm.tableActions(deptManager, DeptManagerTA);
-  await testBuildAsync(employeeTA, 'tx/noInsID/employee');
-  await testBuildAsync(deptTA, 'tx/noInsID/dept');
-  await testBuildAsync(deptManagerTA, 'tx/noInsID/deptManager');
-});
-
 it('Declare return types', async () => {
   class Employee extends mm.Table {
     id = mm.pk(mm.int()).autoIncrement.setDBName('emp_no');
@@ -66,6 +24,65 @@ it('Declare return types', async () => {
   }
   const employeeTA = mm.tableActions(employee, EmployeeTA);
   await testBuildAsync(employeeTA, 'tx/declareRet1/employee');
+});
+
+it('Return multiple values', async () => {
+  class Employee extends mm.Table {
+    id = mm.pk(mm.int()).setDBName('emp_no').autoIncrement;
+    firstName = mm.varChar(50);
+    lastName = mm.varChar(50);
+    gender = mm.varChar(10);
+    birthDate = mm.date();
+    hireDate = mm.date();
+  }
+  const employee = mm.table(Employee, 'employees');
+  class EmployeeTA extends mm.TableActions {
+    insertEmp = mm.insertOne().setInputs();
+  }
+  const employeeTA = mm.tableActions(employee, EmployeeTA);
+  class Dept extends mm.Table {
+    no = mm.pk().setDBName('dept_no');
+    name = mm.varChar(40).setDBName('dept_name');
+  }
+
+  const dept = mm.table(Dept, 'departments');
+  class DeptTA extends mm.TableActions {
+    insertDept = mm.insertOne().setInputs();
+  }
+  const deptTA = mm.tableActions(dept, DeptTA);
+  class DeptManager extends mm.Table {
+    empNo = employee.id;
+    deptNo = dept.no;
+    fromDate = mm.date();
+    toDate = mm.date();
+  }
+  const deptManager = mm.table(DeptManager, 'dept_manager');
+  const empNo = 'empNo';
+  const deptNo = 'deptNo';
+  class DeptManagerTA extends mm.TableActions {
+    insertCore = mm.insertOne().setInputs();
+    insert = mm
+      .transact(
+        employeeTA.insertEmp.declareReturnValue(
+          mr.ReturnValues.insertedID,
+          empNo,
+        ),
+        deptTA.insertDept.declareReturnValue(
+          mr.ReturnValues.insertedID,
+          deptNo,
+        ),
+        this.insertCore.wrapAsRefs({
+          empNo,
+          deptNo,
+        }),
+      )
+      .setReturnValues(deptNo, empNo);
+  }
+
+  const deptManagerTA = mm.tableActions(deptManager, DeptManagerTA);
+  await testBuildAsync(employeeTA, 'tx/multipleRetValues/employee');
+  await testBuildAsync(deptTA, 'tx/multipleRetValues/dept');
+  await testBuildAsync(deptManagerTA, 'tx/multipleRetValues/deptManager');
 });
 
 it('Temp member actions', async () => {

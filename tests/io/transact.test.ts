@@ -133,3 +133,42 @@ it('Member details (normal action, wrapped, tmp wrapped)', () => {
     'sig: *string, followerCount: *string, id: uint64',
   );
 });
+
+it('TX member IOs', () => {
+  class Employee extends mm.Table {
+    id = mm.pk(mm.int()).autoIncrement.setDBName('emp_no');
+    firstName = mm.varChar(50);
+  }
+  const employee = mm.table(Employee, 'employees');
+  class EmployeeTA extends mm.TableActions {
+    insert = mm.insertOne().setInputs();
+    insert2 = mm
+      .transact(
+        this.insert,
+        this.insert.declareReturnValues({
+          [mr.ReturnValues.insertedID]: 'id2',
+        }),
+      )
+      .setReturnValues('id2');
+  }
+  const employeeTA = mm.tableActions(employee, EmployeeTA);
+  const io = mr.transactIO(employeeTA.insert2, dialect);
+  const members = io.memberIOs;
+  assert.equal(
+    members[0].toString(),
+    'TransactMemberIO(InsertAction(insert, Table(employee|employees)), da.Insert, false, undefined)',
+  );
+  assert.equal(
+    members[1].toString(),
+    'TransactMemberIO(InsertAction(insert, Table(employee|employees)), da.Insert, false, {"insertedID":"id2"})',
+  );
+  assert.equal(
+    members[0].actionIO.returnValues.toString(),
+    'insertedID: uint64',
+  );
+  assert.equal(
+    members[1].actionIO.returnValues.toString(),
+    'insertedID: uint64',
+  );
+  assert.deepEqual(members[1].declaredReturnValues, { insertedID: 'id2' });
+});
