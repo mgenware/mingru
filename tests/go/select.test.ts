@@ -435,10 +435,10 @@ it('Ignored keys', async () => {
     selectT = mm.select(
       rpl.user_id
         .join(user)
-        .url_name.attrs({ [mr.ColumnAttributes.jsonIgnore]: true }),
+        .url_name.attrs({ [mm.ColumnAttributes.isPrivate]: true }),
       rpl.user_id
         .join(user)
-        .id.attrs({ [mr.ColumnAttributes.jsonIgnore]: true }),
+        .id.attrs({ [mm.ColumnAttributes.isPrivate]: true }),
       rpl.to_user_id.join(user).url_name,
     );
   }
@@ -455,7 +455,7 @@ it('Ignored keys (raw columns)', async () => {
       mm.sel(mm.sql`1`, 'a', mm.int().__type),
       mm
         .sel(mm.sql`1`, 'b', mm.int().__type)
-        .attrs({ [mr.ColumnAttributes.jsonIgnore]: true }),
+        .attrs({ [mm.ColumnAttributes.isPrivate]: true }),
     );
   }
   const ta = mm.tableActions(rpl, RplTA);

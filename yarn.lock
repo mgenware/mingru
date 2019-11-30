@@ -1142,10 +1142,10 @@ mimic-fn@^2.1.0:
   resolved "https://registry.yarnpkg.com/mimic-fn/-/mimic-fn-2.1.0.tgz#7ed2c2ccccaf84d3ffcb7a69b57711fc2083401b"
   integrity sha512-OqbOk5oEQeAZ8WXWydlu9HJjz9WVdEIvamMCcXmuqUYjTknH/sqsWvhQ3vgwKFRR1HpjvNBKQ37nbJgYzGqGcg==
 
-mingru-models@^0.30.0:
-  version "0.30.0"
-  resolved "https://registry.yarnpkg.com/mingru-models/-/mingru-models-0.30.0.tgz#31ec35ff89727b928e54ada97eecd648fa0c592b"
-  integrity sha512-+1abQxN9v88f9R62gRblnJF5cEZsiW5BtHHUCLo6R4XropzdtggvnkcVmh8Ehe8opSIC8jwvBBpNpV9m63+U1Q==
+mingru-models@^0.31.0:
+  version "0.31.0"
+  resolved "https://registry.yarnpkg.com/mingru-models/-/mingru-models-0.31.0.tgz#80572b087747b06ea947f0adcbde219381d63102"
+  integrity sha512-8TKuuJkA8W8P9abOY/vY3SA7MgnGlh5Xzjrx0wmjSOqWub9fDWp3BB8OSDPpgZeC0D58r7E6z5/e1oMwnmxYUQ==
   dependencies:
     lodash.camelcase "^4.3.0"
     lodash.snakecase "^4.1.1"

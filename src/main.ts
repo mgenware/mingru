@@ -18,4 +18,3 @@ export * from './io/actionIO';
 export * from './io/sqlIO';
 export * from './io/wrapIO';
 export * from './io/transactIO';
-export * from './attrs';

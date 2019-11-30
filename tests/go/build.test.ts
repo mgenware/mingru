@@ -1,5 +1,4 @@
 import * as mm from 'mingru-models';
-import * as mr from '../../';
 import user from '../models/user';
 import post from '../models/post';
 import postReply from '../models/postReply';
@@ -105,11 +104,11 @@ it('Types', async () => {
       .select(user.id)
       .byID()
       .attrs({
-        [mr.ActionAttributes.interfaceName]: 'Type1',
-        [mr.ActionAttributes.resultName]: 'Res1',
+        [mm.ActionAttributes.groupTypeName]: 'Type1',
+        [mm.ActionAttributes.resultTypeName]: 'Res1',
       });
     selectProfile = mm.select(user.display_name, user.sig).attrs({
-      [mr.ActionAttributes.resultName]: 'Res2',
+      [mm.ActionAttributes.resultTypeName]: 'Res2',
     });
     deleteByID = mm.deleteOne().where(user.id.isEqualToInput());
   }
@@ -120,14 +119,14 @@ it('Types', async () => {
       .select(post.id)
       .byID()
       .attrs({
-        [mr.ActionAttributes.interfaceName]: 'Type1',
-        [mr.ActionAttributes.resultName]: 'Res1',
+        [mm.ActionAttributes.groupTypeName]: 'Type1',
+        [mm.ActionAttributes.resultTypeName]: 'Res1',
       });
     selectPostInfo = mm
       .select(post.n_datetime, post.user_id.join(user).url_name)
-      .attrs({ [mr.ActionAttributes.interfaceName]: 'Type2' });
+      .attrs({ [mm.ActionAttributes.groupTypeName]: 'Type2' });
     selectTime = mm.select(post.n_datetime).attrs({
-      [mr.ActionAttributes.resultName]: 'Res3',
+      [mm.ActionAttributes.resultTypeName]: 'Res3',
     });
   }
   const postTA = mm.tableActions(post, PostTA);

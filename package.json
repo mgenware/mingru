@@ -36,7 +36,7 @@
     "del-cli": "^3.0.0",
     "eslint": "^6.6.0",
     "it-throws": "^3.1.0",
-    "mingru-models": "^0.30.0",
+    "mingru-models": "^0.31.0",
     "mocha": "^6.2.2",
     "source-map-support": "^0.5.16",
     "tempy": "^0.3.0",

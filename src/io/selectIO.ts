@@ -9,7 +9,6 @@ import VarInfo, { TypeInfo } from '../lib/varInfo';
 import VarList from '../lib/varList';
 import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
-import { ActionAttributes } from '../attrs';
 
 export class JoinIO {
   constructor(
@@ -274,8 +273,8 @@ export class SelectIOProcessor {
       const funcName = utils.actionPascalName(actionNameSrc);
       let resultType: string;
       // Check if result type is renamed
-      if (action.__attrs[ActionAttributes.resultName]) {
-        resultType = `${action.__attrs[ActionAttributes.resultName]}`;
+      if (action.__attrs[mm.ActionAttributes.resultTypeName]) {
+        resultType = `${action.__attrs[mm.ActionAttributes.resultTypeName]}`;
       } else {
         resultType = `${tableName}Table${funcName}Result`;
       }

@@ -16,7 +16,6 @@ import { TransactIO } from '../io/transactIO';
 import LinesBuilder from './linesBuilder';
 import * as utils from '../io/utils';
 import { BuildOption, MemberJSONKeyStyle } from './buildOption';
-import { ColumnAttributes, ActionAttributes } from '../attrs';
 import GoBuilderContext from './goBuilderContext';
 
 function joinParams(arr: string[]): string {
@@ -122,7 +121,7 @@ export default class GoTABuilder {
     code += funcSigString;
 
     const actionAttr = io.action.__attrs;
-    if (actionAttr[ActionAttributes.interfaceName]) {
+    if (actionAttr[mm.ActionAttributes.groupTypeName]) {
       // Remove the type name from signature:
       // example: func (a) name() ret -> name() ret
       const idx = funcSigString.indexOf(')');
@@ -136,7 +135,7 @@ export default class GoTABuilder {
       );
 
       this.context.handleInterfaceMember(
-        actionAttr[ActionAttributes.interfaceName] as string,
+        actionAttr[mm.ActionAttributes.groupTypeName] as string,
         funcSig,
       );
     }
@@ -256,7 +255,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       selectedFields.push(varInfo);
       if (
         col.selectedColumn instanceof mm.RawColumn &&
-        col.selectedColumn.__attrs[ColumnAttributes.jsonIgnore] === true
+        col.selectedColumn.__attrs[mm.ColumnAttributes.isPrivate] === true
       ) {
         jsonIgnoreFields.add(varInfo);
       }
@@ -266,7 +265,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const resultMemberJSONStyle =
       this.options.memberJSONKeyStyle || MemberJSONKeyStyle.none;
     if (selMode !== mm.SelectActionMode.field) {
-      if (action.__attrs[ActionAttributes.resultName]) {
+      if (action.__attrs[mm.ActionAttributes.resultTypeName]) {
         this.context.handleResultType(
           originalResultType,
           new go.StructInfo(
