@@ -59,7 +59,7 @@ class TransactIOProcessor {
       );
 
       // `isMemberSibling` describes if this member and current TX action
-      // belong to save parent.
+      // belong to same parent.
       const isMemberSibling = mem.isTemp || action.__table === childTable;
       const callPath = utils.actionCallPath(
         isMemberSibling ? null : childTable.__name,
