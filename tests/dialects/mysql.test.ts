@@ -75,9 +75,12 @@ it('as', () => {
 
 it('SQL calls', () => {
   const t = dialect.sqlCall;
-  expect(t(mm.SQLCallType.dateNow), 'CURDATE');
-  expect(t(mm.SQLCallType.timeNow), 'CURTIME');
-  expect(t(mm.SQLCallType.datetimeNow), 'NOW');
+  expect(t(mm.SQLCallType.localDateNow), 'CURDATE');
+  expect(t(mm.SQLCallType.localTimeNow), 'CURTIME');
+  expect(t(mm.SQLCallType.localDatetimeNow), 'NOW');
+  expect(t(mm.SQLCallType.utcDateNow), 'UTC_DATE');
+  expect(t(mm.SQLCallType.utcTimeNow), 'UTC_TIME');
+  expect(t(mm.SQLCallType.utcDatetimeNow), 'UTC_TIMESTAMP');
   expect(t(mm.SQLCallType.count), 'COUNT');
   expect(t(mm.SQLCallType.coalesce), 'COALESCE');
   expect(t(mm.SQLCallType.avg), 'AVG');

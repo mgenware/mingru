@@ -78,12 +78,18 @@ export class MySQL extends Dialect {
 
   sqlCall(type: mm.SQLCallType): string {
     switch (type) {
-      case mm.SQLCallType.datetimeNow:
+      case mm.SQLCallType.localDatetimeNow:
         return 'NOW';
-      case mm.SQLCallType.dateNow:
+      case mm.SQLCallType.localDateNow:
         return 'CURDATE';
-      case mm.SQLCallType.timeNow:
+      case mm.SQLCallType.localTimeNow:
         return 'CURTIME';
+      case mm.SQLCallType.utcDatetimeNow:
+        return 'UTC_TIMESTAMP';
+      case mm.SQLCallType.utcDateNow:
+        return 'UTC_DATE';
+      case mm.SQLCallType.utcTimeNow:
+        return 'UTC_TIME';
       case mm.SQLCallType.count:
         return 'COUNT';
       case mm.SQLCallType.coalesce:

@@ -9,7 +9,7 @@ class Cols extends mm.Table {
   fk = user.id;
   defInt = mm.int(-3);
   defVarChar = mm.varChar(100, '一二');
-  defTime = mm.time(true);
+  defTime = mm.time('local');
 }
 
 export default mm.table(Cols);

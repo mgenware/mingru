@@ -54,8 +54,8 @@ it('noDefaultOnCSQL', async () => {
 it('No SQL expr as default value', async () => {
   class User extends mm.Table {
     a = mm.int(1);
-    b = mm.datetime(true);
-    c = mm.datetime(false);
+    b = mm.datetime('local');
+    c = mm.datetime();
     d = mm.datetime().setDefault('2012-12-20');
   }
   const t = mm.table(User);

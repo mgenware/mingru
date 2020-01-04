@@ -18,20 +18,20 @@ it('Columns and escape strings', () => {
 });
 
 it('SQL calls', () => {
-  const sql = mm.sql`${post.datetime} = ${mm.datetimeNow()}`;
+  const sql = mm.sql`${post.datetime} = ${mm.localDatetimeNow()}`;
   const io = mr.sqlIO(sql, dialect);
   expect(io.toSQL(post), '`datetime` = NOW()');
 });
 
 it('toSQL(sourceTable)', () => {
   itThrows(() => {
-    const sql = mm.sql`${post.datetime} = ${mm.datetimeNow()}`;
+    const sql = mm.sql`${post.datetime} = ${mm.localDatetimeNow()}`;
     const io = mr.sqlIO(sql, dialect);
     io.toSQL(user);
   }, 'Source table assertion failed, expected "Table(user)", got "Table(post|db_post)".');
 
   itThrows(() => {
-    const sql = mm.sql`${post.datetime} = ${mm.datetimeNow()} ${user.id}`;
+    const sql = mm.sql`${post.datetime} = ${mm.localDatetimeNow()} ${user.id}`;
     const io = mr.sqlIO(sql, dialect);
     io.toSQL(post);
   }, 'Source table assertion failed, expected "Table(post|db_post)", got "Table(user)".');
