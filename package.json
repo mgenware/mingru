@@ -35,24 +35,24 @@
   ],
   "devDependencies": {
     "@types/mocha": "^5.2.7",
-    "@types/node": "^12.12.7",
-    "@typescript-eslint/eslint-plugin": "^2.7.0",
-    "@typescript-eslint/parser": "^2.7.0",
+    "@types/node": "^13.1.4",
+    "@typescript-eslint/eslint-plugin": "^2.14.0",
+    "@typescript-eslint/parser": "^2.14.0",
     "del-cli": "^3.0.0",
-    "eslint": "^6.6.0",
-    "it-throws": "^3.1.0",
-    "mingru-models": "^0.31.0",
+    "eslint": "^6.8.0",
+    "it-throws": "^3.2.1",
+    "mingru-models": "^0.32.0",
     "mocha": "^6.2.2",
     "source-map-support": "^0.5.16",
     "tempy": "^0.3.0",
-    "typescript": "^3.7.2"
+    "typescript": "^3.7.4"
   },
   "dependencies": {
     "chalk": "^3.0.0",
     "del": "^5.1.0",
-    "m-fs": "^2.3.2",
+    "m-fs": "^2.3.4",
     "sql-escape-string": "^1.1.0",
-    "throw-if-arg-empty": "^2.1.0",
-    "to-type-string": "^1.0.1"
+    "throw-if-arg-empty": "^2.2.1",
+    "to-type-string": "^1.0.2"
   }
 }
