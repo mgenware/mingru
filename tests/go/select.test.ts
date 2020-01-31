@@ -464,3 +464,26 @@ it('Ignored keys (raw columns)', async () => {
     memberJSONKeyStyle: mr.MemberJSONKeyStyle.camelCase,
   });
 });
+
+it('Exclude empty properties', async () => {
+  class RplTA extends mm.TableActions {
+    selectT = mm.select(
+      rpl.user_id.join(user).url_name.attrs({
+        [mm.ColumnAttributes.isPrivate]: true,
+        [mm.ColumnAttributes.excludeEmptyValue]: true,
+      }),
+      rpl.user_id
+        .join(user)
+        .id.attrs({
+          [mm.ColumnAttributes.isPrivate]: true,
+          [mm.ColumnAttributes.excludeEmptyValue]: true,
+        }),
+      rpl.to_user_id.join(user).url_name,
+    );
+  }
+  const ta = mm.tableActions(rpl, RplTA);
+  await testBuildAsync(ta, 'select/ignoredKeys', {
+    noFileHeader: true,
+    memberJSONKeyStyle: mr.MemberJSONKeyStyle.camelCase,
+  });
+});

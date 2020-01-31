@@ -12,20 +12,20 @@ export class FuncSignature {
 }
 
 export class MemberTagUtil {
-  static getSnakeCaseJSONTag(name: string) {
-    return this.getJSONTag(mm.utils.toSnakeCase(name));
+  static getSnakeCaseJSONTag(name: string, omitEmpty: boolean) {
+    return this.getJSONTag(mm.utils.toSnakeCase(name), omitEmpty);
   }
 
-  static getCamelCaseJSONTag(name: string): string {
-    return this.getJSONTag(mm.utils.toCamelCase(name));
+  static getCamelCaseJSONTag(name: string, omitEmpty: boolean): string {
+    return this.getJSONTag(mm.utils.toCamelCase(name), omitEmpty);
   }
 
   static getIgnoreJSONTag(): string {
-    return this.getJSONTag('-');
+    return this.getJSONTag('-', false);
   }
 
-  private static getJSONTag(name: string): string {
-    return '`json:"' + name + '"`';
+  private static getJSONTag(name: string, omitEmpty: boolean): string {
+    return `\`json:"${name}${omitEmpty ? ',omitempty' : ''}"\``;
   }
 }
 
@@ -34,7 +34,8 @@ export class StructInfo {
     public typeName: string,
     public members: VarInfo[],
     public nameStyle: MemberJSONKeyStyle,
-    public ignored: Set<VarInfo> | null,
+    public ignoredMembers: Set<VarInfo> | null,
+    public omitEmptyMembers: Set<VarInfo> | null,
   ) {}
 }
 
@@ -53,7 +54,8 @@ export function struct(
   typeName: string,
   members: VarInfo[],
   nameStyle: MemberJSONKeyStyle,
-  ignored: Set<VarInfo> | null,
+  ignoredMembers: Set<VarInfo> | null = null,
+  omitEmptyMembers: Set<VarInfo> | null = null,
 ): string {
   let code = `// ${typeName} ...
 type ${typeName} struct {
@@ -69,12 +71,13 @@ type ${typeName} struct {
     code += `\t${mem.name.padEnd(nameMaxLen)} ${mem.type.typeString.padEnd(
       typeMaxLen,
     )}`;
-    if (ignored && ignored.has(mem)) {
+    const omitEmpty = omitEmptyMembers?.has(mem) || false;
+    if (ignoredMembers && ignoredMembers.has(mem)) {
       tag = MemberTagUtil.getIgnoreJSONTag();
     } else if (nameStyle === MemberJSONKeyStyle.camelCase) {
-      tag = MemberTagUtil.getCamelCaseJSONTag(mem.name);
+      tag = MemberTagUtil.getCamelCaseJSONTag(mem.name, omitEmpty);
     } else if (nameStyle === MemberJSONKeyStyle.snakeCase) {
-      tag = MemberTagUtil.getSnakeCaseJSONTag(mem.name);
+      tag = MemberTagUtil.getSnakeCaseJSONTag(mem.name, omitEmpty);
     }
     if (tag) {
       code += ` ${tag}`;

@@ -199,7 +199,7 @@ export default class GoTABuilder {
 
   private buildTableObject(): string {
     const { className, instanceName } = this.taIO;
-    let code = go.struct(className, [], MemberJSONKeyStyle.none, null);
+    let code = go.struct(className, [], MemberJSONKeyStyle.none);
     code += `\n// ${instanceName} ...
 var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     return code;
@@ -247,17 +247,21 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     // Selected columns
     const selectedFields: VarInfo[] = [];
     const jsonIgnoreFields = new Set<VarInfo>();
+    const omitEmptyFields = new Set<VarInfo>();
     for (const col of io.cols) {
       const fieldName = mm.utils.toPascalCase(col.varName);
       const typeInfo = this.dialect.colTypeToGoType(col.getResultType());
       const varInfo = new VarInfo(fieldName, typeInfo);
 
       selectedFields.push(varInfo);
-      if (
-        col.selectedColumn instanceof mm.RawColumn &&
-        col.selectedColumn.__attrs[mm.ColumnAttributes.isPrivate] === true
-      ) {
-        jsonIgnoreFields.add(varInfo);
+      if (col.selectedColumn instanceof mm.RawColumn) {
+        const attrs = col.selectedColumn.__attrs;
+        if (attrs[mm.ColumnAttributes.isPrivate] === true) {
+          jsonIgnoreFields.add(varInfo);
+        }
+        if (attrs[mm.ColumnAttributes.excludeEmptyValue] === true) {
+          omitEmptyFields.add(varInfo);
+        }
       }
     }
 
@@ -273,6 +277,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
             selectedFields,
             resultMemberJSONStyle,
             jsonIgnoreFields,
+            omitEmptyFields,
           ),
         );
       } else {
