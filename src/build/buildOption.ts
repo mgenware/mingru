@@ -1,4 +1,4 @@
-export enum MemberJSONKeyStyle {
+export enum JSONEncodingStyle {
   none,
   camelCase,
   snakeCase,
@@ -9,5 +9,5 @@ export interface BuildOption {
   noFileHeader?: boolean;
   cleanBuild?: boolean;
   noOutput?: boolean;
-  memberJSONKeyStyle?: MemberJSONKeyStyle;
+  jsonEncodingStyle?: JSONEncodingStyle;
 }

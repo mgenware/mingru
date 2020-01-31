@@ -411,7 +411,7 @@ it('snake_case keys', async () => {
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/snakeCaseKeys', {
     noFileHeader: true,
-    memberJSONKeyStyle: mr.MemberJSONKeyStyle.snakeCase,
+    jsonEncodingStyle: mr.JSONEncodingStyle.snakeCase,
   });
 });
 
@@ -426,7 +426,7 @@ it('camelCase keys', async () => {
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/camelCaseKeys', {
     noFileHeader: true,
-    memberJSONKeyStyle: mr.MemberJSONKeyStyle.camelCase,
+    jsonEncodingStyle: mr.JSONEncodingStyle.camelCase,
   });
 });
 
@@ -445,7 +445,7 @@ it('Ignored keys', async () => {
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/ignoredKeys', {
     noFileHeader: true,
-    memberJSONKeyStyle: mr.MemberJSONKeyStyle.camelCase,
+    jsonEncodingStyle: mr.JSONEncodingStyle.camelCase,
   });
 });
 
@@ -461,7 +461,7 @@ it('Ignored keys (raw columns)', async () => {
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/ignoredKeysRawCols', {
     noFileHeader: true,
-    memberJSONKeyStyle: mr.MemberJSONKeyStyle.camelCase,
+    jsonEncodingStyle: mr.JSONEncodingStyle.camelCase,
   });
 });
 
@@ -472,18 +472,16 @@ it('Exclude empty properties', async () => {
         [mm.ColumnAttributes.isPrivate]: true,
         [mm.ColumnAttributes.excludeEmptyValue]: true,
       }),
-      rpl.user_id
-        .join(user)
-        .id.attrs({
-          [mm.ColumnAttributes.isPrivate]: true,
-          [mm.ColumnAttributes.excludeEmptyValue]: true,
-        }),
+      rpl.user_id.join(user).id.attrs({
+        [mm.ColumnAttributes.isPrivate]: true,
+        [mm.ColumnAttributes.excludeEmptyValue]: true,
+      }),
       rpl.to_user_id.join(user).url_name,
     );
   }
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/ignoredKeys', {
     noFileHeader: true,
-    memberJSONKeyStyle: mr.MemberJSONKeyStyle.camelCase,
+    jsonEncodingStyle: mr.JSONEncodingStyle.camelCase,
   });
 });

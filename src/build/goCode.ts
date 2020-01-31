@@ -1,5 +1,5 @@
 import * as mm from 'mingru-models';
-import { MemberJSONKeyStyle } from './buildOption';
+import { JSONEncodingStyle } from './buildOption';
 import VarInfo from '../lib/varInfo';
 
 export class FuncSignature {
@@ -33,7 +33,7 @@ export class StructInfo {
   constructor(
     public typeName: string,
     public members: VarInfo[],
-    public nameStyle: MemberJSONKeyStyle,
+    public nameStyle: JSONEncodingStyle,
     public ignoredMembers: Set<VarInfo> | null,
     public omitEmptyMembers: Set<VarInfo> | null,
   ) {}
@@ -53,7 +53,7 @@ type ${typeName} interface {
 export function struct(
   typeName: string,
   members: VarInfo[],
-  nameStyle: MemberJSONKeyStyle,
+  nameStyle: JSONEncodingStyle,
   ignoredMembers: Set<VarInfo> | null = null,
   omitEmptyMembers: Set<VarInfo> | null = null,
 ): string {
@@ -63,7 +63,7 @@ type ${typeName} struct {
   // Find the max length of var names
   const nameMaxLen = Math.max(...members.map(m => m.name.length));
   let typeMaxLen = 0;
-  if (nameStyle !== MemberJSONKeyStyle.none) {
+  if (nameStyle !== JSONEncodingStyle.none) {
     typeMaxLen = Math.max(...members.map(m => m.type.typeString.length));
   }
   for (const mem of members) {
@@ -74,9 +74,9 @@ type ${typeName} struct {
     const omitEmpty = omitEmptyMembers?.has(mem) || false;
     if (ignoredMembers && ignoredMembers.has(mem)) {
       tag = MemberTagUtil.getIgnoreJSONTag();
-    } else if (nameStyle === MemberJSONKeyStyle.camelCase) {
+    } else if (nameStyle === JSONEncodingStyle.camelCase) {
       tag = MemberTagUtil.getCamelCaseJSONTag(mem.name, omitEmpty);
-    } else if (nameStyle === MemberJSONKeyStyle.snakeCase) {
+    } else if (nameStyle === JSONEncodingStyle.snakeCase) {
       tag = MemberTagUtil.getSnakeCaseJSONTag(mem.name, omitEmpty);
     }
     if (tag) {

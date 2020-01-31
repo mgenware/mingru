@@ -15,7 +15,7 @@ import { WrapIO } from '../io/wrapIO';
 import { TransactIO } from '../io/transactIO';
 import LinesBuilder from './linesBuilder';
 import * as utils from '../io/utils';
-import { BuildOption, MemberJSONKeyStyle } from './buildOption';
+import { BuildOption, JSONEncodingStyle } from './buildOption';
 import GoBuilderContext from './goBuilderContext';
 
 function joinParams(arr: string[]): string {
@@ -199,7 +199,7 @@ export default class GoTABuilder {
 
   private buildTableObject(): string {
     const { className, instanceName } = this.taIO;
-    let code = go.struct(className, [], MemberJSONKeyStyle.none);
+    let code = go.struct(className, [], JSONEncodingStyle.none);
     code += `\n// ${instanceName} ...
 var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     return code;
@@ -267,7 +267,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
     // Generate result type definition
     const resultMemberJSONStyle =
-      this.options.memberJSONKeyStyle || MemberJSONKeyStyle.none;
+      this.options.jsonEncodingStyle || JSONEncodingStyle.none;
     if (selMode !== mm.SelectActionMode.field) {
       if (action.__attrs[mm.ActionAttributes.resultTypeName]) {
         this.context.handleResultType(
