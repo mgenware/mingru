@@ -15,7 +15,7 @@ import { WrapIO } from '../io/wrapIO';
 import { TransactIO } from '../io/transactIO';
 import LinesBuilder from './linesBuilder';
 import * as utils from '../io/utils';
-import { BuildOption, JSONEncodingStyle } from './buildOption';
+import { BuildOptions, JSONEncodingStyle } from './buildOptions';
 import GoBuilderContext from './goBuilderContext';
 
 function joinParams(arr: string[]): string {
@@ -39,13 +39,13 @@ class CodeMap {
 }
 
 export default class GoTABuilder {
-  private options: BuildOption;
+  private options: BuildOptions;
   private imports = new go.ImportList();
   private dialect: Dialect;
 
   constructor(
     public taIO: TAIO,
-    public opts: BuildOption,
+    public opts: BuildOptions,
     public context: GoBuilderContext,
   ) {
     throwIfFalsy(taIO, 'taIO');

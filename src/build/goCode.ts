@@ -1,5 +1,5 @@
 import * as mm from 'mingru-models';
-import { JSONEncodingStyle } from './buildOption';
+import { JSONEncodingStyle } from './buildOptions';
 import VarInfo from '../lib/varInfo';
 
 export class FuncSignature {

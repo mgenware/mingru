@@ -4,7 +4,7 @@ export enum JSONEncodingStyle {
   snakeCase,
 }
 
-export interface BuildOption {
+export interface BuildOptions {
   packageName?: string;
   noFileHeader?: boolean;
   cleanBuild?: boolean;

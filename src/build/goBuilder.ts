@@ -4,7 +4,7 @@ import GoTABuilder from './goTABuilder';
 import GoBuilderContext from './goBuilderContext';
 import { TAIO } from '../io/taIO';
 import Dialect from '../dialect';
-import { BuildOption } from './buildOption';
+import { BuildOptions } from './buildOptions';
 import * as nodepath from 'path';
 import * as mfs from 'm-fs';
 import * as go from './goCode';
@@ -15,7 +15,7 @@ export default class GoBuilder {
     tas: mm.TableActions[],
     outDir: string,
     dialect: Dialect,
-    opts: BuildOption,
+    opts: BuildOptions,
   ) {
     throwIfEmpty(tas, 'tas');
     // Remove duplicate values.

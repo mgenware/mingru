@@ -7,15 +7,15 @@ import * as nodepath from 'path';
 import * as del from 'del';
 import logger from '../logger';
 import CSQLBuilder from './csqlBuilder';
-import { BuildOption } from './buildOption';
+import { BuildOptions } from './buildOptions';
 
 export default class Builder {
-  opts: BuildOption;
+  opts: BuildOptions;
   private buildStarted = false;
   constructor(
     public dialect: Dialect,
     public outDir: string,
-    opts?: BuildOption,
+    opts?: BuildOptions,
   ) {
     throwIfFalsy(dialect, 'dialect');
     throwIfFalsy(outDir, 'outDir');

@@ -6,7 +6,7 @@ export { default as GoBuilder } from './build/goBuilder';
 export { default as GoTABuilder } from './build/goTABuilder';
 export { default as GoBuilderContext } from './build/goBuilderContext';
 export { default as CSQLBuilder } from './build/csqlBuilder';
-export * from './build/buildOption';
+export * from './build/buildOptions';
 
 export * from './io/selectIO';
 export * from './io/updateIO';

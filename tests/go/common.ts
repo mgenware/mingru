@@ -8,11 +8,11 @@ import * as assert from 'assert';
 const dialect = mr.mysql;
 const DestDataDir = 'tests/go/dest';
 
-function defaultOptions(opts?: mr.BuildOption) {
+function defaultOptions(opts?: mr.BuildOptions) {
   if (opts) {
     return opts;
   }
-  const defOpts: mr.BuildOption = {};
+  const defOpts: mr.BuildOptions = {};
   defOpts.noFileHeader = true;
   return defOpts;
 }
@@ -20,7 +20,7 @@ function defaultOptions(opts?: mr.BuildOption) {
 export async function testBuildAsync(
   ta: mm.TableActions,
   path: string,
-  opts?: mr.BuildOption,
+  opts?: mr.BuildOptions,
   ctx?: mr.GoBuilderContext,
 ) {
   let content = '';
@@ -44,7 +44,7 @@ export async function testBuildAsync(
 export async function testBuildFullAsync(
   ta: mm.TableActions,
   path: string,
-  opts?: mr.BuildOption,
+  opts?: mr.BuildOptions,
   ctx?: mr.GoBuilderContext,
 ) {
   let content = '';
@@ -74,7 +74,7 @@ export async function testBuildToDirAsync(
   actions: mm.TableActions[],
   files: string[],
   expectedDir: string,
-  opts?: mr.BuildOption,
+  opts?: mr.BuildOptions,
   buildCSQL = false,
 ) {
   opts = opts || {};
