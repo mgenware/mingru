@@ -411,7 +411,7 @@ it('snake_case keys', async () => {
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/snakeCaseKeys', {
     noFileHeader: true,
-    jsonEncodingStyle: mr.JSONEncodingStyle.snakeCase,
+    jsonEncoding: { encodingStyle: mr.JSONEncodingStyle.snakeCase },
   });
 });
 
@@ -426,7 +426,7 @@ it('camelCase keys', async () => {
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/camelCaseKeys', {
     noFileHeader: true,
-    jsonEncodingStyle: mr.JSONEncodingStyle.camelCase,
+    jsonEncoding: { encodingStyle: mr.JSONEncodingStyle.camelCase },
   });
 });
 
@@ -445,7 +445,7 @@ it('Ignored keys', async () => {
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/ignoredKeys', {
     noFileHeader: true,
-    jsonEncodingStyle: mr.JSONEncodingStyle.camelCase,
+    jsonEncoding: { encodingStyle: mr.JSONEncodingStyle.camelCase },
   });
 });
 
@@ -461,7 +461,7 @@ it('Ignored keys (raw columns)', async () => {
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/ignoredKeysRawCols', {
     noFileHeader: true,
-    jsonEncodingStyle: mr.JSONEncodingStyle.camelCase,
+    jsonEncoding: { encodingStyle: mr.JSONEncodingStyle.camelCase },
   });
 });
 
@@ -473,15 +473,38 @@ it('Exclude empty properties', async () => {
         [mm.ColumnAttributes.excludeEmptyValue]: true,
       }),
       rpl.user_id.join(user).id.attrs({
+        [mm.ColumnAttributes.excludeEmptyValue]: true,
+      }),
+      rpl.to_user_id.join(user).url_name.attrs({
+        [mm.ColumnAttributes.excludeEmptyValue]: true,
+      }),
+    );
+  }
+  const ta = mm.tableActions(rpl, RplTA);
+  await testBuildAsync(ta, 'select/excludedEmptyProps', {
+    noFileHeader: true,
+    jsonEncoding: { encodingStyle: mr.JSONEncodingStyle.camelCase },
+  });
+});
+
+it('Exclude all empty properties', async () => {
+  class RplTA extends mm.TableActions {
+    selectT = mm.select(
+      rpl.user_id.join(user).url_name.attrs({
         [mm.ColumnAttributes.isPrivate]: true,
+      }),
+      rpl.user_id.join(user).id.attrs({
         [mm.ColumnAttributes.excludeEmptyValue]: true,
       }),
       rpl.to_user_id.join(user).url_name,
     );
   }
   const ta = mm.tableActions(rpl, RplTA);
-  await testBuildAsync(ta, 'select/ignoredKeys', {
+  await testBuildAsync(ta, 'select/excludedEmptyProps', {
     noFileHeader: true,
-    jsonEncodingStyle: mr.JSONEncodingStyle.camelCase,
+    jsonEncoding: {
+      encodingStyle: mr.JSONEncodingStyle.camelCase,
+      excludeEmptyValues: true,
+    },
   });
 });

@@ -4,10 +4,15 @@ export enum JSONEncodingStyle {
   snakeCase,
 }
 
+export interface JSONEncodingOptions {
+  encodingStyle?: JSONEncodingStyle;
+  excludeEmptyValues?: boolean;
+}
+
 export interface BuildOptions {
   packageName?: string;
   noFileHeader?: boolean;
   cleanBuild?: boolean;
   noOutput?: boolean;
-  jsonEncodingStyle?: JSONEncodingStyle;
+  jsonEncoding?: JSONEncodingOptions;
 }

@@ -52,6 +52,7 @@ export default class GoBuilder {
           info.members,
           info.nameStyle,
           info.ignoredMembers,
+          info.omitEmptyMembers,
         );
         resultTypesCode += '\n';
       }

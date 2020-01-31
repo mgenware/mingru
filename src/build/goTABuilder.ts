@@ -206,6 +206,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
   }
 
   private select(io: SelectIO): CodeMap {
+    const { options } = this;
     const { action } = io;
     const selMode = action.mode;
     const isPageMode = selMode === mm.SelectActionMode.page;
@@ -248,26 +249,39 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const selectedFields: VarInfo[] = [];
     const jsonIgnoreFields = new Set<VarInfo>();
     const omitEmptyFields = new Set<VarInfo>();
+    const omitAllEmptyFields =
+      options.jsonEncoding?.excludeEmptyValues || false;
+
     for (const col of io.cols) {
       const fieldName = mm.utils.toPascalCase(col.varName);
       const typeInfo = this.dialect.colTypeToGoType(col.getResultType());
       const varInfo = new VarInfo(fieldName, typeInfo);
 
       selectedFields.push(varInfo);
+
+      // Checking explicitly set attributes.
       if (col.selectedColumn instanceof mm.RawColumn) {
         const attrs = col.selectedColumn.__attrs;
         if (attrs[mm.ColumnAttributes.isPrivate] === true) {
           jsonIgnoreFields.add(varInfo);
         }
-        if (attrs[mm.ColumnAttributes.excludeEmptyValue] === true) {
+        if (
+          omitAllEmptyFields ||
+          attrs[mm.ColumnAttributes.excludeEmptyValue] === true
+        ) {
           omitEmptyFields.add(varInfo);
         }
       }
+
+      // Checking inherent attributes.
+      if (omitAllEmptyFields) {
+        omitEmptyFields.add(varInfo);
+      }
     }
 
-    // Generate result type definition
+    // Generate result type definition.
     const resultMemberJSONStyle =
-      this.options.jsonEncodingStyle || JSONEncodingStyle.none;
+      options.jsonEncoding?.encodingStyle || JSONEncodingStyle.none;
     if (selMode !== mm.SelectActionMode.field) {
       if (action.__attrs[mm.ActionAttributes.resultTypeName]) {
         this.context.handleResultType(
@@ -286,6 +300,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
           selectedFields,
           resultMemberJSONStyle,
           jsonIgnoreFields,
+          omitEmptyFields,
         );
 
         this.imports.addVars(selectedFields);
