@@ -55,7 +55,7 @@ it('getInputs', () => {
   expect(io.execArgs.toString(), 'sig: *string, id: uint64, b: string');
 });
 
-it('getReturns (isnert)', () => {
+it('getReturns (insert)', () => {
   class UserTA extends mm.TableActions {
     t = mm
       .unsafeInsert()
@@ -89,4 +89,29 @@ it('Validate setters', () => {
     const ta = mm.tableActions(post, PostTA);
     mr.insertIO(ta.t, mr.mysql);
   }, 'Source table assertion failed, expected "Table(post|db_post)", got "Table(user)".');
+});
+
+it('setDefaults', () => {
+  class Post extends mm.Table {
+    id = mm.pk();
+    title = mm.varChar(100);
+    content = mm.varChar(100, '');
+    datetime = mm.datetime('utc');
+  }
+  const post = mm.table(Post);
+
+  class PostTA extends mm.TableActions {
+    t = mm
+      .insertOne()
+      .setDefaults()
+      .setInputs();
+  }
+  const postTA = mm.tableActions(post, PostTA);
+  const v = postTA.t;
+  const io = mr.insertIO(v, dialect);
+
+  expect(
+    io.sql,
+    "INSERT INTO `post` (`title`, `content`, `datetime`) VALUES (?, '', UTC_TIMESTAMP())",
+  );
 });

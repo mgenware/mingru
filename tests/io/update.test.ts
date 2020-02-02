@@ -33,7 +33,7 @@ it('Update', () => {
   expect(io.setters[2].col, post.cmtCount);
 });
 
-it('Update with where', () => {
+it('Update with WHERE', () => {
   class PostTA extends mm.TableActions {
     t = mm
       .updateOne()
@@ -98,4 +98,23 @@ it('Validate setters', () => {
     const ta = mm.tableActions(post, PostTA);
     mr.insertIO(ta.t, mr.mysql);
   }, 'Source table assertion failed, expected "Table(post|db_post)", got "Table(user)".');
+});
+
+it('setDefaults', () => {
+  class Post extends mm.Table {
+    id = mm.pk();
+    title = mm.varChar(100);
+    content = mm.varChar(100, '');
+    datetime = mm.datetime('utc');
+  }
+  const post = mm.table(Post);
+
+  class PostTA extends mm.TableActions {
+    t = mm.unsafeUpdateAll().setDefaults(post.datetime);
+  }
+  const postTA = mm.tableActions(post, PostTA);
+  const v = postTA.t;
+  const io = mr.updateIO(v, dialect);
+
+  expect(io.sql, 'UPDATE `post` SET `datetime` = UTC_TIMESTAMP()');
 });
