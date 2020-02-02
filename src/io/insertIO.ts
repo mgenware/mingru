@@ -40,11 +40,11 @@ export class InsertIOProcessor {
     const fetchInsertedID =
       action.ensureOneRowAffected && !!table.__pkAIs.length;
 
-    // table
+    // Table
     const tableSQL = this.handleFrom(table);
     sql += tableSQL;
 
-    // setters
+    // Setters
     utils.validateSetters(action.setters, table);
     const setters = SetterIO.fromAction(
       action,
@@ -54,7 +54,7 @@ export class InsertIOProcessor {
     const colNames = setters.map(s => dialect.encodeColumnName(s.col));
     sql += ` (${colNames.join(', ')})`;
 
-    // values
+    // Values
     const colValues = setters.map(s => s.sql.toSQL(table));
     sql += ` VALUES (${colValues.join(', ')})`;
 
@@ -68,7 +68,7 @@ export class InsertIOProcessor {
     // Skip the first param, which is queryable.
     execArgs.merge(funcArgs.list.slice(1));
 
-    // Return values.
+    // Return values
     const returnValue = new VarList(`Returns of action ${action.__name}`);
     if (fetchInsertedID) {
       returnValue.add(defs.insertedIDVar);

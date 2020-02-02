@@ -86,7 +86,7 @@ class UpdateIOProcessor {
     }
     funcArgs.merge(setterVars.list);
 
-    // returns
+    // Return values
     const returnValues = new VarList(`Returns of action ${action.__name}`);
     if (!action.ensureOneRowAffected) {
       returnValues.add(
