@@ -17,7 +17,17 @@ export class SetterIO {
     // User setters come first.
     const res = Array.from(
       action.setters,
-      ([key, value]) => new SetterIO(key, sqlIO(value, dialect)),
+      ([key, value]) =>
+        new SetterIO(
+          key,
+          sqlIO(
+            value instanceof mm.SQL
+              ? value
+              : // Pass `null` for table argument. If `value` is not SQL, it's the default value of a column, thus no need the table argument as it's not an SQL object.
+                mm.sql`${dialect.objToSQL(value, null)}`,
+            dialect,
+          ),
+        ),
     );
 
     mm.enumerateColumns(table, col => {

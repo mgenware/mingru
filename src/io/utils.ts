@@ -38,7 +38,7 @@ export function lowercaseFirstChar(s: string): string {
 }
 
 export function validateSetters(
-  setters: Map<mm.Column, mm.SQL>,
+  setters: Map<mm.Column, unknown>,
   table: mm.Table,
 ) {
   for (const setter of setters.keys()) {
