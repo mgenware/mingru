@@ -55,7 +55,7 @@ class TransactIOProcessor {
       const io = actionToIO(
         childAction,
         dialect,
-        `transaction child index "${idx}"`,
+        `transaction child index ${idx}`,
       );
 
       // `isMemberSibling` describes if this member and current TX action
