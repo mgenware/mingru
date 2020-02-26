@@ -34,18 +34,18 @@
     "/dist/**/*.map"
   ],
   "devDependencies": {
-    "@types/mocha": "^5.2.7",
-    "@types/node": "^13.1.4",
-    "@typescript-eslint/eslint-plugin": "^2.14.0",
-    "@typescript-eslint/parser": "^2.14.0",
+    "@types/mocha": "^7.0.1",
+    "@types/node": "^13.7.6",
+    "@typescript-eslint/eslint-plugin": "^2.21.0",
+    "@typescript-eslint/parser": "^2.21.0",
     "del-cli": "^3.0.0",
     "eslint": "^6.8.0",
     "it-throws": "^3.2.1",
-    "mingru-models": "^0.33.1",
-    "mocha": "^6.2.2",
+    "mingru-models": "^0.33.2",
+    "mocha": "^7.1.0",
     "source-map-support": "^0.5.16",
-    "tempy": "^0.3.0",
-    "typescript": "^3.7.4"
+    "tempy": "^0.4.0",
+    "typescript": "^3.8.2"
   },
   "dependencies": {
     "chalk": "^3.0.0",
