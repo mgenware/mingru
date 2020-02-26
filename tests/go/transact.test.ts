@@ -22,7 +22,7 @@ it('Declare return types', async () => {
       .setReturnValues('id2');
   }
   const employeeTA = mm.tableActions(employee, EmployeeTA);
-  await testBuildAsync(employeeTA, 'tx/declareRet1/employee');
+  await testBuildAsync(employeeTA, 'tx/declareRetFromInsert/employee');
 });
 
 it('Return multiple values', async () => {
