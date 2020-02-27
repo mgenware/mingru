@@ -156,11 +156,11 @@ it('TX member IOs', () => {
   const members = io.memberIOs;
   assert.equal(
     members[0].toString(),
-    'TransactMemberIO(InsertAction(insert, Table(employee|employees)), da.Insert, false, undefined)',
+    'TransactMemberIO(InsertAction(insert, Table(employee|employees)), da.Insert, false)',
   );
   assert.equal(
     members[1].toString(),
-    'TransactMemberIO(InsertAction(insert, Table(employee|employees)), da.Insert, false, {"__insertedID":"id2"})',
+    'TransactMemberIO(InsertAction(insert, Table(employee|employees)), da.Insert, false)',
   );
   assert.equal(
     members[0].actionIO.returnValues.toString(),
@@ -170,5 +170,4 @@ it('TX member IOs', () => {
     members[1].actionIO.returnValues.toString(),
     '__insertedID: uint64',
   );
-  assert.deepEqual(members[1].declaredReturnValues, { __insertedID: 'id2' });
 });

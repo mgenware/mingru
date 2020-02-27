@@ -25,6 +25,55 @@ it('Declare return types', async () => {
   await testBuildAsync(employeeTA, 'tx/declareRetFromInsert/employee');
 });
 
+it('Pass values in child actions (no return value declaration)', async () => {
+  class Employee extends mm.Table {
+    id = mm.pk(mm.int()).autoIncrement.setDBName('emp_no');
+    firstName = mm.varChar(50);
+  }
+  const employee = mm.table(Employee, 'employees');
+  class EmployeeTA extends mm.TableActions {
+    getFirstName = mm.selectField(employee.firstName).byID();
+    insert = mm.insertOne().setInputs();
+    insert1 = mm.transact(
+      this.getFirstName.declareReturnValue(mm.ReturnValues.result, 'firstName'),
+      mm
+        .insertOne()
+        .setInputs()
+        .wrap({ firstName: mm.valueRef('firstName') }),
+    );
+  }
+  const employeeTA = mm.tableActions(employee, EmployeeTA);
+  await testBuildAsync(employeeTA, 'tx/passValues/employee');
+});
+
+it('Pass values in child actions and declare return values', async () => {
+  class Employee extends mm.Table {
+    id = mm.pk(mm.int()).autoIncrement.setDBName('emp_no');
+    firstName = mm.varChar(50);
+  }
+  const employee = mm.table(Employee, 'employees');
+  class EmployeeTA extends mm.TableActions {
+    getFirstName = mm.selectField(employee.firstName).byID();
+    insert1 = mm
+      .transact(
+        this.getFirstName.declareReturnValue(
+          mm.ReturnValues.result,
+          'firstName',
+        ),
+        mm
+          .insertOne()
+          .setInputs()
+          .wrap({ firstName: mm.valueRef('firstName') })
+          .declareReturnValues({
+            [mm.ReturnValues.insertedID]: 'id2',
+          }),
+      )
+      .setReturnValues('firstName', 'id2');
+  }
+  const employeeTA = mm.tableActions(employee, EmployeeTA);
+  await testBuildAsync(employeeTA, 'tx/passValuesAndDecRet/employee');
+});
+
 it('Return multiple values', async () => {
   class Employee extends mm.Table {
     id = mm.pk(mm.int()).setDBName('emp_no').autoIncrement;

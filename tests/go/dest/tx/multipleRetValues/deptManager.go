@@ -22,15 +22,15 @@ func (da *TableTypeDeptManager) insertChild3(queryable dbx.Queryable, empNo int,
 
 // Insert ...
 func (da *TableTypeDeptManager) Insert(db *sql.DB, firstName string, lastName string, gender string, birthDate time.Time, hireDate time.Time, name string, fromDate time.Time, toDate time.Time) (uint64, uint64, error) {
-	var deptNo uint64
-	var empNo uint64
+	var deptNoExported uint64
+	var empNoExported uint64
 	txErr := dbx.Transact(db, func(tx *sql.Tx) error {
 		var err error
-		empNo, err = Employee.InsertEmp(tx, firstName, lastName, gender, birthDate, hireDate)
+		empNo, err := Employee.InsertEmp(tx, firstName, lastName, gender, birthDate, hireDate)
 		if err != nil {
 			return err
 		}
-		deptNo, err = Dept.InsertDept(tx, name)
+		deptNo, err := Dept.InsertDept(tx, name)
 		if err != nil {
 			return err
 		}
@@ -38,9 +38,11 @@ func (da *TableTypeDeptManager) Insert(db *sql.DB, firstName string, lastName st
 		if err != nil {
 			return err
 		}
+		deptNoExported = deptNo
+		empNoExported = empNo
 		return nil
 	})
-	return deptNo, empNo, txErr
+	return deptNoExported, empNoExported, txErr
 }
 
 // InsertCore ...
