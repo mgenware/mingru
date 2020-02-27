@@ -485,7 +485,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     // We don't use queryable in transaction arguments but we still need to import the dbx namespace as we're calling dbx.transact.
     this.imports.addVars([defs.dbxQueryableVar]);
 
-    // Declare err
+    // Declare err variable.
     innerBody += 'var err error\n';
 
     let memberIdx = -1;
@@ -496,14 +496,19 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
       // Return value code:
       // e.g. _, val1, _, val2, err = action(a, b, ...)
-      const declaredReturnValues = memberIO.declaredReturnValues || {};
+      const declaredReturnValueNames = memberIO.member.returnValues || {};
+
+      // Iterate through return values.
+      let hasDeclaredVars = false;
       for (const ret of mActionIO.returnValues.list) {
-        const varName = declaredReturnValues[ret.name]
-          ? declaredReturnValues[ret.name]
-          : '_';
-        innerBody += `${varName}, `;
+        // Check if this value has been exported (declared).
+        const varName = declaredReturnValueNames[ret.name];
+        if (varName) {
+          hasDeclaredVars = true;
+        }
+        innerBody += `${varName || '_'}, `;
       }
-      innerBody += 'err = ';
+      innerBody += `err ${hasDeclaredVars ? ':' : ''}= `;
       innerBody += memberIO.callPath;
       // Generating the calling code of this member
       const queryParamsCode = mActionIO.funcArgs.list
@@ -528,14 +533,22 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       innerBody += ')\n';
       innerBody += `\nif err != nil {\n\treturn err\n}\n`;
     }
+
+    // Assign inner variables to outer return values if needed.
+    if (returnValues.length) {
+      for (const v of returnValues.list) {
+        innerBody += `${this.txExportedVar(v.name)} = ${v.name}\n`;
+      }
+    }
+
     innerBody += 'return nil\n';
 
     let body = '';
-    // Declare return variables if needed
+    // Declare return variables if needed.
     if (returnValues.length) {
       this.imports.addVars(returnValues.list);
       for (const v of returnValues.list) {
-        body += `var ${v.name} ${v.type.typeString}\n`;
+        body += `var ${this.txExportedVar(v.name)} ${v.type.typeString}\n`;
       }
     }
     body += 'txErr := dbx.Transact(db, func(tx *sql.Tx) error {\n';
@@ -543,7 +556,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     body += '\n})\nreturn ';
     if (returnValues.length) {
       for (const v of returnValues.list) {
-        body += `${v.name}, `;
+        body += `${this.txExportedVar(v.name)}, `;
       }
     }
     body += 'txErr\n';
@@ -558,5 +571,9 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
   private increaseIndent(code: string): string {
     const lines = code.match(/[^\r\n]+/g) || [code];
     return lines.map(line => `\t${line}`).join('\n');
+  }
+
+  private txExportedVar(name: string): string {
+    return `${name}Exported`;
   }
 }

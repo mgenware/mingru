@@ -4,7 +4,7 @@ import { throwIfFalsy, throwIfFalsyStrict } from 'throw-if-arg-empty';
 /**
  * Note that variables with same names and types are considered duplicates. Variables with same names but different types are always invalid and will trigger exceptions.
  * When duplicates are allowed:
- *   Used in SQLIO (for example, WHERE expressions): all variables are tracked in insertion order.
+ *   Used in `SQLIO` (for example, WHERE expressions): all variables are tracked in insertion order.
  * When duplicates are NOT allowed:
  *   Used in selected columns, setters. Exceptions are thrown in this case.
  */
