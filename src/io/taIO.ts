@@ -1,7 +1,7 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect from '../dialect';
-import * as utils from './utils';
+import * as utils from '../lib/stringUtils';
 import { ActionIO } from './actionIO';
 import actionToIO from './actionToIO';
 

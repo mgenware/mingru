@@ -8,7 +8,7 @@ import VarList from '../lib/varList';
 import VarInfo from '../lib/varInfo';
 import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
-import * as utils from './utils';
+import * as utils from '../lib/stringUtils';
 
 export class UpdateIO extends ActionIO {
   constructor(

@@ -6,7 +6,7 @@ import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
 import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
-import * as utils from './utils';
+import * as utils from '../lib/stringUtils';
 
 export class InsertIO extends ActionIO {
   returnMember: ActionIO | undefined;

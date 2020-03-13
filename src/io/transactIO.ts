@@ -4,7 +4,7 @@ import Dialect from '../dialect';
 import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
 import actionToIO, { registerHandler } from './actionToIO';
-import * as utils from './utils';
+import * as utils from '../lib/stringUtils';
 import * as defs from '../defs';
 import VarInfo from '../lib/varInfo';
 

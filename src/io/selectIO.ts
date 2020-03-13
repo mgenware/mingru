@@ -4,7 +4,7 @@ import Dialect from '../dialect';
 import toTypeString from 'to-type-string';
 import { SQLIO, sqlIO } from './sqlIO';
 import { ActionIO } from './actionIO';
-import * as utils from './utils';
+import * as utils from '../lib/stringUtils';
 import VarInfo, { TypeInfo } from '../lib/varInfo';
 import VarList from '../lib/varList';
 import { registerHandler } from './actionToIO';

@@ -14,7 +14,7 @@ import { ActionIO } from '../io/actionIO';
 import { WrapIO } from '../io/wrapIO';
 import { TransactIO } from '../io/transactIO';
 import LinesBuilder from './linesBuilder';
-import * as utils from '../io/utils';
+import * as utils from '../lib/stringUtils';
 import { BuildOptions, JSONEncodingStyle } from './buildOptions';
 import GoBuilderContext from './goBuilderContext';
 

@@ -4,7 +4,7 @@ import Dialect from '../dialect';
 import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
 import VarInfo from '../lib/varInfo';
-import * as utils from './utils';
+import * as utils from '../lib/stringUtils';
 import actionToIO, { registerHandler } from './actionToIO';
 import * as defs from '../defs';
 
@@ -62,7 +62,7 @@ class WrapIOProcessor {
     );
     funcArgs.add(defs.dbxQueryableVar);
 
-    // Skip the first param, which is always either dbx.Queryable or db.Tx
+    // Skip the first param, which is always either `dbx.Queryable` or `db.Tx`.
     for (let i = 1; i < innerFuncArgs.list.length; i++) {
       const arg = innerFuncArgs.list[i];
       const newValue = args[arg.name];

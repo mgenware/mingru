@@ -1,4 +1,4 @@
-import * as utils from './utils';
+import * as utils from '../lib/stringUtils';
 import * as mm from 'mingru-models';
 import VarList from '../lib/varList';
 import { throwIfFalsy } from 'throw-if-arg-empty';
