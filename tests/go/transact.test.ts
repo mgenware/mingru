@@ -193,3 +193,29 @@ it('Temp member actions (with from)', async () => {
   const postTA = mm.tableActions(post, PostTA);
   await testBuildAsync(postTA, 'tx/tmpActionsWithFrom/post');
 });
+
+it('Reference property values', async () => {
+  class User extends mm.Table {
+    id = mm.pk();
+    age = mm.int();
+    score = mm.int();
+    name = mm.varChar(200);
+  }
+  const user = mm.table(User);
+  class UserTA extends mm.TableActions {
+    t = mm.transact(
+      mm
+        .select(user.age, user.name)
+        .declareReturnValue(mm.ReturnValues.result, 'res'),
+      mm
+        .insertOne()
+        .setInputs()
+        .wrap({
+          age: mm.valueRef('res.Age'),
+          name: mm.valueRef('res.Name'),
+        }),
+    );
+  }
+  const userTA = mm.tableActions(user, UserTA);
+  await testBuildAsync(userTA, 'tx/refPropertyValues/user');
+});
