@@ -513,13 +513,13 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       // Generating the calling code of this member
       const queryParamsCode = mActionIO.funcArgs.list
         .slice(1) // Strip the first queryable param
-        .map(p => `${p.name}`)
+        .map(p => p.valueOrName)
         .join(', ');
       // If this is a temp member (created inside transaction),
       // then we also need to generate the member func body code.
       if (memberIO.isTemp) {
         const methodCode = this.handleActionIO(memberIO.actionIO, true);
-        // Put func code into head
+        // Put func code into head.
         headCode += methodCode;
         if (memberIdx !== memberCount - 1) {
           headCode += '\n';

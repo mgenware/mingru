@@ -108,11 +108,11 @@ it('ReturnRef', () => {
   const io = mr.wrapIO(wrapOther.retValue, dialect) as WrapIO;
   expect(
     io.funcArgs.toString(),
-    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, extID: uint64, urlName: string, followerCount: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, extID: uint64, followerCount: *string}',
+    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64=ValueRef(extID), urlName: string, followerCount: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64=ValueRef(extID), followerCount: *string}',
   );
   expect(
     io.execArgs.toString(),
-    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, extID: uint64, followerCount: *string',
+    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, followerCount: *string',
   );
   expect(io.funcPath, 'User.D');
 });

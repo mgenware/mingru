@@ -65,15 +65,19 @@ class WrapIOProcessor {
     // Skip the first param, which is always either `dbx.Queryable` or `db.Tx`.
     for (let i = 1; i < innerFuncArgs.list.length; i++) {
       const arg = innerFuncArgs.list[i];
-      const newValue = args[arg.name];
-      if (!newValue) {
-        // If this argument doesn't appear on `args`, it will still
-        // be an func argument.
+      const inputArg = args[arg.name];
+      // This argument is still exposed if it's not overwritten or it's overwritten by a `ValueRef`.
+      // Imagine a func `func(x, y)`.
+      // If input is a constant, e.g. {x: 123}, `x` won't be exposed, this IO results in:
+      //   `func(y) { innerFunc(123, y) }
+      // If input is a `ValueRef` like {x: result.prop}, `x` will still be exposed:
+      //   `func(x, y) { innerFunc(x, y) }
+      // In this case, `x` has a `ValueRef` value and is taken care of by the caller of this func because the `ValueRef`
+      // is only valid at the caller context.
+      if (!inputArg) {
         funcArgs.add(arg);
-      } else if (newValue instanceof mm.ValueRef) {
-        // If this argument appears on `args` with a `ValueRef`,
-        // it's being replaced by another name.
-        funcArgs.add(new VarInfo(newValue.name, arg.type, arg.value, true));
+      } else if (inputArg instanceof mm.ValueRef) {
+        funcArgs.add(VarInfo.withValue(arg, inputArg));
       }
     }
 
@@ -88,18 +92,16 @@ class WrapIOProcessor {
     );
 
     if (action.isTemp) {
-      // We can change innerIO in-place and return it as no other place is using it.
+      // `isTemp` means the `innerIO` is not used by any other actions. We can
+      // update it in-place and return it as the IO object for this action.
       innerIO.funcArgs = funcArgs;
       const innerExecArgs = innerIO.execArgs;
       for (let i = 0; i < innerExecArgs.list.length; i++) {
-        const v = innerExecArgs.list[i];
-        const value = args[v.name];
-        if (value) {
-          if (value instanceof mm.ValueRef) {
-            innerExecArgs.list[i] = VarInfo.withValue(v, value.name);
-          } else {
-            innerExecArgs.list[i] = VarInfo.withValue(v, `${value}`);
-          }
+        const arg = innerExecArgs.list[i];
+        const input = args[arg.name];
+        // If argument is a constant, update the `innerExecArgs`.
+        if (input && typeof input === 'string') {
+          innerExecArgs.list[i] = VarInfo.withValue(arg, input);
         }
       }
       return innerIO;
@@ -109,16 +111,13 @@ class WrapIOProcessor {
       `Exec args of action "${action.__name}"`,
       true,
     );
-    for (const v of innerFuncArgs.distinctList) {
-      const value = args[v.name];
-      if (value) {
-        if (value instanceof mm.ValueRef) {
-          execArgs.add(new VarInfo(value.name, v.type, v.value));
-        } else {
-          execArgs.add(VarInfo.withValue(v, `${value}`));
-        }
+    for (const arg of innerFuncArgs.distinctList) {
+      const input = args[arg.name];
+      // Update all arguments in `execArgs` that have been overwritten as constant.
+      if (input && typeof input === 'string') {
+        execArgs.add(VarInfo.withValue(arg, input));
       } else {
-        execArgs.add(v);
+        execArgs.add(arg);
       }
     }
     return new WrapIO(

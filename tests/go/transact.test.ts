@@ -158,7 +158,7 @@ it('Temp member actions', async () => {
   class PostTA extends mm.TableActions {
     insertCore = mm.insertOne().setInputs();
     insert = mm.transact(
-      userTA.updatePostCount.wrap({ offset: 1 }),
+      userTA.updatePostCount.wrap({ offset: '1' }),
       this.insertCore,
       mm
         .updateOne()
@@ -212,7 +212,7 @@ it('Reference property values', async () => {
         .setInputs()
         .wrap({
           age: mm.valueRef('res.Age'),
-          name: mm.valueRef('res.Name'),
+          name: '"FOO"',
         }),
     );
   }

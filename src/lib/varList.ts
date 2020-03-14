@@ -38,32 +38,32 @@ export default class VarList {
     return [...this.map.keys()].join(', ');
   }
 
-  add(v: VarInfo) {
-    throwIfFalsy(v, 'v');
+  add(varInfo: VarInfo) {
+    throwIfFalsy(varInfo, 'varInfo');
 
-    const prev = this.getByName(v.name);
+    const prev = this.getByName(varInfo.name);
     if (prev) {
       // Found an existing var with the same name, check if their types are identical.
-      if (prev.type.toString() === v.type.toString()) {
+      if (prev.type.toString() === varInfo.type.toString()) {
         if (!this.allowDuplicates) {
           throw new Error(
-            `Duplicate variables "${v.name}" found in "${this.name}"`,
+            `Duplicate variables "${varInfo.name}" found in "${this.name}"`,
           );
         }
         // Duplicates are allowed here.
-        this.list.push(v);
+        this.list.push(varInfo);
         return;
       }
       throw new Error(
         `Cannot handle two variables with same names "${
-          v.name
-        }" but different types ("${prev.type.toString()}" and "${v.type.toString()}") in "${
+          varInfo.name
+        }" but different types ("${prev.type.toString()}" and "${varInfo.type.toString()}") in "${
           this.name
         }"`,
       );
     }
-    this.map.set(v.name, v);
-    this.list.push(v);
+    this.map.set(varInfo.name, varInfo);
+    this.list.push(varInfo);
   }
 
   merge(vars: VarInfo[]) {

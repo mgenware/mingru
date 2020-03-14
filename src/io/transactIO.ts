@@ -89,10 +89,9 @@ class TransactIOProcessor {
     funcArgs.add(defs.sqlDBVar);
     for (const mem of memberIOs) {
       const mAction = mem.actionIO;
-      // Skip the first param of all member functions, which is dbx.Queryable.
+      // Skip the first param of all member functions, which is `dbx.Queryable`.
       for (const v of mAction.funcArgs.list.slice(1)) {
-        if (!v.isRef) {
-          // See `isRef` for details
+        if (!v.hasValueRef) {
           funcArgs.add(v);
         }
       }
@@ -181,7 +180,7 @@ class TransactIOProcessor {
         if (memAction instanceof mm.WrappedAction) {
           for (const value of Object.values(memAction.args)) {
             if (value instanceof mm.ValueRef) {
-              const refName = value.name;
+              const refName = value.firstName;
               if (crv[refName]) {
                 crv[refName].refs.push(TXMReturnValueSource.reference);
               }
@@ -202,7 +201,7 @@ class TransactIOProcessor {
       const argValues = Object.values((action as mm.WrappedAction).args);
       for (const value of argValues) {
         if (value instanceof mm.ValueRef) {
-          varRefs.add(value.name);
+          varRefs.add(value.firstName);
         }
       }
     }

@@ -30,8 +30,8 @@ func (da *TableTypeUser) tChild1(queryable dbx.Queryable) (*UserTableTChild1Resu
 	return result, nil
 }
 
-func (da *TableTypeUser) tChild2(queryable dbx.Queryable, age int, score int, name string) (uint64, error) {
-	result, err := queryable.Exec("INSERT INTO `user` (`age`, `score`, `name`) VALUES (?, ?, ?)", age, score, name)
+func (da *TableTypeUser) tChild2(queryable dbx.Queryable, age int, score int) (uint64, error) {
+	result, err := queryable.Exec("INSERT INTO `user` (`age`, `score`, `name`) VALUES (?, ?, ?)", age, score, "FOO")
 	return dbx.GetLastInsertIDUint64WithError(result, err)
 }
 
@@ -43,7 +43,7 @@ func (da *TableTypeUser) T(db *sql.DB, score int) error {
 		if err != nil {
 			return err
 		}
-		_, err = da.tChild2(tx, res.Age, score, res.Name)
+		_, err = da.tChild2(tx, res.Age, score)
 		if err != nil {
 			return err
 		}

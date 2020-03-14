@@ -118,49 +118,29 @@ export class VarInfo {
     return new VarInfo(v.name, typeInfo);
   }
 
-  static withValue(v: VarInfo, value: string): VarInfo {
+  static withValue(v: VarInfo, value: string | mm.ValueRef): VarInfo {
     throwIfFalsy(v, 'v');
-    return new VarInfo(v.name, v.type, value, v.isRef);
-  }
-
-  static withRef(v: VarInfo): VarInfo {
-    throwIfFalsy(v, 'v');
-    return new VarInfo(v.name, v.type, v.value, true);
+    return new VarInfo(v.name, v.type, value);
   }
 
   constructor(
     public name: string,
     public type: TypeInfo,
-    public value?: string,
-    /**
-     * Indicates if this var is a reference, and should be removed by outer context.
-     *
-     * Example: image a wrap action like mm.wrap({id: new mm.ValueRef('ext_id')}),
-     * the `id` is wrapped in an external ref var `ext_id`. When generating code of
-     * this action, the `id` input is replaced with `ext_id` just like a non-is-ref arg:
-     *    func wrapped(ext_id: type) {...}
-     *
-     * `isRef` matters when an outer context is handling this func, like a TX,
-     * if the `ext_id` above is a non-is-ref param, it would occupy a slot in TX's
-     * input args:
-     *    func TX(ext_id: type) {
-     *      wrapped(ext_id)
-     *    }
-     *
-     * When `ext_id` is a is-ref, TX won't expose the input anymore and will find a
-     * var and pass it to wrapped func:
-     *    func TX() {
-     *      var ext_id
-     *      wrapped(ext_id)
-     *    }
-     */
-    public isRef?: boolean,
+    public value?: string | mm.ValueRef,
   ) {
     Object.freeze(this);
   }
 
   get valueOrName(): string {
-    return this.value || this.name;
+    const { value } = this;
+    if (value) {
+      return value instanceof mm.ValueRef ? value.path : value;
+    }
+    return this.name;
+  }
+
+  get hasValueRef(): boolean {
+    return this.value instanceof mm.ValueRef;
   }
 
   toString(): string {
