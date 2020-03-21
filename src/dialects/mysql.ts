@@ -49,30 +49,34 @@ export class MySQL extends Dialect {
   colToSQLType(col: mm.Column): string {
     throwIfFalsy(col, 'col');
     const colType = col.__type;
-    const types = [this.absoluteSQLType(colType)];
-    if (colType.unsigned) {
-      types.push('UNSIGNED');
+    let typeString = this.absoluteSQLType(colType);
+    if (colType.length) {
+      typeString = `${typeString}(${colType.length})`;
     }
-    types.push(colType.nullable ? 'NULL' : 'NOT NULL');
+    const extras = [typeString];
+    if (colType.unsigned) {
+      extras.push('UNSIGNED');
+    }
+    extras.push(colType.nullable ? 'NULL' : 'NOT NULL');
     if (!col.__isNoDefaultOnCSQL) {
       const defValue = col.__defaultValue;
       if (defValue && defValue instanceof mm.SQL === false) {
-        types.push('DEFAULT');
+        extras.push('DEFAULT');
 
         // MySQL doesn't allow dynamic value as default value, we simply ignore SQL expr here
-        types.push(this.objToSQL(defValue, col.getSourceTable()));
+        extras.push(this.objToSQL(defValue, col.getSourceTable()));
       } else if (colType.nullable) {
-        types.push('DEFAULT');
-        types.push('NULL');
+        extras.push('DEFAULT');
+        extras.push('NULL');
       }
     }
     if (colType.unique) {
-      types.push('UNIQUE');
+      extras.push('UNIQUE');
     }
     if (colType.autoIncrement) {
-      types.push('AUTO_INCREMENT');
+      extras.push('AUTO_INCREMENT');
     }
-    return types.join(' ');
+    return extras.join(' ');
   }
 
   as(sql: string, name: string): string {
@@ -126,7 +130,6 @@ export class MySQL extends Dialect {
 
   private absoluteSQLType(colType: mm.ColumnType): string {
     const DT = mm.dt;
-    const size = colType.length;
     for (const type of colType.types) {
       switch (type) {
         case DT.bigInt: {
@@ -151,10 +154,10 @@ export class MySQL extends Dialect {
           return 'DOUBLE';
         }
         case DT.varChar: {
-          return `VARCHAR(${size})`;
+          return `VARCHAR`;
         }
         case DT.char: {
-          return `CHAR(${size})`;
+          return `CHAR`;
         }
         case DT.text: {
           return 'TEXT';
