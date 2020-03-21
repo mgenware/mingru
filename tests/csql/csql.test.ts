@@ -65,3 +65,12 @@ it('No SQL expr as default value', async () => {
 it('Composite PKs', async () => {
   await testBuildAsync(like, 'compositePKs/like');
 });
+
+it('UNIQUE', async () => {
+  class User extends mm.Table {
+    a = mm.pk();
+    b = mm.uBigInt().unique;
+  }
+  const t = mm.table(User);
+  await testBuildAsync(t, 'unique/user');
+});

@@ -66,6 +66,9 @@ export class MySQL extends Dialect {
         types.push('NULL');
       }
     }
+    if (colType.unique) {
+      types.push('UNIQUE');
+    }
     if (colType.autoIncrement) {
       types.push('AUTO_INCREMENT');
     }
