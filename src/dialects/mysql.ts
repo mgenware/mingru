@@ -144,6 +144,12 @@ export class MySQL extends Dialect {
         case DT.bool: {
           return 'TINYINT';
         }
+        case DT.float: {
+          return 'FLOAT';
+        }
+        case DT.double: {
+          return 'DOUBLE';
+        }
         case DT.varChar: {
           return `VARCHAR(${size})`;
         }

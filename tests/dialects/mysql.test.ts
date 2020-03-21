@@ -135,9 +135,12 @@ it('colToSQLType', () => {
   // NULL
   expect(dialect.colToSQLType(mm.int().nullable), 'INT NULL DEFAULT NULL');
   // Default value
-  expect(dialect.colToSQLType(mm.int(43).nullable), 'INT NULL DEFAULT 43');
   expect(
-    dialect.colToSQLType(mm.varChar(23, 'oo').nullable),
+    dialect.colToSQLType(mm.int().default(43).nullable),
+    'INT NULL DEFAULT 43',
+  );
+  expect(
+    dialect.colToSQLType(mm.varChar(23).default('oo').nullable),
     "VARCHAR(23) NULL DEFAULT 'oo'",
   );
 });

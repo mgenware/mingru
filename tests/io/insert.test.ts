@@ -95,7 +95,7 @@ it('setDefaults', () => {
   class Post extends mm.Table {
     id = mm.pk();
     title = mm.varChar(100);
-    content = mm.varChar(100, '');
+    content = mm.varChar(100).default('');
     datetime = mm.datetime('utc');
   }
   const post = mm.table(Post);
