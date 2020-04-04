@@ -18,8 +18,6 @@ export default function dtDefault(type: string): unknown | null {
     case dt.float:
     case dt.double:
       return 0.0;
-
-    default:
-      return null;
   }
+  return null;
 }

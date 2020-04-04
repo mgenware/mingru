@@ -67,7 +67,7 @@ export class SQLIO {
         const name = dialect.sqlCall(call.type);
         const params = call.params.length
           ? call.params
-              .map(p => sqlIO(p, dialect).toSQL(sourceTable))
+              .map((p) => sqlIO(p, dialect).toSQL(sourceTable))
               .join(', ')
           : '';
         return `${name}(${params})`;

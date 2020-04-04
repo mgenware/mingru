@@ -123,9 +123,8 @@ export class MySQL extends Dialect {
         return 'MINUTE';
       case mm.SQLCallType.second:
         return 'SECOND';
-      default:
-        throw new Error(`Unsupported type of call "${type}"`);
     }
+    throw new Error(`Unsupported type of call "${type}"`);
   }
 
   private absoluteSQLType(colType: mm.ColumnType): string {

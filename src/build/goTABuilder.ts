@@ -102,7 +102,7 @@ export default class GoTABuilder {
     const allFuncArgs = [...funcArgs, ...io.funcStubs];
     this.imports.addVars(allFuncArgs);
     const funcParamsCode = allFuncArgs
-      .map(p => `${p.name} ${p.type.typeString}`)
+      .map((p) => `${p.name} ${p.type.typeString}`)
       .join(', ');
     // Wrap all params with parentheses
     funcSigString += `(${funcParamsCode})`;
@@ -110,7 +110,7 @@ export default class GoTABuilder {
     // Build return values
     this.imports.addVars(returnValues);
     const returnsWithError = this.appendErrorType(returnValues);
-    let returnCode = returnsWithError.map(v => v.type.typeString).join(', ');
+    let returnCode = returnsWithError.map((v) => v.type.typeString).join(', ');
     if (returnsWithError.length > 1) {
       returnCode = `(${returnCode})`;
     }
@@ -308,7 +308,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     }
 
     const queryParamsCode = io.execArgs.list
-      .map(p => `, ${p.valueOrName}`)
+      .map((p) => `, ${p.valueOrName}`)
       .join('');
     let sqlSource = io.sql;
     if (hasLimit) {
@@ -316,7 +316,9 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     }
     const sqlLiteral = go.makeStringLiteral(sqlSource);
     if (selMode === mm.SelectActionMode.list || isPageMode) {
-      const scanParams = joinParams(selectedFields.map(p => `&item.${p.name}`));
+      const scanParams = joinParams(
+        selectedFields.map((p) => `&item.${p.name}`),
+      );
       if (isPageMode) {
         codeBuilder.pushLines(
           'limit := pageSize + 1',
@@ -381,7 +383,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         codeBuilder.push(`var ${defs.resultVarName} ${resultType}`);
       } else {
         scanParams = joinParams(
-          selectedFields.map(p => `&${defs.resultVarName}.${p.name}`),
+          selectedFields.map((p) => `&${defs.resultVarName}.${p.name}`),
         );
         codeBuilder.push(
           `${go.pointerVar(defs.resultVarName, originalResultType)}`,
@@ -413,7 +415,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     let code = '';
 
     const queryParamsCode = io.execArgs.list
-      .map(p => `, ${p.valueOrName}`)
+      .map((p) => `, ${p.valueOrName}`)
       .join('');
     const sqlLiteral = go.makeStringLiteral(io.sql);
     code += `${defs.resultVarName}, err := ${defs.queryableParam}.Exec(${sqlLiteral}${queryParamsCode})\n`;
@@ -432,7 +434,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     let code = '';
 
     const queryParamsCode = io.execArgs.list
-      .map(p => `, ${p.valueOrName}`)
+      .map((p) => `, ${p.valueOrName}`)
       .join('');
     const sqlLiteral = go.makeStringLiteral(io.sql);
     code += `${fetchInsertedID ? 'result' : '_'}, err := ${
@@ -454,7 +456,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     let code = '';
 
     const queryParamsCode = io.execArgs.list
-      .map(p => `, ${p.valueOrName}`)
+      .map((p) => `, ${p.valueOrName}`)
       .join('');
     const sqlLiteral = go.makeStringLiteral(io.sql);
     code += `${defs.resultVarName}, err := ${defs.queryableParam}.Exec(${sqlLiteral}${queryParamsCode})\n`;
@@ -471,7 +473,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     let code = '';
 
     const queryParamsCode = io.execArgs.list
-      .map(p => `${p.valueOrName}`)
+      .map((p) => `${p.valueOrName}`)
       .join(', ');
     code += `return ${io.funcPath}(${queryParamsCode})\n`;
     return new CodeMap(code);
@@ -513,7 +515,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       // Generating the calling code of this member
       const queryParamsCode = mActionIO.funcArgs.list
         .slice(1) // Strip the first queryable param
-        .map(p => p.valueOrName)
+        .map((p) => p.valueOrName)
         .join(', ');
       // If this is a temp member (created inside transaction),
       // then we also need to generate the member func body code.
@@ -570,7 +572,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
   private increaseIndent(code: string): string {
     const lines = code.match(/[^\r\n]+/g) || [code];
-    return lines.map(line => `\t${line}`).join('\n');
+    return lines.map((line) => `\t${line}`).join('\n');
   }
 
   private txExportedVar(name: string): string {
