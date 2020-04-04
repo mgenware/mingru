@@ -49,6 +49,7 @@ it('DT', () => {
     // Time
     [mm.datetime(), 'time.Time', TimePkg],
     [mm.date(), 'time.Time', TimePkg],
+    [mm.timestamp(), 'time.Time', TimePkg],
   ];
 
   for (const t of tests) {
@@ -94,6 +95,7 @@ it('SQL calls', () => {
   expect(t(mm.SQLCallType.hour), 'HOUR');
   expect(t(mm.SQLCallType.minute), 'MINUTE');
   expect(t(mm.SQLCallType.second), 'SECOND');
+  expect(t(mm.SQLCallType.timestampNow), 'NOW');
 });
 
 it('objToSQL', () => {
