@@ -1,8 +1,8 @@
-import * as mr from '../../';
 import * as mm from 'mingru-models';
-import user from '../models/user';
 import * as assert from 'assert';
 import { itThrows } from 'it-throws';
+import user from '../models/user';
+import * as mr from '../..';
 
 const expect = assert.equal;
 const TimePkg = 'time';
@@ -57,7 +57,7 @@ it('DT', () => {
     testType(column, t[1] as string, t[2] as string);
     if (!column.__type.pk) {
       column.__type.nullable = true;
-      testType(column, ('*' + t[1]) as string, t[2] as string);
+      testType(column, `*${t[1]}` as string, t[2] as string);
     }
   }
 });

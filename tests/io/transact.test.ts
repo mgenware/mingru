@@ -1,8 +1,8 @@
-import * as mr from '../../';
 import * as mm from 'mingru-models';
+import * as assert from 'assert';
+import * as mr from '../..';
 import user from '../models/user';
 import post from '../models/post';
-import * as assert from 'assert';
 
 const expect = assert.equal;
 const dialect = mr.mysql;
@@ -16,6 +16,7 @@ it('TransactIO', () => {
       .where(
         mm.sql`${user.url_name.toInput()} ${user.id.toInput()} ${user.url_name.toInput()}`,
       );
+
     d = this.s.wrap({ sig: '"haha"' });
   }
   const wrapSelf = mm.tableActions(user, WrapSelfTA);
@@ -38,17 +39,11 @@ it('TransactIO', () => {
 
 it('Member details (normal action, wrapped, tmp wrapped)', () => {
   class SourceTA extends mm.TableActions {
-    s = mm
-      .updateSome()
-      .setInputs(user.sig, user.follower_count)
-      .byID();
+    s = mm.updateSome().setInputs(user.sig, user.follower_count).byID();
   }
   const srcTA = mm.tableActions(user, SourceTA);
   class WrapTA extends mm.TableActions {
-    s = mm
-      .updateSome()
-      .setInputs(user.sig, user.follower_count)
-      .byID();
+    s = mm.updateSome().setInputs(user.sig, user.follower_count).byID();
     s2 = this.s.wrap({ sig: '"haha"' });
     t = mm.transact(this.s.wrap({ sig: '"haha"' }));
     t2 = mm.transact(this.s2);

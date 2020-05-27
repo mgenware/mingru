@@ -1,23 +1,50 @@
 module.exports = {
-  parser: '@typescript-eslint/parser', // Specifies the ESLint parser
-  extends: [
-    'plugin:@typescript-eslint/recommended', // Uses the recommended rules from the @typescript-eslint/eslint-plugin
-  ],
+  parser: '@typescript-eslint/parser',
+  extends: ['airbnb-typescript/base', 'plugin:@typescript-eslint/recommended'],
   parserOptions: {
-    ecmaVersion: 2018, // Allows for the parsing of modern ECMAScript features
-    sourceType: 'module', // Allows for the use of imports
+    ecmaVersion: 2018,
+    sourceType: 'module',
     project: './tsconfig.json',
   },
   rules: {
-    // Place to specify ESLint rules. Can be used to overwrite rules specified from the extended configs
+    'no-console': ['error', { allow: ['warn', 'error'] }],
+    'no-plusplus': 'off',
+    // Allow `for-of` loops.
+    'no-restricted-syntax': [
+      'error',
+      'ForInStatement',
+      'LabeledStatement',
+      'WithStatement',
+    ],
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-    '@typescript-eslint/camelcase': 'off',
-    '@typescript-eslint/no-use-before-define': [
-      'error',
-      { classes: false, functions: false },
-    ],
-    'no-console': ['error', { allow: ['warn', 'error'] }],
     '@typescript-eslint/switch-exhaustiveness-check': 'error',
+    'lines-between-class-members': [
+      'error',
+      'always',
+      { exceptAfterSingleLine: true },
+    ],
+    'no-underscore-dangle': 'off',
+    'max-classes-per-file': 'off',
+    'import/prefer-default-export': 'off',
+    'no-continue': 'off',
+    'object-curly-newline': [
+      'error',
+      { ImportDeclaration: 'never', ExportDeclaration: 'never' },
+    ],
+    'func-names': 'off',
+    'import/no-extraneous-dependencies': [
+      'error',
+      {
+        devDependencies: true,
+      },
+    ],
+    'import/no-named-as-default': 'off',
+    'prefer-template': 'off',
+    // Prettier will handle all intent issues.
+    'operator-linebreak': 'off',
+    '@typescript-eslint/indent': 'off',
+    'implicit-arrow-linebreak': 'off',
+    'function-paren-newline': 'off',
   },
 };

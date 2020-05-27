@@ -1,8 +1,8 @@
 import * as mm from 'mingru-models';
+import { itRejects } from 'it-throws';
 import user from '../models/user';
 import post from '../models/post';
 import { testBuildFullAsync, testBuildAsync } from './common';
-import { itRejects } from 'it-throws';
 
 it('Single action', async () => {
   class PostTA extends mm.TableActions {
@@ -21,9 +21,11 @@ it('Multiple actions', async () => {
       post.user_id,
       post.user_id.join(user).url_name,
     );
+
     updatePostTitle = mm
       .unsafeUpdateAll()
       .set(post.title, mm.sql`${mm.input(post.title)}`);
+
     deleteByID = mm
       .deleteSome()
       .where(mm.sql`${post.id} = ${mm.input(post.id)}`);

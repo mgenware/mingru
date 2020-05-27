@@ -16,6 +16,7 @@ export class Logger {
     this.log(chalk.gray(s));
   }
 
+  // eslint-disable-next-line class-methods-use-this
   private log(s: string) {
     // eslint-disable-next-line no-console
     console.log(s);

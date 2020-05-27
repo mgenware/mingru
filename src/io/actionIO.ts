@@ -1,9 +1,10 @@
-import * as utils from '../lib/stringUtils';
 import * as mm from 'mingru-models';
-import VarList from '../lib/varList';
 import { throwIfFalsy } from 'throw-if-arg-empty';
+import * as utils from '../lib/stringUtils';
+import VarList from '../lib/varList';
 import VarInfo from '../lib/varInfo';
 import Dialect from '../dialect';
+import { VarInfoBuilder } from '../lib/varInfoHelper';
 
 export class ActionIO {
   table: mm.Table;
@@ -26,6 +27,8 @@ export class ActionIO {
     this.table = table;
     this.funcName = utils.actionPascalName(name);
 
-    this.funcStubs = action.__argStubs.map(v => VarInfo.fromSQLVar(v, dialect));
+    this.funcStubs = action.__argStubs.map((v) =>
+      VarInfoBuilder.fromSQLVar(v, dialect),
+    );
   }
 }

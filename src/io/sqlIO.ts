@@ -1,9 +1,10 @@
 import { throwIfFalsy } from 'throw-if-arg-empty';
+import toTypeString from 'to-type-string';
 import * as mm from 'mingru-models';
 import Dialect from '../dialect';
-import toTypeString from 'to-type-string';
 import VarList from '../lib/varList';
 import VarInfo from '../lib/varInfo';
+import { VarInfoBuilder } from '../lib/varInfoHelper';
 
 export class SQLIO {
   get vars(): VarInfo[] {
@@ -48,6 +49,7 @@ export class SQLIO {
     return res;
   }
 
+  // eslint-disable-next-line class-methods-use-this
   private handleElement(
     element: mm.SQLElement,
     dialect: Dialect,
@@ -67,6 +69,7 @@ export class SQLIO {
         const name = dialect.sqlCall(call.type);
         const params = call.params.length
           ? call.params
+              // eslint-disable-next-line @typescript-eslint/no-use-before-define
               .map((p) => sqlIO(p, dialect).toSQL(sourceTable))
               .join(', ')
           : '';
@@ -106,7 +109,7 @@ export function sqlIO(sql: mm.SQL, dialect: Dialect): SQLIO {
   for (const element of sql.elements) {
     if (element.type === mm.SQLElementType.input) {
       const sqlVar = element.toInput();
-      const varInfo = VarInfo.fromSQLVar(sqlVar, dialect);
+      const varInfo = VarInfoBuilder.fromSQLVar(sqlVar, dialect);
       vars.add(varInfo);
     }
   }

@@ -1,13 +1,13 @@
-import * as mr from '../../';
 import * as mm from 'mingru-models';
+import * as assert from 'assert';
+import { itThrows } from 'it-throws';
+import * as mr from '../..';
 import user from '../models/user';
 import post from '../models/post';
 import cmt from '../models/cmt';
 import rpl from '../models/postReply';
-import * as assert from 'assert';
 import postCmt from '../models/postCmt';
 import cmt2 from '../models/cmt2';
-import { itThrows } from 'it-throws';
 
 const expect = assert.equal;
 const dialect = mr.mysql;
@@ -132,10 +132,7 @@ it('3-table joins and WHERE', () => {
         cmt.target_id.join(post).title,
         cmt.target_id.join(post).user_id,
         cmt.target_id.join(post).user_id.join(user).url_name,
-        cmt.target_id
-          .join(post)
-          .user_id.join(user)
-          .id.as('TUID2'),
+        cmt.target_id.join(post).user_id.join(user).id.as('TUID2'),
       )
       .where(
         mm.sql`${cmt.user_id} = 1 AND ${
@@ -189,10 +186,7 @@ it('AS', () => {
       cmt.user_id.as('a'),
       cmt.target_id.join(post).title.as('b'),
       cmt.target_id.join(post).user_id.join(user).url_name,
-      cmt.target_id
-        .join(post)
-        .user_id.join(user)
-        .url_name.as('c'),
+      cmt.target_id.join(post).user_id.join(user).url_name.as('c'),
     );
   }
   const cmtTA = mm.tableActions(cmt, CmtTA);
@@ -269,10 +263,10 @@ it('getReturns', () => {
 });
 
 it('GROUP BY and HAVING', () => {
-  const yearCol = mm.sel(mm.year(post.datetime), 'year');
+  const yearCol = mm.sel(mm.sql`${mm.year(post.datetime)}`, 'year');
   class PostTA extends mm.TableActions {
     t = mm
-      .select(yearCol, mm.sel(mm.sum(post.cmtCount), 'total'))
+      .select(yearCol, mm.sel(mm.sql`${mm.sum(post.cmtCount)}`, 'total'))
       .byID()
       .groupBy(yearCol, 'total')
       .having(mm.and(mm.sql`${yearCol} > 2010`, mm.sql`\`total\` > 100`));

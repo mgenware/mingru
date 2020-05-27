@@ -14,23 +14,24 @@ export class SetterIO {
   ): SetterIO[] {
     const [table] = action.ensureInitialized();
     const { setters: actionSetters } = action;
-    // User setters come first.
-    const res = Array.from(
-      action.setters,
-      ([key, value]) =>
-        new SetterIO(
-          key,
-          sqlIO(
-            value instanceof mm.SQL
-              ? value
-              : // Pass `null` for table argument. If `value` is not SQL, it's the default value of a column, thus no need the table argument as it's not an SQL object.
-                mm.sql`${dialect.objToSQL(value, null)}`,
-            dialect,
-          ),
-        ),
-    );
 
-    mm.enumerateColumns(table, col => {
+    // User setters come first.
+    // eslint-disable-next-line arrow-body-style
+    const res = Array.from(action.setters, ([key, value]) => {
+      // Pass `null` for table argument. If `value` is not SQL, it's the default value of a column,
+      // thus no need the table argument as it's not an SQL object.
+      return new SetterIO(
+        key,
+        sqlIO(
+          value instanceof mm.SQL
+            ? value
+            : mm.sql`${dialect.objToSQL(value, null)}`,
+          dialect,
+        ),
+      );
+    });
+
+    mm.enumerateColumns(table, (col) => {
       // Skip user setter.
       if (actionSetters.get(col)) {
         return;
@@ -71,7 +72,8 @@ export class SetterIO {
   ): SetterIO {
     if (autoSetter === mm.AutoSetterType.input) {
       return new SetterIO(col, sqlIO(mm.sql`${col.toInput()}`, dialect));
-    } else if (autoSetter === mm.AutoSetterType.default) {
+    }
+    if (autoSetter === mm.AutoSetterType.default) {
       let value: string;
       const defValue = col.__defaultValue;
       if (defValue) {

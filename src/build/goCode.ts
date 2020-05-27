@@ -46,7 +46,7 @@ type ${typeName} interface {
   for (const mem of members) {
     code += `\t${mem}\n`;
   }
-  code += `}\n`;
+  code += '}\n';
   return code;
 }
 
@@ -61,10 +61,10 @@ export function struct(
 type ${typeName} struct {
 `;
   // Find the max length of var names
-  const nameMaxLen = Math.max(...members.map(m => m.name.length));
+  const nameMaxLen = Math.max(...members.map((m) => m.name.length));
   let typeMaxLen = 0;
   if (nameStyle !== JSONEncodingStyle.none) {
-    typeMaxLen = Math.max(...members.map(m => m.type.typeString.length));
+    typeMaxLen = Math.max(...members.map((m) => m.type.typeString.length));
   }
   for (const mem of members) {
     let tag: string | null = null;
@@ -84,7 +84,7 @@ type ${typeName} struct {
     }
     code += '\n';
   }
-  code += `}\n`;
+  code += '}\n';
   return code;
 }
 
@@ -107,6 +107,7 @@ export function makeArray(
   size?: number | string,
   capacity?: number | string,
 ): string {
+  // eslint-disable-next-line no-param-reassign
   size = size || 0;
   const capacityParam = capacity ? `, ${capacity}` : '';
   return `${name} := make([]${type}, ${size}${capacityParam})`;
@@ -115,7 +116,7 @@ export function makeArray(
 function joinImports(imports: string[]): string {
   return imports
     .sort()
-    .map(s => `\t"${s}"\n`)
+    .map((s) => `\t"${s}"\n`)
     .join('');
 }
 

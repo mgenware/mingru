@@ -1,12 +1,13 @@
+/* eslint-disable class-methods-use-this */
 import * as mm from 'mingru-models';
 import { throwIfEmpty } from 'throw-if-arg-empty';
+import * as nodepath from 'path';
+import * as mfs from 'm-fs';
 import GoTABuilder from './goTABuilder';
 import GoBuilderContext from './goBuilderContext';
 import { TAIO } from '../io/taIO';
 import Dialect from '../dialect';
 import { BuildOptions } from './buildOptions';
-import * as nodepath from 'path';
-import * as mfs from 'm-fs';
 import * as go from './goCode';
 import * as defs from '../defs';
 
@@ -19,20 +20,23 @@ export default class GoBuilder {
   ) {
     throwIfEmpty(tas, 'tas');
     // Remove duplicate values.
+    // eslint-disable-next-line no-param-reassign
     tas = [...new Set(tas)];
 
     const context = new GoBuilderContext();
-    for (const ta of tas) {
-      if (!ta.__table) {
-        throw new Error('Table action group is not initialized');
-      }
-      const taIO = new TAIO(ta, dialect);
-      const builder = new GoTABuilder(taIO, opts, context);
-      const code = builder.build();
-      const fileName = mm.utils.toSnakeCase(ta.__table.__name) + '_ta'; // Add a "_ta" suffix to table actions file.
-      const outFile = nodepath.join(outDir, fileName + '.go');
-      await mfs.writeFileAsync(outFile, code);
-    }
+    await Promise.all(
+      tas.map((ta) => {
+        if (!ta.__table) {
+          throw new Error('Table action group is not initialized');
+        }
+        const taIO = new TAIO(ta, dialect);
+        const builder = new GoTABuilder(taIO, opts, context);
+        const code = builder.build();
+        const fileName = mm.utils.toSnakeCase(ta.__table.__name) + '_ta'; // Add a "_ta" suffix to table actions file.
+        const outFile = nodepath.join(outDir, fileName + '.go');
+        return mfs.writeFileAsync(outFile, code);
+      }),
+    );
 
     let code = `package ${opts.packageName || defs.defaultPackageName}\n\n`;
     const imports = new go.ImportList();
@@ -72,7 +76,7 @@ export default class GoBuilder {
 
         interfacesCode += go.interfaceType(
           name,
-          members.map(m => m.sig),
+          members.map((m) => m.sig),
         );
         interfacesCode += '\n';
 

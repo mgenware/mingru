@@ -1,7 +1,8 @@
-import { Dialect } from '../dialect';
+/* eslint-disable class-methods-use-this */
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import toTypeString from 'to-type-string';
+import { Dialect } from '../dialect';
 import { TypeInfo } from '../lib/varInfo';
 import { sqlIO } from '../io/sqlIO';
 // eslint-disable-next-line
@@ -125,13 +126,15 @@ export class MySQL extends Dialect {
         return 'SECOND';
       case mm.SQLCallType.timestampNow:
         return 'NOW';
+      default:
+        throw new Error(`Unsupported type of call "${type}"`);
     }
-    throw new Error(`Unsupported type of call "${type}"`);
   }
 
   private absoluteSQLType(colType: mm.ColumnType): string {
     const DT = mm.dt;
     for (const type of colType.types) {
+      // eslint-disable-next-line default-case
       switch (type) {
         case DT.bigInt: {
           return 'BIGINT';
@@ -155,10 +158,10 @@ export class MySQL extends Dialect {
           return 'DOUBLE';
         }
         case DT.varChar: {
-          return `VARCHAR`;
+          return 'VARCHAR';
         }
         case DT.char: {
-          return `CHAR`;
+          return 'CHAR';
         }
         case DT.text: {
           return 'TEXT';
@@ -179,8 +182,9 @@ export class MySQL extends Dialect {
 
   private goTypeNonNull(colType: mm.ColumnType): string | TypeInfo {
     const DT = mm.dt;
-    const unsigned = colType.unsigned;
+    const { unsigned } = colType;
     for (const type of colType.types) {
+      // eslint-disable-next-line default-case
       switch (type) {
         case DT.bigInt: {
           return unsigned ? 'uint64' : 'int64';

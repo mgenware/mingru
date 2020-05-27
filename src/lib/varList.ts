@@ -1,8 +1,9 @@
-import VarInfo from './varInfo';
 import { throwIfFalsy, throwIfFalsyStrict } from 'throw-if-arg-empty';
+import VarInfo from './varInfo';
 
 /**
- * Note that variables with same names and types are considered duplicates. Variables with same names but different types are always invalid and will trigger exceptions.
+ * Note that variables with same names and types are considered duplicates. Variables with same
+     names but different types are always invalid and will trigger exceptions.
  * When duplicates are allowed:
  *   Used in `SQLIO` (for example, WHERE expressions): all variables are tracked in insertion order.
  * When duplicates are NOT allowed:
@@ -74,10 +75,10 @@ export default class VarList {
   }
 
   toString(): string {
-    const s = this.list.map(item => item.toString()).join(', ');
+    const s = this.list.map((item) => item.toString()).join(', ');
     if (this.list.length !== this.map.size) {
       const mapValues = [...this.map.values()];
-      const mapStr = mapValues.map(item => item.toString()).join(', ');
+      const mapStr = mapValues.map((item) => item.toString()).join(', ');
       return `${s} {${mapStr}}`;
     }
     return s;

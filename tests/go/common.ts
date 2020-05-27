@@ -1,9 +1,10 @@
+/* eslint-disable no-param-reassign */
 import * as nodepath from 'path';
-import * as mr from '../../';
 import * as mm from 'mingru-models';
 import * as tempy from 'tempy';
 import * as mfs from 'm-fs';
 import * as assert from 'assert';
+import * as mr from '../..';
 
 const dialect = mr.mysql;
 const DestDataDir = 'tests/go/dest';
@@ -25,7 +26,7 @@ export async function testBuildAsync(
 ) {
   let content = '';
   if (path) {
-    path = nodepath.resolve(nodepath.join(DestDataDir, path + '.go'));
+    path = nodepath.resolve(nodepath.join(DestDataDir, `${path}.go`));
     content = await mfs.readFileAsync(path, 'utf8');
   }
   mr.logger.enabled = false;
@@ -49,7 +50,7 @@ export async function testBuildFullAsync(
 ) {
   let content = '';
   if (path) {
-    path = nodepath.resolve(nodepath.join(DestDataDir, path + '.go'));
+    path = nodepath.resolve(nodepath.join(DestDataDir, `${path}.go`));
     content = await mfs.readFileAsync(path, 'utf8');
   }
   mr.logger.enabled = false;
@@ -87,35 +88,38 @@ export async function testBuildToDirAsync(
     await builder.buildActionsAsync(actions);
     if (buildCSQL) {
       await builder.buildCreateTableSQLFilesAsync(
-        actions.map(a => a.__table as mm.Table),
+        actions.map((a) => a.__table as mm.Table),
       );
     }
   });
+
+  const promises: Promise<void>[] = [];
   for (let file of files) {
     let actual = '';
     let expected = '';
     if (file.startsWith('#')) {
       file = file.substr(1);
-      actual = await nodepath.join(tmpDir, file);
-      expected = await nodepath.join(
+      actual = nodepath.join(tmpDir, file);
+      expected = nodepath.join(
         nodepath.resolve(nodepath.join(DestDataDir, 'build', expectedDir)),
         file,
       );
     } else if (nodepath.extname(file)) {
       // An SQL file
-      actual = await nodepath.join(tmpDir, 'create_sql', file);
-      expected = await nodepath.join(
+      actual = nodepath.join(tmpDir, 'create_sql', file);
+      expected = nodepath.join(
         nodepath.resolve(nodepath.join(DestDataDir, 'build', expectedDir)),
         file,
       );
     } else {
       // A go file
-      actual = await nodepath.join(tmpDir, file + '_ta.go');
-      expected = await nodepath.join(
+      actual = nodepath.join(tmpDir, `${file}_ta.go`);
+      expected = nodepath.join(
         nodepath.resolve(nodepath.join(DestDataDir, 'build', expectedDir)),
-        file + '_ta.go',
+        `${file}_ta.go`,
       );
     }
-    await testFilesAsync(actual, expected);
+    promises.push(testFilesAsync(actual, expected));
   }
+  await Promise.all(promises);
 }

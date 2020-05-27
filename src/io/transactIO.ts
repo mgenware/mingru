@@ -45,7 +45,8 @@ export enum TXMReturnValueSource {
 // See "Child return values (CRV)" below for details.
 export interface TXMReturnValueInfo {
   typeInfo: VarInfo;
-  // A variable can have no refs (unused var), or multiple refs (used by both TX func return values and other TX member funcs).
+  // A variable can have no refs (unused var), or multiple refs
+  // (used by both TX func return values and other TX member funcs).
   refs: TXMReturnValueSource[];
 }
 
@@ -194,11 +195,11 @@ class TransactIOProcessor {
     // K: declared value name, V: source info (original var info in action return list).
     const varRefs = new Set<string>();
     for (const mem of memberIOs) {
-      const { action } = mem.actionIO;
-      if (action instanceof mm.WrappedAction === false) {
+      const memberAction = mem.actionIO.action;
+      if (memberAction instanceof mm.WrappedAction === false) {
         continue;
       }
-      const argValues = Object.values((action as mm.WrappedAction).args);
+      const argValues = Object.values((memberAction as mm.WrappedAction).args);
       for (const value of argValues) {
         if (value instanceof mm.ValueRef) {
           varRefs.add(value.firstName);

@@ -1,5 +1,6 @@
 import * as mm from 'mingru-models';
-import * as mr from '../../';
+import { itRejects } from 'it-throws';
+import * as mr from '../..';
 import post from '../models/post';
 import cmt from '../models/cmt';
 import rpl from '../models/postReply';
@@ -9,7 +10,6 @@ import postCategory from '../models/postCategory';
 import category from '../models/category';
 import cmt2 from '../models/cmt2';
 import postCmt from '../models/postCmt';
-import { itRejects } from 'it-throws';
 
 it('select', async () => {
   class PostTA extends mm.TableActions {
@@ -73,7 +73,7 @@ it('selectRows with WHERE', async () => {
 });
 
 it('selectRows, WHERE, orderBy', async () => {
-  const cc = mm.sel('RAND()', 'n', new mm.ColumnType(mm.dt.int));
+  const cc = mm.sel(mm.sql`RAND()`, 'n', new mm.ColumnType(mm.dt.int));
   class PostTA extends mm.TableActions {
     selectT = mm
       .selectRows(post.id, cc, post.title)
@@ -146,12 +146,11 @@ it('Basic join (rows)', async () => {
 
 it('Join implied by WHERE', async () => {
   class CmtTA extends mm.TableActions {
-    selectT = mm.select(cmt.id).where(
-      cmt.target_id
-        .join(post)
-        .user_id.join(user)
-        .url_name.isEqualToInput(),
-    );
+    selectT = mm
+      .select(cmt.id)
+      .where(
+        cmt.target_id.join(post).user_id.join(user).url_name.isEqualToInput(),
+      );
   }
   const ta = mm.tableActions(cmt, CmtTA);
   await testBuildAsync(ta, 'select/joinImpliedByWhere');
@@ -208,10 +207,7 @@ it('Join as', async () => {
       cmt.user_id.as('a'),
       cmt.target_id.join(post).title.as('b'),
       cmt.target_id.join(post).user_id.join(user).url_name,
-      cmt.target_id
-        .join(post)
-        .user_id.join(user)
-        .url_name.as('c'),
+      cmt.target_id.join(post).user_id.join(user).url_name.as('c'),
     );
   }
   const ta = mm.tableActions(cmt, CmtTA);
@@ -223,14 +219,8 @@ it('Join as (attr should not affect other things)', async () => {
     selectT = mm.select(
       cmt.id.attrs({ foo: true }),
       cmt.user_id.as('a').attrs({ foo: true }),
-      cmt.target_id
-        .join(post)
-        .title.as('b')
-        .attrs({ foo: true }),
-      cmt.target_id
-        .join(post)
-        .user_id.join(user)
-        .url_name.attrs({ foo: true }),
+      cmt.target_id.join(post).title.as('b').attrs({ foo: true }),
+      cmt.target_id.join(post).user_id.join(user).url_name.attrs({ foo: true }),
       cmt.target_id
         .join(post)
         .user_id.join(user)
@@ -299,7 +289,7 @@ it('Raw columns', async () => {
       ),
       // Auto detected types
       new mm.RawColumn(post.user_id.join(user).display_name, 'snake_name'),
-      new mm.RawColumn(mm.count(post.n_datetime)),
+      new mm.RawColumn(mm.sql`${mm.count(post.n_datetime)}`),
     );
   }
   const ta = mm.tableActions(post, PostTA);
@@ -322,10 +312,7 @@ it('Custom DB names', async () => {
 
 it('selectRows, paginate', async () => {
   class PostTA extends mm.TableActions {
-    selectT = mm
-      .selectRows(post.id, post.title)
-      .limit()
-      .orderByAsc(post.id);
+    selectT = mm.selectRows(post.id, post.title).limit().orderByAsc(post.id);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectRowsPaginate');
@@ -345,10 +332,7 @@ it('selectRows, paginate, where', async () => {
 
 it('selectPage', async () => {
   class PostTA extends mm.TableActions {
-    selectT = mm
-      .selectPage(post.id, post.title)
-      .byID()
-      .orderByAsc(post.id);
+    selectT = mm.selectPage(post.id, post.title).byID().orderByAsc(post.id);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectPage');
@@ -356,14 +340,16 @@ it('selectPage', async () => {
 
 it('WHERE, inputs, joins', async () => {
   class CmtTA extends mm.TableActions {
-    selectT = mm.select(cmt.id).where(
-      mm.sql` ${cmt.id.toInput()}, ${cmt.user_id.toInput()}, ${cmt.target_id
-        .join(post)
-        .title.toInput()}, ${cmt.target_id
-        .join(post)
-        .user_id.join(user)
-        .url_name.toInput()}`,
-    );
+    selectT = mm
+      .select(cmt.id)
+      .where(
+        mm.sql` ${cmt.id.toInput()}, ${cmt.user_id.toInput()}, ${cmt.target_id
+          .join(post)
+          .title.toInput()}, ${cmt.target_id
+          .join(post)
+          .user_id.join(user)
+          .url_name.toInput()}`,
+      );
   }
   const ta = mm.tableActions(cmt, CmtTA);
   await testBuildAsync(ta, 'select/whereInputsJoins');
@@ -383,10 +369,10 @@ it('Argument stubs', async () => {
 });
 
 it('GROUP BY and HAVING', async () => {
-  const yearCol = mm.sel(mm.year(post.datetime), 'year');
+  const yearCol = mm.sel(mm.sql`${mm.year(post.datetime)}`, 'year');
   class PostTA extends mm.TableActions {
     t = mm
-      .select(yearCol, mm.sel(mm.sum(post.cmtCount), 'total'))
+      .select(yearCol, mm.sel(mm.sql`${mm.sum(post.cmtCount)}`, 'total'))
       .byID()
       .groupBy(yearCol, 'total')
       .having(

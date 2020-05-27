@@ -1,5 +1,5 @@
-import { testBuildAsync } from './common';
 import * as mm from 'mingru-models';
+import { testBuildAsync } from './common';
 import cmt2 from '../models/cmt2';
 import postCmt from '../models/postCmt';
 import post from '../models/post';
@@ -154,25 +154,18 @@ it('Temp member actions', async () => {
     title = mm.varChar(200);
   }
 
-  const post = mm.table(Post, 'db_post');
+  const post2 = mm.table(Post, 'db_post');
   class PostTA extends mm.TableActions {
     insertCore = mm.insertOne().setInputs();
     insert = mm.transact(
       userTA.updatePostCount.wrap({ offset: '1' }),
       this.insertCore,
-      mm
-        .updateOne()
-        .setInputs()
-        .byID(),
-      mm
-        .updateOne()
-        .setInputs()
-        .byID()
-        .wrap({ title: '"TITLE"' }),
+      mm.updateOne().setInputs().byID(),
+      mm.updateOne().setInputs().byID().wrap({ title: '"TITLE"' }),
       this.insertCore.wrap({ title: '"abc"' }),
     );
   }
-  const postTA = mm.tableActions(post, PostTA);
+  const postTA = mm.tableActions(post2, PostTA);
   await testBuildAsync(userTA, 'tx/tmpActions/user');
   await testBuildAsync(postTA, 'tx/tmpActions/post');
 });
@@ -180,14 +173,8 @@ it('Temp member actions', async () => {
 it('Temp member actions (with from)', async () => {
   class PostTA extends mm.TableActions {
     t = mm.transact(
-      mm
-        .insertOne()
-        .from(cmt2)
-        .setInputs(),
-      mm
-        .insertOne()
-        .from(postCmt)
-        .setInputs(),
+      mm.insertOne().from(cmt2).setInputs(),
+      mm.insertOne().from(postCmt).setInputs(),
     );
   }
   const postTA = mm.tableActions(post, PostTA);

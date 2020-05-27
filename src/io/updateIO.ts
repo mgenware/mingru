@@ -54,7 +54,7 @@ class UpdateIOProcessor {
     utils.validateSetters(action.setters, table);
     const setterIOs = SetterIO.fromAction(action, dialect, true);
     sql += setterIOs
-      .map(s => `${dialect.encodeColumnName(s.col)} = ${s.sql.toSQL(table)}`)
+      .map((s) => `${dialect.encodeColumnName(s.col)} = ${s.sql.toSQL(table)}`)
       .join(', ');
 
     // WHERE

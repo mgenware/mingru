@@ -72,7 +72,8 @@ class WrapIOProcessor {
       //   `func(y) { innerFunc(123, y) }
       // If input is a `ValueRef` like {x: result.prop}, `x` will still be exposed:
       //   `func(x, y) { innerFunc(x, y) }
-      // In this case, `x` has a `ValueRef` value and is taken care of by the caller of this func because the `ValueRef`
+      // In this case, `x` has a `ValueRef` value and is taken care of by the caller of this func
+      // because the `ValueRef`
       // is only valid at the caller context.
       if (!inputArg) {
         funcArgs.add(arg);

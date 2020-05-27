@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 import * as mm from 'mingru-models';
 import { TypeInfo } from './lib/varInfo';
 

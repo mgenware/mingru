@@ -1,7 +1,7 @@
-import * as mr from '../../';
 import * as mm from 'mingru-models';
-import user from '../models/user';
 import * as assert from 'assert';
+import * as mr from '../..';
+import user from '../models/user';
 
 const expect = assert.equal;
 const dialect = mr.mysql;

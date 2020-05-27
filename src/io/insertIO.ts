@@ -51,11 +51,11 @@ export class InsertIOProcessor {
       dialect,
       action.allowUnsetColumns,
     );
-    const colNames = setters.map(s => dialect.encodeColumnName(s.col));
+    const colNames = setters.map((s) => dialect.encodeColumnName(s.col));
     sql += ` (${colNames.join(', ')})`;
 
     // Values
-    const colValues = setters.map(s => s.sql.toSQL(table));
+    const colValues = setters.map((s) => s.sql.toSQL(table));
     sql += ` VALUES (${colValues.join(', ')})`;
 
     // funcArgs

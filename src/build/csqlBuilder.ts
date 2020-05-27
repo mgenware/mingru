@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 import * as mm from 'mingru-models';
 import * as defs from '../defs';
 import Dialect from '../dialect';
@@ -35,17 +36,17 @@ export default class CSQLBuilder {
     code = `CREATE TABLE ${dialect.encodeTableName(table)} (\n`;
     code += this.increaseIndent(body, ',\n');
     code += '\n)\n';
-    code += `CHARACTER SET=utf8mb4\nCOLLATE=utf8mb4_unicode_ci\n`;
+    code += 'CHARACTER SET=utf8mb4\nCOLLATE=utf8mb4_unicode_ci\n';
     code += ';\n';
     return code;
   }
 
   private groupNames(names: string[]): string {
-    return `(${names.map(n => this.dialect.encodeName(n)).join(', ')})`;
+    return `(${names.map((n) => this.dialect.encodeName(n)).join(', ')})`;
   }
 
   private increaseIndent(lines: string[], sep: string): string {
-    return lines.map(line => `\t${line}`).join(sep);
+    return lines.map((line) => `\t${line}`).join(sep);
   }
 
   private fkExpression(col: mm.Column, fCol: mm.Column): string {

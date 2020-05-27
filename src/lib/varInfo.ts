@@ -1,27 +1,7 @@
 import * as mm from 'mingru-models';
-import { Dialect } from '../dialect';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 
 export class TypeInfo {
-  static fromSQLVariable(variable: mm.SQLVariable, dialect: Dialect): TypeInfo {
-    throwIfFalsy(variable, 'variable');
-    throwIfFalsy(dialect, 'dialect');
-    const { type } = variable;
-    if (typeof type === 'string') {
-      const parts = type.split('|');
-      const typeName = parts[0];
-      let namespace: string | undefined;
-      if (parts.length > 1) {
-        namespace = parts[1];
-      }
-      return TypeInfo.type(typeName, namespace);
-    }
-    if (type instanceof mm.Column) {
-      return dialect.colTypeToGoType(type.__type);
-    }
-    return dialect.colTypeToGoType(type);
-  }
-
   static type(typeName: string, namespace?: string): TypeInfo {
     return new TypeInfo(typeName, namespace, false, false);
   }
@@ -50,17 +30,18 @@ export class TypeInfo {
       if (pathInfo) {
         const parts = pathInfo.split('|');
         if (parts.length === 2) {
-          this.moduleName = parts[0];
-          this.importPath = parts[1];
+          [this.moduleName, this.importPath] = parts;
         } else {
-          this.moduleName = this.importPath = parts[0];
+          [this.moduleName] = parts;
+          [this.importPath] = parts;
         }
       }
     } else {
       this.moduleName = type.moduleName;
       this.importPath = type.importPath;
     }
-    // `sourceTypeString` and`getTypeString` should be called at last cuz they depend on other properties like `namespace`.
+    // `sourceTypeString` and`getTypeString` should be called at last
+    // cuz they depend on other properties like `namespace`.
     this.sourceTypeString = this.getSourceTypeString();
     this.typeString = this.getTypeString();
     Object.freeze(this);
@@ -111,13 +92,6 @@ export class TypeInfo {
 }
 
 export class VarInfo {
-  static fromSQLVar(v: mm.SQLVariable, dialect: Dialect): VarInfo {
-    throwIfFalsy(v, 'v');
-    throwIfFalsy(dialect, 'dialect');
-    const typeInfo = TypeInfo.fromSQLVariable(v, dialect);
-    return new VarInfo(v.name, typeInfo);
-  }
-
   static withValue(v: VarInfo, value: string | mm.ValueRef): VarInfo {
     throwIfFalsy(v, 'v');
     return new VarInfo(v.name, v.type, value);

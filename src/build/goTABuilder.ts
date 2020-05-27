@@ -1,6 +1,7 @@
-import { Dialect } from '../dialect';
+/* eslint-disable class-methods-use-this */
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
+import { Dialect } from '../dialect';
 import { SelectIO } from '../io/selectIO';
 import { UpdateIO } from '../io/updateIO';
 import { InsertIO } from '../io/insertIO';
@@ -216,12 +217,14 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       hasLimit = true;
     }
 
-    // We only need the type name here, the namespace(import) is already handled in `processActionIO`
+    // We only need the type name here, the namespace(import) is already
+    // handled in `processActionIO`
     const firstReturn = io.returnValues.getByIndex(0);
     const resultType = firstReturn.type.typeString;
-    // originalResultType is used to generate additional type definition, e.g. resultType is '[]*Person', the originalResultType is 'Person'
+    // originalResultType is used to generate additional type definition,
+    // e.g. resultType is '[]*Person', the originalResultType is 'Person'
     const originalResultType = firstReturn.type.sourceTypeString || resultType;
-    // Additional type definition for result type, empty on select field action
+    // Additional type definition for result type, empty on select field action.
     let resultTypeDef: string | undefined;
     let errReturnCode = '';
     if (isPageMode) {
@@ -355,7 +358,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       codeBuilder.pushLines(
         go.pointerVar('item', originalResultType),
         `err = rows.Scan(${scanParams})`,
-        `if err != nil {`,
+        'if err != nil {',
       );
       codeBuilder.incrementIndent();
       codeBuilder.push(errReturnCode);
@@ -484,7 +487,8 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     let innerBody = '';
     const { memberIOs, returnValues } = io;
 
-    // We don't use queryable in transaction arguments but we still need to import the dbx namespace as we're calling dbx.transact.
+    // We don't use queryable in transaction arguments but we still need to
+    // import the dbx namespace as we're calling dbx.transact.
     this.imports.addVars([defs.dbxQueryableVar]);
 
     // Declare err variable.
@@ -533,7 +537,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         innerBody += `, ${queryParamsCode}`;
       }
       innerBody += ')\n';
-      innerBody += `\nif err != nil {\n\treturn err\n}\n`;
+      innerBody += '\nif err != nil {\n\treturn err\n}\n';
     }
 
     // Assign inner variables to outer return values if needed.
@@ -565,7 +569,8 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     return new CodeMap(body, headCode);
   }
 
-  // A varList usually ends without an error type, call this to append an Go error type to the varList
+  // A varList usually ends without an error type, call this to append
+  // an Go error type to the varList.
   private appendErrorType(vars: VarInfo[]): VarInfo[] {
     return [...vars, new VarInfo('error', TypeInfo.type('error'))];
   }

@@ -1,7 +1,7 @@
 import * as mm from 'mingru-models';
+import { throwIfFalsy } from 'throw-if-arg-empty';
 import { ActionIO } from './actionIO';
 import Dialect from '../dialect';
-import { throwIfFalsy } from 'throw-if-arg-empty';
 
 export type HandlerType = (action: mm.Action, dialect: Dialect) => ActionIO;
 

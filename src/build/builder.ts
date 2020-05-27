@@ -1,10 +1,10 @@
-import GoBuilder from './goBuilder';
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import * as mfs from 'm-fs';
-import Dialect from '../dialect';
 import * as nodepath from 'path';
 import * as del from 'del';
+import Dialect from '../dialect';
+import GoBuilder from './goBuilder';
 import logger from '../logger';
 import CSQLBuilder from './csqlBuilder';
 import { BuildOptions } from './buildOptions';
@@ -19,6 +19,7 @@ export default class Builder {
   ) {
     throwIfFalsy(dialect, 'dialect');
     throwIfFalsy(outDir, 'outDir');
+    // eslint-disable-next-line no-param-reassign
     opts = opts || {};
     logger.enabled = !opts.noOutput;
     this.opts = opts;
@@ -41,16 +42,17 @@ export default class Builder {
     this.checkBuildStatus();
     const goBuilder = new GoBuilder();
     await goBuilder.buildAsync(actions, this.outDir, this.dialect, this.opts);
-    logger.debug(`🎉  Action build succeeded`);
+    logger.debug('🎉  Action build succeeded');
   }
 
   async buildCreateTableSQLFilesAsync(tables: mm.Table[]): Promise<void> {
     throwIfFalsy(tables, 'tables');
     this.checkBuildStatus();
     // Remove duplicate values.
+    // eslint-disable-next-line no-param-reassign
     tables = [...new Set(tables)];
-    await Promise.all(tables.map(async t => await this.buildCSQL(t)));
-    logger.debug(`🎉  Table build succeeded`);
+    await Promise.all(tables.map((t) => this.buildCSQL(t)));
+    logger.debug('🎉  Table build succeeded');
   }
 
   private checkBuildStatus() {

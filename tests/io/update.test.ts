@@ -1,9 +1,9 @@
-import * as mr from '../../';
 import * as mm from 'mingru-models';
-import post from '../models/post';
-import user from '../models/user';
 import * as assert from 'assert';
 import { itThrows } from 'it-throws';
+import * as mr from '../..';
+import post from '../models/post';
+import user from '../models/user';
 
 const expect = assert.equal;
 const dialect = mr.mysql;
@@ -90,10 +90,7 @@ it('getReturns', () => {
 it('Validate setters', () => {
   itThrows(() => {
     class PostTA extends mm.TableActions {
-      t = mm
-        .unsafeUpdateAll()
-        .setInputs(user.id)
-        .setInputs();
+      t = mm.unsafeUpdateAll().setInputs(user.id).setInputs();
     }
     const ta = mm.tableActions(post, PostTA);
     mr.insertIO(ta.t, mr.mysql);
@@ -107,12 +104,12 @@ it('setDefaults', () => {
     content = mm.varChar(100).default('');
     datetime = mm.datetime('utc');
   }
-  const post = mm.table(Post);
+  const post2 = mm.table(Post);
 
   class PostTA extends mm.TableActions {
-    t = mm.unsafeUpdateAll().setDefaults(post.datetime);
+    t = mm.unsafeUpdateAll().setDefaults(post2.datetime);
   }
-  const postTA = mm.tableActions(post, PostTA);
+  const postTA = mm.tableActions(post2, PostTA);
   const v = postTA.t;
   const io = mr.updateIO(v, dialect);
 

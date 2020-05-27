@@ -1,7 +1,7 @@
-import * as mr from '../../';
 import * as mm from 'mingru-models';
-import cols from '../models/cols';
 import * as assert from 'assert';
+import * as mr from '../..';
+import cols from '../models/cols';
 
 const dialect = mr.mysql;
 
@@ -30,10 +30,7 @@ it('dtDefault', () => {
 
 it('insertWithDefaults', () => {
   class ColsTA extends mm.TableActions {
-    insertT = mm
-      .insert()
-      .setInputs(cols.fk)
-      .setDefaults();
+    insertT = mm.insert().setInputs(cols.fk).setDefaults();
   }
   const ta = mm.tableActions(cols, ColsTA);
   const v = ta.insertT;

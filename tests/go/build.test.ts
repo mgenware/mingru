@@ -13,9 +13,11 @@ it('Single table', async () => {
       post.user_id,
       post.user_id.join(user).url_name,
     );
+
     updatePostTitle = mm
       .unsafeUpdateAll()
       .set(post.title, mm.sql`${mm.input(post.title)}`);
+
     deleteByID = mm
       .deleteOne()
       .where(mm.sql`${post.id} = ${mm.input(post.id)}`);
@@ -38,9 +40,11 @@ it('Multiple tables', async () => {
       post.content,
       post.user_id.join(user).url_name,
     );
+
     updateContent = mm
       .unsafeUpdateAll()
       .set(post.content, post.content.isEqualToInput());
+
     deleteByID = mm.deleteOne().where(post.id.isEqualToInput());
   }
   const postTA = mm.tableActions(post, PostTA);
@@ -82,9 +86,11 @@ it('Multiple tables + CSQL', async () => {
       post.content,
       post.user_id.join(user).url_name,
     );
+
     updateContent = mm
       .unsafeUpdateAll()
       .set(post.content, post.content.isEqualToInput());
+
     deleteByID = mm.deleteOne().where(post.id.isEqualToInput());
   }
   const postTA = mm.tableActions(post, PostTA);
@@ -107,9 +113,11 @@ it('Types', async () => {
         [mm.ActionAttributes.groupTypeName]: 'Type1',
         [mm.ActionAttributes.resultTypeName]: 'Res1',
       });
+
     selectProfile = mm.select(user.display_name, user.sig).attrs({
       [mm.ActionAttributes.resultTypeName]: 'Res2',
     });
+
     deleteByID = mm.deleteOne().where(user.id.isEqualToInput());
   }
   const userTA = mm.tableActions(user, UserTA);
@@ -122,9 +130,11 @@ it('Types', async () => {
         [mm.ActionAttributes.groupTypeName]: 'Type1',
         [mm.ActionAttributes.resultTypeName]: 'Res1',
       });
+
     selectPostInfo = mm
       .select(post.n_datetime, post.user_id.join(user).url_name)
       .attrs({ [mm.ActionAttributes.groupTypeName]: 'Type2' });
+
     selectTime = mm.select(post.n_datetime).attrs({
       [mm.ActionAttributes.resultTypeName]: 'Res3',
     });
