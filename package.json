@@ -1,6 +1,6 @@
 {
   "name": "mingru",
-  "version": "0.28.1",
+  "version": "0.29.0",
   "description": "SQL Generator for mingru-models",
   "main": "dist/main.js",
   "types": "dist/main.d.ts",
