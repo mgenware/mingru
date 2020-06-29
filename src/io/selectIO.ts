@@ -438,7 +438,25 @@ export class SelectIOProcessor {
         return first.toColumn().__type;
       }
       if (first.type === mm.SQLElementType.call) {
-        return first.toCall().returnType;
+        const call = first.toCall();
+        const { returnType } = call;
+        if (typeof returnType === 'number') {
+          const returnTypeArg = call.params[returnType];
+          if (!returnTypeArg) {
+            throw new Error(
+              `Index of out range when probing return type, index: ${returnType}`,
+            );
+          }
+          if (returnTypeArg instanceof mm.Column) {
+            return returnTypeArg.__type;
+          }
+          throw new Error(
+            `Index-based return type data is not a "Column", got ${toTypeString(
+              returnTypeArg,
+            )}`,
+          );
+        }
+        return returnType;
       }
     }
     return null;
