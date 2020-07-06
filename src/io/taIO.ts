@@ -13,16 +13,12 @@ export class TAIO {
 
   constructor(public ta: mm.TableActions, public dialect: Dialect) {
     throwIfFalsy(ta, 'ta');
-
-    const actions: ActionIO[] = [];
-    mm.enumerateActions(
-      ta,
-      (action, prop) => {
-        actions.push(actionToIO(action, dialect, `action "${prop}"`));
-      },
-      { sorted: true },
-    );
-    this.actions = actions;
+    // Actions are sorted alphabetically.
+    this.actions = Object.entries(ta.__actions)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([actionName, action]) =>
+        actionToIO(action, dialect, `action "${actionName}"`),
+      );
 
     if (!ta.__table) {
       throw new Error('Table action group is not initialized');

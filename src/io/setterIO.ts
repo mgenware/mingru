@@ -31,15 +31,15 @@ export class SetterIO {
       );
     });
 
-    mm.enumerateColumns(table, (col) => {
+    for (const col of Object.values(table.__columns)) {
       // Skip user setter.
       if (actionSetters.get(col)) {
-        return;
+        continue;
       }
 
       // Skip AUTO_INCREMENT PKs
       if (col.__type.autoIncrement) {
-        return;
+        continue;
       }
 
       let isValueSet = false;
@@ -59,7 +59,7 @@ export class SetterIO {
       if (!isValueSet && !allowUnsetValues) {
         throw new Error(`${col} is not set by any setter`);
       }
-    });
+    }
 
     return res;
   }

@@ -8,7 +8,7 @@ export default class CSQLBuilder {
 
   build(noHeader?: boolean): string {
     const { table, dialect } = this;
-    const columns = table.__columns;
+    const columns = Object.values(table.__columns);
     const body = [];
 
     const pks: string[] = [];

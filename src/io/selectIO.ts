@@ -119,7 +119,7 @@ export class SelectIOProcessor {
     const [fromTable] = action.ensureInitialized();
     const columns = action.columns.length
       ? action.columns
-      : fromTable.__columns;
+      : Object.values(fromTable.__columns);
     // hasJoin
     let hasJoin = columns.some((sCol) => {
       const [col] = this.analyzeSelectedColumn(sCol);
