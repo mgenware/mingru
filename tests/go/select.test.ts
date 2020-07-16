@@ -312,7 +312,7 @@ it('Custom DB names', async () => {
 
 it('selectRows, paginate', async () => {
   class PostTA extends mm.TableActions {
-    selectT = mm.selectRows(post.id, post.title).limit().orderByAsc(post.id);
+    selectT = mm.selectRows(post.id, post.title).paginate().orderByAsc(post.id);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectRowsPaginate');
@@ -323,7 +323,7 @@ it('selectRows, paginate, where', async () => {
     selectT = mm
       .selectRows(post.id, post.title)
       .byID()
-      .limit()
+      .paginate()
       .orderByAsc(post.id);
   }
   const ta = mm.tableActions(post, PostTA);

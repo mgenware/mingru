@@ -244,7 +244,7 @@ export class SelectIOProcessor {
     this.flushInputs(funcArgs, execArgs, whereIO);
     this.flushInputs(funcArgs, execArgs, havingIO);
 
-    if (action.hasLimit) {
+    if (action.pagination) {
       funcArgs.add(limitTypeInfo);
       funcArgs.add(offsetTypeInfo);
       funcArgs.add(new VarInfo('max', defs.intTypeInfo));
@@ -299,7 +299,7 @@ export class SelectIOProcessor {
           TypeInfo.compoundType(resultTypeInfo, true, isResultTypeArray),
         ),
       );
-      if (action.hasLimit) {
+      if (action.pagination) {
         returnValues.add(new VarInfo('max', defs.intTypeInfo));
       } else if (action.mode === mm.SelectActionMode.page) {
         returnValues.add(new VarInfo('hasNext', defs.boolTypeInfo));

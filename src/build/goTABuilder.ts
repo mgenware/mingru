@@ -211,10 +211,10 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const { action } = io;
     const selMode = action.mode;
     const isPageMode = selMode === mm.SelectActionMode.page;
-    let { hasLimit } = action;
+    let { pagination } = action;
     if (isPageMode) {
       // Page mode can be considered a special case of hasLimit
-      hasLimit = true;
+      pagination = true;
     }
 
     // We only need the type name here, the namespace(import) is already
@@ -229,7 +229,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     let errReturnCode = '';
     if (isPageMode) {
       errReturnCode = 'nil, false, err';
-    } else if (hasLimit) {
+    } else if (pagination) {
       errReturnCode = 'nil, 0, err';
     } else {
       errReturnCode = 'nil, err';
@@ -239,7 +239,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     let succReturnCode = '';
     if (isPageMode) {
       succReturnCode = `${defs.resultVarName}, itemCounter > len(result), nil`;
-    } else if (hasLimit) {
+    } else if (pagination) {
       succReturnCode = `${defs.resultVarName}, itemCounter, nil`;
     } else {
       succReturnCode = `${defs.resultVarName}, nil`;
@@ -314,7 +314,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       .map((p) => `, ${p.valueOrName}`)
       .join('');
     let sqlSource = io.sql;
-    if (hasLimit) {
+    if (pagination) {
       sqlSource += ' LIMIT ? OFFSET ?';
     }
     const sqlLiteral = go.makeStringLiteral(sqlSource);
@@ -343,15 +343,15 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
           defs.resultVarName,
           `*${originalResultType}`,
           0,
-          hasLimit ? defs.limitVarName : 0,
+          pagination ? defs.limitVarName : 0,
         ),
-        hasLimit ? 'itemCounter := 0' : null,
+        pagination ? 'itemCounter := 0' : null,
         'defer rows.Close()',
         'for rows.Next() {',
       );
       codeBuilder.incrementIndent();
       // Wrap the object scan code inside a "if itemCounter <= max" block if hasLimit
-      if (hasLimit) {
+      if (pagination) {
         codeBuilder.pushLines('itemCounter++', 'if itemCounter <= max {');
         codeBuilder.incrementIndent();
       }
@@ -365,7 +365,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       codeBuilder.decrementIndent();
       codeBuilder.push('}');
       codeBuilder.push('result = append(result, item)');
-      if (hasLimit) {
+      if (pagination) {
         codeBuilder.decrementIndent();
         codeBuilder.push('}');
       }
