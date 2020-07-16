@@ -9,6 +9,7 @@ import VarInfo, { TypeInfo } from '../lib/varInfo';
 import VarList from '../lib/varList';
 import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
+import { VarInfoBuilder } from '../lib/varInfoHelper';
 
 export class JoinIO {
   constructor(
@@ -117,6 +118,7 @@ export class SelectIOProcessor {
     let sql = 'SELECT ';
     const { action, dialect } = this;
     const [fromTable] = action.ensureInitialized();
+    const { limitValue, offsetValue } = action;
     const columns = action.columns.length
       ? action.columns
       : Object.values(fromTable.__columns);
@@ -255,6 +257,22 @@ export class SelectIOProcessor {
       funcArgs.add(new VarInfo('pageSize', defs.intTypeInfo));
       execArgs.add(limitTypeInfo);
       execArgs.add(offsetTypeInfo);
+    } else if (limitValue !== undefined) {
+      // User specified LIMIT and OFFSET
+      // Ignore number values, they were directly written in SQL.
+      if (limitValue instanceof mm.SQLVariable) {
+        const userLimitVarInfo = VarInfoBuilder.fromSQLVar(limitValue, dialect);
+        funcArgs.add(userLimitVarInfo);
+        execArgs.add(userLimitVarInfo);
+      }
+      if (offsetValue instanceof mm.SQLVariable) {
+        const userOffsetVarInfo = VarInfoBuilder.fromSQLVar(
+          offsetValue,
+          dialect,
+        );
+        funcArgs.add(userOffsetVarInfo);
+        execArgs.add(userOffsetVarInfo);
+      }
     }
 
     // Set return types

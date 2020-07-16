@@ -211,9 +211,12 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const { action } = io;
     const selMode = action.mode;
     const isPageMode = selMode === mm.SelectActionMode.page;
+    const { limitValue, offsetValue } = action;
+    const isLimitInput = limitValue instanceof mm.SQLVariable;
+    const isOffsetInput = offsetValue instanceof mm.SQLVariable;
     let { pagination } = action;
     if (isPageMode) {
-      // Page mode can be considered a special case of hasLimit
+      // Page mode can be considered a special case of pagination.
       pagination = true;
     }
 
@@ -314,9 +317,20 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       .map((p) => `, ${p.valueOrName}`)
       .join('');
     let sqlSource = io.sql;
+
+    // LIMIT and OFFSET
     if (pagination) {
       sqlSource += ' LIMIT ? OFFSET ?';
+    } else if (limitValue !== undefined) {
+      sqlSource += ' LIMIT ';
+      sqlSource += isLimitInput ? '?' : limitValue.toString();
+
+      if (offsetValue !== undefined) {
+        sqlSource += ' OFFSET ';
+        sqlSource += isOffsetInput ? '?' : offsetValue.toString();
+      }
     }
+
     const sqlLiteral = go.makeStringLiteral(sqlSource);
     if (selMode === mm.SelectActionMode.list || isPageMode) {
       const scanParams = joinParams(

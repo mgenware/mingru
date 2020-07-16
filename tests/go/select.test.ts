@@ -318,6 +318,18 @@ it('selectRows, paginate', async () => {
   await testBuildAsync(ta, 'select/selectRowsPaginate');
 });
 
+it('selectRows, LIMIT and OFFSET', async () => {
+  class PostTA extends mm.TableActions {
+    selectT = mm
+      .selectRows(post.id, post.title)
+      .orderByAsc(post.id)
+      .limit(10)
+      .offset(new mm.SQLVariable(mm.int(), 'offsetVar'));
+  }
+  const ta = mm.tableActions(post, PostTA);
+  await testBuildAsync(ta, 'select/selectRowsLimitOffset');
+});
+
 it('selectRows, paginate, where', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm
