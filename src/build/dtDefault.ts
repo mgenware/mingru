@@ -7,7 +7,6 @@ export default function dtDefault(type: string): unknown | null {
     case dt.smallInt:
     case dt.int:
     case dt.tinyInt:
-    case dt.bool:
       return 0;
 
     case dt.char:
@@ -18,6 +17,9 @@ export default function dtDefault(type: string): unknown | null {
     case dt.float:
     case dt.double:
       return 0.0;
+
+    case dt.bool:
+      return false;
 
     default:
       return null;

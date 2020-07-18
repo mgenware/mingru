@@ -126,6 +126,14 @@ export class MySQL extends Dialect {
         return 'SECOND';
       case mm.SQLCallType.timestampNow:
         return 'NOW';
+      case mm.SQLCallType.exists:
+        return 'EXISTS';
+      case mm.SQLCallType.notExists:
+        return 'NOT EXISTS';
+      case mm.SQLCallType.ifNull:
+        return 'IFNULL';
+      case mm.SQLCallType.IF:
+        return 'IF';
       default:
         throw new Error(`Unsupported type of call "${type}"`);
     }
@@ -209,6 +217,10 @@ export class MySQL extends Dialect {
         case DT.time:
         case DT.timestamp: {
           return TimeType;
+        }
+
+        case DT.bool: {
+          return 'bool';
         }
       }
     }

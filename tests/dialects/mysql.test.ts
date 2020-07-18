@@ -43,6 +43,7 @@ it('DT', () => {
     [mm.uSmallInt(), 'uint16', null],
     [mm.tinyInt(), 'int8', null],
     [mm.uTinyInt(), 'uint8', null],
+    [mm.bool(), 'bool', null],
     // String
     [mm.varChar(10), 'string', null],
     [mm.char(10), 'string', null],
@@ -126,6 +127,10 @@ it('colToSQLType', () => {
   expect(dialect.colToSQLType(mm.tinyInt()), 'TINYINT NOT NULL');
   expect(dialect.colToSQLType(mm.smallInt()), 'SMALLINT NOT NULL');
   expect(dialect.colToSQLType(mm.uInt()), 'INT UNSIGNED NOT NULL');
+  expect(dialect.colToSQLType(mm.uBigInt()), 'BIGINT UNSIGNED NOT NULL');
+  expect(dialect.colToSQLType(mm.uTinyInt()), 'TINYINT UNSIGNED NOT NULL');
+  expect(dialect.colToSQLType(mm.uSmallInt()), 'SMALLINT UNSIGNED NOT NULL');
+  expect(dialect.colToSQLType(mm.bool()), 'TINYINT NOT NULL');
   // Chars
   expect(dialect.colToSQLType(mm.varChar(3)), 'VARCHAR(3) NOT NULL');
   expect(dialect.colToSQLType(mm.char(3)), 'CHAR(3) NOT NULL');

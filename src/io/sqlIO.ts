@@ -5,6 +5,7 @@ import Dialect from '../dialect';
 import VarList from '../lib/varList';
 import VarInfo from '../lib/varInfo';
 import { VarInfoBuilder } from '../lib/varInfoHelper';
+import { SelectIOProcessor } from './selectIO';
 
 export class SQLIO {
   get vars(): VarInfo[] {
@@ -93,9 +94,28 @@ export class SQLIO {
         );
       }
 
+      case mm.SQLElementType.action: {
+        const action = element.value;
+        if (action instanceof mm.SelectAction) {
+          // Initialize the action.
+          if (!action.__name) {
+            action.__name = '__SQLCall_EMBEDDED_ACTION__';
+            action.__table = sourceTable;
+          }
+          const processor = new SelectIOProcessor(action, dialect);
+          const io = processor.convert();
+          return io.sql;
+        }
+        throw new Error(
+          `Sub-query can only contain SELECT clause, got "${toTypeString(
+            action,
+          )}"`,
+        );
+      }
+
       default: {
         throw new Error(
-          `Unsupported type of mm.SQLElement: ${
+          `Unsupported type of \`SQLElement\`: ${
             element.type
           }, value: "${toTypeString(element)}"`,
         );

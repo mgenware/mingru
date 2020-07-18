@@ -12,7 +12,7 @@ it('dtDefault', () => {
     [dt.int, 0],
     [dt.smallInt, 0],
     [dt.tinyInt, 0],
-    [dt.bool, 0],
+    [dt.bool, false],
     [dt.varChar, ''],
     [dt.char, ''],
     [dt.text, ''],
