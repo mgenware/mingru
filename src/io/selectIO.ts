@@ -181,17 +181,21 @@ export class SelectIOProcessor {
       whereIO = sqlIO(action.whereSQL, dialect);
       whereSQL =
         ' WHERE ' +
-        whereIO.toSQL(fromTable, (ele) => {
-          if (ele.type === mm.SQLElementType.column) {
-            const col = ele.toColumn();
-            const [colTable] = col.ensureInitialized();
-            if (colTable instanceof mm.JoinedTable) {
-              this.handleJoinRecursively(col);
+        whereIO.toSQL(
+          fromTable,
+          (ele) => {
+            if (ele.type === mm.SQLElementType.column) {
+              const col = ele.toColumn();
+              const [colTable] = col.ensureInitialized();
+              if (colTable instanceof mm.JoinedTable) {
+                this.handleJoinRecursively(col);
+              }
+              return this.getColumnSQL(col);
             }
-            return this.getColumnSQL(col);
-          }
-          return null;
-        });
+            return null;
+          },
+          this.sqlIOActionHandler,
+        );
     }
 
     // Joins
@@ -235,18 +239,22 @@ export class SelectIOProcessor {
       havingIO = sqlIO(action.havingSQL, dialect);
       sql +=
         ' HAVING ' +
-        havingIO.toSQL(fromTable, (ele) => {
-          if (ele.type === mm.SQLElementType.column) {
-            const col = ele.toColumn();
-            if (col.__table instanceof mm.JoinedTable) {
-              throw new Error(
-                `Joins are not allowed in HAVING clause, offending column "${col.__name}".`,
-              );
+        havingIO.toSQL(
+          fromTable,
+          (ele) => {
+            if (ele.type === mm.SQLElementType.column) {
+              const col = ele.toColumn();
+              if (col.__table instanceof mm.JoinedTable) {
+                throw new Error(
+                  `Joins are not allowed in HAVING clause, offending column "${col.__name}".`,
+                );
+              }
+              return dialect.encodeColumnName(col);
             }
-            return dialect.encodeColumnName(col);
-          }
-          return null;
-        });
+            return null;
+          },
+          this.sqlIOActionHandler,
+        );
     }
 
     // Handle ending parenthesis.
@@ -360,6 +368,27 @@ export class SelectIOProcessor {
       returnValues,
     );
   }
+
+  // Declared as a property to avoid `this` issues as it's used as a callback to other classes.
+  private sqlIOActionHandler = (action: mm.Action): string => {
+    const sourceTable = this.action.__table;
+    const { dialect } = this;
+    if (action instanceof mm.SelectAction) {
+      // Initialize the action.
+      if (!action.__name) {
+        // eslint-disable-next-line no-param-reassign
+        action.__name = '__SQLCall_EMBEDDED_ACTION__';
+        // eslint-disable-next-line no-param-reassign
+        action.__table = sourceTable;
+      }
+      const processor = new SelectIOProcessor(action, dialect);
+      const io = processor.convert();
+      return io.sql;
+    }
+    throw new Error(
+      `Sub-query can only contain SELECT clause, got "${toTypeString(action)}"`,
+    );
+  };
 
   // eslint-disable-next-line class-methods-use-this
   private flushInputs(funcArgs: VarList, execArgs: VarList, io: SQLIO | null) {
@@ -540,18 +569,22 @@ export class SelectIOProcessor {
         );
       }
 
-      // Here, we have a RawColumn.core is an expression with a column inside
+      // Here, we have a `RawColumn.core` which is an expression with a column inside.
       const exprIO = sqlIO(rawColCore, dialect);
       // Replace the column with SQL only (no alias).
-      // Imagine new RawColumn(mm.sql`COUNT(${col.as('a')})`, 'b'), the embedded column would be
+      // Imagine `new RawColumn(mm.sql`COUNT(${col.as('a')})`, 'b')`, the embedded column would be
       // interpreted as `'col' AS 'a'`, but it really should be `COUNT('col') AS 'b'`, so this
-      // step replace the embedded with the SQL without its attached alias.
-      const sql = exprIO.toSQL(table, (element) => {
-        if (element.value === embeddedCol) {
-          return colSQL.sql;
-        }
-        return null;
-      });
+      // step replaces the embedded column with SQL without its attached alias.
+      const sql = exprIO.toSQL(
+        table,
+        (element) => {
+          if (element.value === embeddedCol) {
+            return colSQL.sql;
+          }
+          return null;
+        },
+        this.sqlIOActionHandler,
+      );
       // SelectedColumn.alias takes precedence over colSQL.alias
       return new SelectedColumnIO(
         sCol,
@@ -574,7 +607,7 @@ export class SelectIOProcessor {
     }
     const rawExpr = rawCol.core;
     const exprIO = sqlIO(rawExpr, dialect);
-    const sql = exprIO.toSQL(table);
+    const sql = exprIO.toSQL(table, undefined, this.sqlIOActionHandler);
     // If we cannot guess the result type (`resultType` is null), and neither does a user specified
     // type (`type` is null) exists, we throw cuz we cannot determine the result type.
     if (!resultType && !sCol.__type) {

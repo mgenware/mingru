@@ -5,7 +5,6 @@ import Dialect from '../dialect';
 import VarList from '../lib/varList';
 import VarInfo from '../lib/varInfo';
 import { VarInfoBuilder } from '../lib/varInfoHelper';
-import { SelectIOProcessor } from './selectIO';
 
 export class SQLIO {
   get vars(): VarInfo[] {
@@ -27,7 +26,8 @@ export class SQLIO {
 
   toSQL(
     sourceTable: mm.Table | null,
-    cb?: (element: mm.SQLElement) => string | null,
+    elementHandler?: (element: mm.SQLElement) => string | null,
+    actionHandler?: (action: mm.Action) => string,
   ): string {
     const { sql } = this;
     let res = '';
@@ -39,12 +39,18 @@ export class SQLIO {
         }
       }
       let cbRes: string | null = null;
-      if (cb) {
-        cbRes = cb(element);
+      if (elementHandler) {
+        cbRes = elementHandler(element);
       }
       res +=
         cbRes === null
-          ? this.handleElement(element, this.dialect, sourceTable)
+          ? this.handleElement(
+              element,
+              this.dialect,
+              sourceTable,
+              elementHandler,
+              actionHandler,
+            )
           : cbRes;
     }
     return res;
@@ -55,6 +61,8 @@ export class SQLIO {
     element: mm.SQLElement,
     dialect: Dialect,
     sourceTable: mm.Table | null,
+    elementHandler: ((element: mm.SQLElement) => string | null) | undefined,
+    actionHandler: ((action: mm.Action) => string) | undefined,
   ): string {
     switch (element.type) {
       case mm.SQLElementType.rawString: {
@@ -71,7 +79,13 @@ export class SQLIO {
         const params = call.params.length
           ? call.params
               // eslint-disable-next-line @typescript-eslint/no-use-before-define
-              .map((p) => sqlIO(p, dialect).toSQL(sourceTable))
+              .map((p) =>
+                sqlIO(p, dialect).toSQL(
+                  sourceTable,
+                  elementHandler,
+                  actionHandler,
+                ),
+              )
               .join(', ')
           : '';
         return `${name}(${params})`;
@@ -96,20 +110,14 @@ export class SQLIO {
 
       case mm.SQLElementType.action: {
         const action = element.value;
-        if (action instanceof mm.SelectAction) {
-          // Initialize the action.
-          if (!action.__name) {
-            action.__name = '__SQLCall_EMBEDDED_ACTION__';
-            action.__table = sourceTable;
-          }
-          const processor = new SelectIOProcessor(action, dialect);
-          const io = processor.convert();
-          return io.sql;
+        if (!actionHandler) {
+          throw new Error(`No action handler for action "${action}"`);
+        }
+        if (action instanceof mm.Action) {
+          return actionHandler(action);
         }
         throw new Error(
-          `Sub-query can only contain SELECT clause, got "${toTypeString(
-            action,
-          )}"`,
+          `Element is not an action, got \`${toTypeString(action)}\``,
         );
       }
 

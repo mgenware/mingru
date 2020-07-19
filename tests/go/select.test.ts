@@ -512,6 +512,7 @@ it('SELECT, EXISTS, IF', async () => {
     t1 = mm.select(
       mm.sel(mm.exists(mm.select(post.user_id.join(user).sig).byID()), 'a'),
     );
+
     t2 = mm.select(
       mm.sel(
         mm
