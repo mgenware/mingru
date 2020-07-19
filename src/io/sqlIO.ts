@@ -78,8 +78,8 @@ export class SQLIO {
         const name = dialect.sqlCall(call.type);
         const params = call.params.length
           ? call.params
-              // eslint-disable-next-line @typescript-eslint/no-use-before-define
               .map((p) =>
+                // eslint-disable-next-line @typescript-eslint/no-use-before-define
                 sqlIO(p, dialect).toSQL(
                   sourceTable,
                   elementHandler,
