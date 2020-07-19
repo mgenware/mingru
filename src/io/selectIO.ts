@@ -469,7 +469,7 @@ export class SelectIOProcessor {
             return returnTypeArg.__type;
           }
           throw new Error(
-            `Index-based return type data is not a "Column", got ${toTypeString(
+            `Index-based return type data is not a \`Column\`, got ${toTypeString(
               returnTypeArg,
             )}`,
           );

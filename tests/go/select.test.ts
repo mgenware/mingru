@@ -509,7 +509,21 @@ it('Exclude all empty properties', async () => {
 
 it('SELECT, EXISTS, IF', async () => {
   class PostTA extends mm.TableActions {
-    t1 = mm.select(mm.sel(mm.exists(mm.select(post.title).byID()), 'a'));
+    t1 = mm.select(
+      mm.sel(mm.exists(mm.select(post.user_id.join(user).sig).byID()), 'a'),
+    );
+    t2 = mm.select(
+      mm.sel(
+        mm
+          .IF(
+            mm.exists(mm.select(post.user_id.join(user).sig).byID()),
+            '1',
+            '2',
+          )
+          .setReturnType(mm.int().__type),
+        'a',
+      ),
+    );
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectExistsIf');
