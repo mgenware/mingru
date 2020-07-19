@@ -1454,10 +1454,10 @@ min-indent@^1.0.0:
   resolved "https://registry.yarnpkg.com/min-indent/-/min-indent-1.0.0.tgz#cfc45c37e9ec0d8f0a0ec3dd4ef7f7c3abe39256"
   integrity sha1-z8RcN+nsDY8KDsPdTvf3w6vjklY=
 
-mingru-models@^0.39.0:
-  version "0.39.0"
-  resolved "https://registry.yarnpkg.com/mingru-models/-/mingru-models-0.39.0.tgz#5e8e4ef05e88465ad476efaddeda833f57e720eb"
-  integrity sha512-3GRII/QYAPHXHGi4y1akNqGyg/Caru1Xp/wAvdO+D6epOreS8c6IoLKrGOp0VxaCwRtfbxwg8cjgwYxmWU4RJw==
+mingru-models@^0.40.0:
+  version "0.40.0"
+  resolved "https://registry.yarnpkg.com/mingru-models/-/mingru-models-0.40.0.tgz#0f91b82fcfb6e84e5d8dbf77de0dbcf54e0233b4"
+  integrity sha512-coX8X7vkqf1aI8YfbMJaM3K9ACkyTXtBcYdViTeChV1S3aX3HEr1yRdMur57Ye4q+tSgjImq61tRrOEBKRrD2A==
   dependencies:
     lodash.camelcase "^4.3.0"
     lodash.snakecase "^4.1.1"
