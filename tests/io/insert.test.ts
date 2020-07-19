@@ -5,7 +5,7 @@ import * as mr from '../..';
 import post from '../models/post';
 import user from '../models/user';
 
-const expect = assert.equal;
+const eq = assert.equal;
 const dialect = mr.mysql;
 
 it('Insert inputs', () => {
@@ -17,7 +17,7 @@ it('Insert inputs', () => {
   const io = mr.insertIO(v, dialect);
 
   assert.ok(io instanceof mr.InsertIO);
-  expect(io.sql, 'INSERT INTO `db_post` (`title`, `user_id`) VALUES (?, ?)');
+  eq(io.sql, 'INSERT INTO `db_post` (`title`, `user_id`) VALUES (?, ?)');
 });
 
 it('Insert inputs and values', () => {
@@ -32,7 +32,7 @@ it('Insert inputs and values', () => {
   const io = mr.insertIO(v, dialect);
 
   assert.ok(io instanceof mr.InsertIO);
-  expect(
+  eq(
     io.sql,
     'INSERT INTO `db_post` (`title`, `user_id`, `datetime`) VALUES (?, ?, NOW())',
   );
@@ -48,11 +48,11 @@ it('getInputs', () => {
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, mr.mysql);
-  expect(
+  eq(
     io.funcArgs.toString(),
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, sig: *string, id: uint64, b: string',
   );
-  expect(io.execArgs.toString(), 'sig: *string, id: uint64, b: string');
+  eq(io.execArgs.toString(), 'sig: *string, id: uint64, b: string');
 });
 
 it('getReturns (insert)', () => {
@@ -65,7 +65,7 @@ it('getReturns (insert)', () => {
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, mr.mysql);
-  expect(io.returnValues.toString(), '');
+  eq(io.returnValues.toString(), '');
 });
 
 it('getReturns (insertOne)', () => {
@@ -78,7 +78,7 @@ it('getReturns (insertOne)', () => {
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, mr.mysql);
-  expect(io.returnValues.toString(), '__insertedID: uint64');
+  eq(io.returnValues.toString(), '__insertedID: uint64');
 });
 
 it('Validate setters', () => {
@@ -107,7 +107,7 @@ it('setDefaults', () => {
   const v = postTA.t;
   const io = mr.insertIO(v, dialect);
 
-  expect(
+  eq(
     io.sql,
     "INSERT INTO `post` (`title`, `content`, `datetime`) VALUES (?, '', UTC_TIMESTAMP())",
   );

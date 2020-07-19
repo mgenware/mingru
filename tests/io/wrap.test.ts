@@ -5,7 +5,7 @@ import * as mr from '../..';
 import user from '../models/user';
 import post from '../models/post';
 
-const expect = assert.equal;
+const eq = assert.equal;
 const dialect = mr.mysql;
 
 class WrapSelfTA extends mm.TableActions {
@@ -48,41 +48,41 @@ it('WrapIO', () => {
 
 it('getInputs (wrapSelf and innerIO)', () => {
   const io = mr.wrapIO(wrapSelf.d, dialect) as mr.WrapIO;
-  expect(
+  eq(
     io.funcArgs.toString(),
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, urlName: string, followerCount: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, followerCount: *string}',
   );
-  expect(
+  eq(
     io.execArgs.toString(),
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, sig: *string="haha", followerCount: *string',
   );
-  expect(io.funcPath, 'da.S');
+  eq(io.funcPath, 'da.S');
 });
 
 it('getInputs (wrapOther)', () => {
   const io = mr.wrapIO(wrapOther.standard, dialect) as mr.WrapIO;
-  expect(
+  eq(
     io.funcArgs.toString(),
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, urlName: string, sig: *string, followerCount: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, sig: *string, followerCount: *string}',
   );
-  expect(
+  eq(
     io.execArgs.toString(),
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64=123, sig: *string, followerCount: *string',
   );
-  expect(io.funcPath, 'User.S');
+  eq(io.funcPath, 'User.S');
 });
 
 it('getInputs (wrapOther, nested)', () => {
   const io = mr.wrapIO(wrapOther.nested, dialect) as mr.WrapIO;
-  expect(
+  eq(
     io.funcArgs.toString(),
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, urlName: string, followerCount: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, followerCount: *string}',
   );
-  expect(
+  eq(
     io.execArgs.toString(),
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64=123, followerCount: *string',
   );
-  expect(io.funcPath, 'User.D');
+  eq(io.funcPath, 'User.D');
 });
 
 it('Throws on undefined inputs', () => {
@@ -107,13 +107,13 @@ it('Throws on undefined inputs', () => {
 
 it('ReturnRef', () => {
   const io = mr.wrapIO(wrapOther.retValue, dialect) as mr.WrapIO;
-  expect(
+  eq(
     io.funcArgs.toString(),
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64=ValueRef(extID), urlName: string, followerCount: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64=ValueRef(extID), followerCount: *string}',
   );
-  expect(
+  eq(
     io.execArgs.toString(),
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, followerCount: *string',
   );
-  expect(io.funcPath, 'User.D');
+  eq(io.funcPath, 'User.D');
 });

@@ -3,17 +3,17 @@ import * as assert from 'assert';
 import * as mr from '../..';
 import user from '../models/user';
 
-const expect = assert.equal;
+const eq = assert.equal;
 const dialect = mr.mysql;
 
 it('inputPlaceholder', () => {
-  expect(dialect.inputPlaceholder(new mm.SQLVariable('Type', 'name')), '?');
+  eq(dialect.inputPlaceholder(new mm.SQLVariable('Type', 'name')), '?');
 });
 
 it('encodeColumnName', () => {
-  expect(dialect.encodeColumnName(user.age), '`age`');
+  eq(dialect.encodeColumnName(user.age), '`age`');
 });
 
 it('encodeTableName', () => {
-  expect(dialect.encodeTableName(user), '`user`');
+  eq(dialect.encodeTableName(user), '`user`');
 });

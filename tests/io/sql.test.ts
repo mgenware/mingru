@@ -5,7 +5,7 @@ import * as mr from '../..';
 import user from '../models/user';
 import post from '../models/post';
 
-const expect = assert.equal;
+const eq = assert.equal;
 const dialect = mr.mysql;
 
 it('Columns and escape strings', () => {
@@ -14,13 +14,13 @@ it('Columns and escape strings', () => {
   }`;
   const io = mr.sqlIO(sql, dialect);
   assert.ok(io instanceof mr.SQLIO);
-  expect(io.toSQL(post), 'abc "aaa" `user_id` `url_name`');
+  eq(io.toSQL(post), 'abc "aaa" `user_id` `url_name`');
 });
 
 it('SQL calls', () => {
   const sql = mm.sql`${post.datetime} = ${mm.localDatetimeNow()}`;
   const io = mr.sqlIO(sql, dialect);
-  expect(io.toSQL(post), '`datetime` = NOW()');
+  eq(io.toSQL(post), '`datetime` = NOW()');
 });
 
 it('toSQL(sourceTable)', () => {

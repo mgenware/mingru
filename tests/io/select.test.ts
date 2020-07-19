@@ -9,7 +9,7 @@ import rpl from '../models/postReply';
 import postCmt from '../models/postCmt';
 import cmt2 from '../models/cmt2';
 
-const expect = assert.equal;
+const eq = assert.equal;
 const dialect = mr.mysql;
 
 it('Select', () => {
@@ -21,8 +21,8 @@ it('Select', () => {
   const io = mr.selectIO(v, dialect);
 
   assert.ok(io instanceof mr.SelectIO);
-  expect(io.sql, 'SELECT `id`, `url_name` FROM `user`');
-  expect(io.where, null);
+  eq(io.sql, 'SELECT `id`, `url_name` FROM `user`');
+  eq(io.where, null);
 });
 
 it('Where', () => {
@@ -36,7 +36,7 @@ it('Where', () => {
   const io = mr.selectIO(v, dialect);
 
   assert.ok(io.where instanceof mr.SQLIO);
-  expect(io.sql, 'SELECT `id`, `url_name` FROM `user` WHERE `id` = 1 ? ?');
+  eq(io.sql, 'SELECT `id`, `url_name` FROM `user` WHERE `id` = 1 ? ?');
 });
 
 it('Where and inputs', () => {
@@ -54,7 +54,7 @@ it('Where and inputs', () => {
   const io = mr.selectIO(v, dialect);
 
   assert.ok(io.where instanceof mr.SQLIO);
-  expect(
+  eq(
     io.sql,
     'SELECT `id`, `url_name` FROM `user` WHERE `id` = ? && `url_name` = ?',
   );
@@ -68,7 +68,7 @@ it('Basic join', () => {
   const v = postTA.t;
   const io = mr.selectIO(v, dialect);
 
-  expect(
+  eq(
     io.sql,
     'SELECT `join_1`.`url_name` AS `userUrlName`, `db_post`.`title` AS `title` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`',
   );
@@ -86,7 +86,7 @@ it('Multiple cols join and custom table name', () => {
   const v = rplTA.t;
   const io = mr.selectIO(v, dialect);
 
-  expect(
+  eq(
     io.sql,
     'SELECT `join_1`.`url_name` AS `userUrlName`, `join_1`.`id` AS `userID`, `join_2`.`url_name` AS `toUserUrlName` FROM `post_cmt_rpl` AS `post_cmt_rpl` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `post_cmt_rpl`.`user_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `post_cmt_rpl`.`to_user_id`',
   );
@@ -100,7 +100,7 @@ it('Join a table with custom table name', () => {
   const v = postTA.t;
   const io = mr.selectIO(v, dialect);
 
-  expect(
+  eq(
     io.sql,
     'SELECT `db_post`.`user_id` AS `userID`, `join_1`.`to_user_id` AS `userToUserID` FROM `db_post` AS `db_post` INNER JOIN `post_cmt_rpl` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`',
   );
@@ -117,7 +117,7 @@ it('Join a table with custom column name', () => {
   const v = postTA.t;
   const io = mr.selectIO(v, dialect);
 
-  expect(
+  eq(
     io.sql,
     'SELECT `db_post`.`user_id` AS `userID`, `join_1`.`to_user_id` AS `userToUserID` FROM `db_post` AS `db_post` INNER JOIN `post_cmt_rpl` AS `join_1` ON `join_1`.`haha` = `db_post`.`user_id`',
   );
@@ -147,7 +147,7 @@ it('3-table joins and WHERE', () => {
   const v = cmtTA.t;
   const io = mr.selectIO(v, dialect);
 
-  expect(
+  eq(
     io.sql,
     'SELECT `post_cmt`.`id` AS `id`, `post_cmt`.`user_id` AS `userID`, `join_1`.`title` AS `targetTitle`, `join_1`.`user_id` AS `targetUserID`, `join_2`.`url_name` AS `targetUserUrlName`, `join_2`.`id` AS `TUID2` FROM `post_cmt` AS `post_cmt` INNER JOIN `db_post` AS `join_1` ON `join_1`.`id` = `post_cmt`.`target_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `join_1`.`user_id` WHERE `post_cmt`.`user_id` = 1 AND `join_1`.`title` = 2 | `join_2`.`url_name` = ? | `post_cmt`.`id` = ? | `post_cmt`.`target_id` = ?',
   );
@@ -171,9 +171,9 @@ it('Join and from', () => {
   const ta = mm.tableActions(post, PostTA);
   const io = mr.selectIO(ta.selectT, dialect);
 
-  expect(ta.__table, post);
-  expect(ta.selectT.__table, postCmt);
-  expect(
+  eq(ta.__table, post);
+  eq(ta.selectT.__table, postCmt);
+  eq(
     io.sql,
     'SELECT `join_1`.`content` AS `cmtContent`, `join_1`.`created_at` AS `cmtCreatedAt`, `join_1`.`modified_at` AS `cmtModifiedAt`, `join_1`.`rpl_count` AS `cmtRplCount`, `join_1`.`user_id` AS `cmtUserID`, `join_2`.`url_name` AS `cmtUserUrlName` FROM `post_cmt` AS `post_cmt` INNER JOIN `cmt` AS `join_1` ON `join_1`.`id` = `post_cmt`.`cmt_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `join_1`.`user_id` WHERE `post_cmt`.`post_id` = ?',
   );
@@ -193,7 +193,7 @@ it('AS', () => {
   const v = cmtTA.t;
   const io = mr.selectIO(v, dialect);
 
-  expect(
+  eq(
     io.sql,
     'SELECT `post_cmt`.`id` AS `id`, `post_cmt`.`user_id` AS `a`, `join_1`.`title` AS `b`, `join_2`.`url_name` AS `targetUserUrlName`, `join_2`.`url_name` AS `c` FROM `post_cmt` AS `post_cmt` INNER JOIN `db_post` AS `join_1` ON `join_1`.`id` = `post_cmt`.`target_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `join_1`.`user_id`',
   );
@@ -232,7 +232,7 @@ it('getInputs', () => {
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.selectIO(v, mr.mysql);
-  expect(
+  eq(
     io.funcArgs.toString(),
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, urlName: string',
   );
@@ -245,7 +245,7 @@ it('getInputs (no WHERE)', () => {
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.selectIO(v, mr.mysql);
-  expect(io.funcArgs.list.length, 1);
+  eq(io.funcArgs.list.length, 1);
 });
 
 it('getReturns', () => {
@@ -259,7 +259,7 @@ it('getReturns', () => {
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.selectIO(v, mr.mysql);
-  expect(io.returnValues.toString(), '__result: *UserTableTResult');
+  eq(io.returnValues.toString(), '__result: *UserTableTResult');
 });
 
 it('GROUP BY and HAVING', () => {
@@ -274,7 +274,7 @@ it('GROUP BY and HAVING', () => {
   const ta = mm.tableActions(post, PostTA);
   const v = ta.t;
   const io = mr.selectIO(v, mr.mysql);
-  expect(
+  eq(
     io.sql,
     'SELECT YEAR(`datetime`) AS `year`, SUM(`cmt_c`) AS `total` FROM `db_post` WHERE `id` = ? GROUP BY `year`, `total` HAVING `year` > 2010 AND `total` > 100',
   );

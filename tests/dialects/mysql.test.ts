@@ -4,30 +4,30 @@ import { itThrows } from 'it-throws';
 import user from '../models/user';
 import * as mr from '../..';
 
-const expect = assert.equal;
+const eq = assert.equal;
 const TimePkg = 'time';
 const dialect = mr.mysql;
 
 function testType(col: mm.Column, type: string, pkg?: string) {
   const info = dialect.colTypeToGoType(col.__type);
-  expect(info.typeString, type);
-  expect(info.moduleName || null, pkg || null);
+  eq(info.typeString, type);
+  eq(info.moduleName || null, pkg || null);
 }
 
 it('encodeName', () => {
-  expect(dialect.encodeName('abc'), '`abc`');
+  eq(dialect.encodeName('abc'), '`abc`');
 });
 
 it('encodeColumnName', () => {
-  expect(dialect.encodeColumnName(user.age), '`age`');
-  expect(dialect.encodeColumnName(user.follower_count), '`follower_c`');
+  eq(dialect.encodeColumnName(user.age), '`age`');
+  eq(dialect.encodeColumnName(user.follower_count), '`follower_c`');
 });
 
 it('encodeTableName', () => {
   class Table extends mm.Table {}
   const t = mm.table(Table, 'haha');
-  expect(dialect.encodeTableName(user), '`user`');
-  expect(dialect.encodeTableName(t), '`haha`');
+  eq(dialect.encodeTableName(user), '`user`');
+  eq(dialect.encodeTableName(t), '`haha`');
 });
 
 it('DT', () => {
@@ -72,45 +72,45 @@ it('DT (not supported)', () => {
 });
 
 it('as', () => {
-  expect(dialect.as('abc', 'def'), 'abc AS `def`');
+  eq(dialect.as('abc', 'def'), 'abc AS `def`');
 });
 
 it('SQL calls', () => {
   const t = dialect.sqlCall;
-  expect(t(mm.SQLCallType.localDateNow), 'CURDATE');
-  expect(t(mm.SQLCallType.localTimeNow), 'CURTIME');
-  expect(t(mm.SQLCallType.localDatetimeNow), 'NOW');
-  expect(t(mm.SQLCallType.utcDateNow), 'UTC_DATE');
-  expect(t(mm.SQLCallType.utcTimeNow), 'UTC_TIME');
-  expect(t(mm.SQLCallType.utcDatetimeNow), 'UTC_TIMESTAMP');
-  expect(t(mm.SQLCallType.count), 'COUNT');
-  expect(t(mm.SQLCallType.coalesce), 'COALESCE');
-  expect(t(mm.SQLCallType.avg), 'AVG');
-  expect(t(mm.SQLCallType.sum), 'SUM');
-  expect(t(mm.SQLCallType.min), 'MIN');
-  expect(t(mm.SQLCallType.max), 'MAX');
-  expect(t(mm.SQLCallType.year), 'YEAR');
-  expect(t(mm.SQLCallType.month), 'MONTH');
-  expect(t(mm.SQLCallType.day), 'DAY');
-  expect(t(mm.SQLCallType.week), 'WEEK');
-  expect(t(mm.SQLCallType.hour), 'HOUR');
-  expect(t(mm.SQLCallType.minute), 'MINUTE');
-  expect(t(mm.SQLCallType.second), 'SECOND');
-  expect(t(mm.SQLCallType.timestampNow), 'NOW');
+  eq(t(mm.SQLCallType.localDateNow), 'CURDATE');
+  eq(t(mm.SQLCallType.localTimeNow), 'CURTIME');
+  eq(t(mm.SQLCallType.localDatetimeNow), 'NOW');
+  eq(t(mm.SQLCallType.utcDateNow), 'UTC_DATE');
+  eq(t(mm.SQLCallType.utcTimeNow), 'UTC_TIME');
+  eq(t(mm.SQLCallType.utcDatetimeNow), 'UTC_TIMESTAMP');
+  eq(t(mm.SQLCallType.count), 'COUNT');
+  eq(t(mm.SQLCallType.coalesce), 'COALESCE');
+  eq(t(mm.SQLCallType.avg), 'AVG');
+  eq(t(mm.SQLCallType.sum), 'SUM');
+  eq(t(mm.SQLCallType.min), 'MIN');
+  eq(t(mm.SQLCallType.max), 'MAX');
+  eq(t(mm.SQLCallType.year), 'YEAR');
+  eq(t(mm.SQLCallType.month), 'MONTH');
+  eq(t(mm.SQLCallType.day), 'DAY');
+  eq(t(mm.SQLCallType.week), 'WEEK');
+  eq(t(mm.SQLCallType.hour), 'HOUR');
+  eq(t(mm.SQLCallType.minute), 'MINUTE');
+  eq(t(mm.SQLCallType.second), 'SECOND');
+  eq(t(mm.SQLCallType.timestampNow), 'NOW');
 });
 
 it('objToSQL', () => {
   // null
-  expect(dialect.objToSQL(null, user), 'NULL');
+  eq(dialect.objToSQL(null, user), 'NULL');
   // number
-  expect(dialect.objToSQL(-32, user), '-32');
+  eq(dialect.objToSQL(-32, user), '-32');
   // boolean
-  expect(dialect.objToSQL(true, user), '1');
-  expect(dialect.objToSQL(false, user), '0');
+  eq(dialect.objToSQL(true, user), '1');
+  eq(dialect.objToSQL(false, user), '0');
   // string
-  expect(dialect.objToSQL('a 123 🛋', user), "'a 123 🛋'");
-  expect(dialect.objToSQL('', user), "''");
-  expect(dialect.objToSQL('\'"\\', user), "'''\"\\'");
+  eq(dialect.objToSQL('a 123 🛋', user), "'a 123 🛋'");
+  eq(dialect.objToSQL('', user), "''");
+  eq(dialect.objToSQL('\'"\\', user), "'''\"\\'");
   // undefined
   itThrows(() => dialect.objToSQL(undefined, user), 'value is undefined');
   // Others
@@ -122,31 +122,31 @@ it('objToSQL', () => {
 
 it('colToSQLType', () => {
   // Integers
-  expect(dialect.colToSQLType(mm.int()), 'INT NOT NULL');
-  expect(dialect.colToSQLType(mm.bigInt()), 'BIGINT NOT NULL');
-  expect(dialect.colToSQLType(mm.tinyInt()), 'TINYINT NOT NULL');
-  expect(dialect.colToSQLType(mm.smallInt()), 'SMALLINT NOT NULL');
-  expect(dialect.colToSQLType(mm.uInt()), 'INT UNSIGNED NOT NULL');
-  expect(dialect.colToSQLType(mm.uBigInt()), 'BIGINT UNSIGNED NOT NULL');
-  expect(dialect.colToSQLType(mm.uTinyInt()), 'TINYINT UNSIGNED NOT NULL');
-  expect(dialect.colToSQLType(mm.uSmallInt()), 'SMALLINT UNSIGNED NOT NULL');
-  expect(dialect.colToSQLType(mm.bool()), 'TINYINT NOT NULL');
+  eq(dialect.colToSQLType(mm.int()), 'INT NOT NULL');
+  eq(dialect.colToSQLType(mm.bigInt()), 'BIGINT NOT NULL');
+  eq(dialect.colToSQLType(mm.tinyInt()), 'TINYINT NOT NULL');
+  eq(dialect.colToSQLType(mm.smallInt()), 'SMALLINT NOT NULL');
+  eq(dialect.colToSQLType(mm.uInt()), 'INT UNSIGNED NOT NULL');
+  eq(dialect.colToSQLType(mm.uBigInt()), 'BIGINT UNSIGNED NOT NULL');
+  eq(dialect.colToSQLType(mm.uTinyInt()), 'TINYINT UNSIGNED NOT NULL');
+  eq(dialect.colToSQLType(mm.uSmallInt()), 'SMALLINT UNSIGNED NOT NULL');
+  eq(dialect.colToSQLType(mm.bool()), 'TINYINT NOT NULL');
   // Chars
-  expect(dialect.colToSQLType(mm.varChar(3)), 'VARCHAR(3) NOT NULL');
-  expect(dialect.colToSQLType(mm.char(3)), 'CHAR(3) NOT NULL');
-  expect(dialect.colToSQLType(mm.text()), 'TEXT NOT NULL');
+  eq(dialect.colToSQLType(mm.varChar(3)), 'VARCHAR(3) NOT NULL');
+  eq(dialect.colToSQLType(mm.char(3)), 'CHAR(3) NOT NULL');
+  eq(dialect.colToSQLType(mm.text()), 'TEXT NOT NULL');
   // DateTime
-  expect(dialect.colToSQLType(mm.date()), 'DATE NOT NULL');
-  expect(dialect.colToSQLType(mm.datetime()), 'DATETIME NOT NULL');
-  expect(dialect.colToSQLType(mm.time()), 'TIME NOT NULL');
+  eq(dialect.colToSQLType(mm.date()), 'DATE NOT NULL');
+  eq(dialect.colToSQLType(mm.datetime()), 'DATETIME NOT NULL');
+  eq(dialect.colToSQLType(mm.time()), 'TIME NOT NULL');
   // NULL
-  expect(dialect.colToSQLType(mm.int().nullable), 'INT NULL DEFAULT NULL');
+  eq(dialect.colToSQLType(mm.int().nullable), 'INT NULL DEFAULT NULL');
   // Default value
-  expect(
+  eq(
     dialect.colToSQLType(mm.int().default(43).nullable),
     'INT NULL DEFAULT 43',
   );
-  expect(
+  eq(
     dialect.colToSQLType(mm.varChar(23).default('oo').nullable),
     "VARCHAR(23) NULL DEFAULT 'oo'",
   );

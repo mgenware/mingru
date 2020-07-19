@@ -5,7 +5,7 @@ import * as mr from '../..';
 import post from '../models/post';
 import user from '../models/user';
 
-const expect = assert.equal;
+const eq = assert.equal;
 const dialect = mr.mysql;
 
 it('Update', () => {
@@ -22,15 +22,15 @@ it('Update', () => {
   const io = mr.updateIO(v, dialect);
 
   assert.ok(io instanceof mr.UpdateIO);
-  expect(
+  eq(
     io.sql,
     'UPDATE `db_post` SET `title` = "haha", `content` = ?, `cmt_c` = `cmt_c` + 1 WHERE `id` = ?',
   );
-  expect(io.setters.length, 3);
-  expect(io.setters[0].col, post.title);
-  expect(io.setters[0].sql.sql.toString(), 'SQL(E("haha", type = 0))');
-  expect(io.setters[1].col, post.content);
-  expect(io.setters[2].col, post.cmtCount);
+  eq(io.setters.length, 3);
+  eq(io.setters[0].col, post.title);
+  eq(io.setters[0].sql.sql.toString(), 'SQL(E("haha", type = 0))');
+  eq(io.setters[1].col, post.content);
+  eq(io.setters[2].col, post.cmtCount);
 });
 
 it('Update with WHERE', () => {
@@ -44,7 +44,7 @@ it('Update with WHERE', () => {
   const v = postTA.t;
   const io = mr.updateIO(v, dialect);
 
-  expect(io.sql, 'UPDATE `db_post` SET `title` = "haha" WHERE `id` = 1');
+  eq(io.sql, 'UPDATE `db_post` SET `title` = "haha" WHERE `id` = 1');
 });
 
 it('getInputs', () => {
@@ -61,12 +61,12 @@ it('getInputs', () => {
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.updateIO(v, mr.mysql);
-  expect(io.setterArgs.toString(), 'urlName: string, sig: *string');
-  expect(
+  eq(io.setterArgs.toString(), 'urlName: string, sig: *string');
+  eq(
     io.funcArgs.toString(),
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, urlName: string, sig: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, sig: *string}',
   );
-  expect(
+  eq(
     io.execArgs.toString(),
     'urlName: string, sig: *string, urlName: string, id: uint64, urlName: string {urlName: string, sig: *string, id: uint64}',
   );
@@ -113,5 +113,5 @@ it('setDefaults', () => {
   const v = postTA.t;
   const io = mr.updateIO(v, dialect);
 
-  expect(io.sql, 'UPDATE `post` SET `datetime` = UTC_TIMESTAMP()');
+  eq(io.sql, 'UPDATE `post` SET `datetime` = UTC_TIMESTAMP()');
 });

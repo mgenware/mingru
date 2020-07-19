@@ -4,7 +4,7 @@ import * as mr from '../..';
 import user from '../models/user';
 import post from '../models/post';
 
-const expect = assert.equal;
+const eq = assert.equal;
 const dialect = mr.mysql;
 
 it('TransactIO', () => {
@@ -29,12 +29,12 @@ it('TransactIO', () => {
   const wrapOther = mm.tableActions(post, WrapOtherTA);
   const io = mr.transactIO(wrapOther.t1, dialect);
   assert.ok(io instanceof mr.TransactIO);
-  expect(
+  eq(
     io.funcArgs.toString(),
     'db: *sql.DB|database/sql, urlName: string, id: uint64, urlName: string, sig: *string, followerCount: *string, urlName: string, id: uint64, urlName: string, followerCount: *string, urlName: string, urlName: string, sig: *string, followerCount: *string {db: *sql.DB|database/sql, urlName: string, id: uint64, sig: *string, followerCount: *string}',
   );
   // No execArgs in TX actions
-  expect(io.execArgs.toString(), '');
+  eq(io.execArgs.toString(), '');
 });
 
 it('Member details (normal action, wrapped, tmp wrapped)', () => {
@@ -54,76 +54,76 @@ it('Member details (normal action, wrapped, tmp wrapped)', () => {
 
   const io = mr.transactIO(wrapTA.t, dialect);
   assert.ok(io instanceof mr.TransactIO);
-  expect(
+  eq(
     io.funcArgs.toString(),
     'db: *sql.DB|database/sql, id: uint64, followerCount: *string',
   );
   // No execArgs in TX actions
-  expect(io.execArgs.toString(), '');
+  eq(io.execArgs.toString(), '');
 
   const m1 = io.memberIOs[0].actionIO;
-  expect(
+  eq(
     m1.funcArgs.toString(),
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, followerCount: *string',
   );
-  expect(
+  eq(
     m1.execArgs.toString(),
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, sig: *string="haha", followerCount: *string',
   );
 
   const io2 = mr.transactIO(wrapTA.t2, dialect);
   assert.ok(io2 instanceof mr.TransactIO);
-  expect(
+  eq(
     io2.funcArgs.toString(),
     'db: *sql.DB|database/sql, id: uint64, followerCount: *string',
   );
   // No execArgs in TX actions
-  expect(io2.execArgs.toString(), '');
+  eq(io2.execArgs.toString(), '');
 
   const m2 = io2.memberIOs[0].actionIO;
-  expect(
+  eq(
     m2.funcArgs.toString(),
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, followerCount: *string',
   );
-  expect(
+  eq(
     m2.execArgs.toString(),
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, sig: *string="haha", followerCount: *string',
   );
 
   const io3 = mr.transactIO(wrapTA.t3, dialect);
   assert.ok(io3 instanceof mr.TransactIO);
-  expect(
+  eq(
     io3.funcArgs.toString(),
     'db: *sql.DB|database/sql, id: uint64, sig: *string, followerCount: *string',
   );
   // No execArgs in TX actions
-  expect(io3.execArgs.toString(), '');
+  eq(io3.execArgs.toString(), '');
 
   const m3 = io3.memberIOs[0].actionIO;
-  expect(
+  eq(
     m3.funcArgs.toString(),
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, sig: *string, followerCount: *string',
   );
-  expect(
+  eq(
     m3.execArgs.toString(),
     'sig: *string, followerCount: *string, id: uint64',
   );
 
   const io4 = mr.transactIO(wrapTA.t4, dialect);
   assert.ok(io4 instanceof mr.TransactIO);
-  expect(
+  eq(
     io4.funcArgs.toString(),
     'db: *sql.DB|database/sql, id: uint64, sig: *string, followerCount: *string',
   );
   // No execArgs in TX actions
-  expect(io4.execArgs.toString(), '');
+  eq(io4.execArgs.toString(), '');
 
   const m4 = io4.memberIOs[0].actionIO;
-  expect(
+  eq(
     m4.funcArgs.toString(),
     'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, sig: *string, followerCount: *string',
   );
-  expect(
+  eq(
     m4.execArgs.toString(),
     'sig: *string, followerCount: *string, id: uint64',
   );
