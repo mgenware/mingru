@@ -15,7 +15,7 @@ export class JoinIO {
   constructor(
     public path: string,
     public tableAlias: string,
-    // Note that localTable can also be an alias of another join
+    // Note that `localTable` can also be an alias of another join
     public localTable: string,
     public localColumn: mm.Column,
     public remoteTable: string,
@@ -36,12 +36,12 @@ export class SelectedColumnIO {
   constructor(
     public selectedColumn: mm.SelectActionColumns,
     public valueSQL: string,
-    // is alias if it's present, otherwise auto generated from column name
+    // `varName` is alias if present. Otherwise, alias is auto generated from column name.
     public varName: string,
     public alias: string | null,
     public column: mm.Column | null,
     // Available when we can guess the evaluated type,
-    // e.g. an expression containing only one column or SQLCall
+    // e.g. an expression containing only one column or `SQLCall`.
     public resultType: mm.ColumnType | null,
   ) {
     throwIfFalsy(selectedColumn, 'selectedColumn');
@@ -75,6 +75,7 @@ export class SelectIO extends ActionIO {
     dialect: Dialect,
     public action: mm.SelectAction,
     public sql: string,
+    // `cols` can be empty, it indicates `SELECT *`, which is used in `selectExists`.
     public cols: SelectedColumnIO[],
     public where: SQLIO | null,
     funcArgs: VarList,
@@ -84,11 +85,11 @@ export class SelectIO extends ActionIO {
     super(dialect, action, funcArgs, execArgs, returnValues);
     throwIfFalsy(action, 'action');
     throwIfFalsy(sql, 'sql');
-    throwIfFalsy(cols, 'cols');
   }
 }
 
-// Used internally in SelectProcessor to save an SQL of a selected column associated with an alias.
+// Used internally in `SelectProcessor` to save an SQL of a selected column associated
+// with an alias.
 class ColumnSQL {
   constructor(
     public sql: string,
@@ -100,13 +101,13 @@ class ColumnSQL {
 export class SelectIOProcessor {
   hasJoin = false;
   // Tracks all processed joins, when processing a new join,
-  // we can reuse the JoinIO if it already exists (K: join path, V: JoinIO)
+  // we can reuse the JoinIO if it already exists (K: join path, V: `JoinIO`).
   jcMap = new Map<string, JoinIO>();
   // All processed joins
   joins: JoinIO[] = [];
-  // Make sure all join table alias names are unique
+  // Make sure all join table alias names are unique.
   joinedTableCounter = 0;
-  // Tracks all selected column names, and throw on duplicates
+  // Tracks all selected column names, and throw on duplicates.
   selectedNames = new Set<string>();
 
   constructor(public action: mm.SelectAction, public dialect: Dialect) {
@@ -116,12 +117,23 @@ export class SelectIOProcessor {
 
   convert(): SelectIO {
     let sql = 'SELECT ';
-    const { action, dialect } = this;
+    const { action, dialect, selectedNames } = this;
     const [fromTable] = action.ensureInitialized();
     const { limitValue, offsetValue } = action;
-    const columns = action.columns.length
-      ? action.columns
-      : Object.values(fromTable.__columns);
+    const selMode = action.mode;
+
+    let columns: mm.SelectActionColumns[];
+    if (selMode === mm.SelectActionMode.exists) {
+      if (action.columns.length) {
+        throw new Error('You cannot have selected columns in `selectExists`');
+      }
+      columns = [];
+    } else {
+      columns = action.columns.length
+        ? action.columns
+        : Object.values(fromTable.__columns);
+    }
+
     // hasJoin
     let hasJoin = columns.some((sCol) => {
       const [col] = this.analyzeSelectedColumn(sCol);
@@ -134,28 +146,34 @@ export class SelectIOProcessor {
     }
     this.hasJoin = hasJoin;
 
-    const selMode = action.mode;
-
-    // Process columns
+    // Handle columns.
     const colIOs: SelectedColumnIO[] = [];
-    for (const col of columns) {
-      const selIO = this.handleSelectedColumn(col);
-      if (this.selectedNames.has(selIO.varName)) {
-        throw new Error(
-          `The selected column name "${selIO.varName}" already exists`,
-        );
-      }
-      this.selectedNames.add(selIO.varName);
-      colIOs.push(selIO);
+
+    if (selMode === mm.SelectActionMode.exists) {
+      sql += 'EXISTS(SELECT ';
     }
-    sql += colIOs.map((c) => c.sql(dialect, this.hasJoin)).join(', ');
+    if (columns.length) {
+      for (const col of columns) {
+        const selIO = this.handleSelectedColumn(col);
+        if (selectedNames.has(selIO.varName)) {
+          throw new Error(
+            `The selected column name "${selIO.varName}" already exists`,
+          );
+        }
+        selectedNames.add(selIO.varName);
+        colIOs.push(selIO);
+      }
+      sql += colIOs.map((c) => c.sql(dialect, this.hasJoin)).join(', ');
+    } else {
+      sql += '*';
+    }
 
     // FROM
     const fromSQL = this.handleFrom(fromTable);
     sql += ' ' + fromSQL;
 
     // WHERE
-    // Note: WHERE SQL is created here, but only appended to `sql` var
+    // Note: WHERE SQL is created here, but only appended to the `sql` variable
     // after joins are handled below.
     let whereIO: SQLIO | null = null;
     let whereSQL = '';
@@ -231,6 +249,11 @@ export class SelectIOProcessor {
         });
     }
 
+    // Handle ending parenthesis.
+    if (selMode === mm.SelectActionMode.exists) {
+      sql += ')';
+    }
+
     // Func args
     const limitTypeInfo = new VarInfo('limit', defs.intTypeInfo);
     const offsetTypeInfo = new VarInfo('offset', defs.intTypeInfo);
@@ -285,8 +308,10 @@ export class SelectIOProcessor {
       const col = colIOs[0];
       const typeInfo = dialect.colTypeToGoType(col.getResultType());
       returnValues.add(new VarInfo(mm.ReturnValues.result, typeInfo));
+    } else if (selMode === mm.SelectActionMode.exists) {
+      returnValues.add(new VarInfo(mm.ReturnValues.result, defs.boolTypeInfo));
     } else {
-      // selMode now equals .list or .row
+      // `selMode` now equals `.list` or `.row`.
       const tableNameSrc = fromTable.__name;
       const actionNameSrc = action.__name;
       const tableName = utils.tablePascalName(tableNameSrc);
@@ -295,7 +320,7 @@ export class SelectIOProcessor {
       }
       const funcName = utils.actionPascalName(actionNameSrc);
       let resultType: string;
-      // Check if result type is renamed
+      // Check if result type is renamed.
       if (action.__attrs[mm.ActionAttributes.resultTypeName]) {
         resultType = `${action.__attrs[mm.ActionAttributes.resultTypeName]}`;
       } else {
@@ -341,9 +366,9 @@ export class SelectIOProcessor {
     if (!io) {
       return;
     }
-    // WHERE or HAVING may contain duplicate vars, we only need distinct vars in func args
+    // WHERE or HAVING may contain duplicate vars, we only need distinct vars in func args.
     funcArgs.merge(io.distinctVars);
-    // We need to pass all variables to Exec
+    // We need to pass all variables to Exec.
     execArgs.merge(io.vars);
   }
 

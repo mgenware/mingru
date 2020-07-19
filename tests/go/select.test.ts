@@ -528,3 +528,11 @@ it('SELECT, EXISTS, IF', async () => {
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectExistsIf');
 });
+
+it('selectExists', async () => {
+  class PostTA extends mm.TableActions {
+    t = mm.selectExists().where(post.user_id.join(user).sig.isEqualToInput());
+  }
+  const ta = mm.tableActions(post, PostTA);
+  await testBuildAsync(ta, 'select/selectExists');
+});

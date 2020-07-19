@@ -288,7 +288,10 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     // Generate result type definition.
     const resultMemberJSONStyle =
       options.jsonEncoding?.encodingStyle || JSONEncodingStyle.none;
-    if (selMode !== mm.SelectActionMode.field) {
+    if (
+      selMode !== mm.SelectActionMode.field &&
+      selMode !== mm.SelectActionMode.exists
+    ) {
       if (action.__attrs[mm.ActionAttributes.resultTypeName]) {
         this.context.handleResultType(
           originalResultType,
@@ -395,7 +398,10 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       // select/selectField
       let scanParams: string;
       // Declare the result variable
-      if (selMode === mm.SelectActionMode.field) {
+      if (
+        selMode === mm.SelectActionMode.field ||
+        selMode === mm.SelectActionMode.exists
+      ) {
         scanParams = `&${defs.resultVarName}`;
         codeBuilder.push(`var ${defs.resultVarName} ${resultType}`);
       } else {
@@ -406,9 +412,12 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
           `${go.pointerVar(defs.resultVarName, originalResultType)}`,
         );
       }
-      // For selectField, we return the default value, for select, return nil
+      // For `selectField` and `selectExists`, we return the default value, for `select`, return nil
       const resultVarOnError =
-        selMode === mm.SelectActionMode.field ? 'result' : 'nil';
+        selMode === mm.SelectActionMode.field ||
+        selMode === mm.SelectActionMode.exists
+          ? 'result'
+          : 'nil';
       codeBuilder.push();
 
       // Call query func
