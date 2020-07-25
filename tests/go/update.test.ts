@@ -35,7 +35,7 @@ it('Update with where', async () => {
       .updateOne()
       .set(post.title, mm.sql`"haha"`)
       .set(post.content, post.content.toInput())
-      .where(
+      .whereSQL(
         mm.sql`${post.id} = ${post.id.toInput()} AND ${
           post.content
         } = ${post.content.toInput('content2')}`,
@@ -63,7 +63,7 @@ it('Duplicate names in WHERE and setters', async () => {
       .set(post.content, post.content.toInput())
       .set(post.title, mm.sql`"haha"`)
       .set(post.m_user_id, post.m_user_id.toInput())
-      .where(
+      .whereSQL(
         mm.sql`${post.title.isEqualToInput()} ${post.title.isEqualToInput()} AND ${post.content.isEqualToInput()}`,
       );
   }
@@ -86,11 +86,7 @@ it('Custom DB column name', async () => {
 
 it('Update with defaults', async () => {
   class ColsTA extends mm.TableActions {
-    updateT = mm
-      .updateOne()
-      .setInputs(cols.fk)
-      .setDefaults()
-      .byID();
+    updateT = mm.updateOne().setInputs(cols.fk).setDefaults().byID();
   }
   const ta = mm.tableActions(cols, ColsTA);
   await testBuildAsync(ta, 'update/updateWithDefaults');
@@ -98,11 +94,7 @@ it('Update with defaults', async () => {
 
 it('Update with defaults and inputs', async () => {
   class ColsTA extends mm.TableActions {
-    updateT = mm
-      .updateOne()
-      .setDefaults()
-      .setInputs()
-      .byID();
+    updateT = mm.updateOne().setDefaults().setInputs().byID();
   }
   const ta = mm.tableActions(cols, ColsTA);
   await testBuildAsync(ta, 'update/updateWithDefaultsAndInputs');

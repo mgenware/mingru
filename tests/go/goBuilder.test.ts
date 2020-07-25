@@ -28,7 +28,7 @@ it('Multiple actions', async () => {
 
     deleteByID = mm
       .deleteSome()
-      .where(mm.sql`${post.id} = ${mm.input(post.id)}`);
+      .whereSQL(mm.sql`${post.id} = ${mm.input(post.id)}`);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildFullAsync(ta, 'goBuilder/multipleActions');

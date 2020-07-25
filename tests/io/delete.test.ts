@@ -21,7 +21,7 @@ it('Delete', () => {
 
 it('Delete with where', () => {
   class PostTA extends mm.TableActions {
-    t = mm.unsafeDeleteAll().where(mm.sql`${post.id} = 1`);
+    t = mm.unsafeDeleteAll().whereSQL(mm.sql`${post.id} = 1`);
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
@@ -34,7 +34,7 @@ it('getInputs', () => {
   class UserTA extends mm.TableActions {
     t = mm
       .deleteOne()
-      .where(mm.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
+      .whereSQL(mm.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
@@ -50,7 +50,7 @@ it('getReturns', () => {
   class UserTA extends mm.TableActions {
     t = mm
       .deleteOne()
-      .where(mm.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
+      .whereSQL(mm.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;

@@ -55,7 +55,7 @@ it('WHERE', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm
       .select(post.id, post.title)
-      .where(mm.sql`${post.id} = ${mm.input(post.id)}`);
+      .whereSQL(mm.sql`${post.id} = ${mm.input(post.id)}`);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/where');
@@ -65,7 +65,7 @@ it('selectRows with WHERE', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm
       .selectRows(post.id, post.title)
-      .where(mm.sql`${post.id} = ${mm.input(post.id)}`)
+      .whereSQL(mm.sql`${post.id} = ${mm.input(post.id)}`)
       .orderByAsc(post.id);
   }
   const ta = mm.tableActions(post, PostTA);
@@ -77,7 +77,7 @@ it('selectRows, WHERE, orderBy', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm
       .selectRows(post.id, cc, post.title)
-      .where(mm.sql`${post.id} = ${post.id.toInput()} ${post.id.toInput()}`)
+      .whereSQL(mm.sql`${post.id} = ${post.id.toInput()} ${post.id.toInput()}`)
       .orderByAsc(post.title)
       .orderByAsc(cc)
       .orderByDesc(post.title)
@@ -99,7 +99,7 @@ it('WHERE: multiple cols', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm
       .select(post.id, post.title)
-      .where(
+      .whereSQL(
         mm.sql`${post.id} = ${mm.input(post.id)} && ${post.title} != ${mm.input(
           post.title,
         )}`,
@@ -113,7 +113,7 @@ it('Custom params', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm
       .select(post.id, post.title)
-      .where(
+      .whereSQL(
         mm.sql`${post.id} = ${mm.input(post.id, 'id')} && raw_name = ${mm.input(
           'string',
           'name',
@@ -136,7 +136,7 @@ it('Basic join (rows)', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm
       .selectRows(post.user_id.join(user).url_name, post.title)
-      .where(mm.sql`${post.user_id.join(user).sig}-${post.user_id}`)
+      .whereSQL(mm.sql`${post.user_id.join(user).sig}-${post.user_id}`)
       .orderByAsc(post.user_id.join(user).sig)
       .orderByDesc(post.user_id);
   }
@@ -148,7 +148,7 @@ it('Join implied by WHERE', async () => {
   class CmtTA extends mm.TableActions {
     selectT = mm
       .select(cmt.id)
-      .where(
+      .whereSQL(
         cmt.target_id.join(post).user_id.join(user).url_name.isEqualToInput(),
       );
   }
@@ -169,7 +169,7 @@ it('Inverse join (select from A on A.id = B.a_id)', async () => {
           .category_id.join(category)
           .id.setInputName('id'),
       )
-      .where(
+      .whereSQL(
         mm.sql`${post.title}|${post.id
           .join(postCategory, postCategory.post_id)
           .category_id.setInputName('category_id')}|${post.id
@@ -354,7 +354,7 @@ it('WHERE, inputs, joins', async () => {
   class CmtTA extends mm.TableActions {
     selectT = mm
       .select(cmt.id)
-      .where(
+      .whereSQL(
         mm.sql` ${cmt.id.toInput()}, ${cmt.user_id.toInput()}, ${cmt.target_id
           .join(post)
           .title.toInput()}, ${cmt.target_id
@@ -387,7 +387,7 @@ it('GROUP BY and HAVING', async () => {
       .select(yearCol, mm.sel(mm.sql`${mm.sum(post.cmtCount)}`, 'total'))
       .byID()
       .groupBy(yearCol, 'total')
-      .having(
+      .havingSQL(
         mm.and(
           mm.sql`${yearCol} > ${yearCol.toInput()}`,
           mm.sql`\`total\` > ${mm.int().toInput('total')}`,
@@ -532,7 +532,9 @@ it('SELECT, EXISTS, IF', async () => {
 
 it('selectExists', async () => {
   class PostTA extends mm.TableActions {
-    t = mm.selectExists().where(post.user_id.join(user).sig.isEqualToInput());
+    t = mm
+      .selectExists()
+      .whereSQL(post.user_id.join(user).sig.isEqualToInput());
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectExists');

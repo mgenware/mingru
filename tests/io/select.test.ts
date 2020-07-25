@@ -29,7 +29,9 @@ it('Where', () => {
   class UserTA extends mm.TableActions {
     t = mm
       .select(user.id, user.url_name)
-      .where(mm.sql`${user.id} = 1 ${user.id.toInput()} ${user.id.toInput()}`);
+      .whereSQL(
+        mm.sql`${user.id} = 1 ${user.id.toInput()} ${user.id.toInput()}`,
+      );
   }
   const userTA = mm.tableActions(user, UserTA);
   const v = userTA.t;
@@ -43,7 +45,7 @@ it('Where and inputs', () => {
   class UserTA extends mm.TableActions {
     t = mm
       .select(user.id, user.url_name)
-      .where(
+      .whereSQL(
         mm.sql`${user.id} = ${mm.input(user.id)} && ${
           user.url_name
         } = ${mm.input('string', 'userName')}`,
@@ -134,7 +136,7 @@ it('3-table joins and WHERE', () => {
         cmt.target_id.join(post).user_id.join(user).url_name,
         cmt.target_id.join(post).user_id.join(user).id.as('TUID2'),
       )
-      .where(
+      .whereSQL(
         mm.sql`${cmt.user_id} = 1 AND ${
           cmt.target_id.join(post).title
         } = 2 | ${cmt.target_id
@@ -225,7 +227,7 @@ it('getInputs', () => {
   class UserTA extends mm.TableActions {
     t = mm
       .select(user.id, user.url_name)
-      .where(
+      .whereSQL(
         mm.sql`${user.id.toInput()} ${user.url_name.toInput()} ${user.id.toInput()}`,
       );
   }
@@ -252,7 +254,7 @@ it('getReturns', () => {
   class UserTA extends mm.TableActions {
     t = mm
       .select(user.id)
-      .where(
+      .whereSQL(
         mm.sql`${user.id.toInput()} ${post.title.toInput()} ${user.id.toInput()}`,
       );
   }
@@ -269,7 +271,7 @@ it('GROUP BY and HAVING', () => {
       .select(yearCol, mm.sel(mm.sql`${mm.sum(post.cmtCount)}`, 'total'))
       .byID()
       .groupBy(yearCol, 'total')
-      .having(mm.and(mm.sql`${yearCol} > 2010`, mm.sql`\`total\` > 100`));
+      .havingSQL(mm.and(mm.sql`${yearCol} > 2010`, mm.sql`\`total\` > 100`));
   }
   const ta = mm.tableActions(post, PostTA);
   const v = ta.t;
@@ -294,7 +296,7 @@ it('Unrelated cols', () => {
   // WHERE col
   itThrows(() => {
     class UserTA extends mm.TableActions {
-      t = mm.select(user.id).where(mm.sql`${post.id}`);
+      t = mm.select(user.id).whereSQL(mm.sql`${post.id}`);
     }
     const ta = mm.tableActions(user, UserTA);
     const v = ta.t;
@@ -304,7 +306,7 @@ it('Unrelated cols', () => {
   // Do NOT throws on inputs
   assert.doesNotThrow(() => {
     class UserTA extends mm.TableActions {
-      t = mm.select(user.id).where(mm.sql`${post.id.toInput()}`);
+      t = mm.select(user.id).whereSQL(mm.sql`${post.id.toInput()}`);
     }
     const ta = mm.tableActions(user, UserTA);
     const v = ta.t;

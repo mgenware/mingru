@@ -17,7 +17,7 @@ it('Select (where)', async () => {
   class PostTA extends mm.TableActions {
     selectTimes = mm
       .selectRows(post.datetime, post.date)
-      .where(
+      .whereSQL(
         mm.sql`${post.n_datetime} = ${post.n_datetime.toInput()} OR ${
           post.n_date
         } = ${post.n_date.toInput()}`,
@@ -52,7 +52,7 @@ it('Update (where)', async () => {
     updateTimes = mm
       .updateSome()
       .setInputs(post.datetime)
-      .where(
+      .whereSQL(
         mm.sql`${post.n_datetime} = ${post.n_datetime.toInput()} OR ${
           post.n_date
         } = ${post.n_date.toInput()}`,
@@ -66,7 +66,7 @@ it('Delete (where)', async () => {
   class PostTA extends mm.TableActions {
     deleteTimes = mm
       .deleteOne()
-      .where(
+      .whereSQL(
         mm.sql`${post.n_datetime} = ${post.n_datetime.toInput()} OR ${
           post.n_date
         } = ${post.n_date.toInput()}`,

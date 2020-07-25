@@ -13,7 +13,7 @@ it('TransactIO', () => {
       .updateSome()
       .set(user.url_name, mm.sql`${mm.input(user.url_name)}`)
       .setInputs(user.sig, user.follower_count)
-      .where(
+      .whereSQL(
         mm.sql`${user.url_name.toInput()} ${user.id.toInput()} ${user.url_name.toInput()}`,
       );
 

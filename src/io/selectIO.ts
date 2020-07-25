@@ -139,8 +139,8 @@ export class SelectIOProcessor {
       const [col] = this.analyzeSelectedColumn(sCol);
       return col && col.__table instanceof mm.JoinedTable;
     });
-    if (!hasJoin && action.whereSQL) {
-      hasJoin = action.whereSQL.enumerateColumns(
+    if (!hasJoin && action.whereSQLValue) {
+      hasJoin = action.whereSQLValue.enumerateColumns(
         (col) => col.__table instanceof mm.JoinedTable,
       );
     }
@@ -177,8 +177,8 @@ export class SelectIOProcessor {
     // after joins are handled below.
     let whereIO: SQLIO | null = null;
     let whereSQL = '';
-    if (action.whereSQL) {
-      whereIO = sqlIO(action.whereSQL, dialect);
+    if (action.whereSQLValue) {
+      whereIO = sqlIO(action.whereSQLValue, dialect);
       whereSQL =
         ' WHERE ' +
         whereIO.toSQL(
@@ -235,8 +235,8 @@ export class SelectIOProcessor {
 
     // HAVING
     let havingIO: SQLIO | null = null;
-    if (action.havingSQL) {
-      havingIO = sqlIO(action.havingSQL, dialect);
+    if (action.havingSQLValue) {
+      havingIO = sqlIO(action.havingSQLValue, dialect);
       sql +=
         ' HAVING ' +
         havingIO.toSQL(

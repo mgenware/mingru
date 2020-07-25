@@ -6,7 +6,7 @@ it('Escape string', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm
       .select(post.id, post.title)
-      .where(mm.sql`${post.title} = "\\\\a\\\""`);
+      .whereSQL(mm.sql`${post.title} = "\\\\a\\\""`);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'go/escapeString');

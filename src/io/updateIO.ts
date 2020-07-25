@@ -58,7 +58,9 @@ class UpdateIOProcessor {
       .join(', ');
 
     // WHERE
-    const whereIO = action.whereSQL ? sqlIO(action.whereSQL, dialect) : null;
+    const whereIO = action.whereSQLValue
+      ? sqlIO(action.whereSQLValue, dialect)
+      : null;
     if (whereIO) {
       sql += ` WHERE ${whereIO.toSQL(table)}`;
     }

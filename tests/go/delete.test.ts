@@ -14,7 +14,7 @@ it('deleteSome', async () => {
   class PostTA extends mm.TableActions {
     deleteT = mm
       .deleteSome()
-      .where(mm.sql`${post.user_id} = ${mm.input(post.user_id)}`);
+      .whereSQL(mm.sql`${post.user_id} = ${mm.input(post.user_id)}`);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'delete/deleteWithWhere');

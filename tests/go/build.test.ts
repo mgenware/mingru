@@ -20,7 +20,7 @@ it('Single table', async () => {
 
     deleteByID = mm
       .deleteOne()
-      .where(mm.sql`${post.id} = ${mm.input(post.id)}`);
+      .whereSQL(mm.sql`${post.id} = ${mm.input(post.id)}`);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'singleTable');
@@ -30,7 +30,7 @@ it('Multiple tables', async () => {
   class UserTA extends mm.TableActions {
     selectProfile = mm.select(user.display_name, user.sig);
     updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
-    deleteByID = mm.deleteOne().where(user.id.isEqualToInput());
+    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
   }
   const userTA = mm.tableActions(user, UserTA);
 
@@ -45,7 +45,7 @@ it('Multiple tables', async () => {
       .unsafeUpdateAll()
       .set(post.content, post.content.isEqualToInput());
 
-    deleteByID = mm.deleteOne().where(post.id.isEqualToInput());
+    deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
   }
   const postTA = mm.tableActions(post, PostTA);
   const actions = [userTA, postTA];
@@ -76,7 +76,7 @@ it('Multiple tables + CSQL', async () => {
   class UserTA extends mm.TableActions {
     selectProfile = mm.select(user.display_name, user.sig);
     updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
-    deleteByID = mm.deleteOne().where(user.id.isEqualToInput());
+    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
   }
   const userTA = mm.tableActions(user, UserTA);
 
@@ -91,7 +91,7 @@ it('Multiple tables + CSQL', async () => {
       .unsafeUpdateAll()
       .set(post.content, post.content.isEqualToInput());
 
-    deleteByID = mm.deleteOne().where(post.id.isEqualToInput());
+    deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
   }
   const postTA = mm.tableActions(post, PostTA);
   const actions = [userTA, postTA];
@@ -118,7 +118,7 @@ it('Types', async () => {
       [mm.ActionAttributes.resultTypeName]: 'Res2',
     });
 
-    deleteByID = mm.deleteOne().where(user.id.isEqualToInput());
+    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
   }
   const userTA = mm.tableActions(user, UserTA);
 

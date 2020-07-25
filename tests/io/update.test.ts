@@ -38,7 +38,7 @@ it('Update with WHERE', () => {
     t = mm
       .updateOne()
       .set(post.title, mm.sql`"haha"`)
-      .where(mm.sql`${post.id} = 1`);
+      .whereSQL(mm.sql`${post.id} = 1`);
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
@@ -54,7 +54,7 @@ it('getInputs', () => {
       .set(user.url_name, mm.sql`${mm.input(user.url_name)}`)
       .setInputs(user.sig)
       .set(user.follower_count, mm.sql`${user.follower_count} + 1`)
-      .where(
+      .whereSQL(
         mm.sql`${user.url_name.toInput()} ${user.id.toInput()} ${user.url_name.toInput()}`,
       );
   }
@@ -79,7 +79,7 @@ it('getReturns', () => {
       .set(user.url_name, mm.sql`${mm.input(user.url_name)}`)
       .setInputs(user.sig)
       .set(user.follower_count, mm.sql`${user.follower_count} + 1`)
-      .where(mm.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
+      .whereSQL(mm.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
