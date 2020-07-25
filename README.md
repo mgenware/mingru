@@ -53,10 +53,7 @@ export class UserTA extends mm.TableActions {
   selectSig = mm.selectField(user.sig).byID();
 
   // Update an user profile by ID.
-  updateUserProfile = dd
-    .updateOne()
-    .setInputs(user.name, user.sig)
-    .byID();
+  updateUserProfile = dd.updateOne().setInputs(user.name, user.sig).byID();
 
   // Update all user signatures to an empty string.
   updateAllSigToEmpty = mm.unsafeUpdateAll().set(user.sig, mm.sql`''`);
@@ -65,7 +62,7 @@ export class UserTA extends mm.TableActions {
   deleteByID = mm.deleteOne().byID();
 
   // Delete all users by a specified name.
-  deleteByName = mm.deleteSome().where(user.name.isEqualToInput());
+  deleteByName = mm.deleteSome().whereSQL(user.name.isEqualToInput());
 
   // Delete all users.
   deleteAll = mm.unsafeDeleteAll();
