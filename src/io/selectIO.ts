@@ -374,10 +374,15 @@ export class SelectIOProcessor {
     const sourceTable = this.action.__table;
     const { dialect } = this;
     if (action instanceof mm.SelectAction) {
-      // Initialize the action.
+      // Subqueries don't have a name, we'll give them a dummy name so
+      // they are considered initialized.
       if (!action.__name) {
         // eslint-disable-next-line no-param-reassign
         action.__name = '__SQLCall_EMBEDDED_ACTION__';
+      }
+      // Subqueires may or may not have a table assigned, if not set,
+      // we assign current source table to them.
+      if (!action.__table) {
         // eslint-disable-next-line no-param-reassign
         action.__table = sourceTable;
       }
@@ -386,7 +391,7 @@ export class SelectIOProcessor {
       return io.sql;
     }
     throw new Error(
-      `Sub-query can only contain SELECT clause, got "${toTypeString(action)}"`,
+      `Subquery can only contain SELECT clause, got "${toTypeString(action)}"`,
     );
   };
 
