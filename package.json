@@ -37,7 +37,7 @@
     "eslint-config-airbnb-typescript-lite": "^9.0.0",
     "eslint-plugin-import": "^2.22.0",
     "it-throws": "^3.2.1",
-    "mingru-models": "^0.40.0",
+    "mingru-models": "^0.41.0",
     "mocha": "^8.0.1",
     "source-map-support": "^0.5.19",
     "tempy": "^0.6.0",
