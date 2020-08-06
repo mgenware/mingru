@@ -232,6 +232,14 @@ it('Join as (attr should not affect other things)', async () => {
   await testBuildAsync(ta, 'select/joinAs');
 });
 
+it('Explicit join', async () => {
+  class PostTA extends mm.TableActions {
+    selectT = mm.select(post.title.join(user, user.url_name).age);
+  }
+  const ta = mm.tableActions(post, PostTA);
+  await testBuildAsync(ta, 'select/explicitJoin');
+});
+
 it('Join and from', async () => {
   const jCmt = postCmt.cmt_id.join(cmt2);
   class CmtTA extends mm.TableActions {
