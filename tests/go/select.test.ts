@@ -240,6 +240,19 @@ it('Explicit join', async () => {
   await testBuildAsync(ta, 'select/explicitJoin');
 });
 
+it('Explicit join with multiple columns', async () => {
+  class PostTA extends mm.TableActions {
+    selectT = mm.select(
+      post.title.join(user, user.url_name, [
+        [post.user_id, user.id],
+        [post.m_user_id, user.id],
+      ]).age,
+    );
+  }
+  const ta = mm.tableActions(post, PostTA);
+  await testBuildAsync(ta, 'select/explicitJoinMultiCols');
+});
+
 it('Join and from', async () => {
   const jCmt = postCmt.cmt_id.join(cmt2);
   class CmtTA extends mm.TableActions {

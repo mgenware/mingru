@@ -15,20 +15,33 @@ export class JoinIO {
   constructor(
     public path: string,
     public tableAlias: string,
-    // Note that `localTable` can also be an alias of another join
+    // Note that `localTable` can also be an alias of another join.
     public localTable: string,
     public localColumn: mm.Column,
     public remoteTable: string,
     public remoteColumn: mm.Column,
+    public extraColumns: [mm.Column, mm.Column][],
   ) {}
 
   toSQL(dialect: Dialect): string {
     const e = dialect.encodeName;
-    return `INNER JOIN ${e(this.remoteTable)} AS ${e(this.tableAlias)} ON ${e(
+    const alias1 = e(this.tableAlias);
+    const alias2 = e(this.localTable);
+    let sql = `INNER JOIN ${e(this.remoteTable)} AS ${e(
       this.tableAlias,
-    )}.${e(this.remoteColumn.getDBName())} = ${e(this.localTable)}.${e(
+    )} ON ${alias1}.${e(this.remoteColumn.getDBName())} = ${alias2}.${e(
       this.localColumn.getDBName(),
     )}`;
+
+    // Handle multiple columns in a join.
+    if (this.extraColumns.length) {
+      for (const [col1, col2] of this.extraColumns) {
+        sql += ` AND ${alias1}.${e(col1.getDBName())} = ${alias2}.${e(
+          col2.getDBName(),
+        )}`;
+      }
+    }
+    return sql;
   }
 }
 
@@ -661,6 +674,7 @@ export class SelectIOProcessor {
       srcColumn,
       destTable.getDBName(),
       destColumn,
+      table.extraColumns,
     );
     this.jcMap.set(table.keyPath, joinIO);
     this.joins.push(joinIO);
