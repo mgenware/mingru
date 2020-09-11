@@ -16,7 +16,7 @@
   },
   "license": "MIT",
   "scripts": {
-    "prepublishOnly": "daizong test",
+    "test": "daizong test",
     "r": "daizong"
   },
   "engines": {
@@ -28,20 +28,20 @@
     "/dist/**/*.map"
   ],
   "devDependencies": {
-    "@types/mocha": "^8.0.0",
-    "@types/node": "^14.0.26",
-    "@typescript-eslint/eslint-plugin": "^3.7.0",
-    "@typescript-eslint/parser": "^3.7.0",
-    "daizong": "^0.8.0",
-    "eslint": "^7.5.0",
-    "eslint-config-airbnb-typescript-lite": "^9.0.0",
+    "@types/mocha": "^8.0.3",
+    "@types/node": "^14.10.1",
+    "@typescript-eslint/eslint-plugin": "^4.1.0",
+    "@typescript-eslint/parser": "^4.1.0",
+    "daizong": "^0.10.1",
+    "eslint": "^7.8.1",
+    "eslint-config-airbnb-typescript-lite": "^10.0.1",
     "eslint-plugin-import": "^2.22.0",
     "it-throws": "^3.2.1",
-    "mingru-models": "^0.41.0",
-    "mocha": "^8.0.1",
+    "mingru-models": "^0.41.1",
+    "mocha": "^8.1.3",
     "source-map-support": "^0.5.19",
     "tempy": "^0.6.0",
-    "typescript": "^3.9.7"
+    "typescript": "^4.0.2"
   },
   "dependencies": {
     "chalk": "^4.1.0",
