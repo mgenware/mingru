@@ -82,33 +82,33 @@ export default class GoTABuilder {
   private handleActionIO(io: ActionIO, pri?: boolean): string {
     logger.debug(`Building action "${io.action.__name}"`);
 
-    // Prepare variables
+    // Prepare variables.
     const funcName = pri ? utils.lowercaseFirstChar(io.funcName) : io.funcName;
-    // Used for generating interface member if needed
+    // Used for generating interface member if needed.
     let funcSigString = '';
-    // Use funcArgs.distinctList cuz duplicate vars are not allowed
+    // Use funcArgs.distinctList cuz duplicate vars are not allowed.
     const funcArgs = io.funcArgs.distinctList;
     const returnValues = io.returnValues.list;
     const { className: tableClassName } = this.taIO;
     let code = '';
 
-    // Build func head
+    // Build func head.
     if (!pri) {
       code += `// ${funcName} ...\n`;
     }
     funcSigString += `func (da *${tableClassName}) ${funcName}`;
 
     // Build func params
-    // allFuncArgs = original func args + arg stubs
+    // allFuncArgs = original func args + arg stubs.
     const allFuncArgs = [...funcArgs, ...io.funcStubs];
     this.imports.addVars(allFuncArgs);
     const funcParamsCode = allFuncArgs
       .map((p) => `${p.name} ${p.type.typeString}`)
       .join(', ');
-    // Wrap all params with parentheses
+    // Wrap all params with parentheses.
     funcSigString += `(${funcParamsCode})`;
 
-    // Build return values
+    // Build return values.
     this.imports.addVars(returnValues);
     const returnsWithError = this.appendErrorType(returnValues);
     let returnCode = returnsWithError.map((v) => v.type.typeString).join(', ');
@@ -124,7 +124,7 @@ export default class GoTABuilder {
     const actionAttr = io.action.__attrs;
     if (actionAttr[mm.ActionAttributes.groupTypeName]) {
       // Remove the type name from signature:
-      // example: func (a) name() ret -> name() ret
+      // example: func (a) name() ret -> name() ret.
       const idx = funcSigString.indexOf(')');
       funcSigString = funcSigString.substr(idx + 2);
 
@@ -141,7 +141,7 @@ export default class GoTABuilder {
       );
     }
 
-    // Func start
+    // Func start.
     code += ' {\n';
 
     let bodyMap: CodeMap;
@@ -183,10 +183,10 @@ export default class GoTABuilder {
       }
     }
 
-    // Increase indent on all body lines
+    // Increase indent on all body lines.
     code += this.increaseIndent(bodyMap.body);
 
-    // Closing func
+    // Closing func.
     code += '\n}\n';
 
     if (bodyMap.head) {
@@ -221,11 +221,11 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     }
 
     // We only need the type name here, the namespace(import) is already
-    // handled in `processActionIO`
+    // handled in `processActionIO`.
     const firstReturn = io.returnValues.getByIndex(0);
     const resultType = firstReturn.type.typeString;
     // originalResultType is used to generate additional type definition,
-    // e.g. resultType is '[]*Person', the originalResultType is 'Person'
+    // e.g. resultType is '[]*Person', the originalResultType is 'Person'.
     const originalResultType = firstReturn.type.sourceTypeString || resultType;
     // Additional type definition for result type, empty on select field action.
     let resultTypeDef: string | undefined;
@@ -251,7 +251,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
     const codeBuilder = new LinesBuilder();
 
-    // Selected columns
+    // Selected columns.
     const selectedFields: VarInfo[] = [];
     const jsonIgnoreFields = new Set<VarInfo>();
     const omitEmptyFields = new Set<VarInfo>();
@@ -279,7 +279,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         }
       }
 
-      // Checking inherent attributes.
+      // Checking inherited attributes.
       if (omitAllEmptyFields) {
         omitEmptyFields.add(varInfo);
       }
@@ -395,9 +395,9 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       codeBuilder.decrementIndent();
       codeBuilder.push('}');
     } else {
-      // select/selectField
+      // For `select/selectField`.
       let scanParams: string;
-      // Declare the result variable
+      // Declare the result variable.
       if (
         selMode === mm.SelectActionMode.field ||
         selMode === mm.SelectActionMode.exists
@@ -412,7 +412,8 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
           `${go.pointerVar(defs.resultVarName, originalResultType)}`,
         );
       }
-      // For `selectField` and `selectExists`, we return the default value, for `select`, return nil
+      // For `selectField` and `selectExists`, we return the default value,
+      // for `select`, return nil.
       const resultVarOnError =
         selMode === mm.SelectActionMode.field ||
         selMode === mm.SelectActionMode.exists
