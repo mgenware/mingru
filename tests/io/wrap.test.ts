@@ -50,11 +50,11 @@ it('getInputs (wrapSelf and innerIO)', () => {
   const io = mr.wrapIO(wrapSelf.d, dialect) as mr.WrapIO;
   eq(
     io.funcArgs.toString(),
-    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, urlName: string, followerCount: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, followerCount: *string}',
+    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, id: uint64, urlName: string, followerCount: *string {queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, id: uint64, followerCount: *string}',
   );
   eq(
     io.execArgs.toString(),
-    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, sig: *string="haha", followerCount: *string',
+    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, id: uint64, sig: *string="haha", followerCount: *string',
   );
   eq(io.funcPath, 'da.S');
 });
@@ -63,11 +63,11 @@ it('getInputs (wrapOther)', () => {
   const io = mr.wrapIO(wrapOther.standard, dialect) as mr.WrapIO;
   eq(
     io.funcArgs.toString(),
-    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, urlName: string, sig: *string, followerCount: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, sig: *string, followerCount: *string}',
+    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, urlName: string, sig: *string, followerCount: *string {queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, sig: *string, followerCount: *string}',
   );
   eq(
     io.execArgs.toString(),
-    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64=123, sig: *string, followerCount: *string',
+    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, id: uint64=123, sig: *string, followerCount: *string',
   );
   eq(io.funcPath, 'User.S');
 });
@@ -76,11 +76,11 @@ it('getInputs (wrapOther, nested)', () => {
   const io = mr.wrapIO(wrapOther.nested, dialect) as mr.WrapIO;
   eq(
     io.funcArgs.toString(),
-    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, urlName: string, followerCount: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, followerCount: *string}',
+    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, urlName: string, followerCount: *string {queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, followerCount: *string}',
   );
   eq(
     io.execArgs.toString(),
-    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64=123, followerCount: *string',
+    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, id: uint64=123, followerCount: *string',
   );
   eq(io.funcPath, 'User.D');
 });
@@ -109,11 +109,11 @@ it('ReturnRef', () => {
   const io = mr.wrapIO(wrapOther.retValue, dialect) as mr.WrapIO;
   eq(
     io.funcArgs.toString(),
-    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64=ValueRef(extID), urlName: string, followerCount: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64=ValueRef(extID), followerCount: *string}',
+    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, id: uint64=ValueRef(extID), urlName: string, followerCount: *string {queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, id: uint64=ValueRef(extID), followerCount: *string}',
   );
   eq(
     io.execArgs.toString(),
-    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, followerCount: *string',
+    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, id: uint64, followerCount: *string',
   );
   eq(io.funcPath, 'User.D');
 });

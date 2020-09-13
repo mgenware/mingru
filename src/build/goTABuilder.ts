@@ -448,9 +448,9 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
     // Return the result
     if (action.ensureOneRowAffected) {
-      code += `return dbx.CheckOneRowAffectedWithError(${defs.resultVarName}, err)`;
+      code += `return mingru.CheckOneRowAffectedWithError(${defs.resultVarName}, err)`;
     } else {
-      code += `return dbx.GetRowsAffectedIntWithError(${defs.resultVarName}, err)`;
+      code += `return mingru.GetRowsAffectedIntWithError(${defs.resultVarName}, err)`;
     }
     return new CodeMap(code);
   }
@@ -470,7 +470,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
     // Return the result
     if (fetchInsertedID) {
-      code += `return dbx.GetLastInsertIDUint64WithError(${defs.resultVarName}, err)`;
+      code += `return mingru.GetLastInsertIDUint64WithError(${defs.resultVarName}, err)`;
     } else {
       code += 'return err';
     }
@@ -488,9 +488,9 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     code += `${defs.resultVarName}, err := ${defs.queryableParam}.Exec(${sqlLiteral}${queryParamsCode})\n`;
     // Return the result
     if (action.ensureOneRowAffected) {
-      code += `return dbx.CheckOneRowAffectedWithError(${defs.resultVarName}, err)`;
+      code += `return mingru.CheckOneRowAffectedWithError(${defs.resultVarName}, err)`;
     } else {
-      code += `return dbx.GetRowsAffectedIntWithError(${defs.resultVarName}, err)`;
+      code += `return mingru.GetRowsAffectedIntWithError(${defs.resultVarName}, err)`;
     }
     return new CodeMap(code);
   }
@@ -511,7 +511,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const { memberIOs, returnValues } = io;
 
     // We don't use queryable in transaction arguments but we still need to
-    // import the dbx namespace as we're calling dbx.transact.
+    // import the dbx namespace as we're calling mingru.transact.
     this.imports.addVars([defs.dbxQueryableVar]);
 
     // Declare err variable.
@@ -580,7 +580,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         body += `var ${this.txExportedVar(v.name)} ${v.type.typeString}\n`;
       }
     }
-    body += 'txErr := dbx.Transact(db, func(tx *sql.Tx) error {\n';
+    body += 'txErr := mingru.Transact(db, func(tx *sql.Tx) error {\n';
     body += this.increaseIndent(innerBody);
     body += '\n})\nreturn ';
     if (returnValues.length) {

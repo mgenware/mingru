@@ -1,8 +1,6 @@
 package da
 
-import (
-	"github.com/mgenware/go-packagex/v5/dbx"
-)
+import "github.com/mgenware/mingru-go-lib"
 
 // TableTypePost ...
 type TableTypePost struct {
@@ -21,7 +19,7 @@ type PostTableSelectTResult struct {
 }
 
 // SelectT ...
-func (da *TableTypePost) SelectT(queryable dbx.Queryable, id uint64) ([]*PostTableSelectTResult, error) {
+func (da *TableTypePost) SelectT(queryable mingru.Queryable, id uint64) ([]*PostTableSelectTResult, error) {
 	rows, err := queryable.Query("SELECT `id`, RAND() AS `n`, `title` FROM `db_post` WHERE `id` = ? ? ORDER BY `title`, `n`, `title` DESC, `cmt_c`", id, id)
 	if err != nil {
 		return nil, err

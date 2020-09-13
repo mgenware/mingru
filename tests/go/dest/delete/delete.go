@@ -1,8 +1,6 @@
 package da
 
-import (
-	"github.com/mgenware/go-packagex/v5/dbx"
-)
+import "github.com/mgenware/mingru-go-lib"
 
 // TableTypePost ...
 type TableTypePost struct {
@@ -14,7 +12,7 @@ var Post = &TableTypePost{}
 // ------------ Actions ------------
 
 // DeleteT ...
-func (da *TableTypePost) DeleteT(queryable dbx.Queryable, id uint64) (int, error) {
+func (da *TableTypePost) DeleteT(queryable mingru.Queryable, id uint64) (int, error) {
 	result, err := queryable.Exec("DELETE FROM `db_post` WHERE `id` = ?", id)
-	return dbx.GetRowsAffectedIntWithError(result, err)
+	return mingru.GetRowsAffectedIntWithError(result, err)
 }

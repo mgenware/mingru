@@ -1,8 +1,6 @@
 package da
 
-import (
-	"github.com/mgenware/go-packagex/v5/dbx"
-)
+import "github.com/mgenware/mingru-go-lib"
 
 // TableTypeUser ...
 type TableTypeUser struct {
@@ -14,9 +12,9 @@ var User = &TableTypeUser{}
 // ------------ Actions ------------
 
 // DeleteByID ...
-func (da *TableTypeUser) DeleteByID(queryable dbx.Queryable, id uint64) error {
+func (da *TableTypeUser) DeleteByID(queryable mingru.Queryable, id uint64) error {
 	result, err := queryable.Exec("DELETE FROM `user` WHERE `id` = ?", id)
-	return dbx.CheckOneRowAffectedWithError(result, err)
+	return mingru.CheckOneRowAffectedWithError(result, err)
 }
 
 // UserTableSelectProfileResult ...
@@ -26,7 +24,7 @@ type UserTableSelectProfileResult struct {
 }
 
 // SelectProfile ...
-func (da *TableTypeUser) SelectProfile(queryable dbx.Queryable) (*UserTableSelectProfileResult, error) {
+func (da *TableTypeUser) SelectProfile(queryable mingru.Queryable) (*UserTableSelectProfileResult, error) {
 	result := &UserTableSelectProfileResult{}
 	err := queryable.QueryRow("SELECT `display_name`, `sig` FROM `user`").Scan(&result.DisplayName, &result.Sig)
 	if err != nil {
@@ -36,7 +34,7 @@ func (da *TableTypeUser) SelectProfile(queryable dbx.Queryable) (*UserTableSelec
 }
 
 // UpdateProfile ...
-func (da *TableTypeUser) UpdateProfile(queryable dbx.Queryable, sig *string) (int, error) {
+func (da *TableTypeUser) UpdateProfile(queryable mingru.Queryable, sig *string) (int, error) {
 	result, err := queryable.Exec("UPDATE `user` SET `sig` = ?", sig)
-	return dbx.GetRowsAffectedIntWithError(result, err)
+	return mingru.GetRowsAffectedIntWithError(result, err)
 }

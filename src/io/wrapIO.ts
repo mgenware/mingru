@@ -62,7 +62,7 @@ class WrapIOProcessor {
     );
     funcArgs.add(defs.dbxQueryableVar);
 
-    // Skip the first param, which is always either `dbx.Queryable` or `db.Tx`.
+    // Skip the first param, which is always either `mingru.Queryable` or `db.Tx`.
     for (let i = 1; i < innerFuncArgs.list.length; i++) {
       const arg = innerFuncArgs.list[i];
       const inputArg = args[arg.name];

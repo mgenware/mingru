@@ -1,8 +1,6 @@
 package da
 
-import (
-	"github.com/mgenware/go-packagex/v5/dbx"
-)
+import "github.com/mgenware/mingru-go-lib"
 
 // TableTypePost ...
 type TableTypePost struct {
@@ -14,7 +12,7 @@ var Post = &TableTypePost{}
 // ------------ Actions ------------
 
 // SelectT ...
-func (da *TableTypePost) SelectT(queryable dbx.Queryable, id uint64) (uint64, error) {
+func (da *TableTypePost) SelectT(queryable mingru.Queryable, id uint64) (uint64, error) {
 	var result uint64
 	err := queryable.QueryRow("SELECT `user_id` FROM `db_post` WHERE `id` = ?", id).Scan(&result)
 	if err != nil {

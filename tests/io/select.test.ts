@@ -236,7 +236,7 @@ it('getInputs', () => {
   const io = mr.selectIO(v, mr.mysql);
   eq(
     io.funcArgs.toString(),
-    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, urlName: string',
+    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, urlName: string',
   );
 });
 

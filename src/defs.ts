@@ -7,7 +7,7 @@ export const sqlDBType = TypeInfo.type('DB', 'sql|database/sql').toPointer();
 export const sqlTxType = TypeInfo.type('Tx', 'sql|database/sql').toPointer();
 export const dbxQueryableType = TypeInfo.type(
   'Queryable',
-  'dbx|github.com/mgenware/go-packagex/v5/dbx',
+  'dbx|github.com/mgenware/mingru-go-lib',
 );
 export const dbxQueryableVar = new VarInfo(queryableParam, dbxQueryableType);
 export const sqlDBVar = new VarInfo(dbParam, sqlDBType);

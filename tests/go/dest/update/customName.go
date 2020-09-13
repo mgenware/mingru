@@ -1,8 +1,6 @@
 package da
 
-import (
-	"github.com/mgenware/go-packagex/v5/dbx"
-)
+import "github.com/mgenware/mingru-go-lib"
 
 // TableTypePost ...
 type TableTypePost struct {
@@ -14,7 +12,7 @@ var Post = &TableTypePost{}
 // ------------ Actions ------------
 
 // UpdateT ...
-func (da *TableTypePost) UpdateT(queryable dbx.Queryable, id uint64, content string) (int, error) {
+func (da *TableTypePost) UpdateT(queryable mingru.Queryable, id uint64, content string) (int, error) {
 	result, err := queryable.Exec("UPDATE `db_post` SET `title` = \"haha\", `content` = ?, `cmt_c` = `cmt_c` + 1 WHERE `id` = ?", content, id)
-	return dbx.GetRowsAffectedIntWithError(result, err)
+	return mingru.GetRowsAffectedIntWithError(result, err)
 }

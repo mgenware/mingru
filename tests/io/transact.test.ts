@@ -64,11 +64,11 @@ it('Member details (normal action, wrapped, tmp wrapped)', () => {
   const m1 = io.memberIOs[0].actionIO;
   eq(
     m1.funcArgs.toString(),
-    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, followerCount: *string',
+    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, followerCount: *string',
   );
   eq(
     m1.execArgs.toString(),
-    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, sig: *string="haha", followerCount: *string',
+    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, sig: *string="haha", followerCount: *string',
   );
 
   const io2 = mr.transactIO(wrapTA.t2, dialect);
@@ -83,11 +83,11 @@ it('Member details (normal action, wrapped, tmp wrapped)', () => {
   const m2 = io2.memberIOs[0].actionIO;
   eq(
     m2.funcArgs.toString(),
-    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, followerCount: *string',
+    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, followerCount: *string',
   );
   eq(
     m2.execArgs.toString(),
-    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, sig: *string="haha", followerCount: *string',
+    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, sig: *string="haha", followerCount: *string',
   );
 
   const io3 = mr.transactIO(wrapTA.t3, dialect);
@@ -102,7 +102,7 @@ it('Member details (normal action, wrapped, tmp wrapped)', () => {
   const m3 = io3.memberIOs[0].actionIO;
   eq(
     m3.funcArgs.toString(),
-    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, sig: *string, followerCount: *string',
+    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, sig: *string, followerCount: *string',
   );
   eq(
     m3.execArgs.toString(),
@@ -121,7 +121,7 @@ it('Member details (normal action, wrapped, tmp wrapped)', () => {
   const m4 = io4.memberIOs[0].actionIO;
   eq(
     m4.funcArgs.toString(),
-    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, id: uint64, sig: *string, followerCount: *string',
+    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, sig: *string, followerCount: *string',
   );
   eq(
     m4.execArgs.toString(),

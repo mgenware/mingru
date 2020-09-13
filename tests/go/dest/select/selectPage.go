@@ -1,8 +1,6 @@
 package da
 
-import (
-	"github.com/mgenware/go-packagex/v5/dbx"
-)
+import "github.com/mgenware/mingru-go-lib"
 
 // TableTypePost ...
 type TableTypePost struct {
@@ -20,7 +18,7 @@ type PostTableSelectTResult struct {
 }
 
 // SelectT ...
-func (da *TableTypePost) SelectT(queryable dbx.Queryable, id uint64, page int, pageSize int) ([]*PostTableSelectTResult, bool, error) {
+func (da *TableTypePost) SelectT(queryable mingru.Queryable, id uint64, page int, pageSize int) ([]*PostTableSelectTResult, bool, error) {
 	limit := pageSize + 1
 	offset := (page - 1) * pageSize
 	max := pageSize

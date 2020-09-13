@@ -3,7 +3,7 @@ package da
 import (
 	"time"
 
-	"github.com/mgenware/go-packagex/v5/dbx"
+	"github.com/mgenware/go-packagex/dbx"
 )
 
 // TableTypePost ...
@@ -16,7 +16,7 @@ var Post = &TableTypePost{}
 // ------------ Actions ------------
 
 // InsertTimes ...
-func (da *TableTypePost) InsertTimes(queryable dbx.Queryable, datetime time.Time, nDatetime *time.Time) (uint64, error) {
+func (da *TableTypePost) InsertTimes(queryable mingru.Queryable, datetime time.Time, nDatetime *time.Time) (uint64, error) {
 	result, err := queryable.Exec("INSERT INTO `db_post` (`datetime`, `n_datetime`) VALUES (?, ?)", datetime, nDatetime)
-	return dbx.GetLastInsertIDUint64WithError(result, err)
+	return mingru.GetLastInsertIDUint64WithError(result, err)
 }

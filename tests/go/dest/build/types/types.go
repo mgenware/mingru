@@ -3,7 +3,7 @@ package da
 import (
 	"time"
 
-	"github.com/mgenware/go-packagex/v5/dbx"
+	"github.com/mgenware/mingru-go-lib"
 )
 
 // ------------ Result types ------------
@@ -28,10 +28,10 @@ type Res3 struct {
 
 // Type1 ...
 type Type1 interface {
-	SelectByID(queryable dbx.Queryable, id uint64) (*Res1, error)
+	SelectByID(queryable mingru.Queryable, id uint64) (*Res1, error)
 }
 
 // Type2 ...
 type Type2 interface {
-	SelectPostInfo(queryable dbx.Queryable) (*PostTableSelectPostInfoResult, error)
+	SelectPostInfo(queryable mingru.Queryable) (*PostTableSelectPostInfoResult, error)
 }

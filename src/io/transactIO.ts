@@ -90,7 +90,7 @@ class TransactIOProcessor {
     funcArgs.add(defs.sqlDBVar);
     for (const mem of memberIOs) {
       const mAction = mem.actionIO;
-      // Skip the first param of all member functions, which is `dbx.Queryable`.
+      // Skip the first param of all member functions, which is `mingru.Queryable`.
       for (const v of mAction.funcArgs.list.slice(1)) {
         if (!v.hasValueRef) {
           funcArgs.add(v);

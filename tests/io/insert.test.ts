@@ -50,7 +50,7 @@ it('getInputs', () => {
   const io = mr.insertIO(v, mr.mysql);
   eq(
     io.funcArgs.toString(),
-    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, sig: *string, id: uint64, b: string',
+    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, sig: *string, id: uint64, b: string',
   );
   eq(io.execArgs.toString(), 'sig: *string, id: uint64, b: string');
 });

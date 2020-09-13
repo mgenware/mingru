@@ -3,7 +3,7 @@ package da
 import (
 	"database/sql"
 
-	"github.com/mgenware/go-packagex/v5/dbx"
+	"github.com/mgenware/go-packagex/dbx"
 )
 
 // TableTypePost ...
@@ -15,27 +15,27 @@ var Post = &TableTypePost{}
 
 // ------------ Actions ------------
 
-func (da *TableTypePost) insertChild1(queryable dbx.Queryable, id uint64) error {
+func (da *TableTypePost) insertChild1(queryable mingru.Queryable, id uint64) error {
 	return User.UpdatePostCount(queryable, id, 1)
 }
 
-func (da *TableTypePost) insertChild3(queryable dbx.Queryable, id uint64, title string) error {
+func (da *TableTypePost) insertChild3(queryable mingru.Queryable, id uint64, title string) error {
 	result, err := queryable.Exec("UPDATE `db_post` SET `title` = ? WHERE `id` = ?", title, id)
-	return dbx.CheckOneRowAffectedWithError(result, err)
+	return mingru.CheckOneRowAffectedWithError(result, err)
 }
 
-func (da *TableTypePost) insertChild4(queryable dbx.Queryable, id uint64) error {
+func (da *TableTypePost) insertChild4(queryable mingru.Queryable, id uint64) error {
 	result, err := queryable.Exec("UPDATE `db_post` SET `title` = ? WHERE `id` = ?", "TITLE", id)
-	return dbx.CheckOneRowAffectedWithError(result, err)
+	return mingru.CheckOneRowAffectedWithError(result, err)
 }
 
-func (da *TableTypePost) insertChild5(queryable dbx.Queryable) (uint64, error) {
+func (da *TableTypePost) insertChild5(queryable mingru.Queryable) (uint64, error) {
 	return da.InsertCore(queryable, "abc")
 }
 
 // Insert ...
 func (da *TableTypePost) Insert(db *sql.DB, id uint64, title string) error {
-	txErr := dbx.Transact(db, func(tx *sql.Tx) error {
+	txErr := mingru.Transact(db, func(tx *sql.Tx) error {
 		var err error
 		err = da.insertChild1(tx, id)
 		if err != nil {
@@ -63,7 +63,7 @@ func (da *TableTypePost) Insert(db *sql.DB, id uint64, title string) error {
 }
 
 // InsertCore ...
-func (da *TableTypePost) InsertCore(queryable dbx.Queryable, title string) (uint64, error) {
+func (da *TableTypePost) InsertCore(queryable mingru.Queryable, title string) (uint64, error) {
 	result, err := queryable.Exec("INSERT INTO `db_post` (`title`) VALUES (?)", title)
-	return dbx.GetLastInsertIDUint64WithError(result, err)
+	return mingru.GetLastInsertIDUint64WithError(result, err)
 }

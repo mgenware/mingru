@@ -64,7 +64,7 @@ it('getInputs', () => {
   eq(io.setterArgs.toString(), 'urlName: string, sig: *string');
   eq(
     io.funcArgs.toString(),
-    'queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, urlName: string, sig: *string {queryable: dbx.Queryable|github.com/mgenware/go-packagex/v5/dbx, urlName: string, id: uint64, sig: *string}',
+    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, id: uint64, urlName: string, sig: *string {queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, id: uint64, sig: *string}',
   );
   eq(
     io.execArgs.toString(),

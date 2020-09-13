@@ -1,8 +1,6 @@
 package da
 
-import (
-	"github.com/mgenware/go-packagex/v5/dbx"
-)
+import "github.com/mgenware/mingru-go-lib"
 
 // TableTypePost ...
 type TableTypePost struct {
@@ -20,7 +18,7 @@ type PostTableSelectTResult struct {
 }
 
 // SelectT ...
-func (da *TableTypePost) SelectT(queryable dbx.Queryable, limit int, offset int, max int) ([]*PostTableSelectTResult, int, error) {
+func (da *TableTypePost) SelectT(queryable mingru.Queryable, limit int, offset int, max int) ([]*PostTableSelectTResult, int, error) {
 	rows, err := queryable.Query("SELECT `id`, `title` FROM `db_post` ORDER BY `id` LIMIT ? OFFSET ?", limit, offset)
 	if err != nil {
 		return nil, 0, err

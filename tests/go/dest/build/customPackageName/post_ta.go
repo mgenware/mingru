@@ -1,8 +1,6 @@
 package haha
 
-import (
-	"github.com/mgenware/go-packagex/v5/dbx"
-)
+import "github.com/mgenware/go-packagex/dbx"
 
 // TableTypePost ...
 type TableTypePost struct {
@@ -20,7 +18,7 @@ type PostTableSelectPostTitleResult struct {
 }
 
 // SelectPostTitle ...
-func (da *TableTypePost) SelectPostTitle(queryable dbx.Queryable) (*PostTableSelectPostTitleResult, error) {
+func (da *TableTypePost) SelectPostTitle(queryable mingru.Queryable) (*PostTableSelectPostTitleResult, error) {
 	result := &PostTableSelectPostTitleResult{}
 	err := queryable.QueryRow("SELECT `id`, `title` FROM `db_post`").Scan(&result.ID, &result.Title)
 	if err != nil {

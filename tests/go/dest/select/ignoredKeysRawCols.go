@@ -1,8 +1,6 @@
 package da
 
-import (
-	"github.com/mgenware/go-packagex/v5/dbx"
-)
+import "github.com/mgenware/mingru-go-lib"
 
 // TableTypePostReply ...
 type TableTypePostReply struct {
@@ -20,7 +18,7 @@ type PostReplyTableSelectTResult struct {
 }
 
 // SelectT ...
-func (da *TableTypePostReply) SelectT(queryable dbx.Queryable) (*PostReplyTableSelectTResult, error) {
+func (da *TableTypePostReply) SelectT(queryable mingru.Queryable) (*PostReplyTableSelectTResult, error) {
 	result := &PostReplyTableSelectTResult{}
 	err := queryable.QueryRow("SELECT 1 AS `a`, 1 AS `b` FROM `post_cmt_rpl`").Scan(&result.A, &result.B)
 	if err != nil {

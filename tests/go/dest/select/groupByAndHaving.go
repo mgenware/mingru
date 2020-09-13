@@ -1,8 +1,6 @@
 package da
 
-import (
-	"github.com/mgenware/go-packagex/v5/dbx"
-)
+import "github.com/mgenware/mingru-go-lib"
 
 // TableTypePost ...
 type TableTypePost struct {
@@ -20,7 +18,7 @@ type PostTableTResult struct {
 }
 
 // T ...
-func (da *TableTypePost) T(queryable dbx.Queryable, id uint64, year int, total int) (*PostTableTResult, error) {
+func (da *TableTypePost) T(queryable mingru.Queryable, id uint64, year int, total int) (*PostTableTResult, error) {
 	result := &PostTableTResult{}
 	err := queryable.QueryRow("SELECT YEAR(`datetime`) AS `year`, SUM(`cmt_c`) AS `total` FROM `db_post` WHERE `id` = ? GROUP BY `year`, `total` HAVING `year` > ? AND `total` > ?", id, year, total).Scan(&result.Year, &result.Total)
 	if err != nil {

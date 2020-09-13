@@ -3,7 +3,7 @@ package da
 import (
 	"database/sql"
 
-	"github.com/mgenware/go-packagex/v5/dbx"
+	"github.com/mgenware/go-packagex/dbx"
 )
 
 // TableTypeEmployee ...
@@ -16,7 +16,7 @@ var Employee = &TableTypeEmployee{}
 // ------------ Actions ------------
 
 // GetFirstName ...
-func (da *TableTypeEmployee) GetFirstName(queryable dbx.Queryable, id int) (string, error) {
+func (da *TableTypeEmployee) GetFirstName(queryable mingru.Queryable, id int) (string, error) {
 	var result string
 	err := queryable.QueryRow("SELECT `first_name` FROM `employees` WHERE `emp_no` = ?", id).Scan(&result)
 	if err != nil {
@@ -25,16 +25,16 @@ func (da *TableTypeEmployee) GetFirstName(queryable dbx.Queryable, id int) (stri
 	return result, nil
 }
 
-func (da *TableTypeEmployee) insert1Child2(queryable dbx.Queryable, firstName string) (uint64, error) {
+func (da *TableTypeEmployee) insert1Child2(queryable mingru.Queryable, firstName string) (uint64, error) {
 	result, err := queryable.Exec("INSERT INTO `employees` (`first_name`) VALUES (?)", firstName)
-	return dbx.GetLastInsertIDUint64WithError(result, err)
+	return mingru.GetLastInsertIDUint64WithError(result, err)
 }
 
 // Insert1 ...
 func (da *TableTypeEmployee) Insert1(db *sql.DB, id int) (string, uint64, error) {
 	var firstNameExported string
 	var id2Exported uint64
-	txErr := dbx.Transact(db, func(tx *sql.Tx) error {
+	txErr := mingru.Transact(db, func(tx *sql.Tx) error {
 		var err error
 		firstName, err := da.GetFirstName(tx, id)
 		if err != nil {

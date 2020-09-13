@@ -3,7 +3,7 @@ package da
 import (
 	"database/sql"
 
-	"github.com/mgenware/go-packagex/v5/dbx"
+	"github.com/mgenware/go-packagex/dbx"
 )
 
 // TableTypeEmployee ...
@@ -16,15 +16,15 @@ var Employee = &TableTypeEmployee{}
 // ------------ Actions ------------
 
 // Insert ...
-func (da *TableTypeEmployee) Insert(queryable dbx.Queryable, firstName string) (uint64, error) {
+func (da *TableTypeEmployee) Insert(queryable mingru.Queryable, firstName string) (uint64, error) {
 	result, err := queryable.Exec("INSERT INTO `employees` (`first_name`) VALUES (?)", firstName)
-	return dbx.GetLastInsertIDUint64WithError(result, err)
+	return mingru.GetLastInsertIDUint64WithError(result, err)
 }
 
 // Insert2 ...
 func (da *TableTypeEmployee) Insert2(db *sql.DB, firstName string) (uint64, error) {
 	var id2Exported uint64
-	txErr := dbx.Transact(db, func(tx *sql.Tx) error {
+	txErr := mingru.Transact(db, func(tx *sql.Tx) error {
 		var err error
 		_, err = da.Insert(tx, firstName)
 		if err != nil {

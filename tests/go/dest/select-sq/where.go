@@ -1,8 +1,6 @@
 package da
 
-import (
-	"github.com/mgenware/go-packagex/v5/dbx"
-)
+import "github.com/mgenware/go-packagex/dbx"
 
 // TableTypePost ...
 type TableTypePost struct {
@@ -19,7 +17,7 @@ type PostTableTResult struct {
 }
 
 // T ...
-func (da *TableTypePost) T(queryable dbx.Queryable) (*PostTableTResult, error) {
+func (da *TableTypePost) T(queryable mingru.Queryable) (*PostTableTResult, error) {
 	result := &PostTableTResult{}
 	err := queryable.QueryRow("SELECT `title` FROM `db_post` WHERE `user_id` = SELECT MAX(`id`) AS `maxID` FROM `user`").Scan(&result.Title)
 	if err != nil {
