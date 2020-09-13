@@ -3,7 +3,7 @@ package da
 import (
 	"database/sql"
 
-	"github.com/mgenware/go-packagex/dbx"
+	"github.com/mgenware/mingru-go-lib"
 )
 
 // TableTypeEmployee ...

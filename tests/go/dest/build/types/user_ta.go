@@ -1,6 +1,6 @@
 package da
 
-import "github.com/mgenware/go-packagex/dbx"
+import "github.com/mgenware/mingru-go-lib"
 
 // TableTypeUser ...
 type TableTypeUser struct {

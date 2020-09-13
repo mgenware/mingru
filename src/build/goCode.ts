@@ -113,7 +113,13 @@ export function makeArray(
   return `${name} := make([]${type}, ${size}${capacityParam})`;
 }
 
-function joinImports(imports: string[]): string {
+function joinImports(imports: string[], newline: boolean): string {
+  if (!imports.length) {
+    return '';
+  }
+  if (!newline) {
+    return `"${imports[0]}"`;
+  }
   return imports
     .sort()
     .map((s) => `\t"${s}"\n`)
@@ -125,6 +131,7 @@ function formatImports(imports: string[]): string {
     return '';
   }
 
+  const newlines = imports.length > 1;
   // Split the imports into system and user imports
   const sysImports: string[] = [];
   const usrImports: string[] = [];
@@ -136,8 +143,8 @@ function formatImports(imports: string[]): string {
     }
   }
 
-  const sysStr = joinImports(sysImports);
-  const usrStr = joinImports(usrImports);
+  const sysStr = joinImports(sysImports, newlines);
+  const usrStr = joinImports(usrImports, newlines);
   // Add an empty line between system imports and user imports
   const hasSep = sysStr && usrStr;
   return `${sysStr}${hasSep ? '\n' : ''}${usrStr}`;
@@ -145,10 +152,11 @@ function formatImports(imports: string[]): string {
 
 export function makeImports(imports: string[]): string {
   const code = formatImports(imports);
+  if (imports.length === 1) {
+    return `import ${code}\n\n`;
+  }
   return `import (
-${code})
-
-`;
+${code})\n\n`;
 }
 
 export function makeStringLiteral(s: string): string {
