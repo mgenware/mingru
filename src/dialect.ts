@@ -32,7 +32,10 @@ export class Dialect {
     return this.encodeName(table.getDBName());
   }
 
-  inputPlaceholder(_: mm.SQLVariable | null): string {
+  inputPlaceholder(v: mm.SQLVariable): string {
+    if (v.isArray) {
+      return `+"mingru.InputPlaceholders(len(${v.name}))"+`;
+    }
     return '?';
   }
 

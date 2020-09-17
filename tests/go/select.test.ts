@@ -560,3 +560,13 @@ it('selectExists', async () => {
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectExists');
 });
+
+it('toInputArray', async () => {
+  class PostTA extends mm.TableActions {
+    t = mm.selectRows(post.id, post.title).where`${
+      post.id
+    } IN ${post.id.toInputArray('ids')}`.orderByAsc(post.id);
+  }
+  const ta = mm.tableActions(post, PostTA);
+  await testBuildAsync(ta, 'select/toInputArray');
+});
