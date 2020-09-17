@@ -316,9 +316,6 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       }
     }
 
-    const queryParamsCode = io.execArgs.list
-      .map((p) => `, ${p.valueOrName}`)
-      .join('');
     let sqlSource = io.sql;
 
     // LIMIT and OFFSET
@@ -346,9 +343,12 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
           'max := pageSize',
         );
       }
-      // Call the Query method
+      // Call the `Query` method.
       codeBuilder.push(
-        `rows, err := ${defs.queryableParam}.Query(${sqlLiteral}${queryParamsCode})`,
+        `rows, err := ${defs.queryableParam}.Query(${this.getExecArgsCode(
+          sqlLiteral,
+          io.execArgs.list,
+        )})`,
       );
       codeBuilder.push('if err != nil {');
       codeBuilder.incrementIndent();
@@ -423,7 +423,10 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
       // Call query func
       codeBuilder.push(
-        `err := ${defs.queryableParam}.QueryRow(${sqlLiteral}${queryParamsCode}).Scan(${scanParams})`,
+        `err := ${defs.queryableParam}.QueryRow(${this.getExecArgsCode(
+          sqlLiteral,
+          io.execArgs.list,
+        )}).Scan(${scanParams})`,
       );
       codeBuilder.push('if err != nil {');
       codeBuilder.incrementIndent();
@@ -441,11 +444,10 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const { action } = io;
     let code = '';
 
-    const queryParamsCode = io.execArgs.list
-      .map((p) => `, ${p.valueOrName}`)
-      .join('');
     const sqlLiteral = go.makeStringLiteral(io.sql);
-    code += `${defs.resultVarName}, err := ${defs.queryableParam}.Exec(${sqlLiteral}${queryParamsCode})\n`;
+    code += `${defs.resultVarName}, err := ${
+      defs.queryableParam
+    }.Exec(${this.getExecArgsCode(sqlLiteral, io.execArgs.list)})\n`;
 
     // Return the result
     if (action.ensureOneRowAffected) {
@@ -460,13 +462,10 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const { fetchInsertedID } = io;
     let code = '';
 
-    const queryParamsCode = io.execArgs.list
-      .map((p) => `, ${p.valueOrName}`)
-      .join('');
     const sqlLiteral = go.makeStringLiteral(io.sql);
     code += `${fetchInsertedID ? 'result' : '_'}, err := ${
       defs.queryableParam
-    }.Exec(${sqlLiteral}${queryParamsCode})
+    }.Exec(${this.getExecArgsCode(sqlLiteral, io.execArgs.list)})
 `;
 
     // Return the result
@@ -482,11 +481,10 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const { action } = io;
     let code = '';
 
-    const queryParamsCode = io.execArgs.list
-      .map((p) => `, ${p.valueOrName}`)
-      .join('');
     const sqlLiteral = go.makeStringLiteral(io.sql);
-    code += `${defs.resultVarName}, err := ${defs.queryableParam}.Exec(${sqlLiteral}${queryParamsCode})\n`;
+    code += `${defs.resultVarName}, err := ${
+      defs.queryableParam
+    }.Exec(${this.getExecArgsCode(sqlLiteral, io.execArgs.list)})\n`;
     // Return the result
     if (action.ensureOneRowAffected) {
       code += `return mingru.CheckOneRowAffectedWithError(${defs.resultVarName}, err)`;
@@ -498,11 +496,10 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
   private wrap(io: WrapIO): CodeMap {
     let code = '';
-
-    const queryParamsCode = io.execArgs.list
-      .map((p) => `${p.valueOrName}`)
-      .join(', ');
-    code += `return ${io.funcPath}(${queryParamsCode})\n`;
+    code += `return ${io.funcPath}(${this.getExecArgsCode(
+      null,
+      io.execArgs.list,
+    )})\n`;
     return new CodeMap(code);
   }
 
@@ -606,5 +603,15 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
   private txExportedVar(name: string): string {
     return `${name}Exported`;
+  }
+
+  private getExecArgsCode(firstParam: string | null, args: VarInfo[]): string {
+    const tail = args
+      .map((p) => `${p.type.isArray ? `...${p.valueOrName}` : p.valueOrName}`)
+      .join(', ');
+    if (firstParam && tail) {
+      return `${firstParam}, ${tail}`;
+    }
+    return (firstParam || '') + tail;
   }
 }
