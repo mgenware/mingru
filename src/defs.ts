@@ -1,19 +1,34 @@
 import * as mm from 'mingru-models';
-import VarInfo, { TypeInfo } from './lib/varInfo';
+import VarInfo, { AtomicTypeInfo } from './lib/varInfo';
 
 export const queryableParam = 'queryable';
 export const dbParam = 'db';
-export const sqlDBType = TypeInfo.type('DB', 'sql|database/sql').toPointer();
-export const sqlTxType = TypeInfo.type('Tx', 'sql|database/sql').toPointer();
-export const dbxQueryableType = TypeInfo.type(
+export const errorType = new AtomicTypeInfo('error', null, null);
+export const limitVarName = 'limit';
+export const intTypeInfo = new AtomicTypeInfo('int', 0, null);
+export const uint64TypeInfo = new AtomicTypeInfo('uint64', 0, null);
+export const boolTypeInfo = new AtomicTypeInfo('bool', false, null);
+
+export const sqlDBType = new AtomicTypeInfo(
+  'DB',
+  null,
+  'sql|database/sql',
+).toPointer();
+export const sqlTxType = new AtomicTypeInfo(
+  'Tx',
+  null,
+  'sql|database/sql',
+).toPointer();
+export const dbxQueryableType = new AtomicTypeInfo(
   'Queryable',
+  null,
   'mingru|github.com/mgenware/mingru-go-lib',
 );
 export const dbxQueryableVar = new VarInfo(queryableParam, dbxQueryableType);
 export const sqlDBVar = new VarInfo(dbParam, sqlDBType);
 export const insertedIDVar = new VarInfo(
   mm.ReturnValues.insertedID,
-  TypeInfo.type('uint64'),
+  uint64TypeInfo,
 );
 
 export const resultVarName = 'result';
@@ -23,9 +38,6 @@ export const fileHeader = `/${'*'.repeat(90)}
  ${'*'.repeat(90)}/
 
 `;
-export const limitVarName = 'limit';
-export const intTypeInfo = TypeInfo.type('int');
-export const boolTypeInfo = TypeInfo.type('bool');
 
 export const mathxNS = 'github.com/mgenware/go-packagex/v5/mathx';
 export const defaultPackageName = 'da';

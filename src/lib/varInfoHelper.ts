@@ -1,6 +1,6 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import { VarInfo, TypeInfo } from './varInfo';
+import { VarInfo, TypeInfo, AtomicTypeInfo } from './varInfo';
 import Dialect from '../dialect';
 
 export class TypeInfoBuilder {
@@ -8,20 +8,17 @@ export class TypeInfoBuilder {
     throwIfFalsy(variable, 'variable');
     throwIfFalsy(dialect, 'dialect');
     const { type } = variable;
-    if (typeof type === 'string') {
-      const parts = type.split('|');
-      const typeName = parts[0];
-      let namespace: string | undefined;
-      if (parts.length > 1) {
-        // eslint-disable-next-line prefer-destructuring
-        namespace = parts[1];
-      }
-      return TypeInfo.type(typeName, namespace);
-    }
     if (type instanceof mm.Column) {
       return dialect.colTypeToGoType(type.__type);
     }
-    return dialect.colTypeToGoType(type);
+    if (type instanceof mm.ColumnType) {
+      return dialect.colTypeToGoType(type);
+    }
+    let typePath = type.module || '';
+    if (type.importPath) {
+      typePath += `|${type.importPath}`;
+    }
+    return new AtomicTypeInfo(type.name, type.defaultValue, typePath);
   }
 }
 

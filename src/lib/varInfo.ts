@@ -1,62 +1,40 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 
-export class TypeInfo {
-  static type(typeName: string, namespace?: string): TypeInfo {
-    return new TypeInfo(typeName, namespace, false, false);
-  }
-
-  static compoundType(
-    type: TypeInfo,
-    isPointer: boolean,
-    isArray: boolean,
-  ): TypeInfo {
-    return new TypeInfo(type, undefined, isPointer, isArray);
-  }
-
-  typeString: string;
-  sourceTypeString: string;
+export class AtomicTypeInfo {
   moduleName = '';
   importPath?: string;
+  typeString: string;
 
-  private constructor(
-    public type: string | TypeInfo,
-    // [namespace]|import path
-    pathInfo: string | undefined,
-    public isPointer: boolean,
-    public isArray: boolean,
+  constructor(
+    public typeName: string,
+    public defaultValue: unknown,
+    // Format: <module name>|<import path>
+    typePath: string | null,
   ) {
-    if (typeof type === 'string') {
-      if (pathInfo) {
-        const parts = pathInfo.split('|');
-        if (parts.length === 2) {
-          [this.moduleName, this.importPath] = parts;
-        } else {
-          [this.moduleName] = parts;
-          [this.importPath] = parts;
-        }
+    if (typePath) {
+      const parts = typePath.split('|');
+      if (parts.length === 2) {
+        [this.moduleName, this.importPath] = parts;
+      } else {
+        [this.moduleName] = parts;
+        [this.importPath] = parts;
       }
-    } else {
-      this.moduleName = type.moduleName;
-      this.importPath = type.importPath;
     }
-    // `sourceTypeString` and`getTypeString` should be called at last
-    // cuz they depend on other properties like `namespace`.
-    this.sourceTypeString = this.getSourceTypeString();
     this.typeString = this.getTypeString();
-    Object.freeze(this);
   }
 
-  toPointer(): TypeInfo {
-    return TypeInfo.compoundType(this, true, false);
+  toPointer(): CompoundTypeInfo {
+    return new CompoundTypeInfo(this, true, false);
   }
 
-  toArray(): TypeInfo {
-    return TypeInfo.compoundType(this, false, true);
+  toArray(): CompoundTypeInfo {
+    return new CompoundTypeInfo(this, false, true);
   }
 
   toString(): string {
-    // `this.namespace` is already included in `this.typeString`.
+    // `this.moduleName` is already included in `this.typeString`.
     let s = this.typeString;
     if (this.importPath) {
       s += `|${this.importPath}`;
@@ -64,12 +42,28 @@ export class TypeInfo {
     return s;
   }
 
-  private getTypeString() {
-    const { type, sourceTypeString } = this;
-    if (typeof type === 'string') {
-      return sourceTypeString;
+  private getTypeString(): string {
+    const { typeName } = this;
+    if (this.moduleName) {
+      return `${this.moduleName}.${typeName}`;
     }
-    let s = `${sourceTypeString}`;
+    return typeName;
+  }
+}
+
+export class CompoundTypeInfo {
+  typeString: string;
+
+  constructor(
+    public core: AtomicTypeInfo,
+    public isPointer: boolean,
+    public isArray: boolean,
+  ) {
+    this.typeString = this.getTypeString();
+  }
+
+  private getTypeString(): string {
+    let s = this.core.typeString;
     if (this.isPointer) {
       s = `*${s}`;
     }
@@ -78,17 +72,15 @@ export class TypeInfo {
     }
     return s;
   }
+}
 
-  private getSourceTypeString() {
-    const { type } = this;
-    if (typeof type === 'string') {
-      if (this.moduleName) {
-        return `${this.moduleName}.${type}`;
-      }
-      return type;
-    }
-    return type.sourceTypeString;
+export type TypeInfo = AtomicTypeInfo | CompoundTypeInfo;
+
+export function getAtomicTypeInfo(typeInfo: TypeInfo): AtomicTypeInfo {
+  if (typeInfo instanceof CompoundTypeInfo) {
+    return typeInfo.core;
   }
+  return typeInfo;
 }
 
 export class VarInfo {

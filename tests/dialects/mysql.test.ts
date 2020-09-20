@@ -9,9 +9,12 @@ const TimePkg = 'time';
 const dialect = mr.mysql;
 
 function testType(col: mm.Column, type: string, pkg?: string) {
-  const info = dialect.colTypeToGoType(col.__type);
-  eq(info.typeString, type);
-  eq(info.moduleName || null, pkg || null);
+  // `VarInfo` is not exported, we'll use `any` here to bypass type validation.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const typeInfo = dialect.colTypeToGoType(col.__type) as any;
+  const atomicInfo = typeInfo.core ? typeInfo.core : typeInfo;
+  eq(atomicInfo.typeString, type);
+  eq(atomicInfo.moduleName || null, pkg || null);
 }
 
 it('encodeName', () => {

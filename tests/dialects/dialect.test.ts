@@ -7,7 +7,12 @@ const eq = assert.equal;
 const dialect = mr.mysql;
 
 it('inputPlaceholder', () => {
-  eq(dialect.inputPlaceholder(new mm.SQLVariable('Type', 'name')), '?');
+  eq(
+    dialect.inputPlaceholder(
+      new mm.SQLVariable({ name: 'Type', defaultValue: null }, 'name'),
+    ),
+    '?',
+  );
 });
 
 it('encodeColumnName', () => {

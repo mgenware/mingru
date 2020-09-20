@@ -48,7 +48,7 @@ it('Where and inputs', () => {
       .whereSQL(
         mm.sql`${user.id} = ${mm.input(user.id)} && ${
           user.url_name
-        } = ${mm.input('string', 'userName')}`,
+        } = ${mm.input({ name: 'string', defaultValue: null }, 'userName')}`,
       );
   }
   const userTA = mm.tableActions(user, UserTA);

@@ -5,7 +5,7 @@ import Dialect from '../dialect';
 import { SQLIO, sqlIO } from './sqlIO';
 import { ActionIO } from './actionIO';
 import * as utils from '../lib/stringUtils';
-import VarInfo, { TypeInfo } from '../lib/varInfo';
+import VarInfo, { AtomicTypeInfo, CompoundTypeInfo } from '../lib/varInfo';
 import VarList from '../lib/varList';
 import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
@@ -355,12 +355,12 @@ export class SelectIOProcessor {
       ) {
         isResultTypeArray = true;
       }
-      const resultTypeInfo = TypeInfo.type(resultType);
+      const resultTypeInfo = new AtomicTypeInfo(resultType, null, null);
 
       returnValues.add(
         new VarInfo(
           mm.ReturnValues.result,
-          TypeInfo.compoundType(resultTypeInfo, true, isResultTypeArray),
+          new CompoundTypeInfo(resultTypeInfo, true, isResultTypeArray),
         ),
       );
       if (action.pagination) {

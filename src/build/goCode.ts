@@ -1,6 +1,6 @@
 import * as mm from 'mingru-models';
 import { JSONEncodingStyle } from './buildOptions';
-import VarInfo from '../lib/varInfo';
+import VarInfo, { getAtomicTypeInfo } from '../lib/varInfo';
 
 export class FuncSignature {
   constructor(
@@ -168,8 +168,9 @@ export class ImportList {
 
   addVars(vars: VarInfo[]) {
     for (const info of vars) {
-      if (info.type.importPath) {
-        this.imports.add(info.type.importPath);
+      const atomicInfo = getAtomicTypeInfo(info.type);
+      if (atomicInfo.importPath) {
+        this.imports.add(atomicInfo.importPath);
       }
     }
   }

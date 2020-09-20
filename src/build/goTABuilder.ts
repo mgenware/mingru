@@ -6,7 +6,7 @@ import { SelectIO } from '../io/selectIO';
 import { UpdateIO } from '../io/updateIO';
 import { InsertIO } from '../io/insertIO';
 import { DeleteIO } from '../io/deleteIO';
-import VarInfo, { TypeInfo } from '../lib/varInfo';
+import VarInfo, { CompoundTypeInfo, getAtomicTypeInfo } from '../lib/varInfo';
 import * as go from './goCode';
 import * as defs from '../defs';
 import logger from '../logger';
@@ -144,6 +144,16 @@ export default class GoTABuilder {
     // Func start.
     code += ' {\n';
 
+    // Check input arrays.
+    const arrayParams = funcArgs.filter(
+      (p) => p.type instanceof CompoundTypeInfo && p.type.isArray,
+    );
+    for (const v of arrayParams) {
+      code += `if len(${v.valueOrName}) == 0 {
+\t
+}`;
+    }
+
     let bodyMap: CodeMap;
     switch (io.action.actionType) {
       case mm.ActionType.select: {
@@ -220,13 +230,15 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       pagination = true;
     }
 
-    // We only need the type name here, the namespace(import) is already
+    // We only need the type name here, module name (or import path) is already
     // handled in `processActionIO`.
-    const firstReturn = io.returnValues.getByIndex(0);
-    const resultType = firstReturn.type.typeString;
-    // originalResultType is used to generate additional type definition,
-    // e.g. resultType is '[]*Person', the originalResultType is 'Person'.
-    const originalResultType = firstReturn.type.sourceTypeString || resultType;
+    const firstReturnParam = io.returnValues.getByIndex(0);
+    const resultTypeString = firstReturnParam.type.typeString;
+
+    // `atomicResultType` is used to generate additional type definition,
+    // e.g. if `resultType` is `[]*Person`, `atomicResultType` is `Person`.
+    const atomicResultType =
+      getAtomicTypeInfo(firstReturnParam.type).typeString || resultTypeString;
     // Additional type definition for result type, empty on select field action.
     let resultTypeDef: string | undefined;
     let errReturnCode = '';
@@ -294,9 +306,9 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     ) {
       if (action.__attrs[mm.ActionAttributes.resultTypeName]) {
         this.context.handleResultType(
-          originalResultType,
+          atomicResultType,
           new go.StructInfo(
-            originalResultType,
+            atomicResultType,
             selectedFields,
             resultMemberJSONStyle,
             jsonIgnoreFields,
@@ -305,7 +317,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         );
       } else {
         resultTypeDef = go.struct(
-          originalResultType,
+          atomicResultType,
           selectedFields,
           resultMemberJSONStyle,
           jsonIgnoreFields,
@@ -358,7 +370,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       codeBuilder.pushLines(
         go.makeArray(
           defs.resultVarName,
-          `*${originalResultType}`,
+          `*${atomicResultType}`,
           0,
           pagination ? defs.limitVarName : 0,
         ),
@@ -373,7 +385,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         codeBuilder.incrementIndent();
       }
       codeBuilder.pushLines(
-        go.pointerVar('item', originalResultType),
+        go.pointerVar('item', atomicResultType),
         `err = rows.Scan(${scanParams})`,
         'if err != nil {',
       );
@@ -403,13 +415,13 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         selMode === mm.SelectActionMode.exists
       ) {
         scanParams = `&${defs.resultVarName}`;
-        codeBuilder.push(`var ${defs.resultVarName} ${resultType}`);
+        codeBuilder.push(`var ${defs.resultVarName} ${resultTypeString}`);
       } else {
         scanParams = joinParams(
           selectedFields.map((p) => `&${defs.resultVarName}.${p.name}`),
         );
         codeBuilder.push(
-          `${go.pointerVar(defs.resultVarName, originalResultType)}`,
+          `${go.pointerVar(defs.resultVarName, atomicResultType)}`,
         );
       }
       // For `selectField` and `selectExists`, we return the default value,
@@ -593,7 +605,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
   // A varList usually ends without an error type, call this to append
   // an Go error type to the varList.
   private appendErrorType(vars: VarInfo[]): VarInfo[] {
-    return [...vars, new VarInfo('error', TypeInfo.type('error'))];
+    return [...vars, new VarInfo('error', defs.errorType)];
   }
 
   private increaseIndent(code: string): string {
@@ -607,7 +619,14 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
   private getExecArgsCode(firstParam: string | null, args: VarInfo[]): string {
     const tail = args
-      .map((p) => `${p.type.isArray ? `...${p.valueOrName}` : p.valueOrName}`)
+      .map(
+        (p) =>
+          `${
+            p.type instanceof CompoundTypeInfo && p.type.isArray
+              ? `...${p.valueOrName}`
+              : p.valueOrName
+          }`,
+      )
       .join(', ');
     if (firstParam && tail) {
       return `${firstParam}, ${tail}`;

@@ -3,12 +3,12 @@ import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import toTypeString from 'to-type-string';
 import { Dialect } from '../dialect';
-import { TypeInfo } from '../lib/varInfo';
+import { AtomicTypeInfo, CompoundTypeInfo, TypeInfo } from '../lib/varInfo';
 import { sqlIO } from '../io/sqlIO';
 // eslint-disable-next-line
 const escapeString = require('sql-escape-string');
 
-const TimeType = TypeInfo.type('Time', 'time');
+const TimeType = new AtomicTypeInfo('Time', 'time.Time{}', 'time');
 
 export class MySQL extends Dialect {
   encodeName(name: string): string {
@@ -38,11 +38,9 @@ export class MySQL extends Dialect {
 
   colTypeToGoType(colType: mm.ColumnType): TypeInfo {
     throwIfFalsy(colType, 'colType');
-    const typeString = this.goTypeNonNull(colType);
-    const typeInfo =
-      typeof typeString === 'string' ? TypeInfo.type(typeString) : typeString;
+    const typeInfo = this.goTypeNonNull(colType);
     if (colType.nullable) {
-      return TypeInfo.compoundType(typeInfo, true, false);
+      return new CompoundTypeInfo(typeInfo, true, false);
     }
     return typeInfo;
   }
@@ -188,28 +186,28 @@ export class MySQL extends Dialect {
     throw new Error(`Type not supported: ${this.inspectTypes(colType.types)}`);
   }
 
-  private goTypeNonNull(colType: mm.ColumnType): string | TypeInfo {
+  private goTypeNonNull(colType: mm.ColumnType): AtomicTypeInfo {
     const DT = mm.dt;
     const { unsigned } = colType;
     for (const type of colType.types) {
       // eslint-disable-next-line default-case
       switch (type) {
         case DT.bigInt: {
-          return unsigned ? 'uint64' : 'int64';
+          return new AtomicTypeInfo(unsigned ? 'uint64' : 'int64', 0, null);
         }
         case DT.int: {
-          return unsigned ? 'uint' : 'int';
+          return new AtomicTypeInfo(unsigned ? 'uint' : 'int', 0, null);
         }
         case DT.smallInt: {
-          return unsigned ? 'uint16' : 'int16';
+          return new AtomicTypeInfo(unsigned ? 'uint16' : 'int16', 0, null);
         }
         case DT.tinyInt: {
-          return unsigned ? 'uint8' : 'int8';
+          return new AtomicTypeInfo(unsigned ? 'uint8' : 'int8', 0, null);
         }
         case DT.varChar:
         case DT.char:
         case DT.text: {
-          return 'string';
+          return new AtomicTypeInfo('string', '', null);
         }
 
         case DT.datetime:
@@ -220,7 +218,7 @@ export class MySQL extends Dialect {
         }
 
         case DT.bool: {
-          return 'bool';
+          return new AtomicTypeInfo('bool', false, null);
         }
       }
     }

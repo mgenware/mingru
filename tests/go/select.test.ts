@@ -115,7 +115,7 @@ it('Custom params', async () => {
       .select(post.id, post.title)
       .whereSQL(
         mm.sql`${post.id} = ${mm.input(post.id, 'id')} && raw_name = ${mm.input(
-          'string',
+          { name: 'string', defaultValue: 0 },
           'name',
         )}`,
       );
@@ -393,8 +393,8 @@ it('Argument stubs', async () => {
     selectT = mm
       .select(post.id, post.title)
       .argStubs(
-        new mm.SQLVariable('int', 'id1'),
-        new mm.SQLVariable('int', 'id2'),
+        new mm.SQLVariable({ name: 'int', defaultValue: 0 }, 'id1'),
+        new mm.SQLVariable({ name: 'int', defaultValue: 0 }, 'id2'),
       );
   }
   const ta = mm.tableActions(post, PostTA);
