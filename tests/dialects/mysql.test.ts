@@ -12,8 +12,9 @@ function testType(col: mm.Column, type: string, pkg?: string) {
   // `VarInfo` is not exported, we'll use `any` here to bypass type validation.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const typeInfo = dialect.colTypeToGoType(col.__type) as any;
+  eq(typeInfo.typeString, type);
+
   const atomicInfo = typeInfo.core ? typeInfo.core : typeInfo;
-  eq(atomicInfo.typeString, type);
   eq(atomicInfo.moduleName || null, pkg || null);
 }
 

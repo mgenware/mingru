@@ -59,11 +59,16 @@ export class CompoundTypeInfo {
     public isPointer: boolean,
     public isArray: boolean,
   ) {
-    this.typeString = this.getTypeString();
+    this.typeString = this.getTypeString(false);
   }
 
-  private getTypeString(): string {
-    let s = this.core.typeString;
+  toString(): string {
+    return this.getTypeString(true);
+  }
+
+  // `verbose` is used in `toString` for debugging purposes.
+  private getTypeString(verbose: boolean): string {
+    let s = verbose ? this.core.toString() : this.core.typeString;
     if (this.isPointer) {
       s = `*${s}`;
     }
