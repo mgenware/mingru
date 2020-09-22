@@ -175,6 +175,12 @@ export class ImportList {
     }
   }
 
+  add(value: string) {
+    if (value) {
+      this.imports.add(value);
+    }
+  }
+
   code(): string {
     return makeImports([...this.imports]);
   }

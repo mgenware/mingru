@@ -37,3 +37,4 @@ export const fileHeader = `/${'*'.repeat(90)}
 
 export const mathxNS = 'github.com/mgenware/go-packagex/v5/mathx';
 export const defaultPackageName = 'da';
+export const fmtImport = 'fmt';

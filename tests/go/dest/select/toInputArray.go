@@ -24,10 +24,10 @@ type PostTableTResult struct {
 // T ...
 func (da *TableTypePost) T(queryable mingru.Queryable, ids []uint64, ids2 []uint64) ([]*PostTableTResult, error) {
 	if len(ids) == 0 {
-		return nil, fmt.Errorf("Array \"ids\" cannot be empty")
+		return nil, fmt.Errorf("The array argument `ids` cannot be empty")
 	}
 	if len(ids2) == 0 {
-		return nil, fmt.Errorf("Array \"ids2\" cannot be empty")
+		return nil, fmt.Errorf("The array argument `ids2` cannot be empty")
 	}
 	rows, err := queryable.Query("SELECT `id`, `title` FROM `db_post` WHERE `id` IN "+mingru.InputPlaceholders(len(ids))+" OR `id` IN "+mingru.InputPlaceholders(len(ids2))+" ORDER BY `id`", ids)
 	if err != nil {

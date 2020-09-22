@@ -1,7 +1,7 @@
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import toTypeString from 'to-type-string';
 import * as mm from 'mingru-models';
-import Dialect from '../dialect';
+import Dialect, { StringSegment } from '../dialect';
 import VarList from '../lib/varList';
 import VarInfo from '../lib/varInfo';
 import { VarInfoBuilder } from '../lib/varInfoHelper';
@@ -15,11 +15,7 @@ export class SQLIO {
     return this.varList.distinctList;
   }
 
-  constructor(
-    public sql: mm.SQL,
-    public dialect: Dialect,
-    public varList: VarList,
-  ) {
+  constructor(public sql: mm.SQL, public dialect: Dialect, public varList: VarList) {
     throwIfFalsy(sql, 'sql');
     throwIfFalsy(varList, 'varList');
   }
@@ -44,13 +40,7 @@ export class SQLIO {
       }
       res +=
         cbRes === null
-          ? this.handleElement(
-              element,
-              this.dialect,
-              sourceTable,
-              elementHandler,
-              actionHandler,
-            )
+          ? this.handleElement(element, this.dialect, sourceTable, elementHandler, actionHandler)
           : cbRes;
     }
     return res;
@@ -63,7 +53,7 @@ export class SQLIO {
     sourceTable: mm.Table | null,
     elementHandler: ((element: mm.SQLElement) => string | null) | undefined,
     actionHandler: ((action: mm.Action) => string) | undefined,
-  ): string {
+  ): StringSegment {
     switch (element.type) {
       case mm.SQLElementType.rawString: {
         return element.toRawString();
@@ -80,11 +70,7 @@ export class SQLIO {
           ? call.params
               .map((p) =>
                 // eslint-disable-next-line @typescript-eslint/no-use-before-define
-                sqlIO(p, dialect).toSQL(
-                  sourceTable,
-                  elementHandler,
-                  actionHandler,
-                ),
+                sqlIO(p, dialect).toSQL(sourceTable, elementHandler, actionHandler),
               )
               .join(', ')
           : '';
@@ -116,16 +102,12 @@ export class SQLIO {
         if (action instanceof mm.Action) {
           return actionHandler(action);
         }
-        throw new Error(
-          `Element is not an action, got \`${toTypeString(action)}\``,
-        );
+        throw new Error(`Element is not an action, got \`${toTypeString(action)}\``);
       }
 
       default: {
         throw new Error(
-          `Unsupported type of \`SQLElement\`: ${
-            element.type
-          }, value: "${toTypeString(element)}"`,
+          `Unsupported type of \`SQLElement\`: ${element.type}, value: "${toTypeString(element)}"`,
         );
       }
     }

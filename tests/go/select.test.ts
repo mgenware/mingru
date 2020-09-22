@@ -53,9 +53,7 @@ it('selectField', async () => {
 
 it('WHERE', async () => {
   class PostTA extends mm.TableActions {
-    selectT = mm
-      .select(post.id, post.title)
-      .whereSQL(mm.sql`${post.id} = ${mm.input(post.id)}`);
+    selectT = mm.select(post.id, post.title).whereSQL(mm.sql`${post.id} = ${mm.input(post.id)}`);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/where');
@@ -100,9 +98,7 @@ it('WHERE: multiple cols', async () => {
     selectT = mm
       .select(post.id, post.title)
       .whereSQL(
-        mm.sql`${post.id} = ${mm.input(post.id)} && ${post.title} != ${mm.input(
-          post.title,
-        )}`,
+        mm.sql`${post.id} = ${mm.input(post.id)} && ${post.title} != ${mm.input(post.title)}`,
       );
   }
   const ta = mm.tableActions(post, PostTA);
@@ -148,9 +144,7 @@ it('Join implied by WHERE', async () => {
   class CmtTA extends mm.TableActions {
     selectT = mm
       .select(cmt.id)
-      .whereSQL(
-        cmt.target_id.join(post).user_id.join(user).url_name.isEqualToInput(),
-      );
+      .whereSQL(cmt.target_id.join(post).user_id.join(user).url_name.isEqualToInput());
   }
   const ta = mm.tableActions(cmt, CmtTA);
   await testBuildAsync(ta, 'select/joinImpliedByWhere');
@@ -161,9 +155,7 @@ it('Inverse join (select from A on A.id = B.a_id)', async () => {
     selectT = mm
       .selectRows(
         post.title,
-        post.id
-          .join(postCategory, postCategory.post_id)
-          .category_id.setInputName('category_id'),
+        post.id.join(postCategory, postCategory.post_id).category_id.setInputName('category_id'),
         post.id
           .join(postCategory, postCategory.post_id)
           .category_id.join(category)
@@ -177,11 +169,7 @@ it('Inverse join (select from A on A.id = B.a_id)', async () => {
           .category_id.join(category)
           .id.setInputName('id')}`,
       )
-      .orderByAsc(
-        post.id
-          .join(postCategory, postCategory.post_id)
-          .category_id.join(category).id,
-      )
+      .orderByAsc(post.id.join(postCategory, postCategory.post_id).category_id.join(category).id)
       .orderByDesc(post.user_id);
   }
   const ta = mm.tableActions(post, PostTA);
@@ -221,11 +209,7 @@ it('Join as (attr should not affect other things)', async () => {
       cmt.user_id.as('a').attrs({ foo: true }),
       cmt.target_id.join(post).title.as('b').attrs({ foo: true }),
       cmt.target_id.join(post).user_id.join(user).url_name.attrs({ foo: true }),
-      cmt.target_id
-        .join(post)
-        .user_id.join(user)
-        .url_name.as('c')
-        .attrs({ foo: true }),
+      cmt.target_id.join(post).user_id.join(user).url_name.as('c').attrs({ foo: true }),
     );
   }
   const ta = mm.tableActions(cmt, CmtTA);
@@ -298,11 +282,7 @@ it('Raw columns', async () => {
     selectT = mm.select(
       // User specified types
       new mm.RawColumn(mm.sql`raw expr`, 'a', new mm.ColumnType(mm.dt.bigInt)),
-      new mm.RawColumn(
-        mm.sql`xyz(${post.n_date})`,
-        'b',
-        new mm.ColumnType(mm.dt.smallInt),
-      ),
+      new mm.RawColumn(mm.sql`xyz(${post.n_date})`, 'b', new mm.ColumnType(mm.dt.smallInt)),
       new mm.RawColumn(
         mm.sql`xyz(${post.user_id.join(user).display_name})`,
         'c',
@@ -353,11 +333,7 @@ it('selectRows, LIMIT and OFFSET', async () => {
 
 it('selectRows, paginate, where', async () => {
   class PostTA extends mm.TableActions {
-    selectT = mm
-      .selectRows(post.id, post.title)
-      .byID()
-      .paginate()
-      .orderByAsc(post.id);
+    selectT = mm.selectRows(post.id, post.title).byID().paginate().orderByAsc(post.id);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectRowsPaginateWithWhere');
@@ -378,10 +354,7 @@ it('WHERE, inputs, joins', async () => {
       .whereSQL(
         mm.sql` ${cmt.id.toInput()}, ${cmt.user_id.toInput()}, ${cmt.target_id
           .join(post)
-          .title.toInput()}, ${cmt.target_id
-          .join(post)
-          .user_id.join(user)
-          .url_name.toInput()}`,
+          .title.toInput()}, ${cmt.target_id.join(post).user_id.join(user).url_name.toInput()}`,
       );
   }
   const ta = mm.tableActions(cmt, CmtTA);
@@ -452,12 +425,8 @@ it('camelCase keys', async () => {
 it('Ignored keys', async () => {
   class RplTA extends mm.TableActions {
     selectT = mm.select(
-      rpl.user_id
-        .join(user)
-        .url_name.attrs({ [mm.ColumnAttributes.isPrivate]: true }),
-      rpl.user_id
-        .join(user)
-        .id.attrs({ [mm.ColumnAttributes.isPrivate]: true }),
+      rpl.user_id.join(user).url_name.attrs({ [mm.ColumnAttributes.isPrivate]: true }),
+      rpl.user_id.join(user).id.attrs({ [mm.ColumnAttributes.isPrivate]: true }),
       rpl.to_user_id.join(user).url_name,
     );
   }
@@ -472,9 +441,7 @@ it('Ignored keys (raw columns)', async () => {
   class RplTA extends mm.TableActions {
     selectT = mm.select(
       mm.sel(mm.sql`1`, 'a', mm.int().__type),
-      mm
-        .sel(mm.sql`1`, 'b', mm.int().__type)
-        .attrs({ [mm.ColumnAttributes.isPrivate]: true }),
+      mm.sel(mm.sql`1`, 'b', mm.int().__type).attrs({ [mm.ColumnAttributes.isPrivate]: true }),
     );
   }
   const ta = mm.tableActions(rpl, RplTA);
@@ -530,18 +497,12 @@ it('Exclude all empty properties', async () => {
 
 it('SELECT, EXISTS, IF', async () => {
   class PostTA extends mm.TableActions {
-    t1 = mm.select(
-      mm.sel(mm.exists(mm.select(post.user_id.join(user).sig).byID()), 'a'),
-    );
+    t1 = mm.select(mm.sel(mm.exists(mm.select(post.user_id.join(user).sig).byID()), 'a'));
 
     t2 = mm.select(
       mm.sel(
         mm
-          .IF(
-            mm.exists(mm.select(post.user_id.join(user).sig).byID()),
-            '1',
-            '2',
-          )
+          .IF(mm.exists(mm.select(post.user_id.join(user).sig).byID()), '1', '2')
           .setReturnType(mm.int().__type),
         'a',
       ),
@@ -553,9 +514,7 @@ it('SELECT, EXISTS, IF', async () => {
 
 it('selectExists', async () => {
   class PostTA extends mm.TableActions {
-    t = mm
-      .selectExists()
-      .whereSQL(post.user_id.join(user).sig.isEqualToInput());
+    t = mm.selectExists().whereSQL(post.user_id.join(user).sig.isEqualToInput());
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectExists');
@@ -563,9 +522,9 @@ it('selectExists', async () => {
 
 it('toInputArray', async () => {
   class PostTA extends mm.TableActions {
-    t = mm.selectRows(post.id, post.title).where`${
+    t = mm.selectRows(post.id, post.title).where`${post.id} IN ${post.id.toInputArray('ids')} OR ${
       post.id
-    } IN ${post.id.toInputArray('ids')}`.orderByAsc(post.id);
+    } IN ${post.id.toInputArray('ids2')}`.orderByAsc(post.id);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/toInputArray');

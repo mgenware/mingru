@@ -32,11 +32,7 @@ function joinParams(arr: string[]): string {
  * <CodeMap.tail>
  */
 class CodeMap {
-  constructor(
-    public body: string,
-    public head?: string,
-    public tail?: string,
-  ) {}
+  constructor(public body: string, public head?: string, public tail?: string) {}
 }
 
 export default class GoTABuilder {
@@ -44,11 +40,7 @@ export default class GoTABuilder {
   private imports = new go.ImportList();
   private dialect: Dialect;
 
-  constructor(
-    public taIO: TAIO,
-    public opts: BuildOptions,
-    public context: GoBuilderContext,
-  ) {
+  constructor(public taIO: TAIO, public opts: BuildOptions, public context: GoBuilderContext) {
     throwIfFalsy(taIO, 'taIO');
     this.dialect = taIO.dialect;
     this.options = opts;
@@ -102,9 +94,7 @@ export default class GoTABuilder {
     // allFuncArgs = original func args + arg stubs.
     const allFuncArgs = [...funcArgs, ...io.funcStubs];
     this.imports.addVars(allFuncArgs);
-    const funcParamsCode = allFuncArgs
-      .map((p) => `${p.name} ${p.type.typeString}`)
-      .join(', ');
+    const funcParamsCode = allFuncArgs.map((p) => `${p.name} ${p.type.typeString}`).join(', ');
     // Wrap all params with parentheses.
     funcSigString += `(${funcParamsCode})`;
 
@@ -128,12 +118,7 @@ export default class GoTABuilder {
       const idx = funcSigString.indexOf(')');
       funcSigString = funcSigString.substr(idx + 2);
 
-      const funcSig = new go.FuncSignature(
-        funcName,
-        funcSigString,
-        allFuncArgs,
-        returnsWithError,
-      );
+      const funcSig = new go.FuncSignature(funcName, funcSigString, allFuncArgs, returnsWithError);
 
       this.context.handleInterfaceMember(
         actionAttr[mm.ActionAttributes.groupTypeName] as string,
@@ -149,11 +134,19 @@ export default class GoTABuilder {
     const arrayParams = funcArgs.filter(
       (p) => p.type instanceof CompoundTypeInfo && p.type.isArray,
     );
-    for (const arrayParam of arrayParams) {
-      inputArrayChecks += `if len(${arrayParam.valueOrName}) == 0 {
-\treturn ${returnsWithError.map((v) => v.type.defaultValueString).join(', ')}
+    if (arrayParams.length) {
+      // Array params need `fmt.Errorf` to return errors.
+      this.imports.add(defs.fmtImport);
+      for (const arrayParam of arrayParams) {
+        const returnValueStrings = returnValues.map((v) => v.type.defaultValueString);
+        returnValueStrings.push(
+          `fmt.Errorf("The array argument \`${arrayParam.name}\` cannot be empty")`,
+        );
+        inputArrayChecks += `if len(${arrayParam.valueOrName}) == 0 {
+\treturn ${returnValueStrings.join(', ')}
 }
 `;
+      }
     }
 
     let bodyMap: CodeMap;
@@ -269,8 +262,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const selectedFields: VarInfo[] = [];
     const jsonIgnoreFields = new Set<VarInfo>();
     const omitEmptyFields = new Set<VarInfo>();
-    const omitAllEmptyFields =
-      options.jsonEncoding?.excludeEmptyValues || false;
+    const omitAllEmptyFields = options.jsonEncoding?.excludeEmptyValues || false;
 
     for (const col of io.cols) {
       const fieldName = mm.utils.toPascalCase(col.varName);
@@ -285,10 +277,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         if (attrs[mm.ColumnAttributes.isPrivate] === true) {
           jsonIgnoreFields.add(varInfo);
         }
-        if (
-          omitAllEmptyFields ||
-          attrs[mm.ColumnAttributes.excludeEmptyValue] === true
-        ) {
+        if (omitAllEmptyFields || attrs[mm.ColumnAttributes.excludeEmptyValue] === true) {
           omitEmptyFields.add(varInfo);
         }
       }
@@ -300,12 +289,8 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     }
 
     // Generate result type definition.
-    const resultMemberJSONStyle =
-      options.jsonEncoding?.encodingStyle || JSONEncodingStyle.none;
-    if (
-      selMode !== mm.SelectActionMode.field &&
-      selMode !== mm.SelectActionMode.exists
-    ) {
+    const resultMemberJSONStyle = options.jsonEncoding?.encodingStyle || JSONEncodingStyle.none;
+    if (selMode !== mm.SelectActionMode.field && selMode !== mm.SelectActionMode.exists) {
       if (action.__attrs[mm.ActionAttributes.resultTypeName]) {
         this.context.handleResultType(
           atomicResultType,
@@ -347,9 +332,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
     const sqlLiteral = go.makeStringLiteral(sqlSource);
     if (selMode === mm.SelectActionMode.list || isPageMode) {
-      const scanParams = joinParams(
-        selectedFields.map((p) => `&item.${p.name}`),
-      );
+      const scanParams = joinParams(selectedFields.map((p) => `&item.${p.name}`));
       if (isPageMode) {
         codeBuilder.pushLines(
           'limit := pageSize + 1',
@@ -412,25 +395,17 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       // For `select/selectField`.
       let scanParams: string;
       // Declare the result variable.
-      if (
-        selMode === mm.SelectActionMode.field ||
-        selMode === mm.SelectActionMode.exists
-      ) {
+      if (selMode === mm.SelectActionMode.field || selMode === mm.SelectActionMode.exists) {
         scanParams = `&${defs.resultVarName}`;
         codeBuilder.push(`var ${defs.resultVarName} ${resultTypeString}`);
       } else {
-        scanParams = joinParams(
-          selectedFields.map((p) => `&${defs.resultVarName}.${p.name}`),
-        );
-        codeBuilder.push(
-          `${go.pointerVar(defs.resultVarName, atomicResultType)}`,
-        );
+        scanParams = joinParams(selectedFields.map((p) => `&${defs.resultVarName}.${p.name}`));
+        codeBuilder.push(`${go.pointerVar(defs.resultVarName, atomicResultType)}`);
       }
       // For `selectField` and `selectExists`, we return the default value,
       // for `select`, return nil.
       const resultVarOnError =
-        selMode === mm.SelectActionMode.field ||
-        selMode === mm.SelectActionMode.exists
+        selMode === mm.SelectActionMode.field || selMode === mm.SelectActionMode.exists
           ? 'result'
           : 'nil';
       codeBuilder.push();
@@ -459,9 +434,10 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     let code = '';
 
     const sqlLiteral = go.makeStringLiteral(io.sql);
-    code += `${defs.resultVarName}, err := ${
-      defs.queryableParam
-    }.Exec(${this.getExecArgsCode(sqlLiteral, io.execArgs.list)})\n`;
+    code += `${defs.resultVarName}, err := ${defs.queryableParam}.Exec(${this.getExecArgsCode(
+      sqlLiteral,
+      io.execArgs.list,
+    )})\n`;
 
     // Return the result
     if (action.ensureOneRowAffected) {
@@ -496,9 +472,10 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     let code = '';
 
     const sqlLiteral = go.makeStringLiteral(io.sql);
-    code += `${defs.resultVarName}, err := ${
-      defs.queryableParam
-    }.Exec(${this.getExecArgsCode(sqlLiteral, io.execArgs.list)})\n`;
+    code += `${defs.resultVarName}, err := ${defs.queryableParam}.Exec(${this.getExecArgsCode(
+      sqlLiteral,
+      io.execArgs.list,
+    )})\n`;
     // Return the result
     if (action.ensureOneRowAffected) {
       code += `return mingru.CheckOneRowAffectedWithError(${defs.resultVarName}, err)`;
@@ -510,10 +487,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
   private wrap(io: WrapIO): CodeMap {
     let code = '';
-    code += `return ${io.funcPath}(${this.getExecArgsCode(
-      null,
-      io.execArgs.list,
-    )})\n`;
+    code += `return ${io.funcPath}(${this.getExecArgsCode(null, io.execArgs.list)})\n`;
     return new CodeMap(code);
   }
 
