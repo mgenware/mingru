@@ -145,13 +145,15 @@ export default class GoTABuilder {
     code += ' {\n';
 
     // Check input arrays.
+    let inputArrayChecks = '';
     const arrayParams = funcArgs.filter(
       (p) => p.type instanceof CompoundTypeInfo && p.type.isArray,
     );
-    for (const v of arrayParams) {
-      code += `if len(${v.valueOrName}) == 0 {
-\t
-}`;
+    for (const arrayParam of arrayParams) {
+      inputArrayChecks += `if len(${arrayParam.valueOrName}) == 0 {
+\treturn ${returnsWithError.map((v) => v.type.defaultValueString).join(', ')}
+}
+`;
     }
 
     let bodyMap: CodeMap;
@@ -194,7 +196,7 @@ export default class GoTABuilder {
     }
 
     // Increase indent on all body lines.
-    code += this.increaseIndent(bodyMap.body);
+    code += this.increaseIndent(inputArrayChecks + bodyMap.body);
 
     // Closing func.
     code += '\n}\n';

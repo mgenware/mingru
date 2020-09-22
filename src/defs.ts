@@ -1,5 +1,5 @@
 import * as mm from 'mingru-models';
-import VarInfo, { AtomicTypeInfo } from './lib/varInfo';
+import VarInfo, { AtomicTypeInfo, typeInfoToPointer } from './lib/varInfo';
 
 export const queryableParam = 'queryable';
 export const dbParam = 'db';
@@ -9,16 +9,12 @@ export const intTypeInfo = new AtomicTypeInfo('int', 0, null);
 export const uint64TypeInfo = new AtomicTypeInfo('uint64', 0, null);
 export const boolTypeInfo = new AtomicTypeInfo('bool', false, null);
 
-export const sqlDBType = new AtomicTypeInfo(
-  'DB',
-  null,
-  'sql|database/sql',
-).toPointer();
-export const sqlTxType = new AtomicTypeInfo(
-  'Tx',
-  null,
-  'sql|database/sql',
-).toPointer();
+export const sqlDBType = typeInfoToPointer(
+  new AtomicTypeInfo('DB', null, 'sql|database/sql'),
+);
+export const sqlTxType = typeInfoToPointer(
+  new AtomicTypeInfo('Tx', null, 'sql|database/sql'),
+);
 export const dbxQueryableType = new AtomicTypeInfo(
   'Queryable',
   null,

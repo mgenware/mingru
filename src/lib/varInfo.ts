@@ -6,6 +6,7 @@ export class AtomicTypeInfo {
   moduleName = '';
   importPath?: string;
   typeString: string;
+  defaultValueString: string;
 
   constructor(
     public typeName: string,
@@ -23,14 +24,7 @@ export class AtomicTypeInfo {
       }
     }
     this.typeString = this.getTypeString();
-  }
-
-  toPointer(): CompoundTypeInfo {
-    return new CompoundTypeInfo(this, true, false);
-  }
-
-  toArray(): CompoundTypeInfo {
-    return new CompoundTypeInfo(this, false, true);
+    this.defaultValueString = `${this.defaultValue}`;
   }
 
   toString(): string {
@@ -53,6 +47,7 @@ export class AtomicTypeInfo {
 
 export class CompoundTypeInfo {
   typeString: string;
+  defaultValueString: string;
 
   constructor(
     public core: AtomicTypeInfo,
@@ -60,6 +55,9 @@ export class CompoundTypeInfo {
     public isArray: boolean,
   ) {
     this.typeString = this.getTypeString(false);
+    this.defaultValueString =
+      this.isPointer || this.isArray ? 'nil' : this.core.defaultValueString;
+    Object.freeze(this);
   }
 
   toString(): string {
@@ -86,6 +84,20 @@ export function getAtomicTypeInfo(typeInfo: TypeInfo): AtomicTypeInfo {
     return typeInfo.core;
   }
   return typeInfo;
+}
+
+export function typeInfoToArray(typeInfo: TypeInfo): CompoundTypeInfo {
+  if (typeInfo instanceof CompoundTypeInfo) {
+    return new CompoundTypeInfo(typeInfo.core, typeInfo.isPointer, true);
+  }
+  return new CompoundTypeInfo(typeInfo, false, true);
+}
+
+export function typeInfoToPointer(typeInfo: TypeInfo): CompoundTypeInfo {
+  if (typeInfo instanceof CompoundTypeInfo) {
+    return new CompoundTypeInfo(typeInfo.core, true, typeInfo.isArray);
+  }
+  return new CompoundTypeInfo(typeInfo, true, false);
 }
 
 export class VarInfo {
