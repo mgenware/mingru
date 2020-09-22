@@ -2,6 +2,12 @@
 import * as mm from 'mingru-models';
 import { TypeInfo } from './lib/varInfo';
 
+export type StringSegment = string | CodeSegment;
+
+export interface CodeSegment {
+  code: string;
+}
+
 export class Dialect {
   encodeName(_: string): string {
     throw new Error('Not implemented yet');
@@ -32,11 +38,11 @@ export class Dialect {
     return this.encodeName(table.getDBName());
   }
 
-  inputPlaceholder(v: mm.SQLVariable): string {
+  inputPlaceholder(v: mm.SQLVariable): StringSegment[] {
     if (v.isArray) {
-      return `+"mingru.InputPlaceholders(len(${v.name}))"+`;
+      return [{ code: `mingru.InputPlaceholders(len(${v.name}))` }];
     }
-    return '?';
+    return ['?'];
   }
 
   sqlCall(_: mm.SQLCallType): string {

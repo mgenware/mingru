@@ -22,11 +22,11 @@ export class SQLIO {
 
   toSQL(
     sourceTable: mm.Table | null,
-    elementHandler?: (element: mm.SQLElement) => string | null,
-    actionHandler?: (action: mm.Action) => string,
-  ): string {
+    elementHandler?: (element: mm.SQLElement) => StringSegment[] | null,
+    actionHandler?: (action: mm.Action) => StringSegment[],
+  ): StringSegment[] {
     const { sql } = this;
-    let res = '';
+    const res: StringSegment[] = [];
     for (const element of sql.elements) {
       if (element.type === mm.SQLElementType.column) {
         const col = element.toColumn();
@@ -34,14 +34,17 @@ export class SQLIO {
           col.checkSourceTable(sourceTable);
         }
       }
-      let cbRes: string | null = null;
+      let cbRes: StringSegment[] | null = null;
       if (elementHandler) {
         cbRes = elementHandler(element);
       }
-      res +=
+      const elementResults =
         cbRes === null
           ? this.handleElement(element, this.dialect, sourceTable, elementHandler, actionHandler)
           : cbRes;
+      for (const r of elementResults) {
+        res.push(r);
+      }
     }
     return res;
   }
@@ -51,16 +54,16 @@ export class SQLIO {
     element: mm.SQLElement,
     dialect: Dialect,
     sourceTable: mm.Table | null,
-    elementHandler: ((element: mm.SQLElement) => string | null) | undefined,
-    actionHandler: ((action: mm.Action) => string) | undefined,
-  ): StringSegment {
+    elementHandler: ((element: mm.SQLElement) => StringSegment[] | null) | undefined,
+    actionHandler: ((action: mm.Action) => StringSegment[]) | undefined,
+  ): StringSegment[] {
     switch (element.type) {
       case mm.SQLElementType.rawString: {
-        return element.toRawString();
+        return [element.toRawString()];
       }
 
       case mm.SQLElementType.column: {
-        return dialect.encodeColumnName(element.toColumn());
+        return [dialect.encodeColumnName(element.toColumn())];
       }
 
       case mm.SQLElementType.call: {
@@ -74,7 +77,7 @@ export class SQLIO {
               )
               .join(', ')
           : '';
-        return `${name}(${params})`;
+        return [`${name}(${params})`];
       }
 
       case mm.SQLElementType.input: {
@@ -84,13 +87,13 @@ export class SQLIO {
       case mm.SQLElementType.rawColumn: {
         const rawCol = element.toRawColumn();
         if (rawCol.selectedName) {
-          return dialect.encodeName(rawCol.selectedName);
+          return [dialect.encodeName(rawCol.selectedName)];
         }
         if (rawCol.core instanceof mm.Column) {
-          return dialect.encodeColumnName(rawCol.core);
+          return [dialect.encodeColumnName(rawCol.core)];
         }
         throw new Error(
-          'The argument "selectedName" is required for an SQL expression without any columns inside',
+          'The argument `selectedName` is required for an SQL expression without any columns inside',
         );
       }
 
