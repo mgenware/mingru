@@ -9,6 +9,7 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "newLine": "lf"
+    "newLine": "lf",
+    "lib": ["es2019"]
   }
 }
