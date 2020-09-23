@@ -315,22 +315,22 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       }
     }
 
-    let sqlSource = io.sql;
+    const sqlSource = [...io.sql];
 
     // LIMIT and OFFSET
     if (pagination) {
-      sqlSource += ' LIMIT ? OFFSET ?';
+      sqlSource.push(' LIMIT ? OFFSET ?');
     } else if (limitValue !== undefined) {
-      sqlSource += ' LIMIT ';
-      sqlSource += isLimitInput ? '?' : limitValue.toString();
+      sqlSource.push(' LIMIT ');
+      sqlSource.push(isLimitInput ? '?' : limitValue.toString());
 
       if (offsetValue !== undefined) {
-        sqlSource += ' OFFSET ';
-        sqlSource += isOffsetInput ? '?' : offsetValue.toString();
+        sqlSource.push(' OFFSET ');
+        sqlSource.push(isOffsetInput ? '?' : offsetValue.toString());
       }
     }
 
-    const sqlLiteral = go.makeStringLiteral(sqlSource);
+    const sqlLiteral = go.makeStringFromSegments(sqlSource);
     if (selMode === mm.SelectActionMode.list || isPageMode) {
       const scanParams = joinParams(selectedFields.map((p) => `&item.${p.name}`));
       if (isPageMode) {
@@ -433,7 +433,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const { action } = io;
     let code = '';
 
-    const sqlLiteral = go.makeStringLiteral(io.sql);
+    const sqlLiteral = go.makeStringFromSegments(io.sql);
     code += `${defs.resultVarName}, err := ${defs.queryableParam}.Exec(${this.getExecArgsCode(
       sqlLiteral,
       io.execArgs.list,
@@ -471,7 +471,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const { action } = io;
     let code = '';
 
-    const sqlLiteral = go.makeStringLiteral(io.sql);
+    const sqlLiteral = go.makeStringFromSegments(io.sql);
     code += `${defs.resultVarName}, err := ${defs.queryableParam}.Exec(${this.getExecArgsCode(
       sqlLiteral,
       io.execArgs.list,

@@ -1,6 +1,7 @@
 import * as mm from 'mingru-models';
 import { JSONEncodingStyle } from './buildOptions';
 import VarInfo, { getAtomicTypeInfo } from '../lib/varInfo';
+import { StringSegment } from '../dialect';
 
 export class FuncSignature {
   constructor(
@@ -68,9 +69,7 @@ type ${typeName} struct {
   }
   for (const mem of members) {
     let tag: string | null = null;
-    code += `\t${mem.name.padEnd(nameMaxLen)} ${mem.type.typeString.padEnd(
-      typeMaxLen,
-    )}`;
+    code += `\t${mem.name.padEnd(nameMaxLen)} ${mem.type.typeString.padEnd(typeMaxLen)}`;
     const omitEmpty = omitEmptyMembers?.has(mem) || false;
     if (ignoredMembers && ignoredMembers.has(mem)) {
       tag = MemberTagUtil.getIgnoreJSONTag();
@@ -161,6 +160,10 @@ ${code})\n\n`;
 
 export function makeStringLiteral(s: string): string {
   return JSON.stringify(s);
+}
+
+export function makeStringFromSegments(list: StringSegment[]): string {
+  return list.map((s) => (typeof s === 'string' ? makeStringLiteral(s) : s.code)).join('+');
 }
 
 export class ImportList {

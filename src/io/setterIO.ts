@@ -22,12 +22,7 @@ export class SetterIO {
       // thus no need the table argument as it's not an SQL object.
       return new SetterIO(
         key,
-        sqlIO(
-          value instanceof mm.SQL
-            ? value
-            : mm.sql`${dialect.objToSQL(value, null)}`,
-          dialect,
-        ),
+        sqlIO(value instanceof mm.SQL ? value : mm.sql`${dialect.objToSQL(value, null)}`, dialect),
       );
     });
 
@@ -45,10 +40,7 @@ export class SetterIO {
       let isValueSet = false;
       for (const autoSetter of action.autoSetters) {
         const defValue = col.__defaultValue;
-        if (
-          autoSetter === mm.AutoSetterType.default &&
-          defValue === undefined
-        ) {
+        if (autoSetter === mm.AutoSetterType.default && defValue === undefined) {
           continue;
         }
         isValueSet = true;
@@ -74,17 +66,16 @@ export class SetterIO {
       return new SetterIO(col, sqlIO(mm.sql`${col.toInput()}`, dialect));
     }
     if (autoSetter === mm.AutoSetterType.default) {
-      let value: string;
+      let value: mm.SQL;
       const defValue = col.__defaultValue;
       if (defValue) {
         if (defValue instanceof mm.SQL) {
-          const valueIO = sqlIO(defValue, dialect);
-          value = valueIO.toSQL(table);
+          value = defValue;
         } else {
           value = dialect.objToSQL(defValue, table);
         }
       } else if (col.__type.nullable) {
-        value = 'NULL';
+        value = mm.sql`NULL`;
       } else {
         const type = col.__type.types[0];
         const def = dtDefault(type);
@@ -96,7 +87,7 @@ export class SetterIO {
         value = dialect.objToSQL(def, table);
       }
 
-      return new SetterIO(col, sqlIO(mm.sql`${value}`, dialect));
+      return new SetterIO(col, sqlIO(value, dialect));
     }
     throw new Error(`Unsupported auto setter type "${autoSetter}"`);
   }
@@ -107,11 +98,7 @@ export class SetterIO {
   }
 }
 
-export function settersToVarList(
-  name: string,
-  setters: SetterIO[],
-  items?: VarInfo[],
-): VarList {
+export function settersToVarList(name: string, setters: SetterIO[], items?: VarInfo[]): VarList {
   // Set inputs
   const list = new VarList(name);
   if (items) {

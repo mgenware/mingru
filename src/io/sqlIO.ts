@@ -20,7 +20,7 @@ export class SQLIO {
     throwIfFalsy(varList, 'varList');
   }
 
-  toSQL(
+  toSQLString(
     sourceTable: mm.Table | null,
     elementHandler?: (element: mm.SQLElement) => StringSegment[] | null,
     actionHandler?: (action: mm.Action) => StringSegment[],

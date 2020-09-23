@@ -1,6 +1,6 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import Dialect from '../dialect';
+import Dialect, { StringSegment } from '../dialect';
 import { settersToVarList, SetterIO } from './setterIO';
 import { SQLIO, sqlIO } from './sqlIO';
 import { ActionIO } from './actionIO';
@@ -14,7 +14,7 @@ export class UpdateIO extends ActionIO {
   constructor(
     dialect: Dialect,
     public action: mm.UpdateAction,
-    public sql: string,
+    public sql: StringSegment[],
     public setters: SetterIO[],
     public where: SQLIO | null,
     funcArgs: VarList,
@@ -36,7 +36,7 @@ class UpdateIOProcessor {
   }
 
   convert(): UpdateIO {
-    let sql = 'UPDATE ';
+    const sql: StringSegment[] = ['UPDATE '];
     const { action, dialect } = this;
     const [table] = action.ensureInitialized();
 
@@ -48,37 +48,32 @@ class UpdateIOProcessor {
 
     // Table
     const fromSQL = this.handleFrom(table);
-    sql += `${fromSQL} SET `;
+    sql.push(`${fromSQL} SET `);
 
     // Setters
     utils.validateSetters(action.setters, table);
     const setterIOs = SetterIO.fromAction(action, dialect, true);
-    sql += setterIOs
-      .map((s) => `${dialect.encodeColumnName(s.col)} = ${s.sql.toSQL(table)}`)
-      .join(', ');
+
+    setterIOs.forEach((setter, i) => {
+      sql.push(`${dialect.encodeColumnName(setter.col)} = `);
+      sql.push(...setter.sql.toSQLString(table));
+      if (i <= setterIOs.length - 1) {
+        sql.push(', ');
+      }
+    });
 
     // WHERE
-    const whereIO = action.whereSQLValue
-      ? sqlIO(action.whereSQLValue, dialect)
-      : null;
+    const whereIO = action.whereSQLValue ? sqlIO(action.whereSQLValue, dialect) : null;
     if (whereIO) {
-      sql += ` WHERE ${whereIO.toSQL(table)}`;
+      sql.push(' WHERE ');
+      sql.push(...whereIO.toSQLString(table));
     }
 
     // funcArgs
-    const setterVars = settersToVarList(
-      `SetterInputs of action "${action.__name}"`,
-      setterIOs,
-    );
-    const funcArgs = new VarList(
-      `Func args of action "${action.__name}"`,
-      true,
-    );
+    const setterVars = settersToVarList(`SetterInputs of action "${action.__name}"`, setterIOs);
+    const funcArgs = new VarList(`Func args of action "${action.__name}"`, true);
     funcArgs.add(defs.dbxQueryableVar);
-    const execArgs = new VarList(
-      `Exec args of action "${action.__name}"`,
-      true,
-    );
+    const execArgs = new VarList(`Exec args of action "${action.__name}"`, true);
     // funcArgs = WHERE(distinct) + setters
     // execArgs = setters + WHERE(all)
     execArgs.merge(setterVars.list);
@@ -92,10 +87,7 @@ class UpdateIOProcessor {
     const returnValues = new VarList(`Returns of action ${action.__name}`);
     if (!action.ensureOneRowAffected) {
       returnValues.add(
-        new VarInfo(
-          mm.ReturnValues.rowsAffected,
-          dialect.colTypeToGoType(mm.int().__type),
-        ),
+        new VarInfo(mm.ReturnValues.rowsAffected, dialect.colTypeToGoType(mm.int().__type)),
       );
     }
 

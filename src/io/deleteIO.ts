@@ -1,6 +1,6 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import Dialect from '../dialect';
+import Dialect, { StringSegment } from '../dialect';
 import { ActionIO } from './actionIO';
 import { SQLIO, sqlIO } from './sqlIO';
 import VarList from '../lib/varList';
@@ -12,7 +12,7 @@ export class DeleteIO extends ActionIO {
   constructor(
     dialect: Dialect,
     public action: mm.DeleteAction,
-    public sql: string,
+    public sql: StringSegment[],
     public where: SQLIO | null,
     funcArgs: VarList,
     execArgs: VarList,
@@ -31,7 +31,7 @@ class DeleteIOProcessor {
   }
 
   convert(): DeleteIO {
-    let sql = 'DELETE FROM ';
+    let sql: StringSegment[] = ['DELETE FROM '];
     const { action, dialect } = this;
     const [table] = action.ensureInitialized();
 
@@ -43,54 +43,33 @@ class DeleteIOProcessor {
 
     // table
     const fromSQL = this.handleFrom(table);
-    sql += fromSQL;
+    sql.push(fromSQL);
 
     // where
-    const whereIO = action.whereSQLValue
-      ? sqlIO(action.whereSQLValue, dialect)
-      : null;
+    const whereIO = action.whereSQLValue ? sqlIO(action.whereSQLValue, dialect) : null;
     if (whereIO) {
-      sql += ` WHERE ${whereIO.toSQL(table)}`;
+      sql.push(' WHERE ');
+      sql.push(...whereIO.toSQLString(table));
     }
 
     // inputs
-    const funcArgs = new VarList(
-      `Func args of action "${action.__name}"`,
-      true,
-    );
+    const funcArgs = new VarList(`Func args of action "${action.__name}"`, true);
     funcArgs.add(defs.dbxQueryableVar);
-    const execArgs = new VarList(
-      `Exec args of action "${action.__name}"`,
-      true,
-    );
+    const execArgs = new VarList(`Exec args of action "${action.__name}"`, true);
     if (whereIO) {
       funcArgs.merge(whereIO.distinctVars);
       execArgs.merge(whereIO.vars);
     }
 
     // returns
-    const returnValues = new VarList(
-      `Returns of action ${action.__name}`,
-      false,
-    );
+    const returnValues = new VarList(`Returns of action ${action.__name}`, false);
     if (!action.ensureOneRowAffected) {
       returnValues.add(
-        new VarInfo(
-          mm.ReturnValues.rowsAffected,
-          dialect.colTypeToGoType(mm.int().__type),
-        ),
+        new VarInfo(mm.ReturnValues.rowsAffected, dialect.colTypeToGoType(mm.int().__type)),
       );
     }
 
-    return new DeleteIO(
-      dialect,
-      action,
-      sql,
-      whereIO,
-      funcArgs,
-      execArgs,
-      returnValues,
-    );
+    return new DeleteIO(dialect, action, sql, whereIO, funcArgs, execArgs, returnValues);
   }
 
   private handleFrom(table: mm.Table): string {

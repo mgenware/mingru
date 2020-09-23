@@ -16,22 +16,22 @@ export class MySQL extends Dialect {
     return '`' + name + '`';
   }
 
-  objToSQL(value: unknown, table: mm.Table | null): string {
+  objToSQL(value: unknown, table: mm.Table | null): mm.SQL {
     if (value === undefined) {
       throw new Error('value is undefined');
     }
     if (value === null) {
-      return 'NULL';
+      return mm.sql`NULL`;
     }
     if (typeof value === 'boolean' || typeof value === 'number') {
-      return `${+(value as number)}`;
+      const valueString = `${+(value as number)}`;
+      return mm.sql`${valueString}`;
     }
     if (typeof value === 'string') {
       return escapeString(value);
     }
     if (value instanceof mm.SQL) {
-      const io = sqlIO(value, this);
-      return io.toSQL(table);
+      return value;
     }
     throw new Error(`Unsupported type of object "${toTypeString(value)}"`);
   }
@@ -78,8 +78,8 @@ export class MySQL extends Dialect {
     return extras.join(' ');
   }
 
-  as(sql: string, name: string): string {
-    return `${sql} AS ${this.encodeName(name)}`;
+  as(sql: mm.SQL, name: string): mm.SQL {
+    return mm.sql`${sql} AS ${this.encodeName(name)}`;
   }
 
   sqlCall(type: mm.SQLCallType): string {

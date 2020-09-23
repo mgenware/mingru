@@ -37,8 +37,7 @@ export class InsertIOProcessor {
     let sql = 'INSERT INTO ';
     const { action, dialect } = this;
     const [table] = action.ensureInitialized();
-    const fetchInsertedID =
-      action.ensureOneRowAffected && !!table.__pkAIs.length;
+    const fetchInsertedID = action.ensureOneRowAffected && !!table.__pkAIs.length;
 
     // Table
     const tableSQL = this.handleFrom(table);
@@ -46,24 +45,18 @@ export class InsertIOProcessor {
 
     // Setters
     utils.validateSetters(action.setters, table);
-    const setters = SetterIO.fromAction(
-      action,
-      dialect,
-      action.allowUnsetColumns,
-    );
+    const setters = SetterIO.fromAction(action, dialect, action.allowUnsetColumns);
     const colNames = setters.map((s) => dialect.encodeColumnName(s.col));
     sql += ` (${colNames.join(', ')})`;
 
     // Values
-    const colValues = setters.map((s) => s.sql.toSQL(table));
+    const colValues = setters.map((s) => s.sql.toSQLString(table));
     sql += ` VALUES (${colValues.join(', ')})`;
 
     // funcArgs
-    const funcArgs = settersToVarList(
-      `Func args of action ${action.__name}`,
-      setters,
-      [defs.dbxQueryableVar],
-    );
+    const funcArgs = settersToVarList(`Func args of action ${action.__name}`, setters, [
+      defs.dbxQueryableVar,
+    ]);
     const execArgs = new VarList(`Exec args of action ${action.__name}`);
     // Skip the first param, which is queryable.
     execArgs.merge(funcArgs.list.slice(1));
