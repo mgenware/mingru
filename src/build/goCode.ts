@@ -2,6 +2,7 @@ import * as mm from 'mingru-models';
 import { JSONEncodingStyle } from './buildOptions';
 import VarInfo, { getAtomicTypeInfo } from '../lib/varInfo';
 import { StringSegment } from '../dialect';
+import CodeStringBuilder from '../lib/codeStringBuilder';
 
 export class FuncSignature {
   constructor(
@@ -163,7 +164,15 @@ export function makeStringLiteral(s: string): string {
 }
 
 export function makeStringFromSegments(list: StringSegment[]): string {
-  return list.map((s) => (typeof s === 'string' ? makeStringLiteral(s) : s.code)).join('+');
+  const builder = new CodeStringBuilder();
+  for (const segment of list) {
+    if (typeof segment === 'string') {
+      builder.addString(segment);
+    } else {
+      builder.addCode(segment.code);
+    }
+  }
+  return builder.finish();
 }
 
 export class ImportList {

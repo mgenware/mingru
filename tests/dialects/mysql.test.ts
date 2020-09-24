@@ -69,14 +69,11 @@ it('DT', () => {
 
 it('DT (not supported)', () => {
   const props = new mm.ColumnType(['type1', 'type2']);
-  itThrows(
-    () => dialect.colTypeToGoType(props),
-    'Type not supported: [type1,type2]',
-  );
+  itThrows(() => dialect.colTypeToGoType(props), 'Type not supported: [type1,type2]');
 });
 
 it('as', () => {
-  eq(dialect.as('abc', 'def'), 'abc AS `def`');
+  eq(dialect.as(mm.sql`abc`, 'def'), 'abc AS `def`');
 });
 
 it('SQL calls', () => {
@@ -118,10 +115,7 @@ it('objToSQL', () => {
   // undefined
   itThrows(() => dialect.objToSQL(undefined, user), 'value is undefined');
   // Others
-  itThrows(
-    () => dialect.objToSQL([], user),
-    'Unsupported type of object "Array"',
-  );
+  itThrows(() => dialect.objToSQL([], user), 'Unsupported type of object "Array"');
 });
 
 it('colToSQLType', () => {
@@ -146,12 +140,6 @@ it('colToSQLType', () => {
   // NULL
   eq(dialect.colToSQLType(mm.int().nullable), 'INT NULL DEFAULT NULL');
   // Default value
-  eq(
-    dialect.colToSQLType(mm.int().default(43).nullable),
-    'INT NULL DEFAULT 43',
-  );
-  eq(
-    dialect.colToSQLType(mm.varChar(23).default('oo').nullable),
-    "VARCHAR(23) NULL DEFAULT 'oo'",
-  );
+  eq(dialect.colToSQLType(mm.int().default(43).nullable), 'INT NULL DEFAULT 43');
+  eq(dialect.colToSQLType(mm.varChar(23).default('oo').nullable), "VARCHAR(23) NULL DEFAULT 'oo'");
 });

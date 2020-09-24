@@ -2,7 +2,7 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import toTypeString from 'to-type-string';
-import { Dialect, StringSegment } from '../dialect';
+import { Dialect } from '../dialect';
 import { AtomicTypeInfo, CompoundTypeInfo, TypeInfo } from '../lib/varInfo';
 
 // eslint-disable-next-line
@@ -52,30 +52,32 @@ export class MySQL extends Dialect {
     if (colType.length) {
       typeString = `${typeString}(${colType.length})`;
     }
-    const extras: StringSegment[] = [typeString];
+
+    const builder = new mm.SQLBuilder();
+    builder.push(typeString);
     if (colType.unsigned) {
-      extras.push('UNSIGNED');
+      builder.pushWithSpace('UNSIGNED');
     }
-    extras.push(colType.nullable ? 'NULL' : 'NOT NULL');
+    builder.pushWithSpace(colType.nullable ? 'NULL' : 'NOT NULL');
     if (!col.__isNoDefaultOnCSQL) {
       const defValue = col.__defaultValue;
       if (defValue && defValue instanceof mm.SQL === false) {
-        extras.push('DEFAULT');
+        builder.pushWithSpace('DEFAULT');
 
         // MySQL doesn't allow dynamic value as default value, we simply ignore SQL expr here.
-        extras.push(...this.objToSQL(defValue, col.getSourceTable()));
+        builder.pushWithSpace(this.objToSQL(defValue, col.getSourceTable()));
       } else if (colType.nullable) {
-        extras.push('DEFAULT');
-        extras.push('NULL');
+        builder.pushWithSpace('DEFAULT');
+        builder.pushWithSpace('NULL');
       }
     }
     if (colType.unique) {
-      extras.push('UNIQUE');
+      builder.pushWithSpace('UNIQUE');
     }
     if (colType.autoIncrement) {
-      extras.push('AUTO_INCREMENT');
+      builder.pushWithSpace('AUTO_INCREMENT');
     }
-    return extras.join(' ');
+    return builder.toSQL();
   }
 
   as(sql: mm.SQL, name: string): mm.SQL {

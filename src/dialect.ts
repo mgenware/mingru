@@ -22,7 +22,7 @@ export class Dialect {
     throw new Error('Not implemented yet');
   }
 
-  colToSQLType(_: mm.Column): string {
+  colToSQLType(_: mm.Column): mm.SQL {
     throw new Error('Not implemented yet');
   }
 

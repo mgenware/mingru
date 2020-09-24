@@ -6,6 +6,7 @@ import Dialect, { StringSegment } from '../dialect';
 import VarList from '../lib/varList';
 import VarInfo from '../lib/varInfo';
 import { VarInfoBuilder } from '../lib/varInfoHelper';
+import { makeStringFromSegments } from '../build/goCode';
 
 export class SQLIO {
   get vars(): VarInfo[] {
@@ -25,6 +26,10 @@ export class SQLIO {
     throwIfFalsy(sql, 'sql');
     throwIfFalsy(varList, 'varList');
     throwIfFalsy(code, 'code');
+  }
+
+  getCodeString(): string {
+    return makeStringFromSegments(this.code);
   }
 }
 

@@ -11,6 +11,7 @@ import VarList from '../lib/varList';
 import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
 import { VarInfoBuilder } from '../lib/varInfoHelper';
+import { makeStringFromSegments } from '../build/goCode';
 
 export class JoinIO {
   constructor(
@@ -52,7 +53,7 @@ export class SelectedColumnIO {
     resultType: mm.ColumnType | null,
     rawSQL: mm.SQL,
     dialect: Dialect,
-    sourceTable: mm.Table,
+    sourceTable: mm.Table | null,
     hasJoin: boolean,
     opt?: SQLIOBuilderOption,
   ): SelectedColumnIO {
@@ -107,12 +108,16 @@ export class SelectIO extends ActionIO {
     throwIfFalsy(action, 'action');
     throwIfFalsy(sql, 'sql');
   }
+
+  getSQLCode(): string {
+    return makeStringFromSegments(this.sql);
+  }
 }
 
 // Used internally in `SelectProcessor` to save an SQL of a selected column associated
 // with an alias.
 class ColumnSQL {
-  constructor(public sql: StringSegment[], public inputName: string, public alias: string | null) {}
+  constructor(public sql: mm.SQL, public inputName: string, public alias: string | null) {}
 }
 
 export class SelectIOProcessor {
@@ -176,7 +181,12 @@ export class SelectIOProcessor {
         selectedNames.add(selIO.varName);
         colIOs.push(selIO);
       }
-      sql.push(colIOs.map((c) => c.sql(dialect, this.hasJoin)).join(', '));
+      colIOs.forEach((col, i) => {
+        sql.push(...col.valueSQL.code);
+        if (i !== colIOs.length - 1) {
+          sql.push(', ');
+        }
+      });
     } else {
       sql.push('*');
     }
@@ -230,7 +240,7 @@ export class SelectIOProcessor {
         if (col.desc) {
           orderBySQL.push(' DESC');
         }
-        if (i <= orderByColumns.length - 1) {
+        if (i !== orderByColumns.length - 1) {
           sql.push(', ');
         }
       });
@@ -529,13 +539,17 @@ export class SelectIOProcessor {
       const colSQL = this.handleColumn(embeddedCol, rawCol ? rawCol.selectedName || null : null);
       if (!rawCol) {
         // Pure column-based selected column
-        return new SelectedColumnIO(
+        return SelectedColumnIO.create(
           sCol,
-          colSQL.sql,
           colSQL.inputName,
           colSQL.alias,
           embeddedCol,
           resultType,
+          // `ColumnSQL.sql` is handwritten, no need validation and element post-processing.
+          colSQL.sql,
+          dialect,
+          null,
+          false,
         );
       }
 
@@ -545,11 +559,15 @@ export class SelectIOProcessor {
         // Use RawColumn.selectedName as alias
         return SelectedColumnIO.create(
           sCol,
-          colSQL.sql,
           colSQL.inputName,
           rawCol.selectedName || null,
           embeddedCol,
           resultType,
+          // `ColumnSQL.sql` is handwritten, no need validation and element post-processing.
+          colSQL.sql,
+          dialect,
+          null,
+          false,
         );
       }
 
@@ -573,7 +591,8 @@ export class SelectIOProcessor {
         {
           elementHandler: (element) => {
             if (element.value === embeddedCol) {
-              return colSQL.sql;
+              // `ColumnSQL.sql` is handwritten, no need validation and element post-processing.
+              return sqlIO(colSQL.sql, dialect, null).code;
             }
             return null;
           },
@@ -668,17 +687,17 @@ export class SelectIOProcessor {
           `Internal error: unexpected empty mirroredColumn in joined column "${toTypeString(col)}"`,
         );
       }
-      const sql = [`${e(joinIO.tableAlias)}.${e(col.__mirroredColumn.getDBName())}`];
+      const sql = mm.sql`${e(joinIO.tableAlias)}.${e(col.__mirroredColumn.getDBName())}`;
       return new ColumnSQL(sql, inputName, alias);
     }
-    // Normal column
-    const sql: StringSegment[] = [];
+
+    // Column without a join.
+    let sql = mm.sql`${e(col.getDBName())}`;
     if (this.hasJoin) {
       // Each column must have a prefix in a SQL with joins
       // NOTE: use table DBName as alias
-      sql.push(`${e(this.localTableAlias(colTable))}.`);
+      sql = mm.sql`${e(this.localTableAlias(colTable))}.${sql}`;
     }
-    sql.push(e(col.getDBName()));
     return new ColumnSQL(sql, inputName, alias);
   }
 

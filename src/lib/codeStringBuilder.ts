@@ -3,7 +3,7 @@
 // Used to build string segments, e.g. "abc"+code+"cde".
 // It also ensures multiple consecutive calls to `addString` will have a single
 // string literal in generated code.
-export class CodeStringBuilder {
+export default class CodeStringBuilder {
   private code = '';
   private pendingString = '';
   private isSealed = false;

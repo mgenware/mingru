@@ -21,7 +21,7 @@ it('Select', () => {
   const io = mr.selectIO(v, dialect);
 
   assert.ok(io instanceof mr.SelectIO);
-  eq(io.sql, 'SELECT `id`, `url_name` FROM `user`');
+  eq(io.getSQLCode(), '"SELECT `id`, `url_name` FROM `user`"');
   eq(io.where, null);
 });
 
@@ -29,16 +29,14 @@ it('Where', () => {
   class UserTA extends mm.TableActions {
     t = mm
       .select(user.id, user.url_name)
-      .whereSQL(
-        mm.sql`${user.id} = 1 ${user.id.toInput()} ${user.id.toInput()}`,
-      );
+      .whereSQL(mm.sql`${user.id} = 1 ${user.id.toInput()} ${user.id.toInput()}`);
   }
   const userTA = mm.tableActions(user, UserTA);
   const v = userTA.t;
   const io = mr.selectIO(v, dialect);
 
   assert.ok(io.where instanceof mr.SQLIO);
-  eq(io.sql, 'SELECT `id`, `url_name` FROM `user` WHERE `id` = 1 ? ?');
+  eq(io.getSQLCode(), '"SELECT `id`, `url_name` FROM `user` WHERE `id` = 1 ? ?"');
 });
 
 it('Where and inputs', () => {
@@ -46,9 +44,10 @@ it('Where and inputs', () => {
     t = mm
       .select(user.id, user.url_name)
       .whereSQL(
-        mm.sql`${user.id} = ${mm.input(user.id)} && ${
-          user.url_name
-        } = ${mm.input({ name: 'string', defaultValue: null }, 'userName')}`,
+        mm.sql`${user.id} = ${mm.input(user.id)} && ${user.url_name} = ${mm.input(
+          { name: 'string', defaultValue: null },
+          'userName',
+        )}`,
       );
   }
   const userTA = mm.tableActions(user, UserTA);
@@ -56,10 +55,7 @@ it('Where and inputs', () => {
   const io = mr.selectIO(v, dialect);
 
   assert.ok(io.where instanceof mr.SQLIO);
-  eq(
-    io.sql,
-    'SELECT `id`, `url_name` FROM `user` WHERE `id` = ? && `url_name` = ?',
-  );
+  eq(io.getSQLCode(), '"SELECT `id`, `url_name` FROM `user` WHERE `id` = ? && `url_name` = ?"');
 });
 
 it('Basic join', () => {
@@ -110,10 +106,7 @@ it('Join a table with custom table name', () => {
 
 it('Join a table with custom column name', () => {
   class PostTA extends mm.TableActions {
-    t = mm.select(
-      post.user_id,
-      post.user_id.join(rpl, rpl.custom_id).to_user_id,
-    );
+    t = mm.select(post.user_id, post.user_id.join(rpl, rpl.custom_id).to_user_id);
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
@@ -137,9 +130,7 @@ it('3-table joins and WHERE', () => {
         cmt.target_id.join(post).user_id.join(user).id.as('TUID2'),
       )
       .whereSQL(
-        mm.sql`${cmt.user_id} = 1 AND ${
-          cmt.target_id.join(post).title
-        } = 2 | ${cmt.target_id
+        mm.sql`${cmt.user_id} = 1 AND ${cmt.target_id.join(post).title} = 2 | ${cmt.target_id
           .join(post)
           .user_id.join(user)
           .url_name.isEqualToInput()} | ${cmt.id.isEqualToInput()} | ${cmt.target_id.isEqualToInput()}`,
@@ -217,19 +208,14 @@ it('Duplicate selected names', () => {
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
-  itThrows(
-    () => mr.selectIO(v, dialect),
-    'The selected column name "title" already exists',
-  );
+  itThrows(() => mr.selectIO(v, dialect), 'The selected column name "title" already exists');
 });
 
 it('getInputs', () => {
   class UserTA extends mm.TableActions {
     t = mm
       .select(user.id, user.url_name)
-      .whereSQL(
-        mm.sql`${user.id.toInput()} ${user.url_name.toInput()} ${user.id.toInput()}`,
-      );
+      .whereSQL(mm.sql`${user.id.toInput()} ${user.url_name.toInput()} ${user.id.toInput()}`);
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
@@ -254,9 +240,7 @@ it('getReturns', () => {
   class UserTA extends mm.TableActions {
     t = mm
       .select(user.id)
-      .whereSQL(
-        mm.sql`${user.id.toInput()} ${post.title.toInput()} ${user.id.toInput()}`,
-      );
+      .whereSQL(mm.sql`${user.id.toInput()} ${post.title.toInput()} ${user.id.toInput()}`);
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
@@ -277,8 +261,8 @@ it('GROUP BY and HAVING', () => {
   const v = ta.t;
   const io = mr.selectIO(v, mr.mysql);
   eq(
-    io.sql,
-    'SELECT YEAR(`datetime`) AS `year`, SUM(`cmt_c`) AS `total` FROM `db_post` WHERE `id` = ? GROUP BY `year`, `total` HAVING `year` > 2010 AND `total` > 100',
+    io.getSQLCode(),
+    '"SELECT YEAR(`datetime`) AS `year`, SUM(`cmt_c`) AS `total` FROM `db_post` WHERE `id` = ? GROUP BY `year`, `total` HAVING `year` > 2010 AND `total` > 100"',
   );
 });
 
