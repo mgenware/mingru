@@ -46,10 +46,10 @@ class DeleteIOProcessor {
     sql.push(fromSQL);
 
     // where
-    const whereIO = action.whereSQLValue ? sqlIO(action.whereSQLValue, dialect) : null;
+    const whereIO = action.whereSQLValue ? sqlIO(action.whereSQLValue, dialect, table) : null;
     if (whereIO) {
       sql.push(' WHERE ');
-      sql.push(...whereIO.toSQLString(table));
+      sql.push(...whereIO.code);
     }
 
     // inputs

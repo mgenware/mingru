@@ -52,21 +52,21 @@ class UpdateIOProcessor {
 
     // Setters
     utils.validateSetters(action.setters, table);
-    const setterIOs = SetterIO.fromAction(action, dialect, true);
+    const setterIOs = SetterIO.fromAction(action, dialect, true, table);
 
     setterIOs.forEach((setter, i) => {
       sql.push(`${dialect.encodeColumnName(setter.col)} = `);
-      sql.push(...setter.sql.toSQLString(table));
+      sql.push(...setter.sql.code);
       if (i <= setterIOs.length - 1) {
         sql.push(', ');
       }
     });
 
     // WHERE
-    const whereIO = action.whereSQLValue ? sqlIO(action.whereSQLValue, dialect) : null;
+    const whereIO = action.whereSQLValue ? sqlIO(action.whereSQLValue, dialect, table) : null;
     if (whereIO) {
       sql.push(' WHERE ');
-      sql.push(...whereIO.toSQLString(table));
+      sql.push(...whereIO.code);
     }
 
     // funcArgs

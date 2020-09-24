@@ -1,6 +1,6 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import Dialect from '../dialect';
+import Dialect, { StringSegment } from '../dialect';
 import { settersToVarList, SetterIO } from './setterIO';
 import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
@@ -14,7 +14,7 @@ export class InsertIO extends ActionIO {
   constructor(
     dialect: Dialect,
     public action: mm.InsertAction,
-    public sql: string,
+    public sql: StringSegment[],
     public setters: SetterIO[],
     public fetchInsertedID: boolean,
     funcArgs: VarList,
@@ -34,27 +34,36 @@ export class InsertIOProcessor {
   }
 
   convert(): InsertIO {
-    let sql = 'INSERT INTO ';
+    const sql: StringSegment[] = ['INSERT INTO '];
     const { action, dialect } = this;
     const [table] = action.ensureInitialized();
     const fetchInsertedID = action.ensureOneRowAffected && !!table.__pkAIs.length;
 
     // Table
     const tableSQL = this.handleFrom(table);
-    sql += tableSQL;
+    sql.push(...tableSQL);
 
     // Setters
     utils.validateSetters(action.setters, table);
-    const setters = SetterIO.fromAction(action, dialect, action.allowUnsetColumns);
-    const colNames = setters.map((s) => dialect.encodeColumnName(s.col));
-    sql += ` (${colNames.join(', ')})`;
+    const setterIOs = SetterIO.fromAction(action, dialect, action.allowUnsetColumns, table);
+    const colNames = setterIOs.map((s) => dialect.encodeColumnName(s.col));
+    sql.push(` (${colNames.join(', ')})`);
 
     // Values
-    const colValues = setters.map((s) => s.sql.toSQLString(table));
-    sql += ` VALUES (${colValues.join(', ')})`;
+    sql.push(' VALUES (');
+
+    setterIOs.forEach((setter, i) => {
+      sql.push(...setter.sql.code);
+      if (i <= setterIOs.length - 1) {
+        sql.push(', ');
+      }
+    });
+
+    // Push the ending ) for VALUES.
+    sql.push(')');
 
     // funcArgs
-    const funcArgs = settersToVarList(`Func args of action ${action.__name}`, setters, [
+    const funcArgs = settersToVarList(`Func args of action ${action.__name}`, setterIOs, [
       defs.dbxQueryableVar,
     ]);
     const execArgs = new VarList(`Exec args of action ${action.__name}`);
@@ -71,7 +80,7 @@ export class InsertIOProcessor {
       dialect,
       action,
       sql,
-      setters,
+      setterIOs,
       fetchInsertedID,
       funcArgs,
       execArgs,
@@ -79,9 +88,9 @@ export class InsertIOProcessor {
     );
   }
 
-  private handleFrom(table: mm.Table): string {
+  private handleFrom(table: mm.Table): StringSegment[] {
     const e = this.dialect.encodeName;
-    return `${e(table.getDBName())}`;
+    return [`${e(table.getDBName())}`];
   }
 }
 

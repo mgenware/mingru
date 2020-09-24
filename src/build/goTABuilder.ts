@@ -452,7 +452,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const { fetchInsertedID } = io;
     let code = '';
 
-    const sqlLiteral = go.makeStringLiteral(io.sql);
+    const sqlLiteral = go.makeStringFromSegments(io.sql);
     code += `${fetchInsertedID ? 'result' : '_'}, err := ${
       defs.queryableParam
     }.Exec(${this.getExecArgsCode(sqlLiteral, io.execArgs.list)})

@@ -1,6 +1,6 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import { SQLIO, sqlIO } from './sqlIO';
+import { SQLIO, sqlIO, SQLIOBuilderOption } from './sqlIO';
 import VarList from '../lib/varList';
 import Dialect from '../dialect';
 import VarInfo from '../lib/varInfo';
@@ -11,6 +11,8 @@ export class SetterIO {
     action: mm.CoreUpdateAction,
     dialect: Dialect,
     allowUnsetValues: boolean,
+    sourceTable: mm.Table | null,
+    opt?: SQLIOBuilderOption,
   ): SetterIO[] {
     const [table] = action.ensureInitialized();
     const { setters: actionSetters } = action;
@@ -22,7 +24,12 @@ export class SetterIO {
       // thus no need the table argument as it's not an SQL object.
       return new SetterIO(
         key,
-        sqlIO(value instanceof mm.SQL ? value : mm.sql`${dialect.objToSQL(value, null)}`, dialect),
+        sqlIO(
+          value instanceof mm.SQL ? value : mm.sql`${dialect.objToSQL(value, null)}`,
+          dialect,
+          sourceTable,
+          opt,
+        ),
       );
     });
 
@@ -44,7 +51,7 @@ export class SetterIO {
           continue;
         }
         isValueSet = true;
-        res.push(this.getAutoSetterValue(col, autoSetter, table, dialect));
+        res.push(this.getAutoSetterValue(col, autoSetter, table, dialect, sourceTable, opt));
         // If value is set, no need to check other auto setter values.
         break;
       }
@@ -61,9 +68,11 @@ export class SetterIO {
     autoSetter: mm.AutoSetterType,
     table: mm.Table,
     dialect: Dialect,
+    sourceTable: mm.Table | null,
+    opt?: SQLIOBuilderOption,
   ): SetterIO {
     if (autoSetter === mm.AutoSetterType.input) {
-      return new SetterIO(col, sqlIO(mm.sql`${col.toInput()}`, dialect));
+      return new SetterIO(col, sqlIO(mm.sql`${col.toInput()}`, dialect, sourceTable, opt));
     }
     if (autoSetter === mm.AutoSetterType.default) {
       let value: mm.SQL;
@@ -87,7 +96,7 @@ export class SetterIO {
         value = dialect.objToSQL(def, table);
       }
 
-      return new SetterIO(col, sqlIO(value, dialect));
+      return new SetterIO(col, sqlIO(value, dialect, sourceTable, opt));
     }
     throw new Error(`Unsupported auto setter type "${autoSetter}"`);
   }

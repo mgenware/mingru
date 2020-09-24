@@ -2,9 +2,9 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import toTypeString from 'to-type-string';
-import { Dialect } from '../dialect';
+import { Dialect, StringSegment } from '../dialect';
 import { AtomicTypeInfo, CompoundTypeInfo, TypeInfo } from '../lib/varInfo';
-import { sqlIO } from '../io/sqlIO';
+
 // eslint-disable-next-line
 const escapeString = require('sql-escape-string');
 
@@ -16,7 +16,7 @@ export class MySQL extends Dialect {
     return '`' + name + '`';
   }
 
-  objToSQL(value: unknown, table: mm.Table | null): mm.SQL {
+  objToSQL(value: unknown, _table: mm.Table | null): mm.SQL {
     if (value === undefined) {
       throw new Error('value is undefined');
     }
@@ -45,14 +45,14 @@ export class MySQL extends Dialect {
     return typeInfo;
   }
 
-  colToSQLType(col: mm.Column): string {
+  colToSQLType(col: mm.Column): mm.SQL {
     throwIfFalsy(col, 'col');
     const colType = col.__type;
     let typeString = this.absoluteSQLType(colType);
     if (colType.length) {
       typeString = `${typeString}(${colType.length})`;
     }
-    const extras = [typeString];
+    const extras: StringSegment[] = [typeString];
     if (colType.unsigned) {
       extras.push('UNSIGNED');
     }
@@ -62,8 +62,8 @@ export class MySQL extends Dialect {
       if (defValue && defValue instanceof mm.SQL === false) {
         extras.push('DEFAULT');
 
-        // MySQL doesn't allow dynamic value as default value, we simply ignore SQL expr here
-        extras.push(this.objToSQL(defValue, col.getSourceTable()));
+        // MySQL doesn't allow dynamic value as default value, we simply ignore SQL expr here.
+        extras.push(...this.objToSQL(defValue, col.getSourceTable()));
       } else if (colType.nullable) {
         extras.push('DEFAULT');
         extras.push('NULL');
