@@ -12,6 +12,7 @@ import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
 import { VarInfoBuilder } from '../lib/varInfoHelper';
 import { makeStringFromSegments } from '../build/goCode';
+import { forEachWithSlots } from '../lib/arrayUtils';
 
 export class JoinIO {
   constructor(
@@ -57,7 +58,7 @@ export class SelectedColumnIO {
     hasJoin: boolean,
     opt?: SQLIOBuilderOption,
   ): SelectedColumnIO {
-    rawSQL = hasJoin ? dialect.as(rawSQL, alias || varName) : rawSQL;
+    rawSQL = hasJoin || alias ? dialect.as(rawSQL, alias || varName) : rawSQL;
     const sql = sqlIO(rawSQL, dialect, sourceTable, opt);
     return new SelectedColumnIO(selectedColumn, sql, varName, alias, column, resultType);
   }
@@ -181,12 +182,13 @@ export class SelectIOProcessor {
         selectedNames.add(selIO.varName);
         colIOs.push(selIO);
       }
-      colIOs.forEach((col, i) => {
-        sql.push(...col.valueSQL.code);
-        if (i !== colIOs.length - 1) {
-          sql.push(', ');
-        }
-      });
+      forEachWithSlots(
+        colIOs,
+        (col) => {
+          sql.push(...col.valueSQL.code);
+        },
+        () => sql.push(', '),
+      );
     } else {
       sql.push('*');
     }
@@ -233,32 +235,31 @@ export class SelectIOProcessor {
 
     // ORDER BY
     if (orderByColumns.length) {
-      const orderBySQL: StringSegment[] = [' ORDER BY '];
+      sql.push(' ORDER BY ');
 
-      orderByColumns.forEach((col, i) => {
-        orderBySQL.push(...this.getOrderByColumnSQL(col));
-        if (col.desc) {
-          orderBySQL.push(' DESC');
-        }
-        if (i !== orderByColumns.length - 1) {
-          sql.push(', ');
-        }
-      });
-
-      sql.push(...orderBySQL);
+      forEachWithSlots(
+        orderByColumns,
+        (col) => {
+          sql.push(...this.getOrderByColumnSQL(col));
+          if (col.desc) {
+            sql.push(' DESC');
+          }
+        },
+        () => sql.push(', '),
+      );
     }
 
     // GROUP BY
     if (groupByColumns.length) {
-      const groupBySQL: StringSegment[] = [' GROUP BY '];
+      sql.push(' GROUP BY ');
 
-      groupByColumns.forEach((col, i) => {
-        groupBySQL.push(dialect.encodeName(col));
-        if (i <= groupByColumns.length - 1) {
-          sql.push(', ');
-        }
-      });
-      sql.push(...groupBySQL);
+      forEachWithSlots(
+        groupByColumns,
+        (col) => {
+          sql.push(dialect.encodeName(col));
+        },
+        () => sql.push(', '),
+      );
     }
 
     // HAVING
@@ -538,7 +539,7 @@ export class SelectIOProcessor {
     if (embeddedCol) {
       const colSQL = this.handleColumn(embeddedCol, rawCol ? rawCol.selectedName || null : null);
       if (!rawCol) {
-        // Pure column-based selected column
+        // Plain columns like `post.id`.
         return SelectedColumnIO.create(
           sCol,
           colSQL.inputName,
@@ -549,14 +550,14 @@ export class SelectIOProcessor {
           colSQL.sql,
           dialect,
           null,
-          false,
+          this.hasJoin,
         );
       }
 
       const rawColCore = rawCol.core;
-      // RawColumn with .core is a column (a renamed column)
+      // RawColumn with `.core` is a column (a renamed column) such as `post.id.as('newName')`.
       if (rawColCore instanceof mm.Column) {
-        // Use RawColumn.selectedName as alias
+        // Use `RawColumn.selectedName` as the alias of this column.
         return SelectedColumnIO.create(
           sCol,
           colSQL.inputName,
@@ -567,7 +568,7 @@ export class SelectIOProcessor {
           colSQL.sql,
           dialect,
           null,
-          false,
+          this.hasJoin,
         );
       }
 
@@ -674,9 +675,9 @@ export class SelectIOProcessor {
     const { dialect, action } = this;
     const e = dialect.encodeName;
     const inputName = alias || col.inputName();
-    // Make sure column is initialized
+    // Make sure column is initialized.
     const [colTable] = col.ensureInitialized();
-    // Make sure column is from current table
+    // Make sure column is from current table.
     const [sourceTable] = action.ensureInitialized();
     col.checkSourceTable(sourceTable);
 
@@ -684,7 +685,9 @@ export class SelectIOProcessor {
       const joinIO = this.handleJoinRecursively(col);
       if (!col.__mirroredColumn) {
         throw new Error(
-          `Internal error: unexpected empty mirroredColumn in joined column "${toTypeString(col)}"`,
+          `Internal error: unexpected empty \`mirroredColumn\` in joined column "${toTypeString(
+            col,
+          )}"`,
         );
       }
       const sql = mm.sql`${e(joinIO.tableAlias)}.${e(col.__mirroredColumn.getDBName())}`;
@@ -694,8 +697,8 @@ export class SelectIOProcessor {
     // Column without a join.
     let sql = mm.sql`${e(col.getDBName())}`;
     if (this.hasJoin) {
-      // Each column must have a prefix in a SQL with joins
-      // NOTE: use table DBName as alias
+      // Each column must have a prefix in a SQL with joins.
+      // NOTE: use table `DBName` as alias.
       sql = mm.sql`${e(this.localTableAlias(colTable))}.${sql}`;
     }
     return new ColumnSQL(sql, inputName, alias);

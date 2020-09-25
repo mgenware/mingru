@@ -17,7 +17,7 @@ it('Insert inputs', () => {
   const io = mr.insertIO(v, dialect);
 
   assert.ok(io instanceof mr.InsertIO);
-  eq(io.sql, 'INSERT INTO `db_post` (`title`, `user_id`) VALUES (?, ?)');
+  eq(io.getSQLCode(), '"INSERT INTO `db_post` (`title`, `user_id`) VALUES (?, ?)"');
 });
 
 it('Insert inputs and values', () => {
@@ -33,8 +33,8 @@ it('Insert inputs and values', () => {
 
   assert.ok(io instanceof mr.InsertIO);
   eq(
-    io.sql,
-    'INSERT INTO `db_post` (`title`, `user_id`, `datetime`) VALUES (?, ?, NOW())',
+    io.getSQLCode(),
+    '"INSERT INTO `db_post` (`title`, `user_id`, `datetime`) VALUES (?, ?, NOW())"',
   );
 });
 
@@ -107,8 +107,5 @@ it('setDefaults', () => {
   const v = postTA.t;
   const io = mr.insertIO(v, dialect);
 
-  eq(
-    io.sql,
-    "INSERT INTO `post` (`title`, `content`, `datetime`) VALUES (?, '', UTC_TIMESTAMP())",
-  );
+  eq(io.sql, "INSERT INTO `post` (`title`, `content`, `datetime`) VALUES (?, '', UTC_TIMESTAMP())");
 });

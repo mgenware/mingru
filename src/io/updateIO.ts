@@ -9,6 +9,7 @@ import VarInfo from '../lib/varInfo';
 import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
 import * as utils from '../lib/stringUtils';
+import { forEachWithSlots } from '../lib/arrayUtils';
 
 export class UpdateIO extends ActionIO {
   constructor(
@@ -54,13 +55,14 @@ class UpdateIOProcessor {
     utils.validateSetters(action.setters, table);
     const setterIOs = SetterIO.fromAction(action, dialect, true, table);
 
-    setterIOs.forEach((setter, i) => {
-      sql.push(`${dialect.encodeColumnName(setter.col)} = `);
-      sql.push(...setter.sql.code);
-      if (i <= setterIOs.length - 1) {
-        sql.push(', ');
-      }
-    });
+    forEachWithSlots(
+      setterIOs,
+      (setter) => {
+        sql.push(`${dialect.encodeColumnName(setter.col)} = `);
+        sql.push(...setter.sql.code);
+      },
+      () => sql.push(', '),
+    );
 
     // WHERE
     const whereIO = action.whereSQLValue ? sqlIO(action.whereSQLValue, dialect, table) : null;

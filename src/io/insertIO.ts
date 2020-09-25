@@ -7,6 +7,8 @@ import VarList from '../lib/varList';
 import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
 import * as utils from '../lib/stringUtils';
+import { forEachWithSlots } from '../lib/arrayUtils';
+import { makeStringFromSegments } from '../build/goCode';
 
 export class InsertIO extends ActionIO {
   returnMember: ActionIO | undefined;
@@ -24,6 +26,10 @@ export class InsertIO extends ActionIO {
     super(dialect, action, funcArgs, execArgs, returnValues);
     throwIfFalsy(action, 'action');
     throwIfFalsy(sql, 'sql');
+  }
+
+  getSQLCode(): string {
+    return makeStringFromSegments(this.sql);
   }
 }
 
@@ -52,12 +58,13 @@ export class InsertIOProcessor {
     // Values
     sql.push(' VALUES (');
 
-    setterIOs.forEach((setter, i) => {
-      sql.push(...setter.sql.code);
-      if (i <= setterIOs.length - 1) {
-        sql.push(', ');
-      }
-    });
+    forEachWithSlots(
+      setterIOs,
+      (setter) => {
+        sql.push(...setter.sql.code);
+      },
+      () => sql.push(', '),
+    );
 
     // Push the ending ) for VALUES.
     sql.push(')');

@@ -18,7 +18,7 @@ it('Columns and escape strings', () => {
 it('SQL calls', () => {
   const sql = mm.sql`${post.datetime} = ${mm.localDatetimeNow()}`;
   const io = mr.sqlIO(sql, dialect, post);
-  eq(io.getCodeString(), '`datetime` = NOW()');
+  eq(io.getCodeString(), '`"datetime` = NOW()"');
 });
 
 it('toSQL(sourceTable)', () => {

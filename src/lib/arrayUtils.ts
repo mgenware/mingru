@@ -1,10 +1,29 @@
-export function joinArrayWithItem<T>(array: T[], item: T): T[] {
-  const res: T[] = [];
+export function forEachWithSlots<T>(
+  array: T[],
+  callback: (item: T) => void,
+  slotCallback: () => void,
+) {
+  if (!array) {
+    return;
+  }
+  if (array.length === 1) {
+    callback(array[0]);
+    return;
+  }
   array.forEach((element, i) => {
-    res.push(element);
+    callback(element);
     if (i !== array.length - 1) {
-      res.push(item);
+      slotCallback();
     }
   });
+}
+
+export function join2DArrays<T>(matrix: T[][], item: T): T[] {
+  const res: T[] = [];
+  forEachWithSlots(
+    matrix,
+    (array) => res.push(...array),
+    () => res.push(item),
+  );
   return res;
 }

@@ -7,6 +7,7 @@ import VarList from '../lib/varList';
 import VarInfo from '../lib/varInfo';
 import { VarInfoBuilder } from '../lib/varInfoHelper';
 import { makeStringFromSegments } from '../build/goCode';
+import { join2DArrays } from '../lib/arrayUtils';
 
 export class SQLIO {
   get vars(): VarInfo[] {
@@ -84,9 +85,12 @@ function handleElement(
       const call = element.toCall();
       const name = dialect.sqlCall(call.type);
       const params = call.params.length
-        ? call.params
-            .map((p) => getSQLCode(p, dialect, sourceTable, elementHandler, actionHandler))
-            .join(', ')
+        ? join2DArrays(
+            call.params.map((p) =>
+              getSQLCode(p, dialect, sourceTable, elementHandler, actionHandler),
+            ),
+            ', ',
+          )
         : '';
       return [`${name}(${params})`];
     }
