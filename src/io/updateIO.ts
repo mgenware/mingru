@@ -10,6 +10,7 @@ import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
 import * as utils from '../lib/stringUtils';
 import { forEachWithSlots } from '../lib/arrayUtils';
+import { makeStringFromSegments } from '../build/goCode';
 
 export class UpdateIO extends ActionIO {
   constructor(
@@ -27,6 +28,10 @@ export class UpdateIO extends ActionIO {
     throwIfFalsy(action, 'action');
     throwIfFalsy(sql, 'sql');
     throwIfFalsy(setters, 'setters');
+  }
+
+  getSQLCode(): string {
+    return makeStringFromSegments(this.sql);
   }
 }
 

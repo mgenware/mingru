@@ -7,6 +7,7 @@ import VarList from '../lib/varList';
 import VarInfo from '../lib/varInfo';
 import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
+import { makeStringFromSegments } from '../build/goCode';
 
 export class DeleteIO extends ActionIO {
   constructor(
@@ -21,6 +22,10 @@ export class DeleteIO extends ActionIO {
     super(dialect, action, funcArgs, execArgs, returnValues);
     throwIfFalsy(action, 'action');
     throwIfFalsy(sql, 'sql');
+  }
+
+  getSQLCode(): string {
+    return makeStringFromSegments(this.sql);
   }
 }
 

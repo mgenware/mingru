@@ -37,7 +37,7 @@ it('insertWithDefaults', () => {
   const io = mr.insertIO(v, dialect);
 
   assert.equal(
-    io.sql,
-    "INSERT INTO `cols` (`fk`, `text`, `int`, `nullable`, `def_int`, `def_var_char`, `def_time`) VALUES (?, '', 0, NULL, -3, '一二', CURTIME())",
+    io.getSQLCode(),
+    "\"INSERT INTO `cols` (`fk`, `text`, `int`, `nullable`, `def_int`, `def_var_char`, `def_time`) VALUES (?, '', 0, NULL, -3, '一二', CURTIME())\"",
   );
 });

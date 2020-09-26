@@ -23,8 +23,8 @@ it('Update', () => {
 
   assert.ok(io instanceof mr.UpdateIO);
   eq(
-    io.sql,
-    'UPDATE `db_post` SET `title` = "haha", `content` = ?, `cmt_c` = `cmt_c` + 1 WHERE `id` = ?',
+    io.getSQLCode(),
+    '"UPDATE `db_post` SET `title` = \\"haha\\", `content` = ?, `cmt_c` = `cmt_c` + 1 WHERE `id` = ?"',
   );
   eq(io.setters.length, 3);
   eq(io.setters[0].col, post.title);
@@ -44,7 +44,7 @@ it('Update with WHERE', () => {
   const v = postTA.t;
   const io = mr.updateIO(v, dialect);
 
-  eq(io.sql, 'UPDATE `db_post` SET `title` = "haha" WHERE `id` = 1');
+  eq(io.getSQLCode(), '"UPDATE `db_post` SET `title` = \\"haha\\" WHERE `id` = 1"');
 });
 
 it('getInputs', () => {
@@ -54,9 +54,7 @@ it('getInputs', () => {
       .set(user.url_name, mm.sql`${mm.input(user.url_name)}`)
       .setInputs(user.sig)
       .set(user.follower_count, mm.sql`${user.follower_count} + 1`)
-      .whereSQL(
-        mm.sql`${user.url_name.toInput()} ${user.id.toInput()} ${user.url_name.toInput()}`,
-      );
+      .whereSQL(mm.sql`${user.url_name.toInput()} ${user.id.toInput()} ${user.url_name.toInput()}`);
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
@@ -113,5 +111,5 @@ it('setDefaults', () => {
   const v = postTA.t;
   const io = mr.updateIO(v, dialect);
 
-  eq(io.sql, 'UPDATE `post` SET `datetime` = UTC_TIMESTAMP()');
+  eq(io.getSQLCode(), '"UPDATE `post` SET `datetime` = UTC_TIMESTAMP()"');
 });

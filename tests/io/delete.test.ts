@@ -16,7 +16,7 @@ it('Delete', () => {
   const io = mr.deleteIO(v, dialect);
 
   assert.ok(io instanceof mr.DeleteIO);
-  eq(io.sql, 'DELETE FROM `db_post` WHERE `id` = ?');
+  eq(io.getSQLCode(), '"DELETE FROM `db_post` WHERE `id` = ?"');
 });
 
 it('Delete with where', () => {
@@ -27,14 +27,12 @@ it('Delete with where', () => {
   const v = postTA.t;
   const io = mr.deleteIO(v, dialect);
 
-  eq(io.sql, 'DELETE FROM `db_post` WHERE `id` = 1');
+  eq(io.getSQLCode(), '"DELETE FROM `db_post` WHERE `id` = 1"');
 });
 
 it('getInputs', () => {
   class UserTA extends mm.TableActions {
-    t = mm
-      .deleteOne()
-      .whereSQL(mm.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
+    t = mm.deleteOne().whereSQL(mm.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
@@ -48,9 +46,7 @@ it('getInputs', () => {
 
 it('getReturns', () => {
   class UserTA extends mm.TableActions {
-    t = mm
-      .deleteOne()
-      .whereSQL(mm.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
+    t = mm.deleteOne().whereSQL(mm.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;

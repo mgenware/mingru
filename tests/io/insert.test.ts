@@ -107,5 +107,8 @@ it('setDefaults', () => {
   const v = postTA.t;
   const io = mr.insertIO(v, dialect);
 
-  eq(io.sql, "INSERT INTO `post` (`title`, `content`, `datetime`) VALUES (?, '', UTC_TIMESTAMP())");
+  eq(
+    io.getSQLCode(),
+    '"INSERT INTO `post` (`title`, `content`, `datetime`) VALUES (?, \'\', UTC_TIMESTAMP())"',
+  );
 });

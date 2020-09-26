@@ -18,7 +18,7 @@ export class MySQL extends Dialect {
 
   objToSQL(value: unknown, _table: mm.Table | null): mm.SQL {
     if (value === undefined) {
-      throw new Error('value is undefined');
+      throw new Error('Value is undefined');
     }
     if (value === null) {
       return mm.sql`NULL`;
@@ -28,7 +28,7 @@ export class MySQL extends Dialect {
       return mm.sql`${valueString}`;
     }
     if (typeof value === 'string') {
-      return escapeString(value);
+      return mm.sql`${escapeString(value)}`;
     }
     if (value instanceof mm.SQL) {
       return value;

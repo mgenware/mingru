@@ -12,13 +12,13 @@ it('Columns and escape strings', () => {
   const sql = mm.sql`abc "aaa" ${post.user_id} ${post.user_id.join(user).url_name}`;
   const io = mr.sqlIO(sql, dialect, post);
   assert.ok(io instanceof mr.SQLIO);
-  eq(io.getCodeString(), 'abc "aaa" `user_id` `url_name`');
+  eq(io.getCodeString(), '"abc \\"aaa\\" `user_id` `url_name`"');
 });
 
 it('SQL calls', () => {
   const sql = mm.sql`${post.datetime} = ${mm.localDatetimeNow()}`;
   const io = mr.sqlIO(sql, dialect, post);
-  eq(io.getCodeString(), '`"datetime` = NOW()"');
+  eq(io.getCodeString(), '"`datetime` = NOW()"');
 });
 
 it('toSQL(sourceTable)', () => {
@@ -67,7 +67,7 @@ it('Conflicting names', () => {
   itThrows(() => {
     const sql = mm.sql`${user.id.toInput()}${mm.input({ name: 'b', defaultValue: null }, 'id')}`;
     mr.sqlIO(sql, dialect, null);
-  }, 'Cannot handle two variables with same names "id" but different types ("uint64" and "b") in "Expression SQL(E(SQLVar(id, desc = Column(id, Table(user))), type = 2), E(SQLVar(id, desc = String(b)), type = 2))"');
+  }, 'Cannot handle two variables with the same name "id" but different types ("uint64" and "b") in "Expression SQL(E(SQLVar(id, desc = Column(id, Table(user))), type = 2), E(SQLVar(id, desc = {"name":"b","defaultValue":null}), type = 2))"');
 
   itThrows(() => {
     const sql = mm.sql`${mm.input({ name: 'a', defaultValue: null }, 'v1')}${mm.input(
@@ -75,5 +75,5 @@ it('Conflicting names', () => {
       'v1',
     )}`;
     mr.sqlIO(sql, dialect, null);
-  }, 'Cannot handle two variables with same names "v1" but different types ("a" and "b") in "Expression SQL(E(SQLVar(v1, desc = String(a)), type = 2), E(SQLVar(v1, desc = String(b)), type = 2))"');
+  }, 'Cannot handle two variables with the same name "v1" but different types ("a" and "b") in "Expression SQL(E(SQLVar(v1, desc = {"name":"a","defaultValue":null}), type = 2), E(SQLVar(v1, desc = {"name":"b","defaultValue":null}), type = 2))"');
 });

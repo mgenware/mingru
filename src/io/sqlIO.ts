@@ -143,6 +143,9 @@ export function sqlIO(
   opt?: SQLIOBuilderOption,
 ): SQLIO {
   const vars = new VarList(`Expression ${sql.toString()}`, true);
+  if (!Array.isArray(sql.elements)) {
+    throw new Error(`Elements should be an array, got \`${toTypeString(sql.elements)}\``);
+  }
   for (const element of sql.elements) {
     if (element.type === mm.SQLElementType.input) {
       const sqlVar = element.toInput();

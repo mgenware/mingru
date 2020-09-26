@@ -47,16 +47,14 @@ export default class VarList {
       // Found an existing var with the same name, check if their types are identical.
       if (prev.type.toString() === varInfo.type.toString()) {
         if (!this.allowDuplicates) {
-          throw new Error(
-            `Duplicate variables "${varInfo.name}" found in "${this.name}"`,
-          );
+          throw new Error(`Duplicate variables "${varInfo.name}" found in "${this.name}"`);
         }
         // Duplicates are allowed here.
         this.list.push(varInfo);
         return;
       }
       throw new Error(
-        `Cannot handle two variables with same names "${
+        `Cannot handle two variables with the same name "${
           varInfo.name
         }" but different types ("${prev.type.toString()}" and "${varInfo.type.toString()}") in "${
           this.name
