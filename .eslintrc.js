@@ -10,12 +10,7 @@ module.exports = {
     'no-console': ['error', { allow: ['warn', 'error'] }],
     'no-plusplus': 'off',
     // Allow `for-of` loops.
-    'no-restricted-syntax': [
-      'error',
-      'ForInStatement',
-      'LabeledStatement',
-      'WithStatement',
-    ],
+    'no-restricted-syntax': ['error', 'ForInStatement', 'LabeledStatement', 'WithStatement'],
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     '@typescript-eslint/switch-exhaustiveness-check': 'error',
@@ -30,10 +25,7 @@ module.exports = {
     'max-classes-per-file': 'off',
     'import/prefer-default-export': 'off',
     'no-continue': 'off',
-    'object-curly-newline': [
-      'error',
-      { ImportDeclaration: 'never', ExportDeclaration: 'never' },
-    ],
+    'object-curly-newline': ['error', { ImportDeclaration: 'never', ExportDeclaration: 'never' }],
     'func-names': 'off',
     'import/no-extraneous-dependencies': [
       'error',
@@ -48,5 +40,6 @@ module.exports = {
     '@typescript-eslint/indent': 'off',
     'implicit-arrow-linebreak': 'off',
     'function-paren-newline': 'off',
+    'max-len': 'off',
   },
 };

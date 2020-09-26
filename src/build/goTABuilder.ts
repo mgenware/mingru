@@ -148,36 +148,37 @@ export default class GoTABuilder {
 `;
       }
     }
+    const variadicQueryParams = !!arrayParams.length;
 
     let bodyMap: CodeMap;
     switch (io.action.actionType) {
       case mm.ActionType.select: {
-        bodyMap = this.select(io as SelectIO);
+        bodyMap = this.select(io as SelectIO, variadicQueryParams);
         break;
       }
 
       case mm.ActionType.update: {
-        bodyMap = this.update(io as UpdateIO);
+        bodyMap = this.update(io as UpdateIO, variadicQueryParams);
         break;
       }
 
       case mm.ActionType.insert: {
-        bodyMap = this.insert(io as InsertIO);
+        bodyMap = this.insert(io as InsertIO, variadicQueryParams);
         break;
       }
 
       case mm.ActionType.delete: {
-        bodyMap = this.delete(io as DeleteIO);
+        bodyMap = this.delete(io as DeleteIO, variadicQueryParams);
         break;
       }
 
       case mm.ActionType.wrap: {
-        bodyMap = this.wrap(io as WrapIO);
+        bodyMap = this.wrap(io as WrapIO, variadicQueryParams);
         break;
       }
 
       case mm.ActionType.transact: {
-        bodyMap = this.transact(io as TransactIO);
+        bodyMap = this.transact(io as TransactIO, variadicQueryParams);
         break;
       }
 
@@ -211,7 +212,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     return code;
   }
 
-  private select(io: SelectIO): CodeMap {
+  private select(io: SelectIO, variadicQueryParams: boolean): CodeMap {
     const { options } = this;
     const { action } = io;
     const selMode = action.mode;
@@ -341,10 +342,12 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         );
       }
       // Call the `Query` method.
+      this.injectQueryPreparationCode(codeBuilder, io.execArgs.list, variadicQueryParams);
       codeBuilder.push(
-        `rows, err := ${defs.queryableParam}.Query(${this.getExecArgsCode(
+        `rows, err := ${defs.queryableParam}.Query(${this.getQueryParamsCode(
           sqlLiteral,
           io.execArgs.list,
+          variadicQueryParams,
         )})`,
       );
       codeBuilder.push('if err != nil {');
@@ -410,11 +413,13 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
           : 'nil';
       codeBuilder.push();
 
-      // Call query func
+      // Call the `Query` func.
+      this.injectQueryPreparationCode(codeBuilder, io.execArgs.list, variadicQueryParams);
       codeBuilder.push(
-        `err := ${defs.queryableParam}.QueryRow(${this.getExecArgsCode(
+        `err := ${defs.queryableParam}.QueryRow(${this.getQueryParamsCode(
           sqlLiteral,
           io.execArgs.list,
+          variadicQueryParams,
         )}).Scan(${scanParams})`,
       );
       codeBuilder.push('if err != nil {');
@@ -429,69 +434,87 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     return new CodeMap(codeBuilder.toString(), resultTypeDef);
   }
 
-  private update(io: UpdateIO): CodeMap {
+  private update(io: UpdateIO, variadicParams: boolean): CodeMap {
     const { action } = io;
-    let code = '';
+    const builder = new LinesBuilder();
+    const queryArgs = io.execArgs.list;
 
     const sqlLiteral = go.makeStringFromSegments(io.sql);
-    code += `${defs.resultVarName}, err := ${defs.queryableParam}.Exec(${this.getExecArgsCode(
-      sqlLiteral,
-      io.execArgs.list,
-    )})\n`;
+    this.injectQueryPreparationCode(builder, queryArgs, variadicParams);
+    builder.push(
+      `${defs.resultVarName}, err := ${defs.queryableParam}.Exec(${this.getQueryParamsCode(
+        sqlLiteral,
+        queryArgs,
+        variadicParams,
+      )})\n`,
+    );
 
     // Return the result
     if (action.ensureOneRowAffected) {
-      code += `return mingru.CheckOneRowAffectedWithError(${defs.resultVarName}, err)`;
+      builder.push(`return mingru.CheckOneRowAffectedWithError(${defs.resultVarName}, err)`);
     } else {
-      code += `return mingru.GetRowsAffectedIntWithError(${defs.resultVarName}, err)`;
+      builder.push(`return mingru.GetRowsAffectedIntWithError(${defs.resultVarName}, err)`);
     }
-    return new CodeMap(code);
+    return new CodeMap(builder.toString());
   }
 
-  private insert(io: InsertIO): CodeMap {
+  private insert(io: InsertIO, variadicParams: boolean): CodeMap {
     const { fetchInsertedID } = io;
-    let code = '';
+    const builder = new LinesBuilder();
+    const queryArgs = io.execArgs.list;
 
     const sqlLiteral = go.makeStringFromSegments(io.sql);
-    code += `${fetchInsertedID ? 'result' : '_'}, err := ${
-      defs.queryableParam
-    }.Exec(${this.getExecArgsCode(sqlLiteral, io.execArgs.list)})
-`;
+    this.injectQueryPreparationCode(builder, queryArgs, variadicParams);
+    builder.push(
+      `${fetchInsertedID ? 'result' : '_'}, err := ${
+        defs.queryableParam
+      }.Exec(${this.getQueryParamsCode(sqlLiteral, queryArgs, variadicParams)})\n`,
+    );
 
     // Return the result
     if (fetchInsertedID) {
-      code += `return mingru.GetLastInsertIDUint64WithError(${defs.resultVarName}, err)`;
+      builder.push(`return mingru.GetLastInsertIDUint64WithError(${defs.resultVarName}, err)`);
     } else {
-      code += 'return err';
+      builder.push('return err');
     }
-    return new CodeMap(code);
+    return new CodeMap(builder.toString());
   }
 
-  private delete(io: DeleteIO): CodeMap {
+  private delete(io: DeleteIO, variadicParams: boolean): CodeMap {
     const { action } = io;
-    let code = '';
+    const builder = new LinesBuilder();
+    const queryArgs = io.execArgs.list;
 
     const sqlLiteral = go.makeStringFromSegments(io.sql);
-    code += `${defs.resultVarName}, err := ${defs.queryableParam}.Exec(${this.getExecArgsCode(
-      sqlLiteral,
-      io.execArgs.list,
-    )})\n`;
+    this.injectQueryPreparationCode(builder, queryArgs, variadicParams);
+    builder.push(
+      `${defs.resultVarName}, err := ${defs.queryableParam}.Exec(${this.getQueryParamsCode(
+        sqlLiteral,
+        queryArgs,
+        variadicParams,
+      )})\n`,
+    );
     // Return the result
     if (action.ensureOneRowAffected) {
-      code += `return mingru.CheckOneRowAffectedWithError(${defs.resultVarName}, err)`;
+      builder.push(`return mingru.CheckOneRowAffectedWithError(${defs.resultVarName}, err)`);
     } else {
-      code += `return mingru.GetRowsAffectedIntWithError(${defs.resultVarName}, err)`;
+      builder.push(`return mingru.GetRowsAffectedIntWithError(${defs.resultVarName}, err)`);
     }
-    return new CodeMap(code);
+    return new CodeMap(builder.toString());
   }
 
-  private wrap(io: WrapIO): CodeMap {
-    let code = '';
-    code += `return ${io.funcPath}(${this.getExecArgsCode(null, io.execArgs.list)})\n`;
-    return new CodeMap(code);
+  private wrap(io: WrapIO, variadicParams: boolean): CodeMap {
+    const builder = new LinesBuilder();
+    const queryArgs = io.execArgs.list;
+
+    this.injectQueryPreparationCode(builder, queryArgs, variadicParams);
+    builder.push(
+      `return ${io.funcPath}(${this.getQueryParamsCode(null, queryArgs, variadicParams)})\n`,
+    );
+    return new CodeMap(builder.toString());
   }
 
-  private transact(io: TransactIO): CodeMap {
+  private transact(io: TransactIO, _variadicQueryParams: boolean): CodeMap {
     let headCode = '';
     let innerBody = '';
     const { memberIOs, returnValues } = io;
@@ -593,20 +616,50 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     return `${name}Exported`;
   }
 
-  private getExecArgsCode(firstParam: string | null, args: VarInfo[]): string {
-    const tail = args
-      .map(
-        (p) =>
-          `${
-            p.type instanceof CompoundTypeInfo && p.type.isArray
-              ? `...${p.valueOrName}`
-              : p.valueOrName
-          }`,
-      )
-      .join(', ');
-    if (firstParam && tail) {
-      return `${firstParam}, ${tail}`;
+  private injectQueryPreparationCode(
+    builder: LinesBuilder,
+    args: VarInfo[],
+    variadicParams: boolean,
+  ) {
+    if (variadicParams) {
+      builder.push(`var ${defs.queryParamsVarName} []interface{}`);
+      for (const param of args) {
+        if (param.type instanceof CompoundTypeInfo && param.type.isArray) {
+          builder.push(
+            `${defs.queryParamsVarName} = append(${defs.queryParamsVarName}, ${param.valueOrName}...)`,
+          );
+        } else {
+          builder.push(
+            `${defs.queryParamsVarName} = append(${defs.queryParamsVarName}, ${param.valueOrName})`,
+          );
+        }
+      }
     }
-    return (firstParam || '') + tail;
+  }
+
+  private getQueryParamsCode(
+    firstParam: string | null,
+    args: VarInfo[],
+    variadicParams: boolean,
+  ): string {
+    let tailParams = '';
+    if (variadicParams) {
+      tailParams = `${defs.queryParamsVarName}...`;
+    } else {
+      tailParams = args
+        .map(
+          (p) =>
+            `${
+              p.type instanceof CompoundTypeInfo && p.type.isArray
+                ? `...${p.valueOrName}`
+                : p.valueOrName
+            }`,
+        )
+        .join(', ');
+    }
+    if (firstParam && tailParams) {
+      return `${firstParam}, ${tailParams}`;
+    }
+    return (firstParam || '') + tailParams;
   }
 }

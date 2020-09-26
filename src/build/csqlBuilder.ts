@@ -2,6 +2,8 @@
 import * as mm from 'mingru-models';
 import * as defs from '../defs';
 import Dialect from '../dialect';
+import { sqlIO } from '../io/sqlIO';
+import { makeStringFromSegments } from './goCode';
 
 export default class CSQLBuilder {
   constructor(public table: mm.Table, public dialect: Dialect) {}
@@ -22,9 +24,8 @@ export default class CSQLBuilder {
         const exp = this.fkExpression(col, col.__foreignColumn);
         fks.push(exp);
       }
-      body.push(
-        `${dialect.encodeColumnName(col)} ${dialect.colToSQLType(col)}`,
-      );
+      const io = sqlIO(dialect.colToSQLType(col), dialect, null);
+      body.push(`${dialect.encodeColumnName(col)} ${makeStringFromSegments(io.code)}`);
     }
     if (pks.length) {
       body.push(`PRIMARY KEY ${this.groupNames(pks)}`);
@@ -53,8 +54,8 @@ export default class CSQLBuilder {
     const { dialect } = this;
     return `CONSTRAINT FOREIGN KEY(${dialect.encodeColumnName(
       col,
-    )}) REFERENCES ${dialect.encodeTableName(
-      fCol.__table as mm.Table,
-    )} (${dialect.encodeColumnName(fCol)}) ON DELETE CASCADE`;
+    )}) REFERENCES ${dialect.encodeTableName(fCol.__table as mm.Table)} (${dialect.encodeColumnName(
+      fCol,
+    )}) ON DELETE CASCADE`;
   }
 }
