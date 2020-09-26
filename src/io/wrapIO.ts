@@ -11,15 +11,15 @@ import * as defs from '../defs';
 export class WrapIO extends ActionIO {
   constructor(
     dialect: Dialect,
-    public action: mm.WrappedAction,
+    public wrapAction: mm.WrappedAction,
     funcArgs: VarList,
     execArgs: VarList,
     returnValues: VarList,
     public funcPath: string | null,
     public innerIO: ActionIO,
   ) {
-    super(dialect, action, funcArgs, execArgs, returnValues);
-    throwIfFalsy(action, 'action');
+    super(dialect, wrapAction, null, funcArgs, execArgs, returnValues);
+    throwIfFalsy(wrapAction, 'wrapAction');
   }
 }
 
@@ -33,11 +33,7 @@ class WrapIOProcessor {
     const { action, dialect } = this;
     const innerAction = action.action;
     const [, actionName] = action.ensureInitialized();
-    const innerIO = actionToIO(
-      innerAction,
-      dialect,
-      `WrappedAction "${actionName}"`,
-    );
+    const innerIO = actionToIO(innerAction, dialect, `WrappedAction "${actionName}"`);
     const innerActionTable = innerAction.__table;
     if (!innerActionTable) {
       throw new Error('innerAction not initialized');
@@ -56,10 +52,7 @@ class WrapIOProcessor {
       }
     }
     // funcArgs
-    const funcArgs = new VarList(
-      `Func args of action "${action.__name}"`,
-      true,
-    );
+    const funcArgs = new VarList(`Func args of action "${action.__name}"`, true);
     funcArgs.add(defs.dbxQueryableVar);
 
     // Skip the first param, which is always either `mingru.Queryable` or `db.Tx`.
@@ -108,10 +101,7 @@ class WrapIOProcessor {
       return innerIO;
     }
 
-    const execArgs = new VarList(
-      `Exec args of action "${action.__name}"`,
-      true,
-    );
+    const execArgs = new VarList(`Exec args of action "${action.__name}"`, true);
     for (const arg of innerFuncArgs.distinctList) {
       const input = args[arg.name];
       // Update all arguments in `execArgs` that have been overwritten as constant.
@@ -121,15 +111,7 @@ class WrapIOProcessor {
         execArgs.add(arg);
       }
     }
-    return new WrapIO(
-      dialect,
-      action,
-      funcArgs,
-      execArgs,
-      innerIO.returnValues,
-      funcPath,
-      innerIO,
-    );
+    return new WrapIO(dialect, action, funcArgs, execArgs, innerIO.returnValues, funcPath, innerIO);
   }
 }
 

@@ -214,7 +214,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
   private select(io: SelectIO, variadicQueryParams: boolean): CodeMap {
     const { options } = this;
-    const { action } = io;
+    const { selectAction: action } = io;
     const selMode = action.mode;
     const isPageMode = selMode === mm.SelectActionMode.page;
     const { limitValue, offsetValue } = action;
@@ -316,7 +316,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       }
     }
 
-    const sqlSource = [...io.sql];
+    const sqlSource = [...(io.sql || [])];
 
     // LIMIT and OFFSET
     if (pagination) {
@@ -435,11 +435,11 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
   }
 
   private update(io: UpdateIO, variadicParams: boolean): CodeMap {
-    const { action } = io;
+    const { updateAction: action } = io;
     const builder = new LinesBuilder();
     const queryArgs = io.execArgs.list;
 
-    const sqlLiteral = go.makeStringFromSegments(io.sql);
+    const sqlLiteral = io.getSQLCode();
     this.injectQueryPreparationCode(builder, queryArgs, variadicParams);
     builder.push(
       `${defs.resultVarName}, err := ${defs.queryableParam}.Exec(${this.getQueryParamsCode(
@@ -463,7 +463,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const builder = new LinesBuilder();
     const queryArgs = io.execArgs.list;
 
-    const sqlLiteral = go.makeStringFromSegments(io.sql);
+    const sqlLiteral = io.getSQLCode();
     this.injectQueryPreparationCode(builder, queryArgs, variadicParams);
     builder.push(
       `${fetchInsertedID ? 'result' : '_'}, err := ${
@@ -481,11 +481,11 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
   }
 
   private delete(io: DeleteIO, variadicParams: boolean): CodeMap {
-    const { action } = io;
+    const { deleteAction: action } = io;
     const builder = new LinesBuilder();
     const queryArgs = io.execArgs.list;
 
-    const sqlLiteral = go.makeStringFromSegments(io.sql);
+    const sqlLiteral = io.getSQLCode();
     this.injectQueryPreparationCode(builder, queryArgs, variadicParams);
     builder.push(
       `${defs.resultVarName}, err := ${defs.queryableParam}.Exec(${this.getQueryParamsCode(

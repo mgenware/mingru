@@ -24,15 +24,15 @@ export class TransactMemberIO {
 export class TransactIO extends ActionIO {
   constructor(
     dialect: Dialect,
-    public action: mm.TransactAction,
+    public transactAction: mm.TransactAction,
     public memberIOs: TransactMemberIO[],
     funcArgs: VarList,
     execArgs: VarList,
     returnValues: VarList,
     public childReturnValues: { [name: string]: TXMReturnValueInfo },
   ) {
-    super(dialect, action, funcArgs, execArgs, returnValues);
-    throwIfFalsy(action, 'action');
+    super(dialect, transactAction, null, funcArgs, execArgs, returnValues);
+    throwIfFalsy(transactAction, 'transactAction');
   }
 }
 
@@ -65,11 +65,7 @@ class TransactIOProcessor {
       const [childTable, childName] = childAction.ensureInitialized();
 
       // Call actionToIO after initialization.
-      const io = actionToIO(
-        childAction,
-        dialect,
-        `transaction child index ${idx}`,
-      );
+      const io = actionToIO(childAction, dialect, `transaction child index ${idx}`);
 
       // `isMemberSibling` describes if this member and current TX action
       // belong to same parent.
@@ -83,10 +79,7 @@ class TransactIOProcessor {
     });
 
     // funcArgs
-    const funcArgs = new VarList(
-      `Func args of action "${action.__name}"`,
-      true,
-    );
+    const funcArgs = new VarList(`Func args of action "${action.__name}"`, true);
     funcArgs.add(defs.sqlDBVar);
     for (const mem of memberIOs) {
       const mAction = mem.actionIO;
@@ -98,15 +91,9 @@ class TransactIOProcessor {
       }
     }
     // execArgs is empty for transact io
-    const execArgs = new VarList(
-      `Exec args of action "${action.__name}"`,
-      true,
-    );
+    const execArgs = new VarList(`Exec args of action "${action.__name}"`, true);
 
-    const returnValues = new VarList(
-      `Returns of action ${action.__name}`,
-      false,
-    );
+    const returnValues = new VarList(`Returns of action ${action.__name}`, false);
 
     /**
      * Child return values (CRV)
@@ -168,11 +155,7 @@ class TransactIOProcessor {
 
         // Now both value and key are valid.
         crv[retValueName] = {
-          typeInfo: new VarInfo(
-            retValueName,
-            srcVarInfo.type,
-            srcVarInfo.value,
-          ),
+          typeInfo: new VarInfo(retValueName, srcVarInfo.type, srcVarInfo.value),
           refs: [],
         };
 
@@ -211,9 +194,7 @@ class TransactIOProcessor {
     if (action.__returnValues) {
       for (const name of action.__returnValues) {
         if (!crv[name]) {
-          throw new Error(
-            `The return value named "${name}" is not declared by any member`,
-          );
+          throw new Error(`The return value named "${name}" is not declared by any member`);
         }
         const info = crv[name];
         info.refs.push(TXMReturnValueSource.returnValue);

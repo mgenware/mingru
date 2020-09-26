@@ -3,7 +3,7 @@ import * as mm from 'mingru-models';
 import * as defs from '../defs';
 import Dialect from '../dialect';
 import { sqlIO } from '../io/sqlIO';
-import { makeStringFromSegments } from './goCode';
+import { extractStringContentFromSegments } from './goCode';
 
 export default class CSQLBuilder {
   constructor(public table: mm.Table, public dialect: Dialect) {}
@@ -25,7 +25,7 @@ export default class CSQLBuilder {
         fks.push(exp);
       }
       const io = sqlIO(dialect.colToSQLType(col), dialect, null);
-      body.push(`${dialect.encodeColumnName(col)} ${makeStringFromSegments(io.code)}`);
+      body.push(`${dialect.encodeColumnName(col)} ${extractStringContentFromSegments(io.code)}`);
     }
     if (pks.length) {
       body.push(`PRIMARY KEY ${this.groupNames(pks)}`);

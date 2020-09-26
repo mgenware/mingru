@@ -10,13 +10,12 @@ import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
 import * as utils from '../lib/stringUtils';
 import { forEachWithSlots } from '../lib/arrayUtils';
-import { makeStringFromSegments } from '../build/goCode';
 
 export class UpdateIO extends ActionIO {
   constructor(
     dialect: Dialect,
-    public action: mm.UpdateAction,
-    public sql: StringSegment[],
+    public updateAction: mm.UpdateAction,
+    sql: StringSegment[],
     public setters: SetterIO[],
     public where: SQLIO | null,
     funcArgs: VarList,
@@ -24,14 +23,10 @@ export class UpdateIO extends ActionIO {
     returnValues: VarList,
     public setterArgs: VarList,
   ) {
-    super(dialect, action, funcArgs, execArgs, returnValues);
-    throwIfFalsy(action, 'action');
+    super(dialect, updateAction, sql, funcArgs, execArgs, returnValues);
+    throwIfFalsy(updateAction, 'updateAction');
     throwIfFalsy(sql, 'sql');
     throwIfFalsy(setters, 'setters');
-  }
-
-  getSQLCode(): string {
-    return makeStringFromSegments(this.sql);
   }
 }
 

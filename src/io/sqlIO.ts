@@ -8,6 +8,7 @@ import VarInfo from '../lib/varInfo';
 import { VarInfoBuilder } from '../lib/varInfoHelper';
 import { makeStringFromSegments } from '../build/goCode';
 import { join2DArrays } from '../lib/arrayUtils';
+import actionToIO from './actionToIO';
 
 export class SQLIO {
   get vars(): VarInfo[] {
@@ -37,10 +38,9 @@ export class SQLIO {
 // Helpers to build an `SQLIO`.
 function getSQLCode(
   sql: mm.SQL,
-  dialect: Dialect,
   sourceTable: mm.Table | null,
-  elementHandler?: (element: mm.SQLElement) => StringSegment[] | null,
-  actionHandler?: (action: mm.Action) => StringSegment[],
+  dialect: Dialect,
+  rewriteElement: ((element: mm.SQLElement) => StringSegment[] | null) | undefined,
 ): StringSegment[] {
   const res: StringSegment[] = [];
   for (const element of sql.elements) {
@@ -50,14 +50,12 @@ function getSQLCode(
         col.checkSourceTable(sourceTable);
       }
     }
-    let cbRes: StringSegment[] | null = null;
-    if (elementHandler) {
-      cbRes = elementHandler(element);
+    let rewriteElementRes: StringSegment[] | null = null;
+    if (rewriteElement) {
+      rewriteElementRes = rewriteElement(element);
     }
     const elementResults =
-      cbRes === null
-        ? handleElement(element, dialect, sourceTable, elementHandler, actionHandler)
-        : cbRes;
+      rewriteElementRes === null ? handleElement(element, sourceTable, dialect) : rewriteElementRes;
     for (const r of elementResults) {
       res.push(r);
     }
@@ -65,12 +63,38 @@ function getSQLCode(
   return res;
 }
 
+function handleSubquery(
+  action: mm.Action,
+  defaultTable: mm.Table | null,
+  dialect: Dialect,
+): StringSegment[] {
+  if (action instanceof mm.SelectAction) {
+    // Subqueries don't have a name, we'll give them a dummy name so
+    // they are considered initialized.
+    if (!action.__name) {
+      // eslint-disable-next-line no-param-reassign
+      action.__name = '__SQLCall_EMBEDDED_ACTION__';
+    }
+    // Subqueires may or may not have a table assigned, if not set,
+    // we assign current source table to them.
+    if (!action.__table) {
+      // eslint-disable-next-line no-param-reassign
+      action.__table = defaultTable;
+    }
+
+    const io = actionToIO(action, dialect, 'handleSubquery');
+    if (!io.sql) {
+      throw new Error(`Unexpected null SQL code at action "${action.toString()}"`);
+    }
+    return io.sql;
+  }
+  throw new Error(`Subquery can only contain SELECT clause, got "${toTypeString(action)}"`);
+}
+
 function handleElement(
   element: mm.SQLElement,
+  defaultTable: mm.Table | null,
   dialect: Dialect,
-  sourceTable: mm.Table | null,
-  elementHandler: ((element: mm.SQLElement) => StringSegment[] | null) | undefined,
-  actionHandler: ((action: mm.Action) => StringSegment[]) | undefined,
 ): StringSegment[] {
   switch (element.type) {
     case mm.SQLElementType.rawString: {
@@ -86,9 +110,7 @@ function handleElement(
       const name = dialect.sqlCall(call.type);
       const params = call.params.length
         ? join2DArrays(
-            call.params.map((p) =>
-              getSQLCode(p, dialect, sourceTable, elementHandler, actionHandler),
-            ),
+            call.params.map((p) => getSQLCode(p, defaultTable, dialect, undefined)),
             ', ',
           )
         : '';
@@ -114,11 +136,8 @@ function handleElement(
 
     case mm.SQLElementType.action: {
       const action = element.value;
-      if (!actionHandler) {
-        throw new Error(`No action handler for action "${action}"`);
-      }
       if (action instanceof mm.Action) {
-        return actionHandler(action);
+        return handleSubquery(action, action.__table || defaultTable, dialect);
       }
       throw new Error(`Element is not an action, got \`${toTypeString(action)}\``);
     }
@@ -132,14 +151,14 @@ function handleElement(
 }
 
 export interface SQLIOBuilderOption {
-  elementHandler?: (element: mm.SQLElement) => StringSegment[] | null;
-  actionHandler?: (action: mm.Action) => StringSegment[];
+  rewriteElement?: (element: mm.SQLElement) => StringSegment[] | null;
 }
 
 export function sqlIO(
   sql: mm.SQL,
   dialect: Dialect,
-  sourceTable: mm.Table | null,
+  // Default table if `FROM` is not present.
+  defaultTable: mm.Table | null,
   opt?: SQLIOBuilderOption,
 ): SQLIO {
   const vars = new VarList(`Expression ${sql.toString()}`, true);
@@ -156,10 +175,5 @@ export function sqlIO(
 
   // eslint-disable-next-line no-param-reassign
   opt = opt || {};
-  return new SQLIO(
-    sql,
-    dialect,
-    vars,
-    getSQLCode(sql, dialect, sourceTable, opt.elementHandler, opt.actionHandler),
-  );
+  return new SQLIO(sql, dialect, vars, getSQLCode(sql, defaultTable, dialect, opt.rewriteElement));
 }

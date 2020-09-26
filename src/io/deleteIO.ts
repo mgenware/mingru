@@ -7,25 +7,20 @@ import VarList from '../lib/varList';
 import VarInfo from '../lib/varInfo';
 import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
-import { makeStringFromSegments } from '../build/goCode';
 
 export class DeleteIO extends ActionIO {
   constructor(
     dialect: Dialect,
-    public action: mm.DeleteAction,
-    public sql: StringSegment[],
+    public deleteAction: mm.DeleteAction,
+    sql: StringSegment[],
     public where: SQLIO | null,
     funcArgs: VarList,
     execArgs: VarList,
     returnValues: VarList,
   ) {
-    super(dialect, action, funcArgs, execArgs, returnValues);
-    throwIfFalsy(action, 'action');
+    super(dialect, deleteAction, sql, funcArgs, execArgs, returnValues);
+    throwIfFalsy(deleteAction, 'deleteAction');
     throwIfFalsy(sql, 'sql');
-  }
-
-  getSQLCode(): string {
-    return makeStringFromSegments(this.sql);
   }
 }
 

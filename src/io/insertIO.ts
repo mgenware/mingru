@@ -8,28 +8,23 @@ import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
 import * as utils from '../lib/stringUtils';
 import { forEachWithSlots } from '../lib/arrayUtils';
-import { makeStringFromSegments } from '../build/goCode';
 
 export class InsertIO extends ActionIO {
   returnMember: ActionIO | undefined;
 
   constructor(
     dialect: Dialect,
-    public action: mm.InsertAction,
-    public sql: StringSegment[],
+    public insertAction: mm.InsertAction,
+    sql: StringSegment[],
     public setters: SetterIO[],
     public fetchInsertedID: boolean,
     funcArgs: VarList,
     execArgs: VarList,
     returnValues: VarList,
   ) {
-    super(dialect, action, funcArgs, execArgs, returnValues);
-    throwIfFalsy(action, 'action');
+    super(dialect, insertAction, sql, funcArgs, execArgs, returnValues);
+    throwIfFalsy(insertAction, 'insertAction');
     throwIfFalsy(sql, 'sql');
-  }
-
-  getSQLCode(): string {
-    return makeStringFromSegments(this.sql);
   }
 }
 

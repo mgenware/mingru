@@ -11,7 +11,6 @@ import VarList from '../lib/varList';
 import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
 import { VarInfoBuilder } from '../lib/varInfoHelper';
-import { makeStringFromSegments } from '../build/goCode';
 import { forEachWithSlots } from '../lib/arrayUtils';
 
 export class JoinIO {
@@ -96,8 +95,8 @@ export class SelectedColumnIO {
 export class SelectIO extends ActionIO {
   constructor(
     dialect: Dialect,
-    public action: mm.SelectAction,
-    public sql: StringSegment[],
+    public selectAction: mm.SelectAction,
+    sql: StringSegment[],
     // `cols` can be empty, it indicates `SELECT *`, which is used in `selectExists`.
     public cols: SelectedColumnIO[],
     public where: SQLIO | null,
@@ -105,13 +104,9 @@ export class SelectIO extends ActionIO {
     execArgs: VarList,
     returnValues: VarList,
   ) {
-    super(dialect, action, funcArgs, execArgs, returnValues);
-    throwIfFalsy(action, 'action');
+    super(dialect, selectAction, sql, funcArgs, execArgs, returnValues);
+    throwIfFalsy(selectAction, 'action');
     throwIfFalsy(sql, 'sql');
-  }
-
-  getSQLCode(): string {
-    return makeStringFromSegments(this.sql);
   }
 }
 
@@ -185,6 +180,7 @@ export class SelectIOProcessor {
       forEachWithSlots(
         colIOs,
         (col) => {
+          console.log(' --- ', col.valueSQL.code);
           sql.push(...col.valueSQL.code);
         },
         () => sql.push(', '),
@@ -204,7 +200,7 @@ export class SelectIOProcessor {
     let whereSQL: StringSegment[] = [];
     if (action.whereSQLValue) {
       whereIO = sqlIO(action.whereSQLValue, dialect, fromTable, {
-        elementHandler: (ele) => {
+        rewriteElement: (ele) => {
           if (ele.type === mm.SQLElementType.column) {
             const col = ele.toColumn();
             const [colTable] = col.ensureInitialized();
@@ -215,7 +211,6 @@ export class SelectIOProcessor {
           }
           return null;
         },
-        actionHandler: this.sqlIOActionHandler,
       });
       whereSQL = [' WHERE ', ...whereIO.code];
     }
@@ -266,7 +261,7 @@ export class SelectIOProcessor {
     let havingIO: SQLIO | null = null;
     if (action.havingSQLValue) {
       havingIO = sqlIO(action.havingSQLValue, dialect, fromTable, {
-        elementHandler: (ele) => {
+        rewriteElement: (ele) => {
           if (ele.type === mm.SQLElementType.column) {
             const col = ele.toColumn();
             if (col.__table instanceof mm.JoinedTable) {
@@ -278,7 +273,6 @@ export class SelectIOProcessor {
           }
           return null;
         },
-        actionHandler: this.sqlIOActionHandler,
       });
 
       sql.push(' HAVING ', ...havingIO.code);
@@ -373,28 +367,6 @@ export class SelectIOProcessor {
   }
 
   // Declared as a property to avoid `this` issues as it's used as a callback to other classes.
-  private sqlIOActionHandler = (action: mm.Action): StringSegment[] => {
-    const sourceTable = this.action.__table;
-    const { dialect } = this;
-    if (action instanceof mm.SelectAction) {
-      // Subqueries don't have a name, we'll give them a dummy name so
-      // they are considered initialized.
-      if (!action.__name) {
-        // eslint-disable-next-line no-param-reassign
-        action.__name = '__SQLCall_EMBEDDED_ACTION__';
-      }
-      // Subqueires may or may not have a table assigned, if not set,
-      // we assign current source table to them.
-      if (!action.__table) {
-        // eslint-disable-next-line no-param-reassign
-        action.__table = sourceTable;
-      }
-      const processor = new SelectIOProcessor(action, dialect);
-      const io = processor.convert();
-      return io.sql;
-    }
-    throw new Error(`Subquery can only contain SELECT clause, got "${toTypeString(action)}"`);
-  };
 
   // eslint-disable-next-line class-methods-use-this
   private flushInputs(funcArgs: VarList, execArgs: VarList, io: SQLIO | null) {
@@ -590,14 +562,13 @@ export class SelectIOProcessor {
         table,
         this.hasJoin,
         {
-          elementHandler: (element) => {
+          rewriteElement: (element) => {
             if (element.value === embeddedCol) {
               // `ColumnSQL.sql` is handwritten, no need validation and element post-processing.
               return sqlIO(colSQL.sql, dialect, null).code;
             }
             return null;
           },
-          actionHandler: this.sqlIOActionHandler,
         },
       );
     }
@@ -632,7 +603,6 @@ export class SelectIOProcessor {
       dialect,
       table,
       this.hasJoin,
-      { actionHandler: this.sqlIOActionHandler },
     );
   }
 

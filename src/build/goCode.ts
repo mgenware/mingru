@@ -175,6 +175,16 @@ export function makeStringFromSegments(list: StringSegment[]): string {
   return builder.finish();
 }
 
+export function extractStringContentFromSegments(list: StringSegment[]): string {
+  if (list.length > 1) {
+    throw new Error(`Unexpected multiple segments: "${list}"`);
+  }
+  if (typeof list[0] === 'object') {
+    throw new Error(`Unexpected code segment: "${JSON.stringify(list[0])}"`);
+  }
+  return list[0];
+}
+
 export class ImportList {
   private imports = new Set<string>();
 
