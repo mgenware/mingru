@@ -176,13 +176,14 @@ export function makeStringFromSegments(list: StringSegment[]): string {
 }
 
 export function extractStringContentFromSegments(list: StringSegment[]): string {
-  if (list.length > 1) {
-    throw new Error(`Unexpected multiple segments: "${list}"`);
+  let res = '';
+  for (const segment of list) {
+    if (typeof segment === 'object') {
+      throw new Error(`Unexpected code segment: "${JSON.stringify(segment)}"`);
+    }
+    res += segment;
   }
-  if (typeof list[0] === 'object') {
-    throw new Error(`Unexpected code segment: "${JSON.stringify(list[0])}"`);
-  }
-  return list[0];
+  return res;
 }
 
 export class ImportList {

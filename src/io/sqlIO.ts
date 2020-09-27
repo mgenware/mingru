@@ -40,7 +40,7 @@ function getSQLCode(
   sql: mm.SQL,
   sourceTable: mm.Table | null,
   dialect: Dialect,
-  rewriteElement: ((element: mm.SQLElement) => StringSegment[] | null) | undefined,
+  rewriteElement: ((element: mm.SQLElement) => StringSegment[] | null) | null,
 ): StringSegment[] {
   const res: StringSegment[] = [];
   for (const element of sql.elements) {
@@ -54,8 +54,13 @@ function getSQLCode(
     if (rewriteElement) {
       rewriteElementRes = rewriteElement(element);
     }
+    // Here `rewriteElement` only handles top level elements, it needs to go inside
+    // `handleElement` to handle embedded elements in SQL call params. Note that it
+    // doesn't handle elements in subqueries.
     const elementResults =
-      rewriteElementRes === null ? handleElement(element, sourceTable, dialect) : rewriteElementRes;
+      rewriteElementRes === null
+        ? handleElement(element, sourceTable, dialect, rewriteElement)
+        : rewriteElementRes;
     for (const r of elementResults) {
       res.push(r);
     }
@@ -95,6 +100,7 @@ function handleElement(
   element: mm.SQLElement,
   defaultTable: mm.Table | null,
   dialect: Dialect,
+  rewriteElement: ((element: mm.SQLElement) => StringSegment[] | null) | null,
 ): StringSegment[] {
   switch (element.type) {
     case mm.SQLElementType.rawString: {
@@ -108,13 +114,20 @@ function handleElement(
     case mm.SQLElementType.call: {
       const call = element.toCall();
       const name = dialect.sqlCall(call.type);
-      const params = call.params.length
-        ? join2DArrays(
-            call.params.map((p) => getSQLCode(p, defaultTable, dialect, undefined)),
+      const res: StringSegment[] = [`${name}(`];
+
+      if (call.params.length) {
+        res.push(
+          ...join2DArrays(
+            call.params.map((p) => {
+              return getSQLCode(p, defaultTable, dialect, rewriteElement);
+            }),
             ', ',
-          )
-        : '';
-      return [`${name}(${params})`];
+          ),
+        );
+      }
+      res.push(')');
+      return res;
     }
 
     case mm.SQLElementType.input: {
@@ -123,15 +136,28 @@ function handleElement(
 
     case mm.SQLElementType.rawColumn: {
       const rawCol = element.toRawColumn();
+      const { selectedName, core } = rawCol;
       if (rawCol.selectedName) {
         return [dialect.encodeName(rawCol.selectedName)];
       }
-      if (rawCol.core instanceof mm.Column) {
-        return [dialect.encodeColumnName(rawCol.core)];
+      if (core instanceof mm.Column) {
+        if (selectedName) {
+          return getSQLCode(
+            dialect.as(mm.sql`${core}`, selectedName),
+            defaultTable,
+            dialect,
+            rewriteElement,
+          );
+        }
+        return [dialect.encodeColumnName(core)];
       }
-      throw new Error(
-        'The argument `selectedName` is required for an SQL expression without any columns inside',
-      );
+
+      if (!selectedName) {
+        throw new Error(
+          'The argument `selectedName` is required for an SQL expression without any columns inside',
+        );
+      }
+      return getSQLCode(dialect.as(core, selectedName), defaultTable, dialect, rewriteElement);
     }
 
     case mm.SQLElementType.action: {
@@ -175,5 +201,10 @@ export function sqlIO(
 
   // eslint-disable-next-line no-param-reassign
   opt = opt || {};
-  return new SQLIO(sql, dialect, vars, getSQLCode(sql, defaultTable, dialect, opt.rewriteElement));
+  return new SQLIO(
+    sql,
+    dialect,
+    vars,
+    getSQLCode(sql, defaultTable, dialect, opt.rewriteElement || null),
+  );
 }

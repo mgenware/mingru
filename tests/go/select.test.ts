@@ -531,3 +531,26 @@ it('toInputArray', async () => {
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/toInputArray');
 });
+
+it('Nested AS in SQL calls', async () => {
+  // The AS in selected columns should jump out of nested SQL calls, e.g. SELECT FUNC(FUNC(`col`)) AS `name1`.
+  class PostTA extends mm.TableActions {
+    t = mm.select(mm.sel(mm.year(mm.year(post.id)), 'name1')).where`${mm.year(
+      mm.year(post.id),
+    )} == ${post.id.toInput('idInput')}`;
+  }
+  const ta = mm.tableActions(post, PostTA);
+  await testBuildAsync(ta, 'select/nestedAsInCalls');
+});
+
+it('Nested AS in SQL calls (with join)', async () => {
+  // The AS in selected columns should jump out of nested SQL calls, e.g. SELECT FUNC(FUNC(`col`)) AS `name1`.
+  const col = post.user_id.join(user).age;
+  class PostTA extends mm.TableActions {
+    t = mm.select(mm.sel(mm.year(mm.year(col)), 'name1')).where`${mm.year(
+      mm.year(col),
+    )} == ${col.toInput('ageInput')}`;
+  }
+  const ta = mm.tableActions(post, PostTA);
+  await testBuildAsync(ta, 'select/nestedAsInCallsWithJoin');
+});
