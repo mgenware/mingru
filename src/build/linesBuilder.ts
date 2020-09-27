@@ -18,11 +18,11 @@ export default class LinesBuilder {
     }
   }
 
-  incrementIndent() {
+  increaseIndent() {
     this.indent++;
   }
 
-  decrementIndent() {
+  decreaseIndent() {
     this.indent--;
   }
 

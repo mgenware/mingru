@@ -351,9 +351,9 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         )})`,
       );
       codeBuilder.push('if err != nil {');
-      codeBuilder.incrementIndent();
+      codeBuilder.increaseIndent();
       codeBuilder.push(errReturnCode);
-      codeBuilder.decrementIndent();
+      codeBuilder.decreaseIndent();
       codeBuilder.push('}');
       codeBuilder.pushLines(
         go.makeArray(
@@ -366,33 +366,33 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         'defer rows.Close()',
         'for rows.Next() {',
       );
-      codeBuilder.incrementIndent();
+      codeBuilder.increaseIndent();
       // Wrap the object scan code inside a "if itemCounter <= max" block if hasLimit
       if (pagination) {
         codeBuilder.pushLines('itemCounter++', 'if itemCounter <= max {');
-        codeBuilder.incrementIndent();
+        codeBuilder.increaseIndent();
       }
       codeBuilder.pushLines(
         go.pointerVar('item', atomicResultType),
         `err = rows.Scan(${scanParams})`,
         'if err != nil {',
       );
-      codeBuilder.incrementIndent();
+      codeBuilder.increaseIndent();
       codeBuilder.push(errReturnCode);
-      codeBuilder.decrementIndent();
+      codeBuilder.decreaseIndent();
       codeBuilder.push('}');
       codeBuilder.push('result = append(result, item)');
       if (pagination) {
-        codeBuilder.decrementIndent();
+        codeBuilder.decreaseIndent();
         codeBuilder.push('}');
       }
-      codeBuilder.decrementIndent();
+      codeBuilder.decreaseIndent();
       codeBuilder.push('}');
       codeBuilder.push('err = rows.Err()');
       codeBuilder.push('if err != nil {');
-      codeBuilder.incrementIndent();
+      codeBuilder.increaseIndent();
       codeBuilder.push(errReturnCode);
-      codeBuilder.decrementIndent();
+      codeBuilder.decreaseIndent();
       codeBuilder.push('}');
     } else {
       // For `select/selectField`.
@@ -423,9 +423,9 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         )}).Scan(${scanParams})`,
       );
       codeBuilder.push('if err != nil {');
-      codeBuilder.incrementIndent();
+      codeBuilder.increaseIndent();
       codeBuilder.push(`return ${resultVarOnError}, err`);
-      codeBuilder.decrementIndent();
+      codeBuilder.decreaseIndent();
       codeBuilder.push('}');
     }
     // Return the result
@@ -624,10 +624,13 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     if (variadicParams) {
       builder.push(`var ${defs.queryParamsVarName} []interface{}`);
       for (const param of args) {
+        const { valueOrName } = param;
         if (param.type instanceof CompoundTypeInfo && param.type.isArray) {
-          builder.push(
-            `${defs.queryParamsVarName} = append(${defs.queryParamsVarName}, ${param.valueOrName}...)`,
-          );
+          builder.push(`for _, item := range ${valueOrName} {`);
+          builder.increaseIndent();
+          builder.push(`${defs.queryParamsVarName} = append(${defs.queryParamsVarName}, item)`);
+          builder.decreaseIndent();
+          builder.push('}');
         } else {
           builder.push(
             `${defs.queryParamsVarName} = append(${defs.queryParamsVarName}, ${param.valueOrName})`,

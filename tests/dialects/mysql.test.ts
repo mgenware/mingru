@@ -8,6 +8,10 @@ const eq = assert.equal;
 const TimePkg = 'time';
 const dialect = mr.mysql;
 
+function sqlEq(sql: mm.SQL, value: string) {
+  assert.strictEqual(mr.sqlIO(sql, dialect, null).getCodeString(), `"${value}"`);
+}
+
 function testType(col: mm.Column, type: string, pkg?: string) {
   // `VarInfo` is not exported, we'll use `any` here to bypass type validation.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -73,7 +77,7 @@ it('DT (not supported)', () => {
 });
 
 it('as', () => {
-  eq(dialect.as(mm.sql`abc`, 'def'), 'abc AS `def`');
+  sqlEq(dialect.as(mm.sql`abc`, 'def'), 'abc AS `def`');
 });
 
 it('SQL calls', () => {
@@ -102,44 +106,47 @@ it('SQL calls', () => {
 
 it('objToSQL', () => {
   // null
-  eq(dialect.objToSQL(null, user), 'NULL');
+  sqlEq(dialect.objToSQL(null, user), 'NULL');
   // number
-  eq(dialect.objToSQL(-32, user), '-32');
+  sqlEq(dialect.objToSQL(-32, user), '-32');
   // boolean
-  eq(dialect.objToSQL(true, user), '1');
-  eq(dialect.objToSQL(false, user), '0');
+  sqlEq(dialect.objToSQL(true, user), '1');
+  sqlEq(dialect.objToSQL(false, user), '0');
   // string
-  eq(dialect.objToSQL('a 123 🛋', user), "'a 123 🛋'");
-  eq(dialect.objToSQL('', user), "''");
-  eq(dialect.objToSQL('\'"\\', user), "'''\"\\'");
+  sqlEq(dialect.objToSQL('a 123 🛋', user), "'a 123 🛋'");
+  sqlEq(dialect.objToSQL('', user), "''");
+  sqlEq(dialect.objToSQL('\'"\\', user), "'''\\\"\\\\'");
   // undefined
-  itThrows(() => dialect.objToSQL(undefined, user), 'value is undefined');
+  itThrows(() => dialect.objToSQL(undefined, user), 'Value is undefined');
   // Others
   itThrows(() => dialect.objToSQL([], user), 'Unsupported type of object "Array"');
 });
 
 it('colToSQLType', () => {
   // Integers
-  eq(dialect.colToSQLType(mm.int()), 'INT NOT NULL');
-  eq(dialect.colToSQLType(mm.bigInt()), 'BIGINT NOT NULL');
-  eq(dialect.colToSQLType(mm.tinyInt()), 'TINYINT NOT NULL');
-  eq(dialect.colToSQLType(mm.smallInt()), 'SMALLINT NOT NULL');
-  eq(dialect.colToSQLType(mm.uInt()), 'INT UNSIGNED NOT NULL');
-  eq(dialect.colToSQLType(mm.uBigInt()), 'BIGINT UNSIGNED NOT NULL');
-  eq(dialect.colToSQLType(mm.uTinyInt()), 'TINYINT UNSIGNED NOT NULL');
-  eq(dialect.colToSQLType(mm.uSmallInt()), 'SMALLINT UNSIGNED NOT NULL');
-  eq(dialect.colToSQLType(mm.bool()), 'TINYINT NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.int()), 'INT NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.bigInt()), 'BIGINT NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.tinyInt()), 'TINYINT NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.smallInt()), 'SMALLINT NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.uInt()), 'INT UNSIGNED NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.uBigInt()), 'BIGINT UNSIGNED NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.uTinyInt()), 'TINYINT UNSIGNED NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.uSmallInt()), 'SMALLINT UNSIGNED NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.bool()), 'TINYINT NOT NULL');
   // Chars
-  eq(dialect.colToSQLType(mm.varChar(3)), 'VARCHAR(3) NOT NULL');
-  eq(dialect.colToSQLType(mm.char(3)), 'CHAR(3) NOT NULL');
-  eq(dialect.colToSQLType(mm.text()), 'TEXT NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.varChar(3)), 'VARCHAR(3) NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.char(3)), 'CHAR(3) NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.text()), 'TEXT NOT NULL');
   // DateTime
-  eq(dialect.colToSQLType(mm.date()), 'DATE NOT NULL');
-  eq(dialect.colToSQLType(mm.datetime()), 'DATETIME NOT NULL');
-  eq(dialect.colToSQLType(mm.time()), 'TIME NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.date()), 'DATE NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.datetime()), 'DATETIME NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.time()), 'TIME NOT NULL');
   // NULL
-  eq(dialect.colToSQLType(mm.int().nullable), 'INT NULL DEFAULT NULL');
+  sqlEq(dialect.colToSQLType(mm.int().nullable), 'INT NULL DEFAULT NULL');
   // Default value
-  eq(dialect.colToSQLType(mm.int().default(43).nullable), 'INT NULL DEFAULT 43');
-  eq(dialect.colToSQLType(mm.varChar(23).default('oo').nullable), "VARCHAR(23) NULL DEFAULT 'oo'");
+  sqlEq(dialect.colToSQLType(mm.int().default(43).nullable), 'INT NULL DEFAULT 43');
+  sqlEq(
+    dialect.colToSQLType(mm.varChar(23).default('oo').nullable),
+    "VARCHAR(23) NULL DEFAULT 'oo'",
+  );
 });

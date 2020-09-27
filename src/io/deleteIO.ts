@@ -31,7 +31,7 @@ class DeleteIOProcessor {
   }
 
   convert(): DeleteIO {
-    let sql: StringSegment[] = ['DELETE FROM '];
+    const sql: StringSegment[] = ['DELETE FROM '];
     const { action, dialect } = this;
     const [table] = action.ensureInitialized();
 

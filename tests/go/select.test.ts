@@ -522,9 +522,9 @@ it('selectExists', async () => {
 
 it('toInputArray', async () => {
   class PostTA extends mm.TableActions {
-    t = mm.selectRows(post.id, post.title).where`${post.id} IN ${post.id.toInputArray(
+    t = mm.selectRows(post.id, post.title).where`${post.id} IN ${post.id.toArrayInput(
       'ids',
-    )} OR ${post.id.isNotEqualToInput('idInput')} OR ${post.id} IN ${post.id.toInputArray(
+    )} OR ${post.id.isNotEqualToInput('idInput')} OR ${post.id} IN ${post.id.toArrayInput(
       'ids2',
     )}`.orderByAsc(post.id);
   }

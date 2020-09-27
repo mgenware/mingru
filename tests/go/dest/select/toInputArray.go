@@ -30,9 +30,13 @@ func (da *TableTypePost) T(queryable mingru.Queryable, ids []uint64, idInput uin
 		return nil, fmt.Errorf("The array argument `ids2` cannot be empty")
 	}
 	var queryParams []interface{}
-	queryParams = append(queryParams, ids...)
+	for _, item := range ids {
+		queryParams = append(queryParams, item)
+	}
 	queryParams = append(queryParams, idInput)
-	queryParams = append(queryParams, ids2...)
+	for _, item := range ids2 {
+		queryParams = append(queryParams, item)
+	}
 	rows, err := queryable.Query("SELECT `id`, `title` FROM `db_post` WHERE `id` IN "+mingru.InputPlaceholders(len(ids))+" OR `id` <> ? OR `id` IN "+mingru.InputPlaceholders(len(ids2))+" ORDER BY `id`", queryParams...)
 	if err != nil {
 		return nil, err

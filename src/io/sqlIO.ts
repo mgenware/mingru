@@ -119,9 +119,7 @@ function handleElement(
       if (call.params.length) {
         res.push(
           ...join2DArrays(
-            call.params.map((p) => {
-              return getSQLCode(p, defaultTable, dialect, rewriteElement);
-            }),
+            call.params.map((p) => getSQLCode(p, defaultTable, dialect, rewriteElement)),
             ', ',
           ),
         );
