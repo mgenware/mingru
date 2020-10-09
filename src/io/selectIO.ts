@@ -50,6 +50,8 @@ export class OrderByInputIO {
     public enumTypeName: string,
     public enumNames: string[],
     public enumValues: StringSegment[][],
+    // The name of the variable used in SELECT IO SQL.
+    public sqlVarName: string,
   ) {}
 }
 
@@ -128,6 +130,9 @@ export class SelectIOProcessor {
   actionPascalName = '';
   // Used to help generate a type name for this action.
   actionUniqueTypeName = '';
+
+  // Params needed when ORDER BY inputs are present.
+  private orderByInputParams: VarInfo[] = [];
 
   constructor(public action: mm.SelectAction, public dialect: Dialect) {
     throwIfFalsy(action, 'action');
@@ -318,6 +323,11 @@ export class SelectIOProcessor {
       }
     }
 
+    // ORDER BY inputs.
+    for (const param of this.orderByInputParams) {
+      funcArgs.add(param);
+    }
+
     // Set return types
     const returnValues = new VarList(`Returns of action "${action.__name}"`, true);
 
@@ -385,7 +395,8 @@ export class SelectIOProcessor {
   private getOrderByColumnSQL(col: mm.OrderByColumnType): StringSegment[] {
     if (col instanceof mm.OrderByColumnInput) {
       const enumTypeName = `${this.actionUniqueTypeName}OrderBy${this.orderByInputCounter}`;
-      const orderByVarName = `${orderByInputParamName}${this.orderByInputCounter}`;
+      const orderByParamName = `${orderByInputParamName}${this.orderByInputCounter}`;
+      const orderByResultName = `${orderByParamName}SQL`;
       const names: string[] = [];
       const values: StringSegment[][] = [];
       for (const choice of col.columns) {
@@ -393,10 +404,19 @@ export class SelectIOProcessor {
         names.push(mm.utils.toPascalCase(`${enumTypeName}${displayName}`));
         values.push(code);
       }
-      this.orderByInputIOs.set(orderByVarName, new OrderByInputIO(enumTypeName, names, values));
+      this.orderByInputIOs.set(
+        orderByParamName,
+        new OrderByInputIO(enumTypeName, names, values, orderByResultName),
+      );
+
+      // Add ORDER BY inputs params.
+      // `orderBy1` for enum param, and `orderBy1Desc` for ordering.
+      this.orderByInputParams.push(new VarInfo(orderByParamName, defs.intTypeInfo));
+      const orderByDescVarName = `${orderByParamName}Desc`;
+      this.orderByInputParams.push(new VarInfo(orderByDescVarName, defs.boolTypeInfo));
 
       this.orderByInputCounter++;
-      return [orderByVarName];
+      return [{ code: orderByResultName }];
     }
     const [, code] = this.getOrderByNonInputColumnSQL(col.column);
     if (col.desc) {

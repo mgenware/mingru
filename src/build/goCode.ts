@@ -214,7 +214,7 @@ export function buildSwitch(
   builder: LinesBuilder,
   condition: string,
   cases: Record<string, string>,
-  defCase: string[],
+  defaultCode: string[],
 ) {
   builder.push(`switch ${condition} {`);
   for (const [key, val] of Object.entries(cases)) {
@@ -225,24 +225,26 @@ export function buildSwitch(
   }
   builder.push('default:');
   builder.increaseIndent();
-  builder.push(...defCase);
+  for (const line of defaultCode) {
+    builder.push(line);
+  }
   builder.decreaseIndent();
   builder.push('}');
 }
 
 export function buildEnum(builder: LinesBuilder, name: string, values: string[]) {
   builder.push(`// ${name} ...`);
-  builder.push('const {');
+  builder.push('const (');
   builder.increaseIndent();
   let isFirst = true;
   for (const val of values) {
-    builder.push(val + isFirst ? ' = iota' : '');
+    builder.push(val + (isFirst ? ' = iota' : ''));
     if (isFirst) {
       isFirst = false;
     }
   }
   builder.decreaseIndent();
-  builder.push('}');
+  builder.push(')');
 }
 
 export function appendWithSeparator(code: string, append: string): string {

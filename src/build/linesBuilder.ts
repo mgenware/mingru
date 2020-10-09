@@ -3,7 +3,7 @@ class LineItem {
 }
 
 export default class LinesBuilder {
-  indent = 0;
+  private indent = 0;
   private lines: LineItem[] = [];
 
   push(content = '') {

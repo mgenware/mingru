@@ -75,7 +75,7 @@ it('selectRows, WHERE, orderBy', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm
       .selectRows(post.id, cc, post.title)
-      .whereSQL(mm.sql`${post.id} = ${post.id.toInput()} ${post.id.toInput()}`)
+      .whereSQL(mm.sql`${post.id} = ${post.id.toInput()}`)
       .orderByAsc(post.title)
       .orderByAsc(cc)
       .orderByDesc(post.title)
@@ -90,11 +90,10 @@ it('ORDER BY inputs', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm
       .selectRows(post.id, cc, post.title)
-      .whereSQL(mm.sql`${post.id} = ${post.id.toInput()} ${post.id.toInput()}`)
+      .whereSQL(mm.sql`${post.id} = ${post.id.toInput()}`)
       .orderByAsc(post.title)
-      .orderByAsc(cc)
-      .orderByDesc(post.title)
-      .orderByAsc(post.cmtCount);
+      .orderByInput(cc, post.title, post.cmtCount)
+      .orderByInput('n', post.title);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/orderByInputs');

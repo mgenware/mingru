@@ -264,9 +264,9 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     if (io.orderByInputIOs.size) {
       for (const [paramVarName, inputIO] of io.orderByInputIOs.entries()) {
         // Add ORDER BY enum type definition to header.
-        const typeBuilder = new LinesBuilder();
-        go.buildEnum(builder, inputIO.enumTypeName, inputIO.enumNames);
-        headerCode = go.appendWithSeparator(headerCode, typeBuilder.toString());
+        const enumDefsBuilder = new LinesBuilder();
+        go.buildEnum(enumDefsBuilder, inputIO.enumTypeName, inputIO.enumNames);
+        headerCode = go.appendWithSeparator(headerCode, enumDefsBuilder.toString());
 
         // Add switch-case code.
         // Example:
@@ -274,6 +274,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         // `resultVarName` = `orderBy1SQL`.
         const resultVarName = `${paramVarName}SQL`;
 
+        builder.push(`var ${resultVarName} string`);
         // Switch-case code.
         const cases: Record<string, string> = {};
         inputIO.enumNames.forEach((enumName, i) => {
@@ -283,12 +284,20 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         });
 
         builder.pushSeparator();
-        // Needed as we are using `fmt.Errorf`.
+        // Add `fmt` import as we are using `fmt.Errorf`.
         this.imports.add(defs.fmtImport);
         go.buildSwitch(builder, paramVarName, cases, [
           `err := fmt.Errorf("Unsupported value %v", ${paramVarName})`,
           errReturnCode,
         ]);
+
+        // Build code for DESC.
+        builder.push(`if ${paramVarName}Desc {`);
+        builder.increaseIndent();
+        builder.push(`${resultVarName} += " DESC"`);
+        builder.decreaseIndent();
+        builder.push('}');
+        builder.push();
       }
     }
 
