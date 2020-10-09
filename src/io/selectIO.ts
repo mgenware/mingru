@@ -13,6 +13,8 @@ import * as defs from '../defs';
 import { VarInfoBuilder } from '../lib/varInfoHelper';
 import { forEachWithSlots } from '../lib/arrayUtils';
 
+const orderByInputParamName = 'orderBy';
+
 export class JoinIO {
   constructor(
     public path: string,
@@ -41,6 +43,14 @@ export class JoinIO {
     }
     return sql;
   }
+}
+
+export class OrderByInputIO {
+  constructor(
+    public enumTypeName: string,
+    public enumNames: string[],
+    public enumValues: StringSegment[][],
+  ) {}
 }
 
 export class SelectedColumnIO {
@@ -85,6 +95,8 @@ export class SelectIO extends ActionIO {
     funcArgs: VarList,
     execArgs: VarList,
     returnValues: VarList,
+    // K: ORDER BY params name, V: IO.
+    public orderByInputIOs: Map<string, OrderByInputIO>,
   ) {
     super(dialect, selectAction, sql, funcArgs, execArgs, returnValues);
     throwIfFalsy(selectAction, 'action');
@@ -105,6 +117,18 @@ export class SelectIOProcessor {
   selectedNames = new Set<string>();
   fromTable: mm.Table;
 
+  // Number of ORDER BY inputs.
+  orderByInputCounter = 1;
+  // K: ORDER BY params name, V: IO.
+  orderByInputIOs = new Map<string, OrderByInputIO>();
+
+  // Pascal case of table name.
+  tablePascalName = '';
+  // Pascal case of action name.
+  actionPascalName = '';
+  // Used to help generate a type name for this action.
+  actionUniqueTypeName = '';
+
   constructor(public action: mm.SelectAction, public dialect: Dialect) {
     throwIfFalsy(action, 'action');
     throwIfFalsy(dialect, 'dialect');
@@ -117,6 +141,9 @@ export class SelectIOProcessor {
     const { action, dialect, selectedNames, fromTable } = this;
     const { limitValue, offsetValue, orderByColumns, groupByColumns } = action;
     const selMode = action.mode;
+    this.tablePascalName = utils.tablePascalName(fromTable.__name);
+    this.actionPascalName = utils.actionPascalName(action.mustGetName());
+    this.actionUniqueTypeName = `${this.tablePascalName}Table${this.actionPascalName}`;
 
     let columns: mm.SelectActionColumns[];
     if (selMode === mm.SelectActionMode.exists) {
@@ -212,9 +239,6 @@ export class SelectIOProcessor {
         orderByColumns,
         (col) => {
           sql.push(...this.getOrderByColumnSQL(col));
-          if (col.desc) {
-            sql.push(' DESC');
-          }
         },
         () => sql.push(', '),
       );
@@ -305,19 +329,12 @@ export class SelectIOProcessor {
       returnValues.add(new VarInfo(mm.ReturnValues.result, defs.boolTypeInfo));
     } else {
       // `selMode` now equals `.list` or `.row`.
-      const tableNameSrc = fromTable.__name;
-      const actionNameSrc = action.__name;
-      const tableName = utils.tablePascalName(tableNameSrc);
-      if (!actionNameSrc) {
-        throw new Error('Action not initialized');
-      }
-      const funcName = utils.actionPascalName(actionNameSrc);
       let resultType: string;
       // Check if result type is renamed.
       if (action.__attrs[mm.ActionAttributes.resultTypeName]) {
         resultType = `${action.__attrs[mm.ActionAttributes.resultTypeName]}`;
       } else {
-        resultType = `${tableName}Table${funcName}Result`;
+        resultType = `${this.actionUniqueTypeName}Result`;
       }
 
       let isResultTypeArray = false;
@@ -339,7 +356,17 @@ export class SelectIOProcessor {
       }
     }
 
-    return new SelectIO(dialect, action, sql, colIOs, whereIO, funcArgs, execArgs, returnValues);
+    return new SelectIO(
+      dialect,
+      action,
+      sql,
+      colIOs,
+      whereIO,
+      funcArgs,
+      execArgs,
+      returnValues,
+      this.orderByInputIOs,
+    );
   }
 
   // Declared as a property to avoid `this` issues as it's used as a callback to other classes.
@@ -355,24 +382,49 @@ export class SelectIOProcessor {
     execArgs.merge(io.vars);
   }
 
-  private getOrderByColumnSQL(nCol: mm.OrderByColumn): StringSegment[] {
+  private getOrderByColumnSQL(col: mm.OrderByColumnType): StringSegment[] {
+    if (col instanceof mm.OrderByColumnInput) {
+      const enumTypeName = `${this.actionUniqueTypeName}OrderBy${this.orderByInputCounter}`;
+      const orderByVarName = `${orderByInputParamName}${this.orderByInputCounter}`;
+      const names: string[] = [];
+      const values: StringSegment[][] = [];
+      for (const choice of col.columns) {
+        const [displayName, code] = this.getOrderByNonInputColumnSQL(choice);
+        names.push(mm.utils.toPascalCase(`${enumTypeName}${displayName}`));
+        values.push(code);
+      }
+      this.orderByInputIOs.set(orderByVarName, new OrderByInputIO(enumTypeName, names, values));
+
+      this.orderByInputCounter++;
+      return [orderByVarName];
+    }
+    const [, code] = this.getOrderByNonInputColumnSQL(col.column);
+    if (col.desc) {
+      return [...code, ' DESC'];
+    }
+    return code;
+  }
+
+  // Gets ORDER BY value of the specified column. Returns an array of string segments
+  // along with a column display name which is used in ORDER BY inputs.
+  private getOrderByNonInputColumnSQL(col: mm.SelectActionColumnNames): [string, StringSegment[]] {
     const { dialect } = this;
-    const col = nCol.column;
+
     if (typeof col === 'string') {
-      return [dialect.encodeName(col)];
+      return [col, [dialect.encodeName(col)]];
     }
     if (col instanceof mm.Column) {
-      return this.getColumnSQL(col);
+      return [col.mustGetName(), this.getColumnSQL(col)];
     }
     if (col instanceof mm.RawColumn) {
       if (col.selectedName) {
-        return [dialect.encodeName(col.selectedName)];
+        return [col.selectedName, [dialect.encodeName(col.selectedName)]];
       }
       if (col.core instanceof mm.Column) {
-        return this.getColumnSQL(col.core);
+        return [col.core.mustGetName(), this.getColumnSQL(col.core)];
       }
       throw new Error(
-        'The argument "selectedName" is required for an SQL expression without any columns inside',
+        'The argument `selectedName` is required for an SQL expression without any columns inside',
       );
     }
     throw new Error(`Unsupported orderBy column "${toTypeString(col)}"`);

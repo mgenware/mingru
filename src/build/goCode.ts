@@ -3,6 +3,7 @@ import { JSONEncodingStyle } from './buildOptions';
 import VarInfo, { getAtomicTypeInfo } from '../lib/varInfo';
 import { StringSegment } from '../dialect';
 import CodeStringBuilder from '../lib/codeStringBuilder';
+import LinesBuilder from './linesBuilder';
 
 export class FuncSignature {
   constructor(
@@ -207,4 +208,46 @@ export class ImportList {
   code(): string {
     return makeImports([...this.imports]);
   }
+}
+
+export function buildSwitch(
+  builder: LinesBuilder,
+  condition: string,
+  cases: Record<string, string>,
+  defCase: string[],
+) {
+  builder.push(`switch ${condition} {`);
+  for (const [key, val] of Object.entries(cases)) {
+    builder.push(`case ${key}:`);
+    builder.increaseIndent();
+    builder.push(val);
+    builder.decreaseIndent();
+  }
+  builder.push('default:');
+  builder.increaseIndent();
+  builder.push(...defCase);
+  builder.decreaseIndent();
+  builder.push('}');
+}
+
+export function buildEnum(builder: LinesBuilder, name: string, values: string[]) {
+  builder.push(`// ${name} ...`);
+  builder.push('const {');
+  builder.increaseIndent();
+  let isFirst = true;
+  for (const val of values) {
+    builder.push(val + isFirst ? ' = iota' : '');
+    if (isFirst) {
+      isFirst = false;
+    }
+  }
+  builder.decreaseIndent();
+  builder.push('}');
+}
+
+export function appendWithSeparator(code: string, append: string): string {
+  if (!code) {
+    return append;
+  }
+  return `${code}\n${append}`;
 }

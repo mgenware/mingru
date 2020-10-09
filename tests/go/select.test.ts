@@ -85,6 +85,21 @@ it('selectRows, WHERE, orderBy', async () => {
   await testBuildAsync(ta, 'select/selectRowsWhereOrder');
 });
 
+it('ORDER BY inputs', async () => {
+  const cc = mm.sel(mm.sql`RAND()`, 'n', new mm.ColumnType(mm.dt.int));
+  class PostTA extends mm.TableActions {
+    selectT = mm
+      .selectRows(post.id, cc, post.title)
+      .whereSQL(mm.sql`${post.id} = ${post.id.toInput()} ${post.id.toInput()}`)
+      .orderByAsc(post.title)
+      .orderByAsc(cc)
+      .orderByDesc(post.title)
+      .orderByAsc(post.cmtCount);
+  }
+  const ta = mm.tableActions(post, PostTA);
+  await testBuildAsync(ta, 'select/orderByInputs');
+});
+
 it('selectField, WHERE', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm.selectField(post.user_id).byID();

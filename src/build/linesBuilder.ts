@@ -18,6 +18,12 @@ export default class LinesBuilder {
     }
   }
 
+  pushSeparator() {
+    if (this.lines.length) {
+      this.push();
+    }
+  }
+
   increaseIndent() {
     this.indent++;
   }

@@ -26,9 +26,9 @@ function joinParams(arr: string[]): string {
 // For some actions, like SELECT, it uses CodeMap type to return multiple code blocks.
 /**
  * <CodeMap.head>
- * func foo(...) { // auto generated
+ * func foo(...) { // generated in outer scope.
  *   <CodeMap.body>
- * } // closing brace, auto generated
+ * } // closing brace, generated in outer scope.
  * <CodeMap.tail>
  */
 class CodeMap {
@@ -235,8 +235,9 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     // e.g. if `resultType` is `[]*Person`, `atomicResultType` is `Person`.
     const atomicResultType =
       getAtomicTypeInfo(firstReturnParam.type).typeString || resultTypeString;
-    // Additional type definition for result type, empty on select field action.
-    let resultTypeDef: string | undefined;
+    // Additional type definitions for result type or ORDER BY inputs.
+    let headerCode = '';
+
     let errReturnCode = '';
     if (isPageMode) {
       errReturnCode = 'nil, false, err';
@@ -257,7 +258,39 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     }
     succReturnCode = 'return ' + succReturnCode;
 
-    const codeBuilder = new LinesBuilder();
+    const builder = new LinesBuilder();
+
+    // Prepare extra definitions for ORDER BY inputs.
+    if (io.orderByInputIOs.size) {
+      for (const [paramVarName, inputIO] of io.orderByInputIOs.entries()) {
+        // Add ORDER BY enum type definition to header.
+        const typeBuilder = new LinesBuilder();
+        go.buildEnum(builder, inputIO.enumTypeName, inputIO.enumNames);
+        headerCode = go.appendWithSeparator(headerCode, typeBuilder.toString());
+
+        // Add switch-case code.
+        // Example:
+        // `paramVarName` = `orderBy1`.
+        // `resultVarName` = `orderBy1SQL`.
+        const resultVarName = `${paramVarName}SQL`;
+
+        // Switch-case code.
+        const cases: Record<string, string> = {};
+        inputIO.enumNames.forEach((enumName, i) => {
+          cases[enumName] = `${resultVarName} = ${go.makeStringFromSegments(
+            inputIO.enumValues[i],
+          )}`;
+        });
+
+        builder.pushSeparator();
+        // Needed as we are using `fmt.Errorf`.
+        this.imports.add(defs.fmtImport);
+        go.buildSwitch(builder, paramVarName, cases, [
+          `err := fmt.Errorf("Unsupported value %v", ${paramVarName})`,
+          errReturnCode,
+        ]);
+      }
+    }
 
     // Selected columns.
     const selectedFields: VarInfo[] = [];
@@ -304,12 +337,15 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
           ),
         );
       } else {
-        resultTypeDef = go.struct(
-          atomicResultType,
-          selectedFields,
-          resultMemberJSONStyle,
-          jsonIgnoreFields,
-          omitEmptyFields,
+        headerCode = go.appendWithSeparator(
+          headerCode,
+          go.struct(
+            atomicResultType,
+            selectedFields,
+            resultMemberJSONStyle,
+            jsonIgnoreFields,
+            omitEmptyFields,
+          ),
         );
 
         this.imports.addVars(selectedFields);
@@ -318,7 +354,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
     const sqlSource = [...(io.sql || [])];
 
-    // LIMIT and OFFSET
+    // LIMIT and OFFSET.
     if (pagination) {
       sqlSource.push(' LIMIT ? OFFSET ?');
     } else if (limitValue !== undefined) {
@@ -335,27 +371,27 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     if (selMode === mm.SelectActionMode.list || isPageMode) {
       const scanParams = joinParams(selectedFields.map((p) => `&item.${p.name}`));
       if (isPageMode) {
-        codeBuilder.pushLines(
+        builder.pushLines(
           'limit := pageSize + 1',
           'offset := (page - 1) * pageSize',
           'max := pageSize',
         );
       }
       // Call the `Query` method.
-      this.injectQueryPreparationCode(codeBuilder, io.execArgs.list, variadicQueryParams);
-      codeBuilder.push(
+      this.injectQueryPreparationCode(builder, io.execArgs.list, variadicQueryParams);
+      builder.push(
         `rows, err := ${defs.queryableParam}.Query(${this.getQueryParamsCode(
           sqlLiteral,
           io.execArgs.list,
           variadicQueryParams,
         )})`,
       );
-      codeBuilder.push('if err != nil {');
-      codeBuilder.increaseIndent();
-      codeBuilder.push(errReturnCode);
-      codeBuilder.decreaseIndent();
-      codeBuilder.push('}');
-      codeBuilder.pushLines(
+      builder.push('if err != nil {');
+      builder.increaseIndent();
+      builder.push(errReturnCode);
+      builder.decreaseIndent();
+      builder.push('}');
+      builder.pushLines(
         go.makeArray(
           defs.resultVarName,
           `*${atomicResultType}`,
@@ -366,44 +402,44 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         'defer rows.Close()',
         'for rows.Next() {',
       );
-      codeBuilder.increaseIndent();
+      builder.increaseIndent();
       // Wrap the object scan code inside a "if itemCounter <= max" block if hasLimit
       if (pagination) {
-        codeBuilder.pushLines('itemCounter++', 'if itemCounter <= max {');
-        codeBuilder.increaseIndent();
+        builder.pushLines('itemCounter++', 'if itemCounter <= max {');
+        builder.increaseIndent();
       }
-      codeBuilder.pushLines(
+      builder.pushLines(
         go.pointerVar('item', atomicResultType),
         `err = rows.Scan(${scanParams})`,
         'if err != nil {',
       );
-      codeBuilder.increaseIndent();
-      codeBuilder.push(errReturnCode);
-      codeBuilder.decreaseIndent();
-      codeBuilder.push('}');
-      codeBuilder.push('result = append(result, item)');
+      builder.increaseIndent();
+      builder.push(errReturnCode);
+      builder.decreaseIndent();
+      builder.push('}');
+      builder.push('result = append(result, item)');
       if (pagination) {
-        codeBuilder.decreaseIndent();
-        codeBuilder.push('}');
+        builder.decreaseIndent();
+        builder.push('}');
       }
-      codeBuilder.decreaseIndent();
-      codeBuilder.push('}');
-      codeBuilder.push('err = rows.Err()');
-      codeBuilder.push('if err != nil {');
-      codeBuilder.increaseIndent();
-      codeBuilder.push(errReturnCode);
-      codeBuilder.decreaseIndent();
-      codeBuilder.push('}');
+      builder.decreaseIndent();
+      builder.push('}');
+      builder.push('err = rows.Err()');
+      builder.push('if err != nil {');
+      builder.increaseIndent();
+      builder.push(errReturnCode);
+      builder.decreaseIndent();
+      builder.push('}');
     } else {
       // For `select/selectField`.
       let scanParams: string;
       // Declare the result variable.
       if (selMode === mm.SelectActionMode.field || selMode === mm.SelectActionMode.exists) {
         scanParams = `&${defs.resultVarName}`;
-        codeBuilder.push(`var ${defs.resultVarName} ${resultTypeString}`);
+        builder.push(`var ${defs.resultVarName} ${resultTypeString}`);
       } else {
         scanParams = joinParams(selectedFields.map((p) => `&${defs.resultVarName}.${p.name}`));
-        codeBuilder.push(`${go.pointerVar(defs.resultVarName, atomicResultType)}`);
+        builder.push(`${go.pointerVar(defs.resultVarName, atomicResultType)}`);
       }
       // For `selectField` and `selectExists`, we return the default value,
       // for `select`, return nil.
@@ -411,27 +447,27 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         selMode === mm.SelectActionMode.field || selMode === mm.SelectActionMode.exists
           ? 'result'
           : 'nil';
-      codeBuilder.push();
+      builder.push();
 
       // Call the `Query` func.
-      this.injectQueryPreparationCode(codeBuilder, io.execArgs.list, variadicQueryParams);
-      codeBuilder.push(
+      this.injectQueryPreparationCode(builder, io.execArgs.list, variadicQueryParams);
+      builder.push(
         `err := ${defs.queryableParam}.QueryRow(${this.getQueryParamsCode(
           sqlLiteral,
           io.execArgs.list,
           variadicQueryParams,
         )}).Scan(${scanParams})`,
       );
-      codeBuilder.push('if err != nil {');
-      codeBuilder.increaseIndent();
-      codeBuilder.push(`return ${resultVarOnError}, err`);
-      codeBuilder.decreaseIndent();
-      codeBuilder.push('}');
+      builder.push('if err != nil {');
+      builder.increaseIndent();
+      builder.push(`return ${resultVarOnError}, err`);
+      builder.decreaseIndent();
+      builder.push('}');
     }
     // Return the result
-    codeBuilder.push(succReturnCode);
+    builder.push(succReturnCode);
 
-    return new CodeMap(codeBuilder.toString(), resultTypeDef);
+    return new CodeMap(builder.toString(), headerCode);
   }
 
   private update(io: UpdateIO, variadicParams: boolean): CodeMap {
