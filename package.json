@@ -4,7 +4,7 @@
   "description": "SQL Generator for mingru-models",
   "main": "dist/main.js",
   "types": "dist/main.d.ts",
-  "author": "Mgen (https://www.mgenware.com)",
+  "author": "Mgenware (https://github.com/mgenware)",
   "homepage": "https://github.com/mgenware/mingru",
   "bugs": "https://github.com/mgenware/mingru/issues",
   "keywords": [
