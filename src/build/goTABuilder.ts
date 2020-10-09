@@ -32,7 +32,7 @@ function joinParams(arr: string[]): string {
  * <CodeMap.tail>
  */
 class CodeMap {
-  constructor(public body: string, public head?: string, public tail?: string) {}
+  constructor(public body: LinesBuilder, public head?: string, public tail?: string) {}
 }
 
 export default class GoTABuilder {
@@ -82,11 +82,11 @@ export default class GoTABuilder {
     const funcArgs = io.funcArgs.distinctList;
     const returnValues = io.returnValues.list;
     const { className: tableClassName } = this.taIO;
-    let code = '';
+    const builder = new LinesBuilder();
 
     // Build func head.
     if (!pri) {
-      code += `// ${funcName} ...\n`;
+      builder.push(`// ${funcName} ...`);
     }
     funcSigString += `func (da *${tableClassName}) ${funcName}`;
 
@@ -109,16 +109,18 @@ export default class GoTABuilder {
       returnCode = ' ' + returnCode;
     }
     funcSigString += returnCode;
-    code += funcSigString;
 
     const actionAttr = io.action.__attrs;
     if (actionAttr[mm.ActionAttributes.groupTypeName]) {
       // Remove the type name from signature:
       // example: func (a) name() ret -> name() ret.
       const idx = funcSigString.indexOf(')');
-      funcSigString = funcSigString.substr(idx + 2);
-
-      const funcSig = new go.FuncSignature(funcName, funcSigString, allFuncArgs, returnsWithError);
+      const funcSig = new go.FuncSignature(
+        funcName,
+        funcSigString.substr(idx + 2),
+        allFuncArgs,
+        returnsWithError,
+      );
 
       this.context.handleInterfaceMember(
         actionAttr[mm.ActionAttributes.groupTypeName] as string,
@@ -127,10 +129,10 @@ export default class GoTABuilder {
     }
 
     // Func start.
-    code += ' {\n';
+    builder.push(`${funcSigString} {`);
 
     // Check input arrays.
-    let inputArrayChecks = '';
+    const inputArrayChecks = new LinesBuilder();
     const arrayParams = funcArgs.filter(
       (p) => p.type instanceof CompoundTypeInfo && p.type.isArray,
     );
@@ -142,10 +144,11 @@ export default class GoTABuilder {
         returnValueStrings.push(
           `fmt.Errorf("The array argument \`${arrayParam.name}\` cannot be empty")`,
         );
-        inputArrayChecks += `if len(${arrayParam.valueOrName}) == 0 {
-\treturn ${returnValueStrings.join(', ')}
-}
-`;
+        inputArrayChecks.push(`if len(${arrayParam.valueOrName}) == 0 {`);
+        inputArrayChecks.increaseIndent();
+        inputArrayChecks.push(`return ${returnValueStrings.join(', ')}`);
+        inputArrayChecks.decreaseIndent();
+        inputArrayChecks.push('}');
       }
     }
     const variadicQueryParams = !!arrayParams.length;
@@ -184,17 +187,21 @@ export default class GoTABuilder {
 
       default: {
         throw new Error(
-          `Not supported action type "${io.action.actionType}" in goBuilder.processActionIO`,
+          `Not supported action type "${io.action.actionType}" in \`goBuilder.processActionIO\``,
         );
       }
     }
 
     // Increase indent on all body lines.
-    code += this.increaseIndent(inputArrayChecks + bodyMap.body);
+    builder.increaseIndent();
+    builder.pushBuilder(inputArrayChecks);
+    builder.pushBuilder(bodyMap.body);
 
-    // Closing func.
-    code += '\n}\n';
+    // Close func.
+    builder.decreaseIndent();
+    builder.push('}');
 
+    let code = builder.toString();
     if (bodyMap.head) {
       code = `${bodyMap.head}\n${code}`;
     }
@@ -250,7 +257,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
     let succReturnCode = '';
     if (isPageMode) {
-      succReturnCode = `${defs.resultVarName}, itemCounter > len(result), nil`;
+      succReturnCode = `${defs.resultVarName}, itemCounter > len(${defs.resultVarName}), nil`;
     } else if (pagination) {
       succReturnCode = `${defs.resultVarName}, itemCounter, nil`;
     } else {
@@ -272,7 +279,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         // Example:
         // `paramVarName` = `orderBy1`.
         // `resultVarName` = `orderBy1SQL`.
-        const resultVarName = `${paramVarName}SQL`;
+        const resultVarName = inputIO.sqlVarName;
 
         builder.push(`var ${resultVarName} string`);
         // Switch-case code.
@@ -283,7 +290,6 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
           )}`;
         });
 
-        builder.pushSeparator();
         // Add `fmt` import as we are using `fmt.Errorf`.
         this.imports.add(defs.fmtImport);
         go.buildSwitch(builder, paramVarName, cases, [
@@ -426,7 +432,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       builder.push(errReturnCode);
       builder.decreaseIndent();
       builder.push('}');
-      builder.push('result = append(result, item)');
+      builder.push(`${defs.resultVarName} = append(${defs.resultVarName}, item)`);
       if (pagination) {
         builder.decreaseIndent();
         builder.push('}');
@@ -454,9 +460,8 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       // for `select`, return nil.
       const resultVarOnError =
         selMode === mm.SelectActionMode.field || selMode === mm.SelectActionMode.exists
-          ? 'result'
+          ? defs.resultVarName
           : 'nil';
-      builder.push();
 
       // Call the `Query` func.
       this.injectQueryPreparationCode(builder, io.execArgs.list, variadicQueryParams);
@@ -473,10 +478,10 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       builder.decreaseIndent();
       builder.push('}');
     }
-    // Return the result
+    // Return the result.
     builder.push(succReturnCode);
 
-    return new CodeMap(builder.toString(), headerCode);
+    return new CodeMap(builder, headerCode);
   }
 
   private update(io: UpdateIO, variadicParams: boolean): CodeMap {
@@ -491,7 +496,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         sqlLiteral,
         queryArgs,
         variadicParams,
-      )})\n`,
+      )})`,
     );
 
     // Return the result
@@ -500,7 +505,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     } else {
       builder.push(`return mingru.GetRowsAffectedIntWithError(${defs.resultVarName}, err)`);
     }
-    return new CodeMap(builder.toString());
+    return new CodeMap(builder);
   }
 
   private insert(io: InsertIO, variadicParams: boolean): CodeMap {
@@ -511,9 +516,9 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const sqlLiteral = io.getSQLCode();
     this.injectQueryPreparationCode(builder, queryArgs, variadicParams);
     builder.push(
-      `${fetchInsertedID ? 'result' : '_'}, err := ${
+      `${fetchInsertedID ? defs.resultVarName : '_'}, err := ${
         defs.queryableParam
-      }.Exec(${this.getQueryParamsCode(sqlLiteral, queryArgs, variadicParams)})\n`,
+      }.Exec(${this.getQueryParamsCode(sqlLiteral, queryArgs, variadicParams)})`,
     );
 
     // Return the result
@@ -522,7 +527,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     } else {
       builder.push('return err');
     }
-    return new CodeMap(builder.toString());
+    return new CodeMap(builder);
   }
 
   private delete(io: DeleteIO, variadicParams: boolean): CodeMap {
@@ -537,15 +542,16 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         sqlLiteral,
         queryArgs,
         variadicParams,
-      )})\n`,
+      )})`,
     );
+
     // Return the result
     if (action.ensureOneRowAffected) {
       builder.push(`return mingru.CheckOneRowAffectedWithError(${defs.resultVarName}, err)`);
     } else {
       builder.push(`return mingru.GetRowsAffectedIntWithError(${defs.resultVarName}, err)`);
     }
-    return new CodeMap(builder.toString());
+    return new CodeMap(builder);
   }
 
   private wrap(io: WrapIO, variadicParams: boolean): CodeMap {
@@ -554,14 +560,16 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
     this.injectQueryPreparationCode(builder, queryArgs, variadicParams);
     builder.push(
-      `return ${io.funcPath}(${this.getQueryParamsCode(null, queryArgs, variadicParams)})\n`,
+      `return ${io.funcPath}(${this.getQueryParamsCode(null, queryArgs, variadicParams)})`,
     );
-    return new CodeMap(builder.toString());
+    return new CodeMap(builder);
   }
 
   private transact(io: TransactIO, _variadicQueryParams: boolean): CodeMap {
     let headCode = '';
-    let innerBody = '';
+
+    // Lines builder for code inside DB transaction closure.
+    const innerBuilder = new LinesBuilder();
     const { memberIOs, returnValues } = io;
 
     // We don't use queryable in transaction arguments but we still need to
@@ -569,7 +577,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     this.imports.addVars([defs.dbxQueryableVar]);
 
     // Declare err variable.
-    innerBody += 'var err error\n';
+    innerBuilder.push('var err error');
 
     let memberIdx = -1;
     const memberCount = memberIOs.length;
@@ -583,16 +591,17 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
 
       // Iterate through return values.
       let hasDeclaredVars = false;
+      let returnValuesCode = '';
       for (const ret of mActionIO.returnValues.list) {
         // Check if this value has been exported (declared).
         const varName = declaredReturnValueNames[ret.name];
         if (varName) {
           hasDeclaredVars = true;
         }
-        innerBody += `${varName || '_'}, `;
+        returnValuesCode += `${varName || '_'}, `;
       }
-      innerBody += `err ${hasDeclaredVars ? ':' : ''}= `;
-      innerBody += memberIO.callPath;
+      returnValuesCode += `err ${hasDeclaredVars ? ':' : ''}= `;
+      returnValuesCode += memberIO.callPath;
       // Generating the calling code of this member
       const queryParamsCode = mActionIO.funcArgs.list
         .slice(1) // Strip the first queryable param
@@ -609,52 +618,57 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         }
       }
 
-      innerBody += '(tx';
+      returnValuesCode += '(tx';
       if (queryParamsCode) {
-        innerBody += `, ${queryParamsCode}`;
+        returnValuesCode += `, ${queryParamsCode}`;
       }
-      innerBody += ')\n';
-      innerBody += '\nif err != nil {\n\treturn err\n}\n';
+      returnValuesCode += ')';
+      innerBuilder.push(returnValuesCode);
+      innerBuilder.push('if err != nil {');
+      innerBuilder.increaseIndent();
+      innerBuilder.push('return err');
+      innerBuilder.decreaseIndent();
+      innerBuilder.push('}');
     }
 
     // Assign inner variables to outer return values if needed.
     if (returnValues.length) {
       for (const v of returnValues.list) {
-        innerBody += `${this.txExportedVar(v.name)} = ${v.name}\n`;
+        innerBuilder.push(`${this.txExportedVar(v.name)} = ${v.name}`);
       }
     }
 
-    innerBody += 'return nil\n';
+    innerBuilder.push('return nil');
 
-    let body = '';
+    const builder = new LinesBuilder();
     // Declare return variables if needed.
     if (returnValues.length) {
       this.imports.addVars(returnValues.list);
       for (const v of returnValues.list) {
-        body += `var ${this.txExportedVar(v.name)} ${v.type.typeString}\n`;
+        builder.push(`var ${this.txExportedVar(v.name)} ${v.type.typeString}`);
       }
     }
-    body += 'txErr := mingru.Transact(db, func(tx *sql.Tx) error {\n';
-    body += this.increaseIndent(innerBody);
-    body += '\n})\nreturn ';
+    builder.push('txErr := mingru.Transact(db, func(tx *sql.Tx) error {');
+    builder.increaseIndent();
+    builder.pushBuilder(innerBuilder);
+    builder.decreaseIndent();
+    builder.push('})');
+
+    let returnCode = 'return ';
     if (returnValues.length) {
       for (const v of returnValues.list) {
-        body += `${this.txExportedVar(v.name)}, `;
+        returnCode += `${this.txExportedVar(v.name)}, `;
       }
     }
-    body += 'txErr\n';
-    return new CodeMap(body, headCode);
+    returnCode += 'txErr';
+    builder.push(returnCode);
+    return new CodeMap(builder, headCode);
   }
 
   // A varList usually ends without an error type, call this to append
   // an Go error type to the varList.
   private appendErrorType(vars: VarInfo[]): VarInfo[] {
     return [...vars, new VarInfo('error', defs.errorType)];
-  }
-
-  private increaseIndent(code: string): string {
-    const lines = code.match(/[^\r\n]+/g) || [code];
-    return lines.map((line) => `\t${line}`).join('\n');
   }
 
   private txExportedVar(name: string): string {

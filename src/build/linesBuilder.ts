@@ -32,6 +32,13 @@ export default class LinesBuilder {
     this.indent--;
   }
 
+  pushBuilder(builder: LinesBuilder) {
+    const { indent } = this;
+    for (const line of builder.lines) {
+      this.lines.push(new LineItem(line.indent + indent, line.content));
+    }
+  }
+
   toString(): string {
     let s = '';
     for (const line of this.lines) {
