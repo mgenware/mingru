@@ -84,3 +84,15 @@ it('Numeric length', async () => {
   const t = mm.table(User);
   await testBuildAsync(t, 'numericLength/user');
 });
+
+it('Default empty values', async () => {
+  class Post extends mm.Table {
+    a = mm.pk();
+    b = mm.uInt().default(0);
+    c = mm.uInt().nullable.default(null);
+    d = mm.uInt().nullable;
+    e = mm.uInt();
+  }
+  const t = mm.table(Post, 'db_post');
+  await testBuildAsync(t, 'defaultZero/post');
+});

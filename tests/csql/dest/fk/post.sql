@@ -4,7 +4,7 @@ CREATE TABLE `db_post` (
 	`content` VARCHAR(100) NOT NULL,
 	`user_id` BIGINT UNSIGNED NOT NULL,
 	`reviewer_id` BIGINT UNSIGNED NOT NULL,
-	`cmt_c` INT UNSIGNED NOT NULL,
+	`cmt_c` INT UNSIGNED NOT NULL DEFAULT 0,
 	`datetime` DATETIME NOT NULL,
 	`date` DATE NOT NULL,
 	`time` TIME NOT NULL,

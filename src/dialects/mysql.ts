@@ -61,7 +61,7 @@ export class MySQL extends Dialect {
     builder.pushWithSpace(colType.nullable ? 'NULL' : 'NOT NULL');
     if (!col.__isNoDefaultOnCSQL) {
       const defValue = col.__defaultValue;
-      if (defValue && defValue instanceof mm.SQL === false) {
+      if (defValue !== undefined && defValue instanceof mm.SQL === false) {
         builder.pushWithSpace('DEFAULT');
 
         // MySQL doesn't allow dynamic value as default value, we simply ignore SQL expr here.

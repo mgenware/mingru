@@ -3,7 +3,7 @@ CREATE TABLE `user` (
 	`url_name` VARCHAR(100) NOT NULL,
 	`display_name` VARCHAR(100) NOT NULL,
 	`sig` VARCHAR(300) NULL DEFAULT NULL,
-	`age` INT NOT NULL,
+	`age` INT NOT NULL DEFAULT 0,
 	`follower_c` VARCHAR(300) NULL DEFAULT NULL,
 	PRIMARY KEY (`id`)
 )
