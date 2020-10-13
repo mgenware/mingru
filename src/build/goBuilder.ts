@@ -12,12 +12,7 @@ import * as go from './goCode';
 import * as defs from '../defs';
 
 export default class GoBuilder {
-  async buildAsync(
-    tas: mm.TableActions[],
-    outDir: string,
-    dialect: Dialect,
-    opts: BuildOptions,
-  ) {
+  async buildAsync(tas: mm.TableActions[], outDir: string, dialect: Dialect, opts: BuildOptions) {
     throwIfEmpty(tas, 'tas');
     // Remove duplicate values.
     // eslint-disable-next-line no-param-reassign

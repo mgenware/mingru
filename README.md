@@ -86,7 +86,7 @@ export default mm.tableActions(user, UserTA);
 Install `mingru-tsconfig`:
 
 ```sh
-yarn add mingru-tsconfig
+yarn add mingru-tsconfig -D
 ```
 
 Set `extends` to `mingru-tsconfig` in your local `tsconfig.json`:

@@ -3,7 +3,7 @@ class LineItem {
 }
 
 export default class LinesBuilder {
-  indent = 0;
+  private indent = 0;
   private lines: LineItem[] = [];
 
   push(content = '') {
@@ -18,12 +18,25 @@ export default class LinesBuilder {
     }
   }
 
+  pushSeparator() {
+    if (this.lines.length) {
+      this.push();
+    }
+  }
+
   increaseIndent() {
     this.indent++;
   }
 
   decreaseIndent() {
     this.indent--;
+  }
+
+  pushBuilder(builder: LinesBuilder) {
+    const { indent } = this;
+    for (const line of builder.lines) {
+      this.lines.push(new LineItem(line.indent + indent, line.content));
+    }
   }
 
   toString(): string {
