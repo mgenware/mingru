@@ -146,7 +146,9 @@ export class SelectIOProcessor {
     const { action, dialect, selectedNames, fromTable } = this;
     const { limitValue, offsetValue, orderByColumns, groupByColumns } = action;
     const selMode = action.mode;
-    this.tablePascalName = utils.tablePascalName(fromTable.__name);
+
+    // NOTE: not the table defined by FROM, it's the root table defined in table actions.
+    this.tablePascalName = utils.tablePascalName((action.__rootTable || fromTable).__name);
     this.actionPascalName = utils.actionPascalName(action.mustGetName());
     this.actionUniqueTypeName = `${this.tablePascalName}Table${this.actionPascalName}`;
 
