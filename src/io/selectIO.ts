@@ -372,6 +372,23 @@ export class SelectIOProcessor {
       }
     }
 
+    // Handle UNIONs.
+    let next = action.nextSelectAction;
+    while (next) {
+      try {
+        const nextProcessor = new SelectIOProcessor(next, dialect);
+        // Merge func args and exec args.
+        const nextIO = nextProcessor.convert();
+        funcArgs.merge(nextIO.funcArgs.list);
+        execArgs.merge(nextIO.execArgs.list);
+
+        next = next.nextSelectAction;
+      } catch (err) {
+        err.message += ' [UNION]';
+        throw err;
+      }
+    }
+
     return new SelectIO(
       dialect,
       action,
