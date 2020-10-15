@@ -144,8 +144,12 @@ export class SelectIOProcessor {
   convert(): SelectIO {
     const sql: StringSegment[] = ['SELECT '];
     const { action, dialect, selectedNames, fromTable } = this;
-    const { limitValue, offsetValue, orderByColumns, groupByColumns } = action;
+    const { limitValue, offsetValue, orderByColumns, groupByColumns, distinctFlag } = action;
     const selMode = action.mode;
+
+    if (distinctFlag) {
+      sql.push('DISTINCT ');
+    }
 
     // NOTE: not the table defined by FROM, it's the root table defined in table actions.
     this.tablePascalName = utils.tablePascalName((action.__rootTable || fromTable).__name);

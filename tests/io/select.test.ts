@@ -297,3 +297,16 @@ it('Unrelated cols', () => {
     mr.selectIO(v, mr.mysql);
   });
 });
+
+it('Select DISTINCT', () => {
+  class UserTA extends mm.TableActions {
+    t = mm.select(user.id, user.url_name).distinct();
+  }
+  const userTA = mm.tableActions(user, UserTA);
+  const v = userTA.t;
+  const io = mr.selectIO(v, dialect);
+
+  assert.ok(io instanceof mr.SelectIO);
+  eq(io.getSQLCode(), '"SELECT DISTINCT `id`, `url_name` FROM `user`"');
+  eq(io.where, null);
+});
