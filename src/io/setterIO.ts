@@ -14,7 +14,7 @@ export class SetterIO {
     sourceTable: mm.Table | null,
     opt?: SQLIOBuilderOption,
   ): SetterIO[] {
-    const [table] = action.ensureInitialized();
+    const table = action.mustGetTable();
     const { setters: actionSetters } = action;
 
     // User setters come first.

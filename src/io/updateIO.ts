@@ -39,7 +39,7 @@ class UpdateIOProcessor {
   convert(): UpdateIO {
     const sql: StringSegment[] = ['UPDATE '];
     const { action, dialect } = this;
-    const [table] = action.ensureInitialized();
+    const table = action.mustGetTable();
 
     if (!action.whereSQL && !action.allowNoWhere) {
       throw new Error(

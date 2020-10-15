@@ -137,7 +137,7 @@ export class SelectIOProcessor {
   constructor(public action: mm.SelectAction, public dialect: Dialect) {
     throwIfFalsy(action, 'action');
     throwIfFalsy(dialect, 'dialect');
-    const [fromTable] = action.ensureInitialized();
+    const fromTable = action.mustGetTable();
     this.fromTable = fromTable;
   }
 
@@ -217,7 +217,7 @@ export class SelectIOProcessor {
         rewriteElement: (ele) => {
           if (ele.type === mm.SQLElementType.column) {
             const col = ele.toColumn();
-            const [colTable] = col.ensureInitialized();
+            const colTable = col.mustGetTable();
             if (colTable instanceof mm.JoinedTable) {
               this.handleJoinRecursively(col);
             }
@@ -477,7 +477,7 @@ export class SelectIOProcessor {
     const { dialect } = this;
     let value = dialect.encodeColumnName(col);
     if (this.hasJoin) {
-      const [colTable] = col.ensureInitialized();
+      const colTable = col.mustGetTable();
       if (colTable instanceof mm.JoinedTable) {
         const jt = col.__table as mm.JoinedTable;
         const joinPath = jt.keyPath;
@@ -702,7 +702,7 @@ export class SelectIOProcessor {
 
     let localTableName: string;
     const { srcColumn, destColumn, destTable } = table;
-    const [srcTable] = srcColumn.ensureInitialized();
+    const srcTable = srcColumn.mustGetTable();
     if (srcTable instanceof mm.JoinedTable) {
       const srcIO = this.handleJoinRecursively(srcColumn);
       localTableName = srcIO.tableAlias;
@@ -729,9 +729,9 @@ export class SelectIOProcessor {
     const { dialect, action } = this;
     const e = dialect.encodeName;
     // Make sure column is initialized.
-    const [colTable] = col.ensureInitialized();
+    const colTable = col.mustGetTable();
     // Make sure column is from current table.
-    const [sourceTable] = action.ensureInitialized();
+    const sourceTable = action.mustGetTable();
     col.checkSourceTable(sourceTable);
 
     let colSQL: mm.SQL;

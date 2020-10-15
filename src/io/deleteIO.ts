@@ -33,7 +33,7 @@ class DeleteIOProcessor {
   convert(): DeleteIO {
     const sql: StringSegment[] = ['DELETE FROM '];
     const { action, dialect } = this;
-    const [table] = action.ensureInitialized();
+    const table = action.mustGetTable();
 
     if (!action.whereSQL && !action.allowNoWhere) {
       throw new Error(

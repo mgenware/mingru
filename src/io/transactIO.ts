@@ -59,10 +59,10 @@ class TransactIOProcessor {
   convert(): TransactIO {
     const { action, dialect } = this;
     const { members } = action;
-    action.ensureInitialized();
     const memberIOs = members.map((mem, idx) => {
       const childAction = mem.action;
-      const [childTable, childName] = childAction.ensureInitialized();
+      const childTable = childAction.mustGetTable();
+      const childName = childAction.mustGetName();
 
       // Call actionToIO after initialization.
       const io = actionToIO(childAction, dialect, `transaction child index ${idx}`);

@@ -37,7 +37,7 @@ export class InsertIOProcessor {
   convert(): InsertIO {
     const sql: StringSegment[] = ['INSERT INTO '];
     const { action, dialect } = this;
-    const [table] = action.ensureInitialized();
+    const table = action.mustGetTable();
     const fetchInsertedID = action.ensureOneRowAffected && !!table.__pkAIs.length;
 
     // Table

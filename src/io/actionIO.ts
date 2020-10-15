@@ -25,7 +25,8 @@ export class ActionIO {
     throwIfFalsy(execArgs, 'execArgs');
     throwIfFalsy(returnValues, 'returnValues');
 
-    const [table, name] = action.ensureInitialized();
+    const table = action.mustGetTable();
+    const name = action.mustGetName();
     this.table = table;
     this.funcName = utils.actionPascalName(name);
 

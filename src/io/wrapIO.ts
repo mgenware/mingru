@@ -32,7 +32,7 @@ class WrapIOProcessor {
   convert(): ActionIO {
     const { action, dialect } = this;
     const innerAction = action.action;
-    const [, actionName] = action.ensureInitialized();
+    const actionName = action.mustGetName();
     const innerIO = actionToIO(innerAction, dialect, `WrappedAction "${actionName}"`);
     const innerActionTable = innerAction.__table;
     if (!innerActionTable) {
