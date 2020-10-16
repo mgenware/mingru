@@ -7,11 +7,13 @@ import VarInfo from '../lib/varInfo';
 import * as utils from '../lib/stringUtils';
 import actionToIO, { registerHandler } from './actionToIO';
 import * as defs from '../defs';
+import { ActionToIOOptions } from './actionToIOOptions';
+import BaseIOProcessor from './baseIOProcessor';
 
 export class WrapIO extends ActionIO {
   constructor(
     dialect: Dialect,
-    public wrapAction: mm.WrappedAction,
+    public wrapAction: mm.WrapAction,
     funcArgs: VarList,
     execArgs: VarList,
     returnValues: VarList,
@@ -23,24 +25,20 @@ export class WrapIO extends ActionIO {
   }
 }
 
-class WrapIOProcessor {
-  constructor(public action: mm.WrappedAction, public dialect: Dialect) {
-    throwIfFalsy(action, 'action');
-    throwIfFalsy(dialect, 'dialect');
+class WrapIOProcessor extends BaseIOProcessor {
+  constructor(public action: mm.WrapAction, opt: ActionToIOOptions) {
+    super(action, opt);
   }
 
   convert(): ActionIO {
-    const { action, dialect } = this;
+    const { action, opt } = this;
+    const { dialect } = opt;
     const innerAction = action.action;
     const actionName = action.mustGetName();
-    const innerIO = actionToIO(innerAction, dialect, `WrappedAction "${actionName}"`);
-    const innerActionTable = innerAction.__table;
-    if (!innerActionTable) {
-      throw new Error('innerAction not initialized');
-    }
+    const innerIO = actionToIO(innerAction, opt, `WrapAction "${actionName}"`);
 
     const { args } = action;
-    // Throw on non-existing argument names
+    // Throw on non-existing argument names.
     const innerFuncArgs = innerIO.funcArgs;
     for (const key of Object.keys(args)) {
       if (!innerFuncArgs.getByName(key)) {
@@ -75,19 +73,15 @@ class WrapIOProcessor {
       }
     }
 
-    // For temp actions, inner and outer actions are merged into one:
-    //   mm.update().wrap(args) -> mm.update(args)
-    // For non-temp actions:
+    // For inline actions, inner and outer actions are merged into one:
+    // For non-inline actions:
     //   this.t.wrap(args) -> inner = this.t, outer = this.t(args)
-    const funcPath = utils.actionCallPath(
-      innerActionTable === action.__table ? null : innerActionTable.__name,
-      innerAction.__name || actionName,
-      false,
-    );
 
-    if (action.isTemp) {
-      // `isTemp` means the `innerIO` is not used by any other actions. We can
-      // update it in-place and return it as the IO object for this action.
+    // `isInline` means the `innerIO` is not used by any other actions. We can
+    // update it in-place and return it as the IO object for this action.
+    // Example:
+    //   mm.update().wrap(args) -> mm.update(args)
+    if (action.isInline) {
       innerIO.funcArgs = funcArgs;
       const innerExecArgs = innerIO.execArgs;
       for (let i = 0; i < innerExecArgs.list.length; i++) {
@@ -100,6 +94,18 @@ class WrapIOProcessor {
       }
       return innerIO;
     }
+
+    // Non-inline case.
+    const innerActionRootTable = innerAction.__rootTable;
+    // `innerActionRootTable` should not be null as `innerAction` should be initialized at the point.
+    if (!innerActionRootTable) {
+      throw new Error(`Unexpected uninitialized WRAP action "${innerAction}"`);
+    }
+    const funcPath = utils.actionCallPath(
+      innerActionRootTable === action.__table ? null : innerActionRootTable.__name,
+      innerAction.__name || actionName,
+      false,
+    );
 
     const execArgs = new VarList(`Exec args of action "${action.__name}"`, true);
     for (const arg of innerFuncArgs.distinctList) {
@@ -115,8 +121,8 @@ class WrapIOProcessor {
   }
 }
 
-export function wrapIO(action: mm.Action, dialect: Dialect): ActionIO {
-  const pro = new WrapIOProcessor(action as mm.WrappedAction, dialect);
+export function wrapIO(action: mm.Action, opt: ActionToIOOptions): ActionIO {
+  const pro = new WrapIOProcessor(action as mm.WrapAction, opt);
   return pro.convert();
 }
 

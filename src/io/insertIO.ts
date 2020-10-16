@@ -8,6 +8,8 @@ import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
 import * as utils from '../lib/stringUtils';
 import { forEachWithSlots } from '../lib/arrayUtils';
+import { ActionToIOOptions } from './actionToIOOptions';
+import BaseIOProcessor from './baseIOProcessor';
 
 export class InsertIO extends ActionIO {
   returnMember: ActionIO | undefined;
@@ -28,15 +30,15 @@ export class InsertIO extends ActionIO {
   }
 }
 
-export class InsertIOProcessor {
-  constructor(public action: mm.InsertAction, public dialect: Dialect) {
-    throwIfFalsy(action, 'action');
-    throwIfFalsy(dialect, 'dialect');
+export class InsertIOProcessor extends BaseIOProcessor {
+  constructor(public action: mm.InsertAction, opt: ActionToIOOptions) {
+    super(action, opt);
   }
 
   convert(): InsertIO {
     const sql: StringSegment[] = ['INSERT INTO '];
-    const { action, dialect } = this;
+    const { action, opt } = this;
+    const { dialect } = opt;
     const table = action.mustGetTable();
     const fetchInsertedID = action.ensureOneRowAffected && !!table.__pkAIs.length;
 
@@ -72,8 +74,8 @@ export class InsertIOProcessor {
     // Skip the first param, which is queryable.
     execArgs.merge(funcArgs.list.slice(1));
 
-    // Return values
-    const returnValue = new VarList(`Returns of action ${action.__name}`);
+    // Return values.
+    const returnValue = new VarList(`Return values of action ${action.__name}`);
     if (fetchInsertedID) {
       returnValue.add(defs.insertedIDVar);
     }
@@ -91,13 +93,13 @@ export class InsertIOProcessor {
   }
 
   private handleFrom(table: mm.Table): StringSegment[] {
-    const e = this.dialect.encodeName;
+    const e = this.opt.dialect.encodeName;
     return [`${e(table.getDBName())}`];
   }
 }
 
-export function insertIO(action: mm.Action, dialect: Dialect): InsertIO {
-  const pro = new InsertIOProcessor(action as mm.InsertAction, dialect);
+export function insertIO(action: mm.Action, opt: ActionToIOOptions): InsertIO {
+  const pro = new InsertIOProcessor(action as mm.InsertAction, opt);
   return pro.convert();
 }
 

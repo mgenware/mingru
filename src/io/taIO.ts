@@ -1,9 +1,9 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import Dialect from '../dialect';
 import * as utils from '../lib/stringUtils';
 import { ActionIO } from './actionIO';
 import actionToIO from './actionToIO';
+import { ActionToIOOptions } from './actionToIOOptions';
 
 // IO object for TA(Tabla actions)
 export class TAIO {
@@ -11,19 +11,16 @@ export class TAIO {
   className: string;
   instanceName: string;
 
-  constructor(public ta: mm.TableActions, public dialect: Dialect) {
+  constructor(public ta: mm.TableActions, public opt: ActionToIOOptions) {
     throwIfFalsy(ta, 'ta');
     // Actions are sorted alphabetically.
     this.actions = Object.entries(ta.__actions)
       .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([actionName, action]) =>
-        actionToIO(action, dialect, `action "${actionName}"`),
-      );
+      .map(([actionName, action]) => actionToIO(action, opt, `action "${actionName}"`));
 
-    if (!ta.__table) {
-      throw new Error('Table action group is not initialized');
-    }
-    this.className = utils.tableTypeName(ta.__table.__name);
-    this.instanceName = utils.tablePascalName(ta.__table.__name);
+    const taTable = ta.mustGetTable();
+    const taTableName = taTable.__name;
+    this.className = utils.tableTypeName(taTableName);
+    this.instanceName = utils.tablePascalName(taTableName);
   }
 }

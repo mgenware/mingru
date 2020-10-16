@@ -9,6 +9,8 @@ it('Wrap', async () => {
   }
   const userTA = mm.tableActions(user, UserTA);
   class PostTA extends mm.TableActions {
+    // ROOT_TABLE: post
+    // TABLE: user
     s = mm
       .updateSome()
       .from(user)
@@ -18,8 +20,16 @@ it('Wrap', async () => {
         mm.sql`${user.url_name.toInput()} ${user.id.toInput()} ${user.sig.toInput()} ${user.url_name.toInput()}`,
       );
 
+    // ROOT_TABLE: post
+    // TABLE: user
     t1 = this.s.wrap({ sig: '"haha"' });
+
+    // ROOT_TABLE: post
+    // TABLE: user
     t2 = userTA.t.wrap({ sig: '"SIG"' });
+
+    // ROOT_TABLE: post
+    // TABLE: post
     t3 = mm.updateOne().setInputs().byID().wrap({ title: '"t3"' });
   }
   const ta = mm.tableActions(post, PostTA);

@@ -2,8 +2,7 @@ import * as mm from 'mingru-models';
 import * as assert from 'assert';
 import * as mr from '../..';
 import cols from '../models/cols';
-
-const dialect = mr.mysql;
+import { ioOpt } from './common';
 
 it('dtDefault', () => {
   const { dt } = mm;
@@ -34,7 +33,7 @@ it('insertWithDefaults', () => {
   }
   const ta = mm.tableActions(cols, ColsTA);
   const v = ta.insertT;
-  const io = mr.insertIO(v, dialect);
+  const io = mr.insertIO(v, ioOpt);
 
   assert.equal(
     io.getSQLCode(),

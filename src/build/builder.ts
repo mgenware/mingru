@@ -12,11 +12,7 @@ import { BuildOptions } from './buildOptions';
 export default class Builder {
   opts: BuildOptions;
   private buildStarted = false;
-  constructor(
-    public dialect: Dialect,
-    public outDir: string,
-    opts?: BuildOptions,
-  ) {
+  constructor(public dialect: Dialect, public outDir: string, opts?: BuildOptions) {
     throwIfFalsy(dialect, 'dialect');
     throwIfFalsy(outDir, 'outDir');
     // eslint-disable-next-line no-param-reassign
@@ -41,7 +37,7 @@ export default class Builder {
     throwIfFalsy(actions, 'actions');
     this.checkBuildStatus();
     const goBuilder = new GoBuilder();
-    await goBuilder.buildAsync(actions, this.outDir, this.dialect, this.opts);
+    await goBuilder.buildAsync(actions, this.outDir, { dialect: this.dialect }, this.opts);
     logger.debug('🎉  Action build succeeded');
   }
 

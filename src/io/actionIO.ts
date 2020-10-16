@@ -9,7 +9,8 @@ import { makeStringFromSegments } from '../build/goCode';
 
 export class ActionIO {
   table: mm.Table;
-  funcName = '';
+  // Can be null if action name is null.
+  funcName: string | null = null;
   funcStubs: VarInfo[];
 
   constructor(
@@ -26,9 +27,10 @@ export class ActionIO {
     throwIfFalsy(returnValues, 'returnValues');
 
     const table = action.mustGetTable();
-    const name = action.mustGetName();
+    if (action.__name) {
+      this.funcName = utils.actionPascalName(action.__name);
+    }
     this.table = table;
-    this.funcName = utils.actionPascalName(name);
 
     this.funcStubs = action.__argStubs.map((v) => VarInfoBuilder.fromSQLVar(v, dialect));
   }

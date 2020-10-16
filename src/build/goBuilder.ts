@@ -6,13 +6,18 @@ import * as mfs from 'm-fs';
 import GoTABuilder from './goTABuilder';
 import GoBuilderContext from './goBuilderContext';
 import { TAIO } from '../io/taIO';
-import Dialect from '../dialect';
 import { BuildOptions } from './buildOptions';
 import * as go from './goCode';
 import * as defs from '../defs';
+import { ActionToIOOptions } from '../io/actionToIOOptions';
 
 export default class GoBuilder {
-  async buildAsync(tas: mm.TableActions[], outDir: string, dialect: Dialect, opts: BuildOptions) {
+  async buildAsync(
+    tas: mm.TableActions[],
+    outDir: string,
+    ioOpts: ActionToIOOptions,
+    opts: BuildOptions,
+  ) {
     throwIfEmpty(tas, 'tas');
     // Remove duplicate values.
     // eslint-disable-next-line no-param-reassign
@@ -21,13 +26,11 @@ export default class GoBuilder {
     const context = new GoBuilderContext();
     await Promise.all(
       tas.map((ta) => {
-        if (!ta.__table) {
-          throw new Error('Table action group is not initialized');
-        }
-        const taIO = new TAIO(ta, dialect);
+        const taTable = ta.mustGetTable();
+        const taIO = new TAIO(ta, ioOpts);
         const builder = new GoTABuilder(taIO, opts, context);
         const code = builder.build();
-        const fileName = mm.utils.toSnakeCase(ta.__table.__name) + '_ta'; // Add a "_ta" suffix to table actions file.
+        const fileName = mm.utils.toSnakeCase(taTable.__name) + '_ta'; // Add a "_ta" suffix to table actions file.
         const outFile = nodepath.join(outDir, fileName + '.go');
         return mfs.writeFileAsync(outFile, code);
       }),

@@ -3,9 +3,9 @@ import * as assert from 'assert';
 import * as mr from '../..';
 import post from '../models/post';
 import user from '../models/user';
+import { ioOpt } from './common';
 
 const eq = assert.equal;
-const dialect = mr.mysql;
 
 it('Delete', () => {
   class PostTA extends mm.TableActions {
@@ -13,7 +13,7 @@ it('Delete', () => {
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
-  const io = mr.deleteIO(v, dialect);
+  const io = mr.deleteIO(v, ioOpt);
 
   assert.ok(io instanceof mr.DeleteIO);
   eq(io.getSQLCode(), '"DELETE FROM `db_post` WHERE `id` = ?"');
@@ -25,7 +25,7 @@ it('Delete with where', () => {
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
-  const io = mr.deleteIO(v, dialect);
+  const io = mr.deleteIO(v, ioOpt);
 
   eq(io.getSQLCode(), '"DELETE FROM `db_post` WHERE `id` = 1"');
 });
@@ -36,7 +36,7 @@ it('getInputs', () => {
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
-  const io = mr.deleteIO(v, mr.mysql);
+  const io = mr.deleteIO(v, ioOpt);
   eq(
     io.funcArgs.toString(),
     'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, urlName: string',
@@ -44,15 +44,15 @@ it('getInputs', () => {
   eq(io.execArgs.toString(), 'id: uint64, urlName: string');
 });
 
-it('getReturns', () => {
+it('returnValues', () => {
   class UserTA extends mm.TableActions {
     t = mm.deleteOne().whereSQL(mm.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
-  const io = mr.deleteIO(v, mr.mysql);
-  const returns = io.returnValues;
-  eq(returns.toString(), '');
+  const io = mr.deleteIO(v, ioOpt);
+  const { returnValues } = io;
+  eq(returnValues.toString(), '');
 });
 
 it('getInputs (no WHERE)', () => {
@@ -61,18 +61,18 @@ it('getInputs (no WHERE)', () => {
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
-  const io = mr.deleteIO(v, mr.mysql);
+  const io = mr.deleteIO(v, ioOpt);
   const inputs = io.funcArgs;
   eq(inputs.list.length, 1);
 });
 
-it('getReturns (no WHERE)', () => {
+it('returnValues (no WHERE)', () => {
   class UserTA extends mm.TableActions {
     t = mm.unsafeDeleteAll();
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
-  const io = mr.deleteIO(v, mr.mysql);
-  const returns = io.returnValues;
-  assert.deepEqual(returns.toString(), '__rowsAffected: int');
+  const io = mr.deleteIO(v, ioOpt);
+  const { returnValues } = io;
+  assert.deepEqual(returnValues.toString(), '__rowsAffected: int');
 });

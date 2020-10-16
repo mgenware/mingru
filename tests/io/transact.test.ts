@@ -3,9 +3,9 @@ import * as assert from 'assert';
 import * as mr from '../..';
 import user from '../models/user';
 import post from '../models/post';
+import { ioOpt } from './common';
 
 const eq = assert.equal;
-const dialect = mr.mysql;
 
 it('TransactIO', () => {
   class WrapSelfTA extends mm.TableActions {
@@ -13,9 +13,7 @@ it('TransactIO', () => {
       .updateSome()
       .set(user.url_name, mm.sql`${mm.input(user.url_name)}`)
       .setInputs(user.sig, user.follower_count)
-      .whereSQL(
-        mm.sql`${user.url_name.toInput()} ${user.id.toInput()} ${user.url_name.toInput()}`,
-      );
+      .whereSQL(mm.sql`${user.url_name.toInput()} ${user.id.toInput()} ${user.url_name.toInput()}`);
 
     d = this.s.wrap({ sig: '"haha"' });
   }
@@ -27,7 +25,7 @@ it('TransactIO', () => {
     t1 = mm.transact(wrapSelf.s, wrapSelf.d, this.standard);
   }
   const wrapOther = mm.tableActions(post, WrapOtherTA);
-  const io = mr.transactIO(wrapOther.t1, dialect);
+  const io = mr.transactIO(wrapOther.t1, ioOpt);
   assert.ok(io instanceof mr.TransactIO);
   eq(
     io.funcArgs.toString(),
@@ -37,7 +35,7 @@ it('TransactIO', () => {
   eq(io.execArgs.toString(), '');
 });
 
-it('Member details (normal action, wrapped, tmp wrapped)', () => {
+it('Members with WRAP actions', () => {
   class SourceTA extends mm.TableActions {
     s = mm.updateSome().setInputs(user.sig, user.follower_count).byID();
   }
@@ -52,12 +50,9 @@ it('Member details (normal action, wrapped, tmp wrapped)', () => {
   }
   const wrapTA = mm.tableActions(user, WrapTA);
 
-  const io = mr.transactIO(wrapTA.t, dialect);
+  const io = mr.transactIO(wrapTA.t, ioOpt);
   assert.ok(io instanceof mr.TransactIO);
-  eq(
-    io.funcArgs.toString(),
-    'db: *sql.DB|database/sql, id: uint64, followerCount: *string',
-  );
+  eq(io.funcArgs.toString(), 'db: *sql.DB|database/sql, id: uint64, followerCount: *string');
   // No execArgs in TX actions
   eq(io.execArgs.toString(), '');
 
@@ -71,12 +66,9 @@ it('Member details (normal action, wrapped, tmp wrapped)', () => {
     'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, sig: *string="haha", followerCount: *string',
   );
 
-  const io2 = mr.transactIO(wrapTA.t2, dialect);
+  const io2 = mr.transactIO(wrapTA.t2, ioOpt);
   assert.ok(io2 instanceof mr.TransactIO);
-  eq(
-    io2.funcArgs.toString(),
-    'db: *sql.DB|database/sql, id: uint64, followerCount: *string',
-  );
+  eq(io2.funcArgs.toString(), 'db: *sql.DB|database/sql, id: uint64, followerCount: *string');
   // No execArgs in TX actions
   eq(io2.execArgs.toString(), '');
 
@@ -90,7 +82,7 @@ it('Member details (normal action, wrapped, tmp wrapped)', () => {
     'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, sig: *string="haha", followerCount: *string',
   );
 
-  const io3 = mr.transactIO(wrapTA.t3, dialect);
+  const io3 = mr.transactIO(wrapTA.t3, ioOpt);
   assert.ok(io3 instanceof mr.TransactIO);
   eq(
     io3.funcArgs.toString(),
@@ -104,12 +96,9 @@ it('Member details (normal action, wrapped, tmp wrapped)', () => {
     m3.funcArgs.toString(),
     'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, sig: *string, followerCount: *string',
   );
-  eq(
-    m3.execArgs.toString(),
-    'sig: *string, followerCount: *string, id: uint64',
-  );
+  eq(m3.execArgs.toString(), 'sig: *string, followerCount: *string, id: uint64');
 
-  const io4 = mr.transactIO(wrapTA.t4, dialect);
+  const io4 = mr.transactIO(wrapTA.t4, ioOpt);
   assert.ok(io4 instanceof mr.TransactIO);
   eq(
     io4.funcArgs.toString(),
@@ -123,10 +112,7 @@ it('Member details (normal action, wrapped, tmp wrapped)', () => {
     m4.funcArgs.toString(),
     'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, sig: *string, followerCount: *string',
   );
-  eq(
-    m4.execArgs.toString(),
-    'sig: *string, followerCount: *string, id: uint64',
-  );
+  eq(m4.execArgs.toString(), 'sig: *string, followerCount: *string, id: uint64');
 });
 
 it('TX member IOs', () => {
@@ -147,7 +133,7 @@ it('TX member IOs', () => {
       .setReturnValues('id2');
   }
   const employeeTA = mm.tableActions(employee, EmployeeTA);
-  const io = mr.transactIO(employeeTA.insert2, dialect);
+  const io = mr.transactIO(employeeTA.insert2, ioOpt);
   const members = io.memberIOs;
   assert.equal(
     members[0].toString(),
@@ -157,12 +143,6 @@ it('TX member IOs', () => {
     members[1].toString(),
     'TransactMemberIO(InsertAction(insert, Table(employee|employees)), da.Insert, false)',
   );
-  assert.equal(
-    members[0].actionIO.returnValues.toString(),
-    '__insertedID: uint64',
-  );
-  assert.equal(
-    members[1].actionIO.returnValues.toString(),
-    '__insertedID: uint64',
-  );
+  assert.equal(members[0].actionIO.returnValues.toString(), '__insertedID: uint64');
+  assert.equal(members[1].actionIO.returnValues.toString(), '__insertedID: uint64');
 });

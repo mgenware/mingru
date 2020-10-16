@@ -42,7 +42,7 @@ export default class GoTABuilder {
 
   constructor(public taIO: TAIO, public opts: BuildOptions, public context: GoBuilderContext) {
     throwIfFalsy(taIO, 'taIO');
-    this.dialect = taIO.dialect;
+    this.dialect = taIO.opt.dialect;
     this.options = opts;
   }
 
@@ -73,9 +73,13 @@ export default class GoTABuilder {
 
   private handleActionIO(io: ActionIO, pri?: boolean): string {
     logger.debug(`Building action "${io.action.__name}"`);
+    const ioFuncName = io.funcName;
+    if (!ioFuncName) {
+      throw new Error(`Unexpected empty \`io.funcName\`, action "${io.action.__name}"`);
+    }
 
     // Prepare variables.
-    const funcName = pri ? utils.lowercaseFirstChar(io.funcName) : io.funcName;
+    const funcName = pri ? utils.lowercaseFirstChar(ioFuncName) : ioFuncName;
     // Used for generating interface member if needed.
     let funcSigString = '';
     // Use funcArgs.distinctList cuz duplicate vars are not allowed.
@@ -100,9 +104,9 @@ export default class GoTABuilder {
 
     // Build return values.
     this.imports.addVars(returnValues);
-    const returnsWithError = this.appendErrorType(returnValues);
-    let returnCode = returnsWithError.map((v) => v.type.typeString).join(', ');
-    if (returnsWithError.length > 1) {
+    const returnValuesWithError = this.appendErrorType(returnValues);
+    let returnCode = returnValuesWithError.map((v) => v.type.typeString).join(', ');
+    if (returnValuesWithError.length > 1) {
       returnCode = `(${returnCode})`;
     }
     if (returnCode) {
@@ -119,7 +123,7 @@ export default class GoTABuilder {
         funcName,
         funcSigString.substr(idx + 2),
         allFuncArgs,
-        returnsWithError,
+        returnValuesWithError,
       );
 
       this.context.handleInterfaceMember(

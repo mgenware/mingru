@@ -5,6 +5,7 @@ import * as tempy from 'tempy';
 import * as mfs from 'm-fs';
 import * as assert from 'assert';
 import * as mr from '../..';
+import { ioOpt } from '../io/common';
 
 const dialect = mr.mysql;
 const DestDataDir = 'tests/go/dest';
@@ -31,7 +32,7 @@ export async function testBuildAsync(
   }
   mr.logger.enabled = false;
   const builder = new mr.GoTABuilder(
-    new mr.TAIO(ta, dialect),
+    new mr.TAIO(ta, ioOpt),
     defaultOptions(opts),
     ctx || new mr.GoBuilderContext(),
   );
@@ -55,7 +56,7 @@ export async function testBuildFullAsync(
   }
   mr.logger.enabled = false;
   const builder = new mr.GoTABuilder(
-    new mr.TAIO(ta, dialect),
+    new mr.TAIO(ta, ioOpt),
     defaultOptions(opts),
     ctx || new mr.GoBuilderContext(),
   );
@@ -87,9 +88,7 @@ export async function testBuildToDirAsync(
   await builder.buildAsync(async () => {
     await builder.buildActionsAsync(actions);
     if (buildCSQL) {
-      await builder.buildCreateTableSQLFilesAsync(
-        actions.map((a) => a.__table as mm.Table),
-      );
+      await builder.buildCreateTableSQLFilesAsync(actions.map((a) => a.__table as mm.Table));
     }
   });
 

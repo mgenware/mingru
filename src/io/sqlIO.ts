@@ -74,20 +74,14 @@ function handleSubquery(
   dialect: Dialect,
 ): StringSegment[] {
   if (action instanceof mm.SelectAction) {
-    // Subqueries don't have a name, we'll give them a dummy name so
-    // they are considered initialized.
-    if (!action.__name) {
-      // eslint-disable-next-line no-param-reassign
-      action.__name = '__SQLCall_EMBEDDED_ACTION__';
+    const tableForInit = action.__table || defaultTable;
+    if (!tableForInit) {
+      throw new Error('No table available for subquery initialization (forgot to call `from`?)');
     }
-    // Subqueires may or may not have a table assigned, if not set,
-    // we assign current source table to them.
-    if (!action.__table) {
-      // eslint-disable-next-line no-param-reassign
-      action.__table = defaultTable;
-    }
+    // Initialize subquery action.
+    action.__init(tableForInit, null);
 
-    const io = actionToIO(action, dialect, 'handleSubquery');
+    const io = actionToIO(action, { dialect, selectionLiteMode: true }, 'handleSubquery');
     if (!io.sql) {
       throw new Error(`Unexpected null SQL code at action "${action.toString()}"`);
     }

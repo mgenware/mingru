@@ -7,6 +7,8 @@ import VarList from '../lib/varList';
 import VarInfo from '../lib/varInfo';
 import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
+import BaseIOProcessor from './baseIOProcessor';
+import { ActionToIOOptions } from './actionToIOOptions';
 
 export class DeleteIO extends ActionIO {
   constructor(
@@ -24,20 +26,20 @@ export class DeleteIO extends ActionIO {
   }
 }
 
-class DeleteIOProcessor {
-  constructor(public action: mm.DeleteAction, public dialect: Dialect) {
-    throwIfFalsy(action, 'action');
-    throwIfFalsy(dialect, 'dialect');
+class DeleteIOProcessor extends BaseIOProcessor {
+  constructor(public action: mm.DeleteAction, opt: ActionToIOOptions) {
+    super(action, opt);
   }
 
   convert(): DeleteIO {
     const sql: StringSegment[] = ['DELETE FROM '];
-    const { action, dialect } = this;
+    const { action, opt } = this;
+    const { dialect } = opt;
     const table = action.mustGetTable();
 
     if (!action.whereSQL && !action.allowNoWhere) {
       throw new Error(
-        `You have to call unsafeDeleteAll to build an action without a WHERE clause, action name: "${action.__name}"`,
+        `You have to call \`unsafeDeleteAll\` to build an action without a WHERE clause, action name: "${action.__name}"`,
       );
     }
 
@@ -61,8 +63,8 @@ class DeleteIOProcessor {
       execArgs.merge(whereIO.vars);
     }
 
-    // returns
-    const returnValues = new VarList(`Returns of action ${action.__name}`, false);
+    // Return values.
+    const returnValues = new VarList(`Return values of action ${action.__name}`, false);
     if (!action.ensureOneRowAffected) {
       returnValues.add(
         new VarInfo(mm.ReturnValues.rowsAffected, dialect.colTypeToGoType(mm.int().__type)),
@@ -73,13 +75,13 @@ class DeleteIOProcessor {
   }
 
   private handleFrom(table: mm.Table): string {
-    const e = this.dialect.encodeName;
+    const e = this.opt.dialect.encodeName;
     return e(table.getDBName());
   }
 }
 
-export function deleteIO(action: mm.Action, dialect: Dialect): DeleteIO {
-  const pro = new DeleteIOProcessor(action as mm.DeleteAction, dialect);
+export function deleteIO(action: mm.Action, opt: ActionToIOOptions): DeleteIO {
+  const pro = new DeleteIOProcessor(action as mm.DeleteAction, opt);
   return pro.convert();
 }
 

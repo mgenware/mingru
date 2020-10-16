@@ -7,6 +7,8 @@ import actionToIO, { registerHandler } from './actionToIO';
 import * as utils from '../lib/stringUtils';
 import * as defs from '../defs';
 import VarInfo from '../lib/varInfo';
+import BaseIOProcessor from './baseIOProcessor';
+import { ActionToIOOptions } from './actionToIOOptions';
 
 export class TransactMemberIO {
   constructor(
@@ -50,14 +52,14 @@ export interface TXMReturnValueInfo {
   refs: TXMReturnValueSource[];
 }
 
-class TransactIOProcessor {
-  constructor(public action: mm.TransactAction, public dialect: Dialect) {
-    throwIfFalsy(action, 'action');
-    throwIfFalsy(dialect, 'dialect');
+class TransactIOProcessor extends BaseIOProcessor {
+  constructor(public action: mm.TransactAction, opt: ActionToIOOptions) {
+    super(action, opt);
   }
 
   convert(): TransactIO {
-    const { action, dialect } = this;
+    const { action, opt } = this;
+    const { dialect } = opt;
     const { members } = action;
     const memberIOs = members.map((mem, idx) => {
       const childAction = mem.action;
@@ -65,17 +67,17 @@ class TransactIOProcessor {
       const childName = childAction.mustGetName();
 
       // Call actionToIO after initialization.
-      const io = actionToIO(childAction, dialect, `transaction child index ${idx}`);
+      const io = actionToIO(childAction, opt, `transaction child index ${idx}`);
 
       // `isMemberSibling` describes if this member and current TX action
       // belong to same parent.
-      const isMemberSibling = mem.isTemp || action.__table === childTable;
+      const isMemberSibling = mem.isInline || action.__table === childTable;
       const callPath = utils.actionCallPath(
         isMemberSibling ? null : childTable.__name,
         childName,
-        mem.isTemp,
+        mem.isInline,
       );
-      return new TransactMemberIO(mem, io, callPath, mem.isTemp);
+      return new TransactMemberIO(mem, io, callPath, mem.isInline);
     });
 
     // funcArgs
@@ -93,7 +95,7 @@ class TransactIOProcessor {
     // execArgs is empty for transact io
     const execArgs = new VarList(`Exec args of action "${action.__name}"`, true);
 
-    const returnValues = new VarList(`Returns of action ${action.__name}`, false);
+    const returnValues = new VarList(`Return values of action ${action.__name}`, false);
 
     /**
      * Child return values (CRV)
@@ -161,7 +163,7 @@ class TransactIOProcessor {
 
         // Check values referenced by other TX members.
         const memAction = mem.actionIO.action;
-        if (memAction instanceof mm.WrappedAction) {
+        if (memAction instanceof mm.WrapAction) {
           for (const value of Object.values(memAction.args)) {
             if (value instanceof mm.ValueRef) {
               const refName = value.firstName;
@@ -179,10 +181,10 @@ class TransactIOProcessor {
     const varRefs = new Set<string>();
     for (const mem of memberIOs) {
       const memberAction = mem.actionIO.action;
-      if (memberAction instanceof mm.WrappedAction === false) {
+      if (memberAction instanceof mm.WrapAction === false) {
         continue;
       }
-      const argValues = Object.values((memberAction as mm.WrappedAction).args);
+      const argValues = Object.values((memberAction as mm.WrapAction).args);
       for (const value of argValues) {
         if (value instanceof mm.ValueRef) {
           varRefs.add(value.firstName);
@@ -215,8 +217,8 @@ class TransactIOProcessor {
   }
 }
 
-export function transactIO(action: mm.Action, dialect: Dialect): TransactIO {
-  const pro = new TransactIOProcessor(action as mm.TransactAction, dialect);
+export function transactIO(action: mm.Action, opt: ActionToIOOptions): TransactIO {
+  const pro = new TransactIOProcessor(action as mm.TransactAction, opt);
   return pro.convert();
 }
 

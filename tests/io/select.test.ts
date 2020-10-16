@@ -8,9 +8,9 @@ import cmt from '../models/cmt';
 import rpl from '../models/postReply';
 import postCmt from '../models/postCmt';
 import cmt2 from '../models/cmt2';
+import { ioOpt } from './common';
 
 const eq = assert.equal;
-const dialect = mr.mysql;
 
 it('Select', () => {
   class UserTA extends mm.TableActions {
@@ -18,11 +18,11 @@ it('Select', () => {
   }
   const userTA = mm.tableActions(user, UserTA);
   const v = userTA.t;
-  const io = mr.selectIO(v, dialect);
+  const io = mr.selectIO(v, ioOpt);
 
   assert.ok(io instanceof mr.SelectIO);
   eq(io.getSQLCode(), '"SELECT `id`, `url_name` FROM `user`"');
-  eq(io.where, null);
+  eq(io.whereIO, null);
 });
 
 it('Where', () => {
@@ -33,9 +33,9 @@ it('Where', () => {
   }
   const userTA = mm.tableActions(user, UserTA);
   const v = userTA.t;
-  const io = mr.selectIO(v, dialect);
+  const io = mr.selectIO(v, ioOpt);
 
-  assert.ok(io.where instanceof mr.SQLIO);
+  assert.ok(io.whereIO instanceof mr.SQLIO);
   eq(io.getSQLCode(), '"SELECT `id`, `url_name` FROM `user` WHERE `id` = 1 ? ?"');
 });
 
@@ -52,9 +52,9 @@ it('Where and inputs', () => {
   }
   const userTA = mm.tableActions(user, UserTA);
   const v = userTA.t;
-  const io = mr.selectIO(v, dialect);
+  const io = mr.selectIO(v, ioOpt);
 
-  assert.ok(io.where instanceof mr.SQLIO);
+  assert.ok(io.whereIO instanceof mr.SQLIO);
   eq(io.getSQLCode(), '"SELECT `id`, `url_name` FROM `user` WHERE `id` = ? && `url_name` = ?"');
 });
 
@@ -64,7 +64,7 @@ it('Basic join', () => {
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
-  const io = mr.selectIO(v, dialect);
+  const io = mr.selectIO(v, ioOpt);
 
   eq(
     io.getSQLCode(),
@@ -82,7 +82,7 @@ it('Multiple cols join and custom table name', () => {
   }
   const rplTA = mm.tableActions(rpl, RplTA);
   const v = rplTA.t;
-  const io = mr.selectIO(v, dialect);
+  const io = mr.selectIO(v, ioOpt);
 
   eq(
     io.getSQLCode(),
@@ -96,7 +96,7 @@ it('Join a table with custom table name', () => {
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
-  const io = mr.selectIO(v, dialect);
+  const io = mr.selectIO(v, ioOpt);
 
   eq(
     io.getSQLCode(),
@@ -110,7 +110,7 @@ it('Join a table with custom column name', () => {
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
-  const io = mr.selectIO(v, dialect);
+  const io = mr.selectIO(v, ioOpt);
 
   eq(
     io.getSQLCode(),
@@ -138,7 +138,7 @@ it('3-table joins and WHERE', () => {
   }
   const cmtTA = mm.tableActions(cmt, CmtTA);
   const v = cmtTA.t;
-  const io = mr.selectIO(v, dialect);
+  const io = mr.selectIO(v, ioOpt);
 
   eq(
     io.getSQLCode(),
@@ -162,7 +162,7 @@ it('Join and from', () => {
       .by(postCmt.post_id);
   }
   const ta = mm.tableActions(post, PostTA);
-  const io = mr.selectIO(ta.selectT, dialect);
+  const io = mr.selectIO(ta.selectT, ioOpt);
 
   eq(ta.__table, post);
   eq(ta.selectT.__table, postCmt);
@@ -184,7 +184,7 @@ it('AS', () => {
   }
   const cmtTA = mm.tableActions(cmt, CmtTA);
   const v = cmtTA.t;
-  const io = mr.selectIO(v, dialect);
+  const io = mr.selectIO(v, ioOpt);
 
   eq(
     io.getSQLCode(),
@@ -208,7 +208,7 @@ it('Duplicate selected names', () => {
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
-  itThrows(() => mr.selectIO(v, dialect), 'The selected column name "title" already exists');
+  itThrows(() => mr.selectIO(v, ioOpt), 'The selected column name "title" already exists');
 });
 
 it('getInputs', () => {
@@ -219,7 +219,7 @@ it('getInputs', () => {
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
-  const io = mr.selectIO(v, mr.mysql);
+  const io = mr.selectIO(v, ioOpt);
   eq(
     io.funcArgs.toString(),
     'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, urlName: string',
@@ -232,11 +232,11 @@ it('getInputs (no WHERE)', () => {
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
-  const io = mr.selectIO(v, mr.mysql);
+  const io = mr.selectIO(v, ioOpt);
   eq(io.funcArgs.list.length, 1);
 });
 
-it('getReturns', () => {
+it('returnValues', () => {
   class UserTA extends mm.TableActions {
     t = mm
       .select(user.id)
@@ -244,7 +244,7 @@ it('getReturns', () => {
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
-  const io = mr.selectIO(v, mr.mysql);
+  const io = mr.selectIO(v, ioOpt);
   eq(io.returnValues.toString(), '__result: *UserTableTResult');
 });
 
@@ -259,7 +259,7 @@ it('GROUP BY and HAVING', () => {
   }
   const ta = mm.tableActions(post, PostTA);
   const v = ta.t;
-  const io = mr.selectIO(v, mr.mysql);
+  const io = mr.selectIO(v, ioOpt);
   eq(
     io.getSQLCode(),
     '"SELECT YEAR(`datetime`) AS `year`, SUM(`cmt_c`) AS `total` FROM `db_post` WHERE `id` = ? GROUP BY `year`, `total` HAVING `year` > 2010 AND `total` > 100"',
@@ -274,7 +274,7 @@ it('Unrelated cols', () => {
     }
     const ta = mm.tableActions(user, UserTA);
     const v = ta.t;
-    mr.selectIO(v, mr.mysql);
+    mr.selectIO(v, ioOpt);
   }, 'Source table assertion failed, expected "Table(user)", got "Table(post|db_post)".');
 
   // WHERE col
@@ -284,7 +284,7 @@ it('Unrelated cols', () => {
     }
     const ta = mm.tableActions(user, UserTA);
     const v = ta.t;
-    mr.selectIO(v, mr.mysql);
+    mr.selectIO(v, ioOpt);
   }, 'Source table assertion failed, expected "Table(user)", got "Table(post|db_post)".');
 
   // Do NOT throws on inputs
@@ -294,7 +294,7 @@ it('Unrelated cols', () => {
     }
     const ta = mm.tableActions(user, UserTA);
     const v = ta.t;
-    mr.selectIO(v, mr.mysql);
+    mr.selectIO(v, ioOpt);
   });
 });
 
@@ -304,9 +304,9 @@ it('Select DISTINCT', () => {
   }
   const userTA = mm.tableActions(user, UserTA);
   const v = userTA.t;
-  const io = mr.selectIO(v, dialect);
+  const io = mr.selectIO(v, ioOpt);
 
   assert.ok(io instanceof mr.SelectIO);
   eq(io.getSQLCode(), '"SELECT DISTINCT `id`, `url_name` FROM `user`"');
-  eq(io.where, null);
+  eq(io.whereIO, null);
 });

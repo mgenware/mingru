@@ -12,6 +12,8 @@ import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
 import { VarInfoBuilder } from '../lib/varInfoHelper';
 import { forEachWithSlots } from '../lib/arrayUtils';
+import { ActionToIOOptions } from './actionToIOOptions';
+import BaseIOProcessor from './baseIOProcessor';
 
 const orderByInputParamName = 'orderBy';
 
@@ -93,7 +95,7 @@ export class SelectIO extends ActionIO {
     sql: StringSegment[],
     // `cols` can be empty, it indicates `SELECT *`, which is used in `selectExists`.
     public cols: SelectedColumnIO[],
-    public where: SQLIO | null,
+    public whereIO: SQLIO | null,
     funcArgs: VarList,
     execArgs: VarList,
     returnValues: VarList,
@@ -106,7 +108,7 @@ export class SelectIO extends ActionIO {
   }
 }
 
-export class SelectIOProcessor {
+export class SelectIOProcessor extends BaseIOProcessor {
   hasJoin = false;
   // Tracks all processed joins, when processing a new join,
   // we can reuse the JoinIO if it already exists (K: join path, V: `JoinIO`).
@@ -134,16 +136,18 @@ export class SelectIOProcessor {
   // Params needed when ORDER BY inputs are present.
   private orderByInputParams: VarInfo[] = [];
 
-  constructor(public action: mm.SelectAction, public dialect: Dialect) {
-    throwIfFalsy(action, 'action');
-    throwIfFalsy(dialect, 'dialect');
+  constructor(public action: mm.SelectAction, opt: ActionToIOOptions) {
+    super(action, opt);
+
     const fromTable = action.mustGetTable();
     this.fromTable = fromTable;
   }
 
   convert(): SelectIO {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const sql: StringSegment[] = ['SELECT '];
-    const { action, dialect, selectedNames, fromTable } = this;
+    const { action, opt, selectedNames, fromTable } = this;
+    const { dialect } = opt;
     const { limitValue, offsetValue, orderByColumns, groupByColumns, distinctFlag } = action;
     const selMode = action.mode;
 
@@ -151,10 +155,14 @@ export class SelectIOProcessor {
       sql.push('DISTINCT ');
     }
 
-    // NOTE: not the table defined by FROM, it's the root table defined in table actions.
-    this.tablePascalName = utils.tablePascalName((action.__rootTable || fromTable).__name);
-    this.actionPascalName = utils.actionPascalName(action.mustGetName());
-    this.actionUniqueTypeName = `${this.tablePascalName}Table${this.actionPascalName}`;
+    if (!opt.selectionLiteMode) {
+      // NOTE: not the table defined by FROM, it's the root table defined in table actions.
+      // Those fields are used to generate result type definition.
+      // This process call be skipped if we don't need a result type.
+      this.tablePascalName = utils.tablePascalName((action.__rootTable || fromTable).__name);
+      this.actionPascalName = utils.actionPascalName(action.mustGetName());
+      this.actionUniqueTypeName = `${this.tablePascalName}Table${this.actionPascalName}`;
+    }
 
     let columns: mm.SelectActionColumns[];
     if (selMode === mm.SelectActionMode.exists) {
@@ -334,41 +342,42 @@ export class SelectIOProcessor {
       funcArgs.add(param);
     }
 
-    // Set return types
-    const returnValues = new VarList(`Returns of action "${action.__name}"`, true);
-
-    if (selMode === mm.SelectActionMode.field) {
-      const col = colIOs[0];
-      const typeInfo = dialect.colTypeToGoType(col.getResultType());
-      returnValues.add(new VarInfo(mm.ReturnValues.result, typeInfo));
-    } else if (selMode === mm.SelectActionMode.exists) {
-      returnValues.add(new VarInfo(mm.ReturnValues.result, defs.boolTypeInfo));
-    } else {
-      // `selMode` now equals `.list` or `.row`.
-      let resultType: string;
-      // Check if result type is renamed.
-      if (action.__attrs[mm.ActionAttributes.resultTypeName]) {
-        resultType = `${action.__attrs[mm.ActionAttributes.resultTypeName]}`;
+    // Set return values.
+    const returnValues = new VarList(`Return values of action "${action.__name}"`, true);
+    if (!opt.selectionLiteMode) {
+      if (selMode === mm.SelectActionMode.field) {
+        const col = colIOs[0];
+        const typeInfo = dialect.colTypeToGoType(col.getResultType());
+        returnValues.add(new VarInfo(mm.ReturnValues.result, typeInfo));
+      } else if (selMode === mm.SelectActionMode.exists) {
+        returnValues.add(new VarInfo(mm.ReturnValues.result, defs.boolTypeInfo));
       } else {
-        resultType = `${this.actionUniqueTypeName}Result`;
-      }
+        // `selMode` now equals `.list` or `.row`.
+        let resultType: string;
+        // Check if result type is renamed.
+        if (action.__attrs[mm.ActionAttributes.resultTypeName]) {
+          resultType = `${action.__attrs[mm.ActionAttributes.resultTypeName]}`;
+        } else {
+          resultType = `${this.actionUniqueTypeName}Result`;
+        }
 
-      let isResultTypeArray = false;
-      if (selMode === mm.SelectActionMode.list || selMode === mm.SelectActionMode.page) {
-        isResultTypeArray = true;
-      }
-      const resultTypeInfo = new AtomicTypeInfo(resultType, null, null);
+        let isResultTypeArray = false;
+        if (selMode === mm.SelectActionMode.list || selMode === mm.SelectActionMode.page) {
+          isResultTypeArray = true;
+        }
+        const resultTypeInfo = new AtomicTypeInfo(resultType, null, null);
 
-      returnValues.add(
-        new VarInfo(
-          mm.ReturnValues.result,
-          new CompoundTypeInfo(resultTypeInfo, true, isResultTypeArray),
-        ),
-      );
-      if (action.pagination) {
-        returnValues.add(new VarInfo('max', defs.intTypeInfo));
-      } else if (action.mode === mm.SelectActionMode.page) {
-        returnValues.add(new VarInfo('hasNext', defs.boolTypeInfo));
+        returnValues.add(
+          new VarInfo(
+            mm.ReturnValues.result,
+            new CompoundTypeInfo(resultTypeInfo, true, isResultTypeArray),
+          ),
+        );
+        if (action.pagination) {
+          returnValues.add(new VarInfo('max', defs.intTypeInfo));
+        } else if (action.mode === mm.SelectActionMode.page) {
+          returnValues.add(new VarInfo('hasNext', defs.boolTypeInfo));
+        }
       }
     }
 
@@ -376,13 +385,23 @@ export class SelectIOProcessor {
     let next = action.nextSelectAction;
     while (next) {
       try {
-        const nextProcessor = new SelectIOProcessor(next, dialect);
+        sql.push(' UNION');
+        if (action.unionAllFlag) {
+          sql.push(' ALL');
+        }
+        sql.push(' ');
+        const nextProcessor = new SelectIOProcessor(next, opt);
         // Merge func args and exec args.
         const nextIO = nextProcessor.convert();
         funcArgs.merge(nextIO.funcArgs.list);
         execArgs.merge(nextIO.execArgs.list);
 
         next = next.nextSelectAction;
+
+        const nextSQL = nextIO.sql;
+        if (nextSQL) {
+          sql.push(...nextSQL);
+        }
       } catch (err) {
         err.message += ' [UNION]';
         throw err;
@@ -451,7 +470,7 @@ export class SelectIOProcessor {
   // Gets ORDER BY value of the specified column. Returns an array of string segments
   // along with a column display name which is used in ORDER BY inputs.
   private getOrderByNonInputColumnSQL(col: mm.SelectActionColumnNames): [string, StringSegment[]] {
-    const { dialect } = this;
+    const { dialect } = this.opt;
 
     if (typeof col === 'string') {
       return [col, [dialect.encodeName(col)]];
@@ -474,7 +493,7 @@ export class SelectIOProcessor {
   }
 
   private getColumnSQL(col: mm.Column): StringSegment[] {
-    const { dialect } = this;
+    const { dialect } = this.opt;
     let value = dialect.encodeColumnName(col);
     if (this.hasJoin) {
       const colTable = col.mustGetTable();
@@ -497,7 +516,7 @@ export class SelectIOProcessor {
   }
 
   private handleFrom(table: mm.Table): string {
-    const e = this.dialect.encodeName;
+    const e = this.opt.dialect.encodeName;
     const tableDBName = table.getDBName();
     const encodedTableName = e(tableDBName);
     let sql = `FROM ${encodedTableName}`;
@@ -588,9 +607,9 @@ export class SelectIOProcessor {
     if (this.hasJoin) {
       alias = alias || inputName;
     }
-    const sql = alias ? this.dialect.as(colSQL, alias) : colSQL;
+    const sql = alias ? this.opt.dialect.as(colSQL, alias) : colSQL;
     const variableName = alias || inputName;
-    return [variableName, sqlIO(sql, this.dialect, this.fromTable, opt).code];
+    return [variableName, sqlIO(sql, this.opt.dialect, this.fromTable, opt).code];
   }
 
   // Returns SQL expr of the selected column.
@@ -601,7 +620,8 @@ export class SelectIOProcessor {
    * an alias, we should use raw SQL aliases in `mm.SQL`.
    */
   private handleSelectedColumn(sCol: mm.SelectActionColumns): SelectedColumnIO {
-    const { dialect, fromTable } = this;
+    const { fromTable } = this;
+    const { dialect } = this.opt;
     const [embeddedCol, rawCol, resultType] = this.analyzeSelectedColumn(sCol);
     if (embeddedCol) {
       // There's at least one column in this expression:
@@ -641,7 +661,7 @@ export class SelectIOProcessor {
       const [varName, colSQLCode] = this.getColumnSQLCode(rawColCore, embeddedCol, alias, {
         rewriteElement: (element) => {
           if (element.value === embeddedCol) {
-            return sqlIO(this.handleColumn(embeddedCol), this.dialect, fromTable).code;
+            return sqlIO(this.handleColumn(embeddedCol), this.opt.dialect, fromTable).code;
           }
           return null;
         },
@@ -726,7 +746,8 @@ export class SelectIOProcessor {
 
   // Returns SQL expr of the selected plain column object.
   private handleColumn(col: mm.Column): mm.SQL {
-    const { dialect, action } = this;
+    const { action } = this;
+    const { dialect } = this.opt;
     const e = dialect.encodeName;
     // Make sure column is initialized.
     const colTable = col.mustGetTable();
@@ -768,8 +789,8 @@ export class SelectIOProcessor {
   }
 }
 
-export function selectIO(action: mm.Action, dialect: Dialect): SelectIO {
-  const converter = new SelectIOProcessor(action as mm.SelectAction, dialect);
+export function selectIO(action: mm.Action, opt: ActionToIOOptions): SelectIO {
+  const converter = new SelectIOProcessor(action as mm.SelectAction, opt);
   return converter.convert();
 }
 

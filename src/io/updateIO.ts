@@ -10,6 +10,8 @@ import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
 import * as utils from '../lib/stringUtils';
 import { forEachWithSlots } from '../lib/arrayUtils';
+import BaseIOProcessor from './baseIOProcessor';
+import { ActionToIOOptions } from './actionToIOOptions';
 
 export class UpdateIO extends ActionIO {
   constructor(
@@ -30,18 +32,18 @@ export class UpdateIO extends ActionIO {
   }
 }
 
-class UpdateIOProcessor {
-  constructor(public action: mm.UpdateAction, public dialect: Dialect) {
-    throwIfFalsy(action, 'action');
-    throwIfFalsy(dialect, 'dialect');
+class UpdateIOProcessor extends BaseIOProcessor {
+  constructor(public action: mm.UpdateAction, opt: ActionToIOOptions) {
+    super(action, opt);
   }
 
   convert(): UpdateIO {
     const sql: StringSegment[] = ['UPDATE '];
-    const { action, dialect } = this;
+    const { action, opt } = this;
+    const { dialect } = opt;
     const table = action.mustGetTable();
 
-    if (!action.whereSQL && !action.allowNoWhere) {
+    if (!action.whereSQL && !action.allowEmptyWhere) {
       throw new Error(
         'You have to call `unsafeUpdateAll` to build an action without a WHERE clause',
       );
@@ -86,7 +88,7 @@ class UpdateIOProcessor {
     funcArgs.merge(setterVars.list);
 
     // Return values
-    const returnValues = new VarList(`Returns of action ${action.__name}`);
+    const returnValues = new VarList(`Return values of action ${action.__name}`);
     if (!action.ensureOneRowAffected) {
       returnValues.add(
         new VarInfo(mm.ReturnValues.rowsAffected, dialect.colTypeToGoType(mm.int().__type)),
@@ -107,13 +109,13 @@ class UpdateIOProcessor {
   }
 
   private handleFrom(table: mm.Table): string {
-    const e = this.dialect.encodeName;
+    const e = this.opt.dialect.encodeName;
     return `${e(table.getDBName())}`;
   }
 }
 
-export function updateIO(action: mm.Action, dialect: Dialect): UpdateIO {
-  const pro = new UpdateIOProcessor(action as mm.UpdateAction, dialect);
+export function updateIO(action: mm.Action, opt: ActionToIOOptions): UpdateIO {
+  const pro = new UpdateIOProcessor(action as mm.UpdateAction, opt);
   return pro.convert();
 }
 

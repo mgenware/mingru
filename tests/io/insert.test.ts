@@ -4,9 +4,9 @@ import { itThrows } from 'it-throws';
 import * as mr from '../..';
 import post from '../models/post';
 import user from '../models/user';
+import { ioOpt } from './common';
 
 const eq = assert.equal;
-const dialect = mr.mysql;
 
 it('Insert inputs', () => {
   class PostTA extends mm.TableActions {
@@ -14,7 +14,7 @@ it('Insert inputs', () => {
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
-  const io = mr.insertIO(v, dialect);
+  const io = mr.insertIO(v, ioOpt);
 
   assert.ok(io instanceof mr.InsertIO);
   eq(io.getSQLCode(), '"INSERT INTO `db_post` (`title`, `user_id`) VALUES (?, ?)"');
@@ -29,7 +29,7 @@ it('Insert inputs and values', () => {
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
-  const io = mr.insertIO(v, dialect);
+  const io = mr.insertIO(v, ioOpt);
 
   assert.ok(io instanceof mr.InsertIO);
   eq(
@@ -47,7 +47,7 @@ it('getInputs', () => {
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
-  const io = mr.insertIO(v, mr.mysql);
+  const io = mr.insertIO(v, ioOpt);
   eq(
     io.funcArgs.toString(),
     'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, sig: *string, id: uint64, b: string',
@@ -55,7 +55,7 @@ it('getInputs', () => {
   eq(io.execArgs.toString(), 'sig: *string, id: uint64, b: string');
 });
 
-it('getReturns (insert)', () => {
+it('returnValues (insert)', () => {
   class UserTA extends mm.TableActions {
     t = mm
       .unsafeInsert()
@@ -64,11 +64,11 @@ it('getReturns (insert)', () => {
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
-  const io = mr.insertIO(v, mr.mysql);
+  const io = mr.insertIO(v, ioOpt);
   eq(io.returnValues.toString(), '');
 });
 
-it('getReturns (insertOne)', () => {
+it('returnValues (insertOne)', () => {
   class UserTA extends mm.TableActions {
     t = mm
       .unsafeInsertOne()
@@ -77,7 +77,7 @@ it('getReturns (insertOne)', () => {
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
-  const io = mr.insertIO(v, mr.mysql);
+  const io = mr.insertIO(v, ioOpt);
   eq(io.returnValues.toString(), '__insertedID: uint64');
 });
 
@@ -87,7 +87,7 @@ it('Validate setters', () => {
       t = mm.unsafeInsert().setInputs(user.id);
     }
     const ta = mm.tableActions(post, PostTA);
-    mr.insertIO(ta.t, mr.mysql);
+    mr.insertIO(ta.t, ioOpt);
   }, 'Source table assertion failed, expected "Table(post|db_post)", got "Table(user)".');
 });
 
@@ -105,7 +105,7 @@ it('setDefaults', () => {
   }
   const postTA = mm.tableActions(post2, PostTA);
   const v = postTA.t;
-  const io = mr.insertIO(v, dialect);
+  const io = mr.insertIO(v, ioOpt);
 
   eq(
     io.getSQLCode(),

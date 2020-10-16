@@ -18,3 +18,6 @@ export * from './io/actionIO';
 export * from './io/sqlIO';
 export * from './io/wrapIO';
 export * from './io/transactIO';
+
+// Used by tests.
+export * from './io/actionToIOOptions';

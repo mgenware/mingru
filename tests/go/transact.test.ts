@@ -56,10 +56,7 @@ it('Pass values in child actions and declare return values', async () => {
     getFirstName = mm.selectField(employee.firstName).byID();
     insert1 = mm
       .transact(
-        this.getFirstName.declareReturnValue(
-          mm.ReturnValues.result,
-          'firstName',
-        ),
+        this.getFirstName.declareReturnValue(mm.ReturnValues.result, 'firstName'),
         mm
           .insertOne()
           .setInputs()
@@ -111,14 +108,8 @@ it('Return multiple values', async () => {
     insertCore = mm.insertOne().setInputs();
     insert = mm
       .transact(
-        employeeTA.insertEmp.declareReturnValue(
-          mm.ReturnValues.insertedID,
-          empNo,
-        ),
-        deptTA.insertDept.declareReturnValue(
-          mm.ReturnValues.insertedID,
-          deptNo,
-        ),
+        employeeTA.insertEmp.declareReturnValue(mm.ReturnValues.insertedID, empNo),
+        deptTA.insertDept.declareReturnValue(mm.ReturnValues.insertedID, deptNo),
         this.insertCore.wrapAsRefs({
           empNo,
           deptNo,
@@ -133,7 +124,7 @@ it('Return multiple values', async () => {
   await testBuildAsync(deptManagerTA, 'tx/multipleRetValues/deptManager');
 });
 
-it('Temp member actions', async () => {
+it('Inline member actions', async () => {
   class User extends mm.Table {
     id = mm.pk();
     postCount = mm.int();
@@ -142,10 +133,7 @@ it('Temp member actions', async () => {
   class UserTA extends mm.TableActions {
     updatePostCount = mm
       .updateOne()
-      .set(
-        user.postCount,
-        mm.sql`${user.postCount} + ${mm.input(mm.int(), 'offset')}`,
-      )
+      .set(user.postCount, mm.sql`${user.postCount} + ${mm.input(mm.int(), 'offset')}`)
       .byID();
   }
   const userTA = mm.tableActions(user, UserTA);
@@ -170,7 +158,7 @@ it('Temp member actions', async () => {
   await testBuildAsync(postTA, 'tx/tmpActions/post');
 });
 
-it('Temp member actions (with from)', async () => {
+it('Inline member actions (with from)', async () => {
   class PostTA extends mm.TableActions {
     t = mm.transact(
       mm.insertOne().from(cmt2).setInputs(),
@@ -191,9 +179,7 @@ it('Reference property values', async () => {
   const user = mm.table(User);
   class UserTA extends mm.TableActions {
     t = mm.transact(
-      mm
-        .select(user.age, user.name)
-        .declareReturnValue(mm.ReturnValues.result, 'res'),
+      mm.select(user.age, user.name).declareReturnValue(mm.ReturnValues.result, 'res'),
       mm
         .insertOne()
         .setInputs()

@@ -4,9 +4,9 @@ import { itThrows } from 'it-throws';
 import * as mr from '../..';
 import post from '../models/post';
 import user from '../models/user';
+import { ioOpt } from './common';
 
 const eq = assert.equal;
-const dialect = mr.mysql;
 
 it('Update', () => {
   class PostTA extends mm.TableActions {
@@ -19,7 +19,7 @@ it('Update', () => {
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
-  const io = mr.updateIO(v, dialect);
+  const io = mr.updateIO(v, ioOpt);
 
   assert.ok(io instanceof mr.UpdateIO);
   eq(
@@ -42,7 +42,7 @@ it('Update with WHERE', () => {
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
-  const io = mr.updateIO(v, dialect);
+  const io = mr.updateIO(v, ioOpt);
 
   eq(io.getSQLCode(), '"UPDATE `db_post` SET `title` = \\"haha\\" WHERE `id` = 1"');
 });
@@ -58,7 +58,7 @@ it('getInputs', () => {
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
-  const io = mr.updateIO(v, mr.mysql);
+  const io = mr.updateIO(v, ioOpt);
   eq(io.setterArgs.toString(), 'urlName: string, sig: *string');
   eq(
     io.funcArgs.toString(),
@@ -70,7 +70,7 @@ it('getInputs', () => {
   );
 });
 
-it('getReturns', () => {
+it('returnValues', () => {
   class UserTA extends mm.TableActions {
     t = mm
       .updateSome()
@@ -81,7 +81,7 @@ it('getReturns', () => {
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
-  const io = mr.updateIO(v, mr.mysql);
+  const io = mr.updateIO(v, ioOpt);
   assert.deepEqual(io.returnValues.toString(), '__rowsAffected: int');
 });
 
@@ -91,7 +91,7 @@ it('Validate setters', () => {
       t = mm.unsafeUpdateAll().setInputs(user.id).setInputs();
     }
     const ta = mm.tableActions(post, PostTA);
-    mr.insertIO(ta.t, mr.mysql);
+    mr.insertIO(ta.t, ioOpt);
   }, 'Source table assertion failed, expected "Table(post|db_post)", got "Table(user)".');
 });
 
@@ -109,7 +109,7 @@ it('setDefaults', () => {
   }
   const postTA = mm.tableActions(post2, PostTA);
   const v = postTA.t;
-  const io = mr.updateIO(v, dialect);
+  const io = mr.updateIO(v, ioOpt);
 
   eq(io.getSQLCode(), '"UPDATE `post` SET `datetime` = UTC_TIMESTAMP()"');
 });
