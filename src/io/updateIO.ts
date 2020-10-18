@@ -49,7 +49,7 @@ class UpdateIOProcessor extends BaseIOProcessor {
       );
     }
 
-    // Table
+    // FROM
     const fromSQL = this.handleFrom(table);
     sql.push(`${fromSQL} SET `);
 

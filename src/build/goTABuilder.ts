@@ -66,17 +66,23 @@ export default class GoTABuilder {
     let code = '';
     for (const actionIO of this.taIO.actions) {
       code += '\n';
-      code += this.handleActionIO(actionIO);
+      code += this.buildActionIO(actionIO, undefined);
     }
     return code;
   }
 
-  private handleActionIO(io: ActionIO, pri?: boolean): string {
+  // `fallbackActionName` used by TRANSACT members as they don't have a `__name`.
+  private buildActionIO(
+    io: ActionIO,
+    fallbackActionName: string | undefined,
+    pri?: boolean,
+  ): string {
     logger.debug(`Building action "${io.action.__name}"`);
-    const ioFuncName = io.funcName;
-    if (!ioFuncName) {
-      throw new Error(`Unexpected empty \`io.funcName\`, action "${io.action.__name}"`);
+    const actionName = io.action.__name || fallbackActionName;
+    if (!actionName) {
+      throw new Error(`Unexpected empty action name, action "${io.action.__name}"`);
     }
+    const ioFuncName = utils.actionPascalName(actionName);
 
     // Prepare variables.
     const funcName = pri ? utils.lowercaseFirstChar(ioFuncName) : ioFuncName;
@@ -613,8 +619,8 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         .join(', ');
       // If this is a temp member (created inside transaction),
       // then we also need to generate the member func body code.
-      if (memberIO.isTemp) {
-        const methodCode = this.handleActionIO(memberIO.actionIO, true);
+      if (memberIO.isInline) {
+        const methodCode = this.buildActionIO(memberIO.actionIO, memberIO.assignedName, true);
         // Put func code into head.
         headCode += methodCode;
         if (memberIdx !== memberCount - 1) {

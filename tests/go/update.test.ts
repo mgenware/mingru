@@ -10,7 +10,7 @@ it('UpdateSome', async () => {
       .set(post.title, mm.sql`"haha"`)
       .set(post.content, mm.sql`${mm.input(post.content)}`)
       .set(post.cmtCount, mm.sql`${post.cmtCount} + 1`)
-      .byID();
+      .by(post.id);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'update/update');
@@ -23,7 +23,7 @@ it('UpdateOne', async () => {
       .set(post.title, mm.sql`"haha"`)
       .set(post.content, mm.sql`${mm.input(post.content)}`)
       .set(post.cmtCount, mm.sql`${post.cmtCount} + 1`)
-      .byID();
+      .by(post.id);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'update/updateOne');
@@ -36,9 +36,9 @@ it('Update with where', async () => {
       .set(post.title, mm.sql`"haha"`)
       .set(post.content, post.content.toInput())
       .whereSQL(
-        mm.sql`${post.id} = ${post.id.toInput()} AND ${
-          post.content
-        } = ${post.content.toInput('content2')}`,
+        mm.sql`${post.id} = ${post.id.toInput()} AND ${post.content} = ${post.content.toInput(
+          'content2',
+        )}`,
       );
   }
   const ta = mm.tableActions(post, PostTA);
@@ -78,7 +78,7 @@ it('Custom DB column name', async () => {
       .set(post.title, mm.sql`"haha"`)
       .set(post.content, mm.sql`${mm.input(post.content)}`)
       .set(post.cmtCount, mm.sql`${post.cmtCount} + 1`)
-      .byID();
+      .by(post.id);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'update/customName');
@@ -86,7 +86,7 @@ it('Custom DB column name', async () => {
 
 it('Update with defaults', async () => {
   class ColsTA extends mm.TableActions {
-    updateT = mm.updateOne().setInputs(cols.fk).setDefaults().byID();
+    updateT = mm.updateOne().setInputs(cols.fk).setDefaults().by(cols.id);
   }
   const ta = mm.tableActions(cols, ColsTA);
   await testBuildAsync(ta, 'update/updateWithDefaults');
@@ -94,7 +94,7 @@ it('Update with defaults', async () => {
 
 it('Update with defaults and inputs', async () => {
   class ColsTA extends mm.TableActions {
-    updateT = mm.updateOne().setDefaults().setInputs().byID();
+    updateT = mm.updateOne().setDefaults().setInputs().by(cols.id);
   }
   const ta = mm.tableActions(cols, ColsTA);
   await testBuildAsync(ta, 'update/updateWithDefaultsAndInputs');

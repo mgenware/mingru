@@ -253,7 +253,7 @@ it('GROUP BY and HAVING', () => {
   class PostTA extends mm.TableActions {
     t = mm
       .select(yearCol, mm.sel(mm.sql`${mm.sum(post.cmtCount)}`, 'total'))
-      .byID()
+      .by(post.id)
       .groupBy(yearCol, 'total')
       .havingSQL(mm.and(mm.sql`${yearCol} > 2010`, mm.sql`\`total\` > 100`));
   }

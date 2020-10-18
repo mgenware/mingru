@@ -61,10 +61,9 @@ it('WHERE', async () => {
 
 it('selectRows with WHERE', async () => {
   class PostTA extends mm.TableActions {
-    selectT = mm
-      .selectRows(post.id, post.title)
-      .whereSQL(mm.sql`${post.id} = ${mm.input(post.id)}`)
-      .orderByAsc(post.id);
+    selectT = mm.selectRows(post.id, post.title).where`${post.id.isEqualToInput()}`.orderByAsc(
+      post.id,
+    );
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectRowsWhere');
@@ -101,7 +100,7 @@ it('ORDER BY inputs', async () => {
 
 it('selectField, WHERE', async () => {
   class PostTA extends mm.TableActions {
-    selectT = mm.selectField(post.user_id).byID();
+    selectT = mm.selectField(post.user_id).by(post.id);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/whereField');
@@ -304,7 +303,7 @@ it('Raw columns', async () => {
       ),
       // Auto detected types
       new mm.RawColumn(post.user_id.join(user).display_name, 'snake_name'),
-      new mm.RawColumn(mm.sql`${mm.count(post.n_datetime)}`),
+      new mm.RawColumn(mm.sql`${mm.count(post.n_datetime)}`, 'nDatetime'),
     );
   }
   const ta = mm.tableActions(post, PostTA);
@@ -347,7 +346,7 @@ it('selectRows, LIMIT and OFFSET', async () => {
 
 it('selectRows, paginate, where', async () => {
   class PostTA extends mm.TableActions {
-    selectT = mm.selectRows(post.id, post.title).byID().paginate().orderByAsc(post.id);
+    selectT = mm.selectRows(post.id, post.title).by(post.id).paginate().orderByAsc(post.id);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectRowsPaginateWithWhere');
@@ -355,7 +354,7 @@ it('selectRows, paginate, where', async () => {
 
 it('selectPage', async () => {
   class PostTA extends mm.TableActions {
-    selectT = mm.selectPage(post.id, post.title).byID().orderByAsc(post.id);
+    selectT = mm.selectPage(post.id, post.title).by(post.id).orderByAsc(post.id);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectPage');
@@ -393,11 +392,11 @@ it('GROUP BY and HAVING', async () => {
   class PostTA extends mm.TableActions {
     t = mm
       .select(yearCol, mm.sel(mm.sql`${mm.sum(post.cmtCount)}`, 'total'))
-      .byID()
+      .by(post.id)
       .groupBy(yearCol, 'total')
       .havingSQL(
         mm.and(
-          mm.sql`${yearCol} > ${yearCol.toInput()}`,
+          mm.sql`${yearCol} > ${mm.input(mm.int(), 'year')}`,
           mm.sql`\`total\` > ${mm.int().toInput('total')}`,
         ),
       );
@@ -511,12 +510,12 @@ it('Exclude all empty properties', async () => {
 
 it('SELECT, EXISTS, IF', async () => {
   class PostTA extends mm.TableActions {
-    t1 = mm.select(mm.sel(mm.exists(mm.select(post.user_id.join(user).sig).byID()), 'a'));
+    t1 = mm.select(mm.sel(mm.exists(mm.select(post.user_id.join(user).sig).by(post.id)), 'a'));
 
     t2 = mm.select(
       mm.sel(
         mm
-          .IF(mm.exists(mm.select(post.user_id.join(user).sig).byID()), '1', '2')
+          .IF(mm.exists(mm.select(post.user_id.join(user).sig).by(post.id)), '1', '2')
           .setReturnType(mm.int().__type),
         'a',
       ),

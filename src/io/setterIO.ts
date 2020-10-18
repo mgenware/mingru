@@ -14,7 +14,10 @@ export class SetterIO {
     sourceTable: mm.Table | null,
     opt?: SQLIOBuilderOption,
   ): SetterIO[] {
-    const table = action.mustGetTable();
+    const table = action.__table || sourceTable;
+    if (!table) {
+      throw new Error(`Unexpected empty table in \`SetterIO\`, action "${action}"`);
+    }
     const { setters: actionSetters } = action;
 
     // User setters come first.

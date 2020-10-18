@@ -33,6 +33,34 @@ export class VarInfoBuilder {
     throwIfFalsy(v, 'v');
     throwIfFalsy(dialect, 'dialect');
     const typeInfo = TypeInfoBuilder.fromSQLVariable(v, dialect);
-    return new VarInfo(v.name, typeInfo);
+    return new VarInfo(this.getInputNameFromColumn(v, v.name, v.column), typeInfo);
+  }
+
+  private static getInputNameFromColumn(
+    v: mm.SQLVariable,
+    inputName: string | undefined,
+    column?: mm.Column,
+  ): string {
+    if (inputName) {
+      return inputName;
+    }
+    if (!column) {
+      throw new Error(`Missing \`inputName\` for variable ${v}`);
+    }
+    if (column.__inputName) {
+      return column.__inputName;
+    }
+    const name = column.mustGetName();
+    const table = column.mustGetTable();
+    const curName = mm.utils.toCamelCase(name);
+
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    if (table instanceof mm.JoinedTable) {
+      if (table.associative) {
+        return curName;
+      }
+      return table.tableInputName() + mm.utils.capitalizeColumnName(curName);
+    }
+    return curName;
   }
 }

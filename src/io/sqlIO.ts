@@ -9,6 +9,7 @@ import { VarInfoBuilder } from '../lib/varInfoHelper';
 import { makeStringFromSegments } from '../build/goCode';
 import { join2DArrays } from '../lib/arrayUtils';
 import actionToIO from './actionToIO';
+import { ActionIO } from './actionIO';
 
 export class SQLIO {
   get vars(): VarInfo[] {
@@ -41,6 +42,7 @@ function getSQLCode(
   sourceTable: mm.Table | null,
   dialect: Dialect,
   rewriteElement: ((element: mm.SQLElement) => StringSegment[] | null) | null,
+  subqueryCallback: ((action: mm.Action, io: ActionIO) => void) | null,
 ): StringSegment[] {
   const res: StringSegment[] = [];
   for (const element of sql.elements) {
@@ -54,12 +56,12 @@ function getSQLCode(
     if (rewriteElement) {
       rewriteElementRes = rewriteElement(element);
     }
-    // Here `rewriteElement` only handles top level elements, it needs to go inside
-    // `handleElement` to handle embedded elements in SQL call params. Note that it
-    // doesn't handle elements in subqueries.
+    // At this point, `rewriteElement` only handles top level elements, it needs to
+    // go inside of `handleElement` to handle embedded elements in SQL call params.
+    // Note that it doesn't handle elements in subqueries.
     const elementResults =
       rewriteElementRes === null
-        ? handleElement(element, sourceTable, dialect, rewriteElement)
+        ? handleElement(element, sourceTable, dialect, rewriteElement, subqueryCallback)
         : rewriteElementRes;
     for (const r of elementResults) {
       res.push(r);
@@ -72,20 +74,21 @@ function handleSubquery(
   action: mm.Action,
   defaultTable: mm.Table | null,
   dialect: Dialect,
-): StringSegment[] {
+): ActionIO {
   if (action instanceof mm.SelectAction) {
-    const tableForInit = action.__table || defaultTable;
-    if (!tableForInit) {
+    const sourceTable = action.__table || defaultTable;
+    if (!sourceTable) {
       throw new Error('No table available for subquery initialization (forgot to call `from`?)');
     }
-    // Initialize subquery action.
-    action.__init(tableForInit, null);
+    // Embedded actions are not validated by mingru-models.
+    action.validate(sourceTable);
 
-    const io = actionToIO(action, { dialect, selectionLiteMode: true }, 'handleSubquery');
-    if (!io.sql) {
-      throw new Error(`Unexpected null SQL code at action "${action.toString()}"`);
-    }
-    return io.sql;
+    const io = actionToIO(
+      action,
+      { dialect, selectionLiteMode: true, contextTable: sourceTable },
+      'handleSubquery',
+    );
+    return io;
   }
   throw new Error(`Subquery can only contain SELECT clause, got "${toTypeString(action)}"`);
 }
@@ -95,6 +98,7 @@ function handleElement(
   defaultTable: mm.Table | null,
   dialect: Dialect,
   rewriteElement: ((element: mm.SQLElement) => StringSegment[] | null) | null,
+  subqueryCallback: ((action: mm.Action, io: ActionIO) => void) | null,
 ): StringSegment[] {
   switch (element.type) {
     case mm.SQLElementType.rawString: {
@@ -113,7 +117,9 @@ function handleElement(
       if (call.params.length) {
         res.push(
           ...join2DArrays(
-            call.params.map((p) => getSQLCode(p, defaultTable, dialect, rewriteElement)),
+            call.params.map((p) =>
+              getSQLCode(p, defaultTable, dialect, rewriteElement, subqueryCallback),
+            ),
             ', ',
           ),
         );
@@ -139,6 +145,7 @@ function handleElement(
             defaultTable,
             dialect,
             rewriteElement,
+            subqueryCallback,
           );
         }
         return [dialect.encodeColumnName(core)];
@@ -149,13 +156,24 @@ function handleElement(
           'The argument `selectedName` is required for an SQL expression without any columns inside',
         );
       }
-      return getSQLCode(dialect.as(core, selectedName), defaultTable, dialect, rewriteElement);
+      return getSQLCode(
+        dialect.as(core, selectedName),
+        defaultTable,
+        dialect,
+        rewriteElement,
+        subqueryCallback,
+      );
     }
 
     case mm.SQLElementType.action: {
       const action = element.value;
       if (action instanceof mm.Action) {
-        return handleSubquery(action, action.__table || defaultTable, dialect);
+        const io = handleSubquery(action, action.__table || defaultTable, dialect);
+        subqueryCallback?.(action, io);
+        if (!io.sql) {
+          throw new Error(`Unexpected empty SQL code from IO, action "${action}"`);
+        }
+        return io.sql;
       }
       throw new Error(`Element is not an action, got \`${toTypeString(action)}\``);
     }
@@ -170,6 +188,7 @@ function handleElement(
 
 export interface SQLIOBuilderOption {
   rewriteElement?: (element: mm.SQLElement) => StringSegment[] | null;
+  subqueryCallback?: (action: mm.Action, io: ActionIO) => void;
 }
 
 export function sqlIO(
@@ -197,6 +216,12 @@ export function sqlIO(
     sql,
     dialect,
     vars,
-    getSQLCode(sql, defaultTable, dialect, opt.rewriteElement || null),
+    getSQLCode(
+      sql,
+      defaultTable,
+      dialect,
+      opt.rewriteElement || null,
+      opt.subqueryCallback || null,
+    ),
   );
 }

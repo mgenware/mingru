@@ -13,13 +13,17 @@ import { ActionToIOOptions } from './actionToIOOptions';
 export class TransactMemberIO {
   constructor(
     public member: mm.TransactionMember,
+    public assignedName: string,
     public actionIO: ActionIO,
     public callPath: string,
-    public isTemp: boolean,
   ) {}
 
+  get isInline(): boolean {
+    return !this.member.action.__name;
+  }
+
   toString(): string {
-    return `TransactMemberIO(${this.actionIO.action}, ${this.callPath}, ${this.isTemp})`;
+    return `TransactMemberIO(${this.actionIO.action}, ${this.callPath})`;
   }
 }
 
@@ -59,25 +63,31 @@ class TransactIOProcessor extends BaseIOProcessor {
 
   convert(): TransactIO {
     const { action, opt } = this;
+    const parentName = action.mustGetName();
+    const parentTable = action.mustGetTable();
     const { dialect } = opt;
     const { members } = action;
     const memberIOs = members.map((mem, idx) => {
       const childAction = mem.action;
-      const childTable = childAction.mustGetTable();
-      const childName = childAction.mustGetName();
+      const childTable = childAction.__table || parentTable;
+      const childName = childAction.__name || mem.name || `${parentName}Child${idx + 1}`;
 
-      // Call actionToIO after initialization.
-      const io = actionToIO(childAction, opt, `transaction child index ${idx}`);
+      const io = actionToIO(
+        childAction,
+        { ...opt, contextTable: action.mustGetTable(), actionName: childName },
+        `transaction child index ${idx}`,
+      );
 
       // `isMemberSibling` describes if this member and current TX action
-      // belong to same parent.
-      const isMemberSibling = mem.isInline || action.__table === childTable;
+      // belong to the same parent.
+      const isMemberInline = !mem.action.__name;
+      const isMemberSibling = isMemberInline || action.__table === childTable;
       const callPath = utils.actionCallPath(
         isMemberSibling ? null : childTable.__name,
         childName,
-        mem.isInline,
+        isMemberInline,
       );
-      return new TransactMemberIO(mem, io, callPath, mem.isInline);
+      return new TransactMemberIO(mem, childName, io, callPath);
     });
 
     // funcArgs

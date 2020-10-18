@@ -4,7 +4,7 @@ import { testBuildAsync } from './common';
 
 it('unsafeDeleteAll', async () => {
   class PostTA extends mm.TableActions {
-    deleteT = mm.unsafeDeleteAll().byID();
+    deleteT = mm.unsafeDeleteAll().by(post.id);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'delete/delete');
@@ -12,9 +12,7 @@ it('unsafeDeleteAll', async () => {
 
 it('deleteSome', async () => {
   class PostTA extends mm.TableActions {
-    deleteT = mm
-      .deleteSome()
-      .whereSQL(mm.sql`${post.user_id} = ${mm.input(post.user_id)}`);
+    deleteT = mm.deleteSome().whereSQL(mm.sql`${post.user_id} = ${mm.input(post.user_id)}`);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'delete/deleteWithWhere');
@@ -22,7 +20,7 @@ it('deleteSome', async () => {
 
 it('deleteOne', async () => {
   class PostTA extends mm.TableActions {
-    deleteT = mm.deleteOne().byID();
+    deleteT = mm.deleteOne().by(post.id);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'delete/deleteOne');

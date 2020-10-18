@@ -5,7 +5,7 @@ import post from '../models/post';
 
 it('Wrap', async () => {
   class UserTA extends mm.TableActions {
-    t = mm.updateOne().setInputs().byID();
+    t = mm.updateOne().setInputs().by(user.id);
   }
   const userTA = mm.tableActions(user, UserTA);
   class PostTA extends mm.TableActions {
@@ -30,7 +30,7 @@ it('Wrap', async () => {
 
     // ROOT_TABLE: post
     // TABLE: post
-    t3 = mm.updateOne().setInputs().byID().wrap({ title: '"t3"' });
+    t3 = mm.updateOne().setInputs().by(post.id).wrap({ title: '"t3"' });
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'wrap/wrap');

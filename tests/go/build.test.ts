@@ -7,20 +7,11 @@ import { testBuildToDirAsync } from './common';
 it('Single table', async () => {
   class PostTA extends mm.TableActions {
     selectPostTitle = mm.select(post.id, post.title);
-    selectPostInfo = mm.select(
-      post.id,
-      post.title,
-      post.user_id,
-      post.user_id.join(user).url_name,
-    );
+    selectPostInfo = mm.select(post.id, post.title, post.user_id, post.user_id.join(user).url_name);
 
-    updatePostTitle = mm
-      .unsafeUpdateAll()
-      .set(post.title, mm.sql`${mm.input(post.title)}`);
+    updatePostTitle = mm.unsafeUpdateAll().set(post.title, mm.sql`${mm.input(post.title)}`);
 
-    deleteByID = mm
-      .deleteOne()
-      .whereSQL(mm.sql`${post.id} = ${mm.input(post.id)}`);
+    deleteByID = mm.deleteOne().whereSQL(mm.sql`${post.id} = ${mm.input(post.id)}`);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'singleTable');
@@ -35,15 +26,9 @@ it('Multiple tables', async () => {
   const userTA = mm.tableActions(user, UserTA);
 
   class PostTA extends mm.TableActions {
-    selectPostInfo = mm.select(
-      post.id,
-      post.content,
-      post.user_id.join(user).url_name,
-    );
+    selectPostInfo = mm.select(post.id, post.content, post.user_id.join(user).url_name);
 
-    updateContent = mm
-      .unsafeUpdateAll()
-      .set(post.content, post.content.isEqualToInput());
+    updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToInput());
 
     deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
   }
@@ -64,9 +49,7 @@ it('Custom package name', async () => {
 
 it('Table DBName', async () => {
   class PostRplTA extends mm.TableActions {
-    insertPostReply = mm
-      .unsafeInsertOne()
-      .setInputs(postReply.to_user_id, postReply.user_id);
+    insertPostReply = mm.unsafeInsertOne().setInputs(postReply.to_user_id, postReply.user_id);
   }
   const ta = mm.tableActions(postReply, PostRplTA);
   await testBuildToDirAsync([ta], ['post_reply'], 'tableName');
@@ -81,15 +64,9 @@ it('Multiple tables + CSQL', async () => {
   const userTA = mm.tableActions(user, UserTA);
 
   class PostTA extends mm.TableActions {
-    selectPostInfo = mm.select(
-      post.id,
-      post.content,
-      post.user_id.join(user).url_name,
-    );
+    selectPostInfo = mm.select(post.id, post.content, post.user_id.join(user).url_name);
 
-    updateContent = mm
-      .unsafeUpdateAll()
-      .set(post.content, post.content.isEqualToInput());
+    updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToInput());
 
     deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
   }
@@ -108,7 +85,7 @@ it('Types', async () => {
   class UserTA extends mm.TableActions {
     selectByID = mm
       .select(user.id)
-      .byID()
+      .by(user.id)
       .attrs({
         [mm.ActionAttributes.groupTypeName]: 'Type1',
         [mm.ActionAttributes.resultTypeName]: 'Res1',
@@ -125,7 +102,7 @@ it('Types', async () => {
   class PostTA extends mm.TableActions {
     selectByID = mm
       .select(post.id)
-      .byID()
+      .by(post.id)
       .attrs({
         [mm.ActionAttributes.groupTypeName]: 'Type1',
         [mm.ActionAttributes.resultTypeName]: 'Res1',

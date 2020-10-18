@@ -15,7 +15,7 @@ it('Update', () => {
       .set(post.title, mm.sql`"haha"`)
       .set(post.content, mm.sql`${mm.input(post.content)}`)
       .set(post.cmtCount, mm.sql`${post.cmtCount} + 1`)
-      .byID();
+      .by(post.id);
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;

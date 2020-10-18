@@ -34,8 +34,16 @@ class WrapIOProcessor extends BaseIOProcessor {
     const { action, opt } = this;
     const { dialect } = opt;
     const innerAction = action.action;
-    const actionName = action.mustGetName();
-    const innerIO = actionToIO(innerAction, opt, `WrapAction "${actionName}"`);
+    const actionName = this.mustGetActionName();
+    const fromTable = this.mustGetFromTable();
+    if (!actionName) {
+      throw new Error(`Action name is empty, action "${action}"`);
+    }
+    const innerIO = actionToIO(
+      innerAction,
+      { ...opt, contextTable: fromTable, actionName },
+      `WrapAction "${actionName}"`,
+    );
 
     const { args } = action;
     // Throw on non-existing argument names.
@@ -81,7 +89,7 @@ class WrapIOProcessor extends BaseIOProcessor {
     // update it in-place and return it as the IO object for this action.
     // Example:
     //   mm.update().wrap(args) -> mm.update(args)
-    if (action.isInline) {
+    if (!action.__name) {
       innerIO.funcArgs = funcArgs;
       const innerExecArgs = innerIO.execArgs;
       for (let i = 0; i < innerExecArgs.list.length; i++) {

@@ -9,7 +9,7 @@ const eq = assert.equal;
 
 it('Delete', () => {
   class PostTA extends mm.TableActions {
-    t = mm.unsafeDeleteAll().byID();
+    t = mm.unsafeDeleteAll().by(post.id);
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;

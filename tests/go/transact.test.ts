@@ -32,7 +32,7 @@ it('Pass values in child actions (no return value declaration)', async () => {
   }
   const employee = mm.table(Employee, 'employees');
   class EmployeeTA extends mm.TableActions {
-    getFirstName = mm.selectField(employee.firstName).byID();
+    getFirstName = mm.selectField(employee.firstName).by(employee.id);
     insert = mm.insertOne().setInputs();
     insert1 = mm.transact(
       this.getFirstName.declareReturnValue(mm.ReturnValues.result, 'firstName'),
@@ -53,7 +53,7 @@ it('Pass values in child actions and declare return values', async () => {
   }
   const employee = mm.table(Employee, 'employees');
   class EmployeeTA extends mm.TableActions {
-    getFirstName = mm.selectField(employee.firstName).byID();
+    getFirstName = mm.selectField(employee.firstName).by(employee.id);
     insert1 = mm
       .transact(
         this.getFirstName.declareReturnValue(mm.ReturnValues.result, 'firstName'),
@@ -134,7 +134,7 @@ it('Inline member actions', async () => {
     updatePostCount = mm
       .updateOne()
       .set(user.postCount, mm.sql`${user.postCount} + ${mm.input(mm.int(), 'offset')}`)
-      .byID();
+      .by(user.id);
   }
   const userTA = mm.tableActions(user, UserTA);
   class Post extends mm.Table {
@@ -148,8 +148,8 @@ it('Inline member actions', async () => {
     insert = mm.transact(
       userTA.updatePostCount.wrap({ offset: '1' }),
       this.insertCore,
-      mm.updateOne().setInputs().byID(),
-      mm.updateOne().setInputs().byID().wrap({ title: '"TITLE"' }),
+      mm.updateOne().setInputs().by(post2.id),
+      mm.updateOne().setInputs().by(post2.id).wrap({ title: '"TITLE"' }),
       this.insertCore.wrap({ title: '"abc"' }),
     );
   }

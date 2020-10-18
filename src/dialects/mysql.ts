@@ -59,7 +59,7 @@ export class MySQL extends Dialect {
       builder.pushWithSpace('UNSIGNED');
     }
     builder.pushWithSpace(colType.nullable ? 'NULL' : 'NOT NULL');
-    if (!col.__isNoDefaultOnCSQL) {
+    if (!col.__noDefaultOnCSQL) {
       const defValue = col.__defaultValue;
       if (defValue !== undefined && defValue instanceof mm.SQL === false) {
         builder.pushWithSpace('DEFAULT');

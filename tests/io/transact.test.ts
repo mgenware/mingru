@@ -37,11 +37,11 @@ it('TransactIO', () => {
 
 it('Members with WRAP actions', () => {
   class SourceTA extends mm.TableActions {
-    s = mm.updateSome().setInputs(user.sig, user.follower_count).byID();
+    s = mm.updateSome().setInputs(user.sig, user.follower_count).by(user.id);
   }
   const srcTA = mm.tableActions(user, SourceTA);
   class WrapTA extends mm.TableActions {
-    s = mm.updateSome().setInputs(user.sig, user.follower_count).byID();
+    s = mm.updateSome().setInputs(user.sig, user.follower_count).by(user.id);
     s2 = this.s.wrap({ sig: '"haha"' });
     t = mm.transact(this.s.wrap({ sig: '"haha"' }));
     t2 = mm.transact(this.s2);

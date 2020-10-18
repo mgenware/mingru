@@ -14,6 +14,7 @@ import { VarInfoBuilder } from '../lib/varInfoHelper';
 import { forEachWithSlots } from '../lib/arrayUtils';
 import { ActionToIOOptions } from './actionToIOOptions';
 import BaseIOProcessor from './baseIOProcessor';
+import * as sqlHelper from '../lib/sqlHelper';
 
 const orderByInputParamName = 'orderBy';
 
@@ -119,7 +120,6 @@ export class SelectIOProcessor extends BaseIOProcessor {
   joinedTableCounter = 0;
   // Tracks all selected column names, and throw on duplicates.
   selectedNames = new Set<string>();
-  fromTable: mm.Table;
 
   // Number of ORDER BY inputs.
   orderByInputCounter = 1;
@@ -135,19 +135,19 @@ export class SelectIOProcessor extends BaseIOProcessor {
 
   // Params needed when ORDER BY inputs are present.
   private orderByInputParams: VarInfo[] = [];
+  // Tracks subqueries func args.
+  private subqueryIOs: ActionIO[] = [];
 
   constructor(public action: mm.SelectAction, opt: ActionToIOOptions) {
     super(action, opt);
-
-    const fromTable = action.mustGetTable();
-    this.fromTable = fromTable;
   }
 
   convert(): SelectIO {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const sql: StringSegment[] = ['SELECT '];
-    const { action, opt, selectedNames, fromTable } = this;
+    const { action, opt, selectedNames } = this;
     const { dialect } = opt;
+    const fromTable = this.mustGetFromTable();
     const { limitValue, offsetValue, orderByColumns, groupByColumns, distinctFlag } = action;
     const selMode = action.mode;
 
@@ -156,11 +156,16 @@ export class SelectIOProcessor extends BaseIOProcessor {
     }
 
     if (!opt.selectionLiteMode) {
+      const actionName = this.mustGetActionName();
+      if (!actionName) {
+        throw new Error(`\`actionName\` is required, action "${action}"`);
+      }
+
       // NOTE: not the table defined by FROM, it's the root table defined in table actions.
       // Those fields are used to generate result type definition.
       // This process call be skipped if we don't need a result type.
       this.tablePascalName = utils.tablePascalName((action.__rootTable || fromTable).__name);
-      this.actionPascalName = utils.actionPascalName(action.mustGetName());
+      this.actionPascalName = utils.actionPascalName(actionName);
       this.actionUniqueTypeName = `${this.tablePascalName}Table${this.actionPascalName}`;
     }
 
@@ -174,15 +179,10 @@ export class SelectIOProcessor extends BaseIOProcessor {
       columns = action.columns.length ? action.columns : Object.values(fromTable.__columns);
     }
 
-    // Checks if there's any joins in this query.
-    let hasJoin = columns.some((sCol) => {
-      const [col] = this.analyzeSelectedColumn(sCol);
-      return col && col.__table instanceof mm.JoinedTable;
-    });
+    // Checks if there are any joins in this query.
+    let hasJoin = columns.some((sCol) => sqlHelper.hasJoinInSelectedColumn(sCol));
     if (!hasJoin && action.whereSQLValue) {
-      hasJoin = action.whereSQLValue.enumerateColumns(
-        (col) => col.__table instanceof mm.JoinedTable,
-      );
+      hasJoin = sqlHelper.hasJoinInSQL(action.whereSQLValue);
     }
     this.hasJoin = hasJoin;
 
@@ -221,19 +221,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     let whereIO: SQLIO | null = null;
     let whereSQL: StringSegment[] = [];
     if (action.whereSQLValue) {
-      whereIO = sqlIO(action.whereSQLValue, dialect, fromTable, {
-        rewriteElement: (ele) => {
-          if (ele.type === mm.SQLElementType.column) {
-            const col = ele.toColumn();
-            const colTable = col.mustGetTable();
-            if (colTable instanceof mm.JoinedTable) {
-              this.handleJoinRecursively(col);
-            }
-            return this.getColumnSQL(col);
-          }
-          return null;
-        },
-      });
+      whereIO = sqlIO(action.whereSQLValue, dialect, fromTable, this.getSQLBuilderOpt(''));
       whereSQL = [' WHERE ', ...whereIO.code];
     }
 
@@ -279,21 +267,12 @@ export class SelectIOProcessor extends BaseIOProcessor {
     // HAVING
     let havingIO: SQLIO | null = null;
     if (action.havingSQLValue) {
-      havingIO = sqlIO(action.havingSQLValue, dialect, fromTable, {
-        rewriteElement: (ele) => {
-          if (ele.type === mm.SQLElementType.column) {
-            const col = ele.toColumn();
-            if (col.__table instanceof mm.JoinedTable) {
-              throw new Error(
-                `Joins are not allowed in HAVING clause, offending column "${col.__name}".`,
-              );
-            }
-            return [dialect.encodeColumnName(col)];
-          }
-          return null;
-        },
-      });
-
+      havingIO = sqlIO(
+        action.havingSQLValue,
+        dialect,
+        fromTable,
+        this.getSQLBuilderOpt('HAVING clause'),
+      );
       sql.push(' HAVING ', ...havingIO.code);
     }
 
@@ -308,8 +287,13 @@ export class SelectIOProcessor extends BaseIOProcessor {
     const funcArgs = new VarList(`Func args of action "${action.__name}"`, true);
     funcArgs.add(defs.dbxQueryableVar);
     const execArgs = new VarList(`Exec args of action "${action.__name}"`, true);
-    this.flushInputs(funcArgs, execArgs, whereIO);
-    this.flushInputs(funcArgs, execArgs, havingIO);
+
+    // Merge inputs.
+    for (const io of this.subqueryIOs) {
+      this.mergeActionVars(funcArgs, execArgs, io);
+    }
+    this.mergeSQLVars(funcArgs, execArgs, whereIO);
+    this.mergeSQLVars(funcArgs, execArgs, havingIO);
 
     if (action.pagination) {
       funcArgs.add(limitTypeInfo);
@@ -393,8 +377,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
         const nextProcessor = new SelectIOProcessor(next, opt);
         // Merge func args and exec args.
         const nextIO = nextProcessor.convert();
-        funcArgs.merge(nextIO.funcArgs.list);
-        execArgs.merge(nextIO.execArgs.list);
+        this.mergeActionVars(funcArgs, execArgs, nextIO);
 
         next = next.nextSelectAction;
 
@@ -421,10 +404,8 @@ export class SelectIOProcessor extends BaseIOProcessor {
     );
   }
 
-  // Declared as a property to avoid `this` issues as it's used as a callback to other classes.
-
   // eslint-disable-next-line class-methods-use-this
-  private flushInputs(funcArgs: VarList, execArgs: VarList, io: SQLIO | null) {
+  private mergeSQLVars(funcArgs: VarList, execArgs: VarList, io: SQLIO | null) {
     if (!io) {
       return;
     }
@@ -432,6 +413,42 @@ export class SelectIOProcessor extends BaseIOProcessor {
     funcArgs.merge(io.distinctVars);
     // We need to pass all variables to Exec.
     execArgs.merge(io.vars);
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private mergeActionVars(funcArgs: VarList, execArgs: VarList, io: ActionIO | null) {
+    if (!io) {
+      return;
+    }
+    // WHERE or HAVING may contain duplicate vars, we only need distinct vars in func args.
+    funcArgs.merge(io.funcArgs.distinctList);
+    // We need to pass all variables to Exec.
+    execArgs.merge(io.execArgs.list);
+  }
+
+  private getSQLBuilderOpt(noJoinRegion: string): SQLIOBuilderOption {
+    return {
+      rewriteElement: (ele) => {
+        if (ele.type === mm.SQLElementType.column) {
+          const col = ele.toColumn();
+          const colTable = col.mustGetTable();
+          if (colTable instanceof mm.JoinedTable) {
+            if (!noJoinRegion) {
+              this.handleJoinRecursively(col);
+            } else {
+              throw new Error(
+                `Join is not allowed in ${noJoinRegion}, offending column "${col.__name}"`,
+              );
+            }
+          }
+          return this.getColumnSQL(col);
+        }
+        return null;
+      },
+      subqueryCallback: (_action, io) => {
+        this.subqueryIOs.push(io);
+      },
+    };
   }
 
   private getOrderByColumnSQL(col: mm.OrderByColumnType): StringSegment[] {
@@ -526,46 +543,6 @@ export class SelectIOProcessor extends BaseIOProcessor {
     return sql;
   }
 
-  /*
-  * Returns:
-  [
-    // Can be a column from params, or extracted from a renamed raw column,
-    // or extracted from the expression of a raw column
-    Column,
-    RawColumn,
-    ColumnType,
-  ]
-  */
-  private analyzeSelectedColumn(
-    sCol: mm.SelectActionColumns,
-  ): [mm.Column | null, mm.RawColumn | null, mm.ColumnType | null] {
-    if (!sCol) {
-      throw new Error('Unexpected null column at `fetchColumns`');
-    }
-    // If user uses a column directly
-    if (sCol instanceof mm.Column) {
-      return [sCol, null, sCol.__type];
-    }
-    if (sCol instanceof mm.RawColumn === false) {
-      throw new Error(`Expected an "RawColumn", got ${toTypeString(sCol)}`);
-    }
-    // If user uses a renamed column (a RawColumn with core = column, and selectedName = newName)
-    const rawCol = sCol;
-    if (rawCol.core instanceof mm.Column) {
-      const col = rawCol.core;
-      return [col, rawCol, col.__type];
-    }
-    if (rawCol.core instanceof mm.SQL === false) {
-      throw new Error(`Expected an "SQL" object, got ${toTypeString(rawCol.core)}`);
-    }
-    // Now, RawColumn.core is an SQL expression. Try to extract a column from it.
-    const sql = rawCol.core;
-    const column = sql.findFirstColumn();
-    // In this case, we can guess the result type in case user specified type is not present
-    const resultType = this.guessColumnType(sql);
-    return [column, rawCol, resultType];
-  }
-
   // eslint-disable-next-line class-methods-use-this
   private guessColumnType(sql: mm.SQL): mm.ColumnType | null {
     if (sql.elements.length === 1) {
@@ -609,7 +586,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     }
     const sql = alias ? this.opt.dialect.as(colSQL, alias) : colSQL;
     const variableName = alias || inputName;
-    return [variableName, sqlIO(sql, this.opt.dialect, this.fromTable, opt).code];
+    return [variableName, sqlIO(sql, this.opt.dialect, this.mustGetFromTable(), opt).code];
   }
 
   // Returns SQL expr of the selected column.
@@ -620,94 +597,49 @@ export class SelectIOProcessor extends BaseIOProcessor {
    * an alias, we should use raw SQL aliases in `mm.SQL`.
    */
   private handleSelectedColumn(sCol: mm.SelectActionColumns): SelectedColumnIO {
-    const { fromTable } = this;
+    const fromTable = this.mustGetFromTable();
     const { dialect } = this.opt;
-    const [embeddedCol, rawCol, resultType] = this.analyzeSelectedColumn(sCol);
-    if (embeddedCol) {
-      // There's at least one column in this expression:
-      if (!rawCol) {
-        // Plain columns like `post.id`.
-        const colSQL = this.handleColumn(embeddedCol);
-        const [varName, colSQLCode] = this.getColumnSQLCode(colSQL, embeddedCol, null);
+    // Plain columns like `post.id`.
+    if (sCol instanceof mm.Column) {
+      const colSQL = this.handlePlainColumn(sCol);
+      const [varName, colSQLCode] = this.getColumnSQLCode(colSQL, sCol, null);
 
-        return new SelectedColumnIO(sCol, colSQLCode, varName, null, embeddedCol, resultType);
-      }
+      return new SelectedColumnIO(sCol, colSQLCode, varName, null, sCol, sCol.__type);
+    }
 
-      const rawColCore = rawCol.core;
-      if (rawColCore instanceof mm.Column) {
-        // RawColumn with `.core` is a column (a renamed column) such as `post.id.as('newName')`.
-        const colSQL = this.handleColumn(embeddedCol);
-        const [varName, colSQLCode] = this.getColumnSQLCode(
-          colSQL,
-          embeddedCol,
-          rawCol.selectedName,
-        );
+    const { core, selectedName } = sCol;
+    // Renamed columns like `post.id.as('foo')`.
+    if (core instanceof mm.Column) {
+      const colSQL = this.handlePlainColumn(core);
+      const [varName, colSQLCode] = this.getColumnSQLCode(colSQL, core, selectedName);
 
-        return new SelectedColumnIO(
-          sCol,
-          colSQLCode,
-          varName,
-          rawCol.selectedName,
-          embeddedCol,
-          resultType,
-        );
-      }
+      return new SelectedColumnIO(sCol, colSQLCode, varName, selectedName, core, core.__type);
+    }
 
-      // Here, `RawColumn.core` is an expression with a column inside.
-      // Replace the column with the expr above.
-      // Alias is required when column is inside an expr.
-      // Example: SELECT COUNT(col) AS col_name.
-      const alias = rawCol.selectedName || embeddedCol.inputName();
-      const [varName, colSQLCode] = this.getColumnSQLCode(rawColCore, embeddedCol, alias, {
-        rewriteElement: (element) => {
-          if (element.value === embeddedCol) {
-            return sqlIO(this.handleColumn(embeddedCol), this.opt.dialect, fromTable).code;
-          }
-          return null;
-        },
-      });
-
-      return new SelectedColumnIO(
-        sCol,
-        colSQLCode,
-        varName,
-        rawCol.selectedName || null,
-        embeddedCol,
-        resultType,
+    // Raw column with an SQL expr.
+    // Selected name is required.
+    if (!selectedName) {
+      throw new Error(
+        'The argument "selectedName" is required for an SQL expression without any columns inside',
       );
     }
-
-    // Expression with no columns inside.
-    if (!rawCol) {
-      throw new Error(`Unexpected null raw column from selected column "${sCol}"`);
-    }
-    if (rawCol.core instanceof mm.Column) {
-      throw new Error(`Unexpected column object in raw column "${rawCol}"`);
-    }
-    let rawExpr = rawCol.core;
-    // If we cannot guess the result type (`resultType` is null), and neither does a user specified
-    // type (`type` is null) exists, we throw cuz we cannot determine the result type.
+    // If we cannot guess the result type (`resultType` is null), and neither does a user specified.
+    // Throw an error cuz we cannot determine the result type.
+    const resultType = this.guessColumnType(core);
     if (!resultType && !sCol.__type) {
       throw new Error(
         `Column type is required for a "${toTypeString(sCol)}" without any embedded columns`,
       );
     }
-    if (!rawCol.selectedName) {
-      throw new Error(
-        'The argument "selectedName" is required for an SQL expression without any columns inside',
-      );
-    }
 
-    // Add alias if needed.
-    if (rawCol.selectedName) {
-      rawExpr = dialect.as(rawExpr, rawCol.selectedName);
-    }
-    const info = sqlIO(rawExpr, dialect, fromTable);
+    // Add alias.
+    const rawExpr = dialect.as(core, selectedName);
+    const info = sqlIO(rawExpr, dialect, fromTable, this.getSQLBuilderOpt(''));
     return new SelectedColumnIO(
       sCol,
       info.code,
-      rawCol.selectedName, // inputName
-      rawCol.selectedName, // alias is always present in this case.
+      selectedName, // inputName
+      selectedName, // alias is always present in this case.
       null,
       resultType,
     );
@@ -744,16 +676,16 @@ export class SelectIOProcessor extends BaseIOProcessor {
     return joinIO;
   }
 
+  // Called by `handleSelectedColumn`.
   // Returns SQL expr of the selected plain column object.
-  private handleColumn(col: mm.Column): mm.SQL {
-    const { action } = this;
+  private handlePlainColumn(col: mm.Column): mm.SQL {
+    const fromTable = this.mustGetFromTable();
     const { dialect } = this.opt;
     const e = dialect.encodeName;
     // Make sure column is initialized.
     const colTable = col.mustGetTable();
     // Make sure column is from current table.
-    const sourceTable = action.mustGetTable();
-    col.checkSourceTable(sourceTable);
+    col.checkSourceTable(fromTable);
 
     let colSQL: mm.SQL;
     if (colTable instanceof mm.JoinedTable) {

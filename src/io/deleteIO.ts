@@ -43,18 +43,18 @@ class DeleteIOProcessor extends BaseIOProcessor {
       );
     }
 
-    // table
+    // FROM
     const fromSQL = this.handleFrom(table);
     sql.push(fromSQL);
 
-    // where
+    // WHERE
     const whereIO = action.whereSQLValue ? sqlIO(action.whereSQLValue, dialect, table) : null;
     if (whereIO) {
       sql.push(' WHERE ');
       sql.push(...whereIO.code);
     }
 
-    // inputs
+    // Inputs
     const funcArgs = new VarList(`Func args of action "${action.__name}"`, true);
     funcArgs.add(defs.dbxQueryableVar);
     const execArgs = new VarList(`Exec args of action "${action.__name}"`, true);

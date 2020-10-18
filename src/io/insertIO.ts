@@ -39,8 +39,8 @@ export class InsertIOProcessor extends BaseIOProcessor {
     const sql: StringSegment[] = ['INSERT INTO '];
     const { action, opt } = this;
     const { dialect } = opt;
-    const table = action.mustGetTable();
-    const fetchInsertedID = action.ensureOneRowAffected && !!table.__pkAIs.length;
+    const table = this.mustGetFromTable();
+    const fetchInsertedID = action.ensureOneRowAffected && !!table.__aiPKs.length;
 
     // Table
     const tableSQL = this.handleFrom(table);
