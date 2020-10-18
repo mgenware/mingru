@@ -45,7 +45,7 @@ it('Where and inputs', () => {
       .select(user.id, user.url_name)
       .whereSQL(
         mm.sql`${user.id} = ${mm.input(user.id)} && ${user.url_name} = ${mm.input(
-          { name: 'string', defaultValue: null },
+          { type: 'string', defaultValue: null },
           'userName',
         )}`,
       );

@@ -41,7 +41,7 @@ class UpdateIOProcessor extends BaseIOProcessor {
     const sql: StringSegment[] = ['UPDATE '];
     const { action, opt } = this;
     const { dialect } = opt;
-    const table = action.mustGetTable();
+    const table = this.mustGetFromTable();
 
     if (!action.whereSQL && !action.allowEmptyWhere) {
       throw new Error(

@@ -8,9 +8,7 @@ const dialect = mr.mysql;
 
 it('inputPlaceholder', () => {
   eq(
-    dialect.inputPlaceholder(
-      new mm.SQLVariable({ name: 'Type', defaultValue: null }, 'name'),
-    ),
+    dialect.inputPlaceholder(new mm.SQLVariable({ type: 'Type', defaultValue: null }, 'name')),
     '?',
   );
 });

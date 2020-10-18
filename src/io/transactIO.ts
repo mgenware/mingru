@@ -69,7 +69,7 @@ class TransactIOProcessor extends BaseIOProcessor {
     const { members } = action;
     const memberIOs = members.map((mem, idx) => {
       const childAction = mem.action;
-      const childTable = childAction.__table || parentTable;
+      const childRootTable = childAction.__rootTable || parentTable;
       const childName = childAction.__name || mem.name || `${parentName}Child${idx + 1}`;
 
       const io = actionToIO(
@@ -78,14 +78,23 @@ class TransactIOProcessor extends BaseIOProcessor {
         `transaction child index ${idx}`,
       );
 
-      // `isMemberSibling` describes if this member and current TX action
-      // belong to the same parent.
-      const isMemberInline = !mem.action.__name;
-      const isMemberSibling = isMemberInline || action.__table === childTable;
+      const isChildInline = !childAction.__name;
+      const isChildSameRoot = isChildInline || action.__rootTable === childRootTable;
       const callPath = utils.actionCallPath(
-        isMemberSibling ? null : childTable.__name,
+        isChildSameRoot ? null : childRootTable.__name,
         childName,
-        isMemberInline,
+        isChildInline,
+      );
+      console.log(
+        ' 👚👚👚👚👚👚 ',
+        childName,
+        childAction.__name,
+        childAction.__rootTable?.__name,
+        action.__table?.__name,
+        action.__rootTable?.__name,
+        isChildInline,
+        isChildSameRoot,
+        callPath,
       );
       return new TransactMemberIO(mem, childName, io, callPath);
     });

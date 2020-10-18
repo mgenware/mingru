@@ -64,7 +64,7 @@ export default class GoTABuilder {
 
   private buildActions(): string {
     let code = '';
-    for (const actionIO of this.taIO.actions) {
+    for (const actionIO of this.taIO.actionIOs) {
       code += '\n';
       code += this.buildActionIO(actionIO, undefined);
     }
@@ -617,6 +617,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
         .slice(1) // Strip the first queryable param
         .map((p) => p.valueOrName)
         .join(', ');
+
       // If this is a temp member (created inside transaction),
       // then we also need to generate the member func body code.
       if (memberIO.isInline) {

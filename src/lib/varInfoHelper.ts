@@ -19,7 +19,7 @@ export class TypeInfoBuilder {
       if (type.importPath) {
         typePath += `|${type.importPath}`;
       }
-      typeInfo = new AtomicTypeInfo(type.name, type.defaultValue, typePath);
+      typeInfo = new AtomicTypeInfo(type.type, type.defaultValue, typePath);
     }
     if (variable.isArray) {
       typeInfo = typeInfoToArray(typeInfo);

@@ -20,27 +20,20 @@ export function tableTypeName(tableName: string): string {
 }
 
 export function actionCallPath(
-  tableName: string | null,
+  className: string | null,
   actionName: string,
   isPrivate: boolean,
 ): string {
   const funcName = actionPascalName(actionName);
-  const resolvedTableName = tableName ? tablePascalName(tableName) : 'da';
-  return (
-    resolvedTableName +
-    '.' +
-    (isPrivate ? lowercaseFirstChar(funcName) : funcName)
-  );
+  const resolvedTableName = className ? tablePascalName(className) : 'da';
+  return resolvedTableName + '.' + (isPrivate ? lowercaseFirstChar(funcName) : funcName);
 }
 
 export function paginateCoreFuncName(name: string): string {
   return `${name}Core`;
 }
 
-export function validateSetters(
-  setters: Map<mm.Column, unknown>,
-  table: mm.Table,
-) {
+export function validateSetters(setters: Map<mm.Column, unknown>, table: mm.Table) {
   for (const setter of setters.keys()) {
     setter.checkSourceTable(table);
   }

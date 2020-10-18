@@ -38,10 +38,10 @@ it('toSQL(sourceTable)', () => {
 it('Nested SQLs', () => {
   const i1 = mm.input(user.id);
   const i2 = user.url_name.toInput();
-  const sql1 = mm.sql`${user.url_name} = ${i2} ${mm.input({ name: 'a', defaultValue: null }, 'b')}`;
+  const sql1 = mm.sql`${user.url_name} = ${i2} ${mm.input({ type: 'a', defaultValue: null }, 'b')}`;
   const i3 = mm.input(user.sig);
   const sql2 = mm.sql`_${user.id} = ${i1} AND ${sql1}`;
-  const i4 = mm.input({ name: 'a', defaultValue: null }, 'b');
+  const i4 = mm.input({ type: 'a', defaultValue: null }, 'b');
   const sql = mm.sql`START${sql2} OR ${user.sig} = ${i3} = ${mm.input(user.sig)} ${i4}`;
 
   const io = mr.sqlIO(sql, dialect, null);
@@ -65,13 +65,13 @@ it('list and distinctList', () => {
 
 it('Conflicting names', () => {
   itThrows(() => {
-    const sql = mm.sql`${user.id.toInput()}${mm.input({ name: 'b', defaultValue: null }, 'id')}`;
+    const sql = mm.sql`${user.id.toInput()}${mm.input({ type: 'b', defaultValue: null }, 'id')}`;
     mr.sqlIO(sql, dialect, null);
   }, 'Cannot handle two variables with the same name "id" but different types ("uint64" and "b") in "Expression SQL(E(SQLVar(id, desc = Column(id, Table(user))), type = 2), E(SQLVar(id, desc = {"name":"b","defaultValue":null}), type = 2))"');
 
   itThrows(() => {
-    const sql = mm.sql`${mm.input({ name: 'a', defaultValue: null }, 'v1')}${mm.input(
-      { name: 'b', defaultValue: null },
+    const sql = mm.sql`${mm.input({ type: 'a', defaultValue: null }, 'v1')}${mm.input(
+      { type: 'b', defaultValue: null },
       'v1',
     )}`;
     mr.sqlIO(sql, dialect, null);

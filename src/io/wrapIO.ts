@@ -39,6 +39,7 @@ class WrapIOProcessor extends BaseIOProcessor {
     if (!actionName) {
       throw new Error(`Action name is empty, action "${action}"`);
     }
+
     const innerIO = actionToIO(
       innerAction,
       { ...opt, contextTable: fromTable, actionName },
@@ -81,15 +82,12 @@ class WrapIOProcessor extends BaseIOProcessor {
       }
     }
 
-    // For inline actions, inner and outer actions are merged into one:
-    // For non-inline actions:
-    //   this.t.wrap(args) -> inner = this.t, outer = this.t(args)
-
     // `isInline` means the `innerIO` is not used by any other actions. We can
     // update it in-place and return it as the IO object for this action.
     // Example:
     //   mm.update().wrap(args) -> mm.update(args)
-    if (!action.__name) {
+    // NOTE that `innerIO` might be any action types.
+    if (!innerAction.__name) {
       innerIO.funcArgs = funcArgs;
       const innerExecArgs = innerIO.execArgs;
       for (let i = 0; i < innerExecArgs.list.length; i++) {
@@ -100,6 +98,11 @@ class WrapIOProcessor extends BaseIOProcessor {
           innerExecArgs.list[i] = VarInfo.withValue(arg, input);
         }
       }
+
+      // IMPORTANT! Give `innerIO` a name as it doesn't have one.
+      // Calling `__configure` with another table won't inner action's
+      // previous table.
+      innerAction.__configure(this.mustGetFromTable(), this.mustGetActionName());
       return innerIO;
     }
 
@@ -107,7 +110,7 @@ class WrapIOProcessor extends BaseIOProcessor {
     const innerActionRootTable = innerAction.__rootTable;
     // `innerActionRootTable` should not be null as `innerAction` should be initialized at the point.
     if (!innerActionRootTable) {
-      throw new Error(`Unexpected uninitialized WRAP action "${innerAction}"`);
+      throw new Error(`Unexpected uninitialized WRAP action "${innerAction.__name}"`);
     }
     const funcPath = utils.actionCallPath(
       innerActionRootTable === action.__table ? null : innerActionRootTable.__name,
@@ -125,6 +128,7 @@ class WrapIOProcessor extends BaseIOProcessor {
         execArgs.add(arg);
       }
     }
+
     return new WrapIO(dialect, action, funcArgs, execArgs, innerIO.returnValues, funcPath, innerIO);
   }
 }

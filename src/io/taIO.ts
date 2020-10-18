@@ -7,14 +7,15 @@ import { ActionToIOOptions } from './actionToIOOptions';
 
 // IO object for TA(Tabla actions)
 export class TAIO {
-  actions: ActionIO[];
+  actionIOs: ActionIO[];
   className: string;
   instanceName: string;
 
   constructor(public ta: mm.TableActions, public opt: ActionToIOOptions) {
     throwIfFalsy(ta, 'ta');
+
     // Actions are sorted alphabetically.
-    this.actions = Object.entries(ta.__actions)
+    this.actionIOs = Object.entries(ta.__actions)
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([actionName, action]) => actionToIO(action, opt, `action "${actionName}"`));
 

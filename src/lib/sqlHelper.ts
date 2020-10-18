@@ -1,5 +1,8 @@
 import * as mm from 'mingru-models';
 import toTypeString from 'to-type-string';
+import { ActionIO } from '../io/actionIO';
+import { SQLIO } from '../io/sqlIO';
+import VarList from './varList';
 
 export function sniffSQLType(sql: mm.SQL): mm.ColumnType | null {
   for (const element of sql.elements) {
@@ -125,4 +128,24 @@ export function hasJoinInSQL(sql: mm.SQL): boolean {
     return true;
   });
   return hasJoin;
+}
+
+export function mergeIOVerListsWithSQLIO(funcArgs: VarList, execArgs: VarList, io: SQLIO | null) {
+  if (!io) {
+    return;
+  }
+  funcArgs.merge(io.distinctVars);
+  execArgs.merge(io.vars);
+}
+
+export function mergeIOVerListsWithActionIO(
+  funcArgs: VarList,
+  execArgs: VarList,
+  io: ActionIO | null,
+) {
+  if (!io) {
+    return;
+  }
+  funcArgs.merge(io.funcArgs.distinctList);
+  execArgs.merge(io.execArgs.list);
 }

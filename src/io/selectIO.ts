@@ -290,10 +290,10 @@ export class SelectIOProcessor extends BaseIOProcessor {
 
     // Merge inputs.
     for (const io of this.subqueryIOs) {
-      this.mergeActionVars(funcArgs, execArgs, io);
+      sqlHelper.mergeIOVerListsWithActionIO(funcArgs, execArgs, io);
     }
-    this.mergeSQLVars(funcArgs, execArgs, whereIO);
-    this.mergeSQLVars(funcArgs, execArgs, havingIO);
+    sqlHelper.mergeIOVerListsWithSQLIO(funcArgs, execArgs, whereIO);
+    sqlHelper.mergeIOVerListsWithSQLIO(funcArgs, execArgs, havingIO);
 
     if (action.pagination) {
       funcArgs.add(limitTypeInfo);
@@ -377,7 +377,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
         const nextProcessor = new SelectIOProcessor(next, opt);
         // Merge func args and exec args.
         const nextIO = nextProcessor.convert();
-        this.mergeActionVars(funcArgs, execArgs, nextIO);
+        sqlHelper.mergeIOVerListsWithActionIO(funcArgs, execArgs, nextIO);
 
         next = next.nextSelectAction;
 
@@ -402,28 +402,6 @@ export class SelectIOProcessor extends BaseIOProcessor {
       returnValues,
       this.orderByInputIOs,
     );
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  private mergeSQLVars(funcArgs: VarList, execArgs: VarList, io: SQLIO | null) {
-    if (!io) {
-      return;
-    }
-    // WHERE or HAVING may contain duplicate vars, we only need distinct vars in func args.
-    funcArgs.merge(io.distinctVars);
-    // We need to pass all variables to Exec.
-    execArgs.merge(io.vars);
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  private mergeActionVars(funcArgs: VarList, execArgs: VarList, io: ActionIO | null) {
-    if (!io) {
-      return;
-    }
-    // WHERE or HAVING may contain duplicate vars, we only need distinct vars in func args.
-    funcArgs.merge(io.funcArgs.distinctList);
-    // We need to pass all variables to Exec.
-    execArgs.merge(io.execArgs.list);
   }
 
   private getSQLBuilderOpt(noJoinRegion: string): SQLIOBuilderOption {
