@@ -39,16 +39,16 @@ export class InsertIOProcessor extends BaseIOProcessor {
     const sql: StringSegment[] = ['INSERT INTO '];
     const { action, opt } = this;
     const { dialect } = opt;
-    const table = this.mustGetFromTable();
-    const fetchInsertedID = action.ensureOneRowAffected && !!table.__aiPKs.length;
+    const sqlTable = this.mustGetAvailableSQLTable();
+    const fetchInsertedID = action.ensureOneRowAffected && !!sqlTable.__aiPKs.length;
 
     // Table
-    const tableSQL = this.handleFrom(table);
+    const tableSQL = this.handleFrom(sqlTable);
     sql.push(...tableSQL);
 
     // Setters
-    utils.validateSetters(action.setters, table);
-    const setterIOs = SetterIO.fromAction(action, dialect, action.allowUnsetColumns, table);
+    utils.validateSetters(action.setters, sqlTable);
+    const setterIOs = SetterIO.fromAction(action, dialect, action.allowUnsetColumns, sqlTable);
     const colNames = setterIOs.map((s) => dialect.encodeColumnName(s.col));
     sql.push(` (${colNames.join(', ')})`);
 

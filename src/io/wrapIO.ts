@@ -35,14 +35,14 @@ class WrapIOProcessor extends BaseIOProcessor {
     const { dialect } = opt;
     const innerAction = action.action;
     const actionName = this.mustGetActionName();
-    const fromTable = this.mustGetFromTable();
+    const groupTable = this.mustGetGroupTable();
     if (!actionName) {
       throw new Error(`Action name is empty, action "${action}"`);
     }
 
     const innerIO = actionToIO(
       innerAction,
-      { ...opt, contextTable: fromTable, actionName },
+      { ...opt, groupTable, actionName },
       `WrapAction "${actionName}"`,
     );
 
@@ -102,18 +102,18 @@ class WrapIOProcessor extends BaseIOProcessor {
       // IMPORTANT! Give `innerIO` a name as it doesn't have one.
       // Calling `__configure` with another table won't inner action's
       // previous table.
-      innerAction.__configure(this.mustGetFromTable(), this.mustGetActionName());
+      innerAction.__configure(groupTable, this.mustGetActionName());
       return innerIO;
     }
 
     // Non-inline case.
-    const innerActionRootTable = innerAction.__rootTable;
-    // `innerActionRootTable` should not be null as `innerAction` should be initialized at the point.
-    if (!innerActionRootTable) {
+    const innerActionGroupTable = innerAction.__groupTable;
+    // `innerActionGroupTable` should not be null as `innerAction` should be initialized at the point.
+    if (!innerActionGroupTable) {
       throw new Error(`Unexpected uninitialized WRAP action "${innerAction.__name}"`);
     }
     const funcPath = utils.actionCallPath(
-      innerActionRootTable === action.__table ? null : innerActionRootTable.__name,
+      innerActionGroupTable === groupTable ? null : innerActionGroupTable.__name,
       innerAction.__name || actionName,
       false,
     );

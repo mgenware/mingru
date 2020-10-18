@@ -64,37 +64,26 @@ class TransactIOProcessor extends BaseIOProcessor {
   convert(): TransactIO {
     const { action, opt } = this;
     const parentName = action.mustGetName();
-    const parentTable = action.mustGetTable();
+    const groupTable = action.mustGetGroupTable();
     const { dialect } = opt;
     const { members } = action;
     const memberIOs = members.map((mem, idx) => {
       const childAction = mem.action;
-      const childRootTable = childAction.__rootTable || parentTable;
+      const childGroupTable = childAction.__groupTable;
       const childName = childAction.__name || mem.name || `${parentName}Child${idx + 1}`;
 
       const io = actionToIO(
         childAction,
-        { ...opt, contextTable: action.mustGetTable(), actionName: childName },
+        { ...opt, groupTable, actionName: childName },
         `transaction child index ${idx}`,
       );
 
       const isChildInline = !childAction.__name;
-      const isChildSameRoot = isChildInline || action.__rootTable === childRootTable;
+      const isChildSameRoot = isChildInline || groupTable === childGroupTable;
       const callPath = utils.actionCallPath(
-        isChildSameRoot ? null : childRootTable.__name,
+        isChildSameRoot ? null : childGroupTable?.__name || null,
         childName,
         isChildInline,
-      );
-      console.log(
-        ' 👚👚👚👚👚👚 ',
-        childName,
-        childAction.__name,
-        childAction.__rootTable?.__name,
-        action.__table?.__name,
-        action.__rootTable?.__name,
-        isChildInline,
-        isChildSameRoot,
-        callPath,
       );
       return new TransactMemberIO(mem, childName, io, callPath);
     });

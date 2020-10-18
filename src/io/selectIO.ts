@@ -143,11 +143,10 @@ export class SelectIOProcessor extends BaseIOProcessor {
   }
 
   convert(): SelectIO {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const sqlTable = this.mustGetAvailableSQLTable();
     const sql: StringSegment[] = ['SELECT '];
     const { action, opt, selectedNames } = this;
     const { dialect } = opt;
-    const fromTable = this.mustGetFromTable();
     const { limitValue, offsetValue, orderByColumns, groupByColumns, distinctFlag } = action;
     const selMode = action.mode;
 
@@ -164,7 +163,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
       // NOTE: not the table defined by FROM, it's the root table defined in table actions.
       // Those fields are used to generate result type definition.
       // This process call be skipped if we don't need a result type.
-      this.tablePascalName = utils.tablePascalName((action.__rootTable || fromTable).__name);
+      this.tablePascalName = utils.tablePascalName(this.mustGetGroupTable().__name);
       this.actionPascalName = utils.actionPascalName(actionName);
       this.actionUniqueTypeName = `${this.tablePascalName}Table${this.actionPascalName}`;
     }
@@ -176,7 +175,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
       }
       columns = [];
     } else {
-      columns = action.columns.length ? action.columns : Object.values(fromTable.__columns);
+      columns = action.columns.length ? action.columns : Object.values(sqlTable.__columns);
     }
 
     // Checks if there are any joins in this query.
@@ -212,7 +211,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     }
 
     // FROM
-    const fromSQL = this.handleFrom(fromTable);
+    const fromSQL = this.handleFrom(sqlTable);
     sql.push(' ' + fromSQL);
 
     // WHERE
@@ -221,7 +220,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     let whereIO: SQLIO | null = null;
     let whereSQL: StringSegment[] = [];
     if (action.whereSQLValue) {
-      whereIO = sqlIO(action.whereSQLValue, dialect, fromTable, this.getSQLBuilderOpt(''));
+      whereIO = sqlIO(action.whereSQLValue, dialect, sqlTable, this.getSQLBuilderOpt(''));
       whereSQL = [' WHERE ', ...whereIO.code];
     }
 
@@ -270,7 +269,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
       havingIO = sqlIO(
         action.havingSQLValue,
         dialect,
-        fromTable,
+        sqlTable,
         this.getSQLBuilderOpt('HAVING clause'),
       );
       sql.push(' HAVING ', ...havingIO.code);
@@ -557,6 +556,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     alias: string | null,
     opt?: SQLIOBuilderOption,
   ): [string, StringSegment[]] {
+    const sqlTable = this.mustGetAvailableSQLTable();
     // Alias is required when `hasJoin` is true.
     const inputName = col.inputName();
     if (this.hasJoin) {
@@ -564,7 +564,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     }
     const sql = alias ? this.opt.dialect.as(colSQL, alias) : colSQL;
     const variableName = alias || inputName;
-    return [variableName, sqlIO(sql, this.opt.dialect, this.mustGetFromTable(), opt).code];
+    return [variableName, sqlIO(sql, this.opt.dialect, sqlTable, opt).code];
   }
 
   // Returns SQL expr of the selected column.
@@ -575,7 +575,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
    * an alias, we should use raw SQL aliases in `mm.SQL`.
    */
   private handleSelectedColumn(sCol: mm.SelectActionColumns): SelectedColumnIO {
-    const fromTable = this.mustGetFromTable();
+    const sqlTable = this.mustGetAvailableSQLTable();
     const { dialect } = this.opt;
     // Plain columns like `post.id`.
     if (sCol instanceof mm.Column) {
@@ -612,7 +612,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
 
     // Add alias.
     const rawExpr = dialect.as(core, selectedName);
-    const info = sqlIO(rawExpr, dialect, fromTable, this.getSQLBuilderOpt(''));
+    const info = sqlIO(rawExpr, dialect, sqlTable, this.getSQLBuilderOpt(''));
     return new SelectedColumnIO(
       sCol,
       info.code,
@@ -657,13 +657,13 @@ export class SelectIOProcessor extends BaseIOProcessor {
   // Called by `handleSelectedColumn`.
   // Returns SQL expr of the selected plain column object.
   private handlePlainColumn(col: mm.Column): mm.SQL {
-    const fromTable = this.mustGetFromTable();
+    const sqlTable = this.mustGetAvailableSQLTable();
     const { dialect } = this.opt;
     const e = dialect.encodeName;
     // Make sure column is initialized.
     const colTable = col.mustGetTable();
     // Make sure column is from current table.
-    col.checkSourceTable(fromTable);
+    col.checkSourceTable(sqlTable);
 
     let colSQL: mm.SQL;
     if (colTable instanceof mm.JoinedTable) {

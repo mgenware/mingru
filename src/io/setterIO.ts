@@ -14,7 +14,7 @@ export class SetterIO {
     sourceTable: mm.Table | null,
     opt?: SQLIOBuilderOption,
   ): SetterIO[] {
-    const table = action.__table || sourceTable;
+    const table = action.__sqlTable || sourceTable;
     if (!table) {
       throw new Error(`Unexpected empty table in \`SetterIO\`, action "${action}"`);
     }

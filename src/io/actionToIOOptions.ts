@@ -12,7 +12,7 @@ export interface ActionToIOOptions {
   // subqueries to keep calling `from` with the action table,
   // `SQLIO` uses this option to provide a fallback bound table
   // for subqueries when they don't have a bound table.
-  contextTable?: mm.Table;
+  groupTable?: mm.Table;
   // Like `contextTable`, a fallback value for `__name`, used by
   // TRANSACT members.
   actionName?: string;

@@ -41,7 +41,7 @@ class UpdateIOProcessor extends BaseIOProcessor {
     const sql: StringSegment[] = ['UPDATE '];
     const { action, opt } = this;
     const { dialect } = opt;
-    const table = this.mustGetFromTable();
+    const sqlTable = this.mustGetAvailableSQLTable();
 
     if (!action.whereSQL && !action.allowEmptyWhere) {
       throw new Error(
@@ -50,12 +50,12 @@ class UpdateIOProcessor extends BaseIOProcessor {
     }
 
     // FROM
-    const fromSQL = this.handleFrom(table);
+    const fromSQL = this.handleFrom(sqlTable);
     sql.push(`${fromSQL} SET `);
 
     // Setters
-    utils.validateSetters(action.setters, table);
-    const setterIOs = SetterIO.fromAction(action, dialect, true, table);
+    utils.validateSetters(action.setters, sqlTable);
+    const setterIOs = SetterIO.fromAction(action, dialect, true, sqlTable);
 
     forEachWithSlots(
       setterIOs,
@@ -67,7 +67,7 @@ class UpdateIOProcessor extends BaseIOProcessor {
     );
 
     // WHERE
-    const whereIO = action.whereSQLValue ? sqlIO(action.whereSQLValue, dialect, table) : null;
+    const whereIO = action.whereSQLValue ? sqlIO(action.whereSQLValue, dialect, sqlTable) : null;
     if (whereIO) {
       sql.push(' WHERE ');
       sql.push(...whereIO.code);

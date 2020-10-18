@@ -8,12 +8,20 @@ export default class BaseIOProcessor {
     throwIfFalsy(opt, 'opt');
   }
 
-  mustGetFromTable(): mm.Table {
-    const fromTable = this.action.__table || this.opt.contextTable;
-    if (!fromTable) {
-      throw new Error(`\`fromTable\` is empty, action "${this.action}"`);
+  mustGetAvailableSQLTable(): mm.Table {
+    const table = this.action.mustGetAvailableSQLTable(this.opt.groupTable);
+    if (!table) {
+      throw new Error(`No available SQL tables, action "${this.action}"`);
     }
-    return fromTable;
+    return table;
+  }
+
+  mustGetGroupTable(): mm.Table {
+    const table = this.action.__groupTable || this.opt.groupTable;
+    if (!table) {
+      throw new Error(`No available group tables, action "${this.action}"`);
+    }
+    return table;
   }
 
   mustGetActionName(): string {

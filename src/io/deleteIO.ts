@@ -35,7 +35,7 @@ class DeleteIOProcessor extends BaseIOProcessor {
     const sql: StringSegment[] = ['DELETE FROM '];
     const { action, opt } = this;
     const { dialect } = opt;
-    const table = this.mustGetFromTable();
+    const sqlTable = this.mustGetAvailableSQLTable();
 
     if (!action.whereSQL && !action.allowNoWhere) {
       throw new Error(
@@ -44,11 +44,11 @@ class DeleteIOProcessor extends BaseIOProcessor {
     }
 
     // FROM
-    const fromSQL = this.handleFrom(table);
+    const fromSQL = this.handleFrom(sqlTable);
     sql.push(fromSQL);
 
     // WHERE
-    const whereIO = action.whereSQLValue ? sqlIO(action.whereSQLValue, dialect, table) : null;
+    const whereIO = action.whereSQLValue ? sqlIO(action.whereSQLValue, dialect, sqlTable) : null;
     if (whereIO) {
       sql.push(' WHERE ');
       sql.push(...whereIO.code);

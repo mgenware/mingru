@@ -165,7 +165,7 @@ it('Join and from', () => {
   const io = mr.selectIO(ta.selectT, ioOpt);
 
   eq(ta.__table, post);
-  eq(ta.selectT.__table, postCmt);
+  eq(ta.selectT.__sqlTable, postCmt);
   eq(
     io.getSQLCode(),
     '"SELECT `join_1`.`content` AS `cmtContent`, `join_1`.`created_at` AS `cmtCreatedAt`, `join_1`.`modified_at` AS `cmtModifiedAt`, `join_1`.`rpl_count` AS `cmtRplCount`, `join_1`.`user_id` AS `cmtUserID`, `join_2`.`url_name` AS `cmtUserUrlName` FROM `post_cmt` AS `post_cmt` INNER JOIN `cmt` AS `join_1` ON `join_1`.`id` = `post_cmt`.`cmt_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `join_1`.`user_id` WHERE `post_cmt`.`post_id` = ?"',

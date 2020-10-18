@@ -72,20 +72,20 @@ function getSQLCode(
 
 function handleSubquery(
   action: mm.Action,
-  defaultTable: mm.Table | null,
+  defaultGroupTable: mm.Table | null,
   dialect: Dialect,
 ): ActionIO {
   if (action instanceof mm.SelectAction) {
-    const sourceTable = action.__table || defaultTable;
-    if (!sourceTable) {
-      throw new Error('No table available for subquery initialization (forgot to call `from`?)');
+    const groupTable = action.__groupTable || defaultGroupTable;
+    if (!groupTable) {
+      throw new Error('No group table available for subquery initialization');
     }
     // Embedded actions are not validated by mingru-models.
-    action.validate(sourceTable);
+    action.validate(groupTable);
 
     const io = actionToIO(
       action,
-      { dialect, selectionLiteMode: true, contextTable: sourceTable },
+      { dialect, selectionLiteMode: true, groupTable },
       'handleSubquery',
     );
     return io;
@@ -168,7 +168,7 @@ function handleElement(
     case mm.SQLElementType.action: {
       const action = element.value;
       if (action instanceof mm.Action) {
-        const io = handleSubquery(action, action.__table || defaultTable, dialect);
+        const io = handleSubquery(action, action.__groupTable || defaultTable, dialect);
         subqueryCallback?.(action, io);
         if (!io.sql) {
           throw new Error(`Unexpected empty SQL code from IO, action "${action}"`);

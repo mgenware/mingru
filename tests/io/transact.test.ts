@@ -137,11 +137,11 @@ it('TX member IOs', () => {
   const members = io.memberIOs;
   assert.equal(
     members[0].toString(),
-    'TransactMemberIO(InsertAction(insert, Table(employee|employees)), da.Insert, false)',
+    'TransactMemberIO(InsertAction(insert, Table(employee|employees)), da.Insert)',
   );
   assert.equal(
     members[1].toString(),
-    'TransactMemberIO(InsertAction(insert, Table(employee|employees)), da.Insert, false)',
+    'TransactMemberIO(InsertAction(insert, Table(employee|employees)), da.Insert)',
   );
   assert.equal(members[0].actionIO.returnValues.toString(), '__insertedID: uint64');
   assert.equal(members[1].actionIO.returnValues.toString(), '__insertedID: uint64');
