@@ -75,7 +75,7 @@ class TransactIOProcessor extends BaseIOProcessor {
       const io = actionToIO(
         childAction,
         { ...opt, groupTable, actionName: childName },
-        `transaction child index ${idx}`,
+        `transaction child number ${idx + 1}`,
       );
 
       const isChildInline = !childAction.__name;

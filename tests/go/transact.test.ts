@@ -192,3 +192,29 @@ it('Reference property values', async () => {
   const userTA = mm.tableActions(user, UserTA);
   await testBuildAsync(userTA, 'tx/refPropertyValues/user');
 });
+
+it('Use the return value of a TX', async () => {
+  class Employee extends mm.Table {
+    id = mm.pk(mm.int()).autoIncrement.setDBName('emp_no');
+    firstName = mm.varChar(50);
+  }
+  const employee = mm.table(Employee, 'employees');
+  class EmployeeTA extends mm.TableActions {
+    insert = mm.insertOne().setInputs();
+    insert2 = mm
+      .transact(
+        this.insert,
+        this.insert.declareReturnValues({
+          [mm.ReturnValues.insertedID]: 'id2',
+        }),
+      )
+      .setReturnValues('id2');
+
+    // Use the return value in another TX;
+    insert3 = mm
+      .transact(this.insert, this.insert2.declareReturnValue('id2', 'id3'))
+      .setReturnValues('id3');
+  }
+  const employeeTA = mm.tableActions(employee, EmployeeTA);
+  await testBuildAsync(employeeTA, 'tx/useTXReturnValue/employee');
+});
