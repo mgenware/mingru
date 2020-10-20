@@ -94,7 +94,7 @@ it('Throws on undefined inputs', () => {
   const v = ta.t2;
   itThrows(
     () => mr.wrapIO(v, ioOpt),
-    'The argument "haha" doesn\'t exist in action "t2", available keys "queryable, id, urlName"',
+    'The argument "haha" doesn\'t exist in action "t2", available arguments "queryable, id, urlName", got "{"haha":"\\"tony\\""}"',
   );
 });
 
