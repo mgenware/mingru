@@ -1,5 +1,5 @@
 export function forEachWithSlots<T>(
-  array: T[],
+  array: ReadonlyArray<T>,
   callback: (item: T) => void,
   slotCallback: () => void,
 ) {

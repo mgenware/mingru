@@ -33,7 +33,7 @@ export function paginateCoreFuncName(name: string): string {
   return `${name}Core`;
 }
 
-export function validateSetters(setters: Map<mm.Column, unknown>, table: mm.Table) {
+export function validateSetters(setters: ReadonlyMap<mm.Column, unknown>, table: mm.Table) {
   for (const setter of setters.keys()) {
     setter.checkSourceTable(table);
   }

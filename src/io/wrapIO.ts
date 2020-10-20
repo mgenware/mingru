@@ -54,7 +54,9 @@ class WrapIOProcessor extends BaseIOProcessor {
         throw new Error(
           `The argument "${key}" doesn't exist in action "${
             action.__name
-          }", available keys "${innerFuncArgs.getKeysString()}"`,
+          }", available arguments "${innerFuncArgs.getKeysString()}", got "${JSON.stringify(
+            args,
+          )}"`,
         );
       }
     }

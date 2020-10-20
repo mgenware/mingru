@@ -19,7 +19,7 @@ export class TAIO {
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([actionName, action]) => actionToIO(action, opt, `action "${actionName}"`));
 
-    const taTable = ta.mustGetTable();
+    const taTable = ta.__table;
     const taTableName = taTable.__name;
     this.className = utils.tableTypeName(taTableName);
     this.instanceName = utils.tablePascalName(taTableName);

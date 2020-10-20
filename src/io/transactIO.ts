@@ -75,7 +75,7 @@ class TransactIOProcessor extends BaseIOProcessor {
       const io = actionToIO(
         childAction,
         { ...opt, groupTable, actionName: childName },
-        `transaction child number ${idx + 1}`,
+        `Transaction child number ${idx + 1}`,
       );
 
       const isChildInline = !childAction.__name;
@@ -159,7 +159,9 @@ class TransactIOProcessor extends BaseIOProcessor {
           throw new Error(
             `The return value named "${key}" doesn't exist in member action "${
               mem.actionIO.action
-            }", available keys "${mem.actionIO.returnValues.getKeysString()}"`,
+            }", available return values "${mem.actionIO.returnValues.getKeysString()}", got "${JSON.stringify(
+              Object.keys(memReturnValues),
+            )}"`,
           );
         }
 
@@ -201,8 +203,8 @@ class TransactIOProcessor extends BaseIOProcessor {
     }
 
     // Check TX return value refs.
-    if (action.__returnValues) {
-      for (const name of action.__returnValues) {
+    if (action.returnValues) {
+      for (const name of action.returnValues) {
         if (!crv[name]) {
           throw new Error(`The return value named "${name}" is not declared by any member`);
         }

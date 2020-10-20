@@ -26,7 +26,7 @@ export default class GoBuilder {
     const context = new GoBuilderContext();
     await Promise.all(
       tas.map((ta) => {
-        const taTable = ta.mustGetTable();
+        const taTable = ta.__table;
         const taIO = new TAIO(ta, ioOpts);
         const builder = new GoTABuilder(taIO, opts, context);
         const code = builder.build();
