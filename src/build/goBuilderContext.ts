@@ -1,8 +1,8 @@
 import { FuncSignature, StructInfo } from './goCode';
 
 export default class GoBuilderContext {
-  interfaces: { [name: string]: Map<string, FuncSignature> } = {};
-  resultTypes: { [name: string]: StructInfo } = {};
+  interfaces: Record<string, Map<string, FuncSignature>> = {};
+  resultTypes: Record<string, StructInfo> = {};
 
   handleInterfaceMember(name: string, funcSig: FuncSignature) {
     if (!this.interfaces[name]) {
