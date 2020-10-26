@@ -16,4 +16,6 @@ export interface ActionToIOOptions {
   // Like `contextTable`, a fallback value for `__name`, used by
   // TRANSACT members.
   actionName?: string;
+
+  unsafeTableInput?: boolean;
 }

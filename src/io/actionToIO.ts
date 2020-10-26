@@ -15,6 +15,8 @@ export function registerHandler(type: mm.ActionType, handler: HandlerType) {
   handlers.set(type, handler);
 }
 
+const actionToIOMap = new Map<mm.Action, ActionIO>();
+
 export function actionToIO(
   action: mm.Action,
   opt: ActionToIOOptions,
@@ -24,11 +26,18 @@ export function actionToIO(
     throwIfFalsy(action, 'action');
     throwIfFalsy(opt, 'opt');
 
+    const cached = actionToIOMap.get(action);
+    if (cached) {
+      return cached;
+    }
+
     const handler = handlers.get(action.actionType);
     if (!handler) {
       throw new Error(`The type "${action.actionType}" is not supported in actionToIO`);
     }
-    return handler(action, opt);
+    const result = handler(action, opt);
+    actionToIOMap.set(action, result);
+    return result;
   } catch (err) {
     if (err.message) {
       err.message += ` [${descMsg}]`;

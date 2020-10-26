@@ -31,4 +31,9 @@ export default class BaseIOProcessor {
     }
     return name;
   }
+
+  isFromTableInput(): boolean {
+    const { action, opt } = this;
+    return !!(opt.unsafeTableInput && action.__groupTable && !action.__sqlTable);
+  }
 }

@@ -64,7 +64,7 @@ class WrapIOProcessor extends BaseIOProcessor {
     const funcArgs = new VarList(`Func args of action "${action.__name}"`, true);
     funcArgs.add(defs.dbxQueryableVar);
 
-    // Skip the first param, which is always either `mingru.Queryable` or `db.Tx`.
+    // Skip the first param, which is always `mingru.Queryable` or `db.Tx`.
     for (let i = 1; i < innerFuncArgs.list.length; i++) {
       const arg = innerFuncArgs.list[i];
       const inputArg = args[arg.name];
@@ -96,7 +96,7 @@ class WrapIOProcessor extends BaseIOProcessor {
         const arg = innerExecArgs.list[i];
         const input = args[arg.name];
         // If argument is a constant, update the `innerExecArgs`.
-        if (input && typeof input === 'string') {
+        if (input instanceof mm.ValueRef === false && input) {
           innerExecArgs.list[i] = VarInfo.withValue(arg, input);
         }
       }
@@ -124,7 +124,7 @@ class WrapIOProcessor extends BaseIOProcessor {
     for (const arg of innerFuncArgs.distinctList) {
       const input = args[arg.name];
       // Update all arguments in `execArgs` that have been overwritten as constant.
-      if (input && typeof input === 'string') {
+      if (input instanceof mm.ValueRef === false && input) {
         execArgs.add(VarInfo.withValue(arg, input));
       } else {
         execArgs.add(arg);

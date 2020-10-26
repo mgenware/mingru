@@ -8,6 +8,7 @@ export const limitVarName = 'limit';
 export const intTypeInfo = new AtomicTypeInfo('int', 0, null);
 export const uint64TypeInfo = new AtomicTypeInfo('uint64', 0, null);
 export const boolTypeInfo = new AtomicTypeInfo('bool', false, null);
+export const stringTypeInfo = new AtomicTypeInfo('string', '', null);
 
 export const sqlDBType = typeInfoToPointer(new AtomicTypeInfo('DB', null, 'sql|database/sql'));
 export const sqlTxType = typeInfoToPointer(new AtomicTypeInfo('Tx', null, 'sql|database/sql'));
@@ -32,3 +33,5 @@ export const mathxNS = 'github.com/mgenware/go-packagex/v5/mathx';
 export const defaultPackageName = 'da';
 export const fmtImport = 'fmt';
 export const queryParamsVarName = 'queryParams';
+export const tableInputName = 'table';
+export const tableInputVar = new VarInfo(tableInputName, stringTypeInfo);

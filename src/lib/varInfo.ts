@@ -49,14 +49,9 @@ export class CompoundTypeInfo {
   typeString: string;
   defaultValueString: string;
 
-  constructor(
-    public core: AtomicTypeInfo,
-    public isPointer: boolean,
-    public isArray: boolean,
-  ) {
+  constructor(public core: AtomicTypeInfo, public isPointer: boolean, public isArray: boolean) {
     this.typeString = this.getTypeString(false);
-    this.defaultValueString =
-      this.isPointer || this.isArray ? 'nil' : this.core.defaultValueString;
+    this.defaultValueString = this.isPointer || this.isArray ? 'nil' : this.core.defaultValueString;
     Object.freeze(this);
   }
 
@@ -100,24 +95,31 @@ export function typeInfoToPointer(typeInfo: TypeInfo): CompoundTypeInfo {
   return new CompoundTypeInfo(typeInfo, true, false);
 }
 
+export type VarValue = string | mm.ValueRef | mm.Table | number;
+
 export class VarInfo {
-  static withValue(v: VarInfo, value: string | mm.ValueRef): VarInfo {
+  static withValue(v: VarInfo, value: VarValue): VarInfo {
     throwIfFalsy(v, 'v');
     return new VarInfo(v.name, v.type, value);
   }
 
-  constructor(
-    public name: string,
-    public type: TypeInfo,
-    public value?: string | mm.ValueRef,
-  ) {
+  constructor(public name: string, public type: TypeInfo, public value?: VarValue) {
     Object.freeze(this);
   }
 
   get valueOrName(): string {
     const { value } = this;
     if (value) {
-      return value instanceof mm.ValueRef ? value.path : value;
+      if (typeof value === 'string') {
+        return value;
+      }
+      if (typeof value === 'number') {
+        return value.toString();
+      }
+      if (value instanceof mm.ValueRef) {
+        return value.path;
+      }
+      return JSON.stringify(value.getDBName());
     }
     return this.name;
   }

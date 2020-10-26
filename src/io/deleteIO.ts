@@ -9,6 +9,7 @@ import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
 import BaseIOProcessor from './baseIOProcessor';
 import { ActionToIOOptions } from './actionToIOOptions';
+import { handleNonSelectSQLFrom } from '../lib/sqlHelper';
 
 export class DeleteIO extends ActionIO {
   constructor(
@@ -44,8 +45,8 @@ class DeleteIOProcessor extends BaseIOProcessor {
     }
 
     // FROM
-    const fromSQL = this.handleFrom(sqlTable);
-    sql.push(fromSQL);
+    const fromSQL = handleNonSelectSQLFrom(this, sqlTable);
+    sql.push(...fromSQL);
 
     // WHERE
     const whereIO = action.whereSQLValue ? sqlIO(action.whereSQLValue, dialect, sqlTable) : null;
@@ -57,6 +58,9 @@ class DeleteIOProcessor extends BaseIOProcessor {
     // Inputs
     const funcArgs = new VarList(`Func args of action "${action.__name}"`, true);
     funcArgs.add(defs.dbxQueryableVar);
+    if (this.isFromTableInput()) {
+      funcArgs.add(defs.tableInputVar);
+    }
     const execArgs = new VarList(`Exec args of action "${action.__name}"`, true);
     if (whereIO) {
       funcArgs.merge(whereIO.distinctVars);
@@ -72,11 +76,6 @@ class DeleteIOProcessor extends BaseIOProcessor {
     }
 
     return new DeleteIO(dialect, action, sql, whereIO, funcArgs, execArgs, returnValues);
-  }
-
-  private handleFrom(table: mm.Table): string {
-    const e = this.opt.dialect.encodeName;
-    return e(table.getDBName());
   }
 }
 

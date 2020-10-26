@@ -12,6 +12,7 @@ import * as utils from '../lib/stringUtils';
 import { forEachWithSlots } from '../lib/arrayUtils';
 import BaseIOProcessor from './baseIOProcessor';
 import { ActionToIOOptions } from './actionToIOOptions';
+import { handleNonSelectSQLFrom } from '../lib/sqlHelper';
 
 export class UpdateIO extends ActionIO {
   constructor(
@@ -50,8 +51,9 @@ class UpdateIOProcessor extends BaseIOProcessor {
     }
 
     // FROM
-    const fromSQL = this.handleFrom(sqlTable);
-    sql.push(`${fromSQL} SET `);
+    const fromSQL = handleNonSelectSQLFrom(this, sqlTable);
+    sql.push(...fromSQL);
+    sql.push(' SET ');
 
     // Setters
     utils.validateSetters(action.setters, sqlTable);
@@ -77,6 +79,10 @@ class UpdateIOProcessor extends BaseIOProcessor {
     const setterVars = settersToVarList(`SetterInputs of action "${action.__name}"`, setterIOs);
     const funcArgs = new VarList(`Func args of action "${action.__name}"`, true);
     funcArgs.add(defs.dbxQueryableVar);
+    if (this.isFromTableInput()) {
+      funcArgs.add(defs.tableInputVar);
+    }
+
     const execArgs = new VarList(`Exec args of action "${action.__name}"`, true);
     // funcArgs = WHERE(distinct) + setters
     // execArgs = setters + WHERE(all)
@@ -106,11 +112,6 @@ class UpdateIOProcessor extends BaseIOProcessor {
       returnValues,
       setterVars,
     );
-  }
-
-  private handleFrom(table: mm.Table): string {
-    const e = this.opt.dialect.encodeName;
-    return `${e(table.getDBName())}`;
   }
 }
 

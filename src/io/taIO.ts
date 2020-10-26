@@ -14,10 +14,20 @@ export class TAIO {
   constructor(public ta: mm.TableActions, public opt: ActionToIOOptions) {
     throwIfFalsy(ta, 'ta');
 
+    const taOpt = ta.__options;
     // Actions are sorted alphabetically.
     this.actionIOs = Object.entries(ta.__actions)
       .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([actionName, action]) => actionToIO(action, opt, `action "${actionName}"`));
+      .map(([actionName, action]) =>
+        actionToIO(
+          action,
+          {
+            ...opt,
+            unsafeTableInput: taOpt?.unsafeTableInput,
+          },
+          `action "${actionName}"`,
+        ),
+      );
 
     const taTable = ta.__table;
     const taTableName = taTable.__name;

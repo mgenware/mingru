@@ -10,6 +10,7 @@ import * as utils from '../lib/stringUtils';
 import { forEachWithSlots } from '../lib/arrayUtils';
 import { ActionToIOOptions } from './actionToIOOptions';
 import BaseIOProcessor from './baseIOProcessor';
+import { handleNonSelectSQLFrom } from '../lib/sqlHelper';
 
 export class InsertIO extends ActionIO {
   returnMember: ActionIO | undefined;
@@ -43,7 +44,7 @@ export class InsertIOProcessor extends BaseIOProcessor {
     const fetchInsertedID = action.ensureOneRowAffected && !!sqlTable.__aiPKs.length;
 
     // Table
-    const tableSQL = this.handleFrom(sqlTable);
+    const tableSQL = handleNonSelectSQLFrom(this, sqlTable);
     sql.push(...tableSQL);
 
     // Setters
@@ -67,9 +68,16 @@ export class InsertIOProcessor extends BaseIOProcessor {
     sql.push(')');
 
     // funcArgs
-    const funcArgs = settersToVarList(`Func args of action ${action.__name}`, setterIOs, [
-      defs.dbxQueryableVar,
-    ]);
+    const precedingElements = [defs.dbxQueryableVar];
+    if (this.isFromTableInput()) {
+      precedingElements.push(defs.tableInputVar);
+    }
+    const funcArgs = settersToVarList(
+      `Func args of action ${action.__name}`,
+      setterIOs,
+      precedingElements,
+    );
+
     const execArgs = new VarList(`Exec args of action ${action.__name}`);
     // Skip the first param, which is queryable.
     execArgs.merge(funcArgs.list.slice(1));
@@ -90,11 +98,6 @@ export class InsertIOProcessor extends BaseIOProcessor {
       execArgs,
       returnValue,
     );
-  }
-
-  private handleFrom(table: mm.Table): StringSegment[] {
-    const e = this.opt.dialect.encodeName;
-    return [`${e(table.getDBName())}`];
   }
 }
 

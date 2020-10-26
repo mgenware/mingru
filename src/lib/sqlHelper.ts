@@ -3,6 +3,9 @@ import toTypeString from 'to-type-string';
 import { ActionIO } from '../io/actionIO';
 import { SQLIO } from '../io/sqlIO';
 import VarList from './varList';
+import * as defs from '../defs';
+import { StringSegment } from '../dialect';
+import BaseIOProcessor from '../io/baseIOProcessor';
 
 export function sniffSQLType(sql: mm.SQL): mm.ColumnType | null {
   for (const element of sql.elements) {
@@ -148,4 +151,14 @@ export function mergeIOVerListsWithActionIO(
   }
   funcArgs.merge(io.funcArgs.distinctList);
   execArgs.merge(io.execArgs.list);
+}
+
+export function handleNonSelectSQLFrom(
+  processor: BaseIOProcessor,
+  table: mm.Table,
+): StringSegment[] {
+  const e = processor.opt.dialect.encodeName;
+  return processor.isFromTableInput()
+    ? [{ code: defs.tableInputName }]
+    : [`${e(table.getDBName())}`];
 }

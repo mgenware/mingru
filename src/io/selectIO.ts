@@ -212,7 +212,8 @@ export class SelectIOProcessor extends BaseIOProcessor {
 
     // FROM
     const fromSQL = this.handleFrom(sqlTable);
-    sql.push(' ' + fromSQL);
+    sql.push(' ');
+    sql.push(...fromSQL);
 
     // WHERE
     // Note: WHERE SQL is created here, but only appended to the `sql` variable
@@ -285,6 +286,10 @@ export class SelectIOProcessor extends BaseIOProcessor {
     const offsetTypeInfo = new VarInfo('offset', defs.intTypeInfo);
     const funcArgs = new VarList(`Func args of action "${action.__name}"`, true);
     funcArgs.add(defs.dbxQueryableVar);
+    if (this.isFromTableInput()) {
+      funcArgs.add(defs.tableInputVar);
+    }
+
     const execArgs = new VarList(`Exec args of action "${action.__name}"`, true);
 
     // Merge inputs.
@@ -509,15 +514,21 @@ export class SelectIOProcessor extends BaseIOProcessor {
     return [value];
   }
 
-  private handleFrom(table: mm.Table): string {
-    const e = this.opt.dialect.encodeName;
+  private handleFrom(table: mm.Table): StringSegment[] {
+    const { opt } = this;
+    const e = opt.dialect.encodeName;
     const tableDBName = table.getDBName();
     const encodedTableName = e(tableDBName);
-    let sql = `FROM ${encodedTableName}`;
-    if (this.hasJoin) {
-      sql += ' AS ' + encodedTableName;
+    const segList: StringSegment[] = ['FROM '];
+    if (this.isFromTableInput()) {
+      segList.push({ code: defs.tableInputName });
+    } else {
+      segList.push(encodedTableName);
     }
-    return sql;
+    if (this.hasJoin) {
+      segList.push(' AS ' + encodedTableName);
+    }
+    return segList;
   }
 
   // eslint-disable-next-line class-methods-use-this
