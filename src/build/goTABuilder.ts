@@ -396,7 +396,17 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     if (selMode === mm.SelectActionMode.list || isPageMode) {
       const scanParams = joinParams(selectedFields.map((p) => `&item.${p.name}`));
       if (isPageMode) {
+        // Add `fmt` import as we are using `fmt.Errorf`.
+        this.imports.add(defs.fmtImport);
         builder.pushLines(
+          'if page <= 0 {',
+          '\terr := fmt.Errorf("Invalid page %v", page)',
+          `\t${errReturnCode}`,
+          '}',
+          'if pageSize <= 0 {',
+          '\terr := fmt.Errorf("Invalid page size %v", pageSize)',
+          `\t${errReturnCode}`,
+          '}',
           'limit := pageSize + 1',
           'offset := (page - 1) * pageSize',
           'max := pageSize',
