@@ -47,14 +47,14 @@ export default class GoBuilder {
       // Sort types alphabetically.
       resultTypes.sort((a, b) => a.localeCompare(b));
       for (const name of resultTypes) {
-        const info = context.resultTypes[name];
-        imports.addVars(info.members);
+        const resultType = context.resultTypes[name];
+        imports.addVars(resultType.members);
         resultTypesCode += go.struct(
-          info.typeName,
-          info.members,
-          info.nameStyle,
-          info.ignoredMembers,
-          info.omitEmptyMembers,
+          resultType.typeName,
+          resultType.members,
+          resultType.nameStyle,
+          resultType.ignoredMembers,
+          resultType.omitEmptyMembers,
         );
         resultTypesCode += '\n';
       }

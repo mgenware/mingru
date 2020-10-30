@@ -63,7 +63,7 @@ export function struct(
   let code = `// ${typeName} ...
 type ${typeName} struct {
 `;
-  // Find the max length of var names
+  // Find the max length of all field names.
   const nameMaxLen = Math.max(...members.map((m) => m.name.length));
   let typeMaxLen = 0;
   if (nameStyle !== JSONEncodingStyle.none) {

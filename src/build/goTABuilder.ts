@@ -324,7 +324,10 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     const omitAllEmptyFields = options.jsonEncoding?.excludeEmptyValues || false;
 
     for (const col of io.cols) {
-      const fieldName = mm.utils.toPascalCase(col.varName);
+      // Column property name to model property name.
+      // Check if model name has been explicitly set.
+      const userModelName = col.column?.__modelName;
+      const fieldName = userModelName ?? mm.utils.toPascalCase(col.varName);
       const typeInfo = this.dialect.colTypeToGoType(col.getResultType());
       const varInfo = new VarInfo(fieldName, typeInfo);
 

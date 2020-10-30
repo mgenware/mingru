@@ -19,7 +19,7 @@ it('select', async () => {
   await testBuildAsync(ta, 'select/select');
 });
 
-it('select, all rows', async () => {
+it('select *', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm.select();
   }
@@ -35,7 +35,7 @@ it('selectRows', async () => {
   await testBuildAsync(ta, 'select/selectRows');
 });
 
-it('selectRows', async () => {
+it('selectAllRows', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm.selectRows().orderByAsc(post.id);
   }
@@ -566,4 +566,17 @@ it('Nested AS in SQL calls (with join)', async () => {
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/nestedAsInCallsWithJoin');
+});
+
+it('column.setModelName', async () => {
+  class MyTable extends mm.Table {
+    my_id = mm.pk();
+    my_name = mm.varChar(100).setModelName('my___name');
+  }
+  const myTable = mm.table(MyTable);
+  class MyTableTA extends mm.TableActions {
+    selectT = mm.selectRows().orderByAsc(post.id);
+  }
+  const ta = mm.tableActions(myTable, MyTableTA);
+  await testBuildAsync(ta, 'select/columnModelName');
 });
