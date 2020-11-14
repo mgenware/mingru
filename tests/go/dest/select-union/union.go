@@ -19,9 +19,9 @@ type ActivityTableTResult struct {
 }
 
 // T ...
-func (da *TableTypeActivity) T(queryable mingru.Queryable, id uint64) (*ActivityTableTResult, error) {
+func (da *TableTypeActivity) T(queryable mingru.Queryable, id uint64, postID uint64) (*ActivityTableTResult, error) {
 	result := &ActivityTableTResult{}
-	err := queryable.QueryRow("SELECT `id`, `url_name`, `display_name`, `sig`, `age`, `follower_c` FROM `user` WHERE `id` = ?", id).Scan(&result.ID, &result.UrlName, &result.DisplayName, &result.Sig, &result.Age, &result.FollowerCount)
+	err := queryable.QueryRow("SELECT `id`, `sig` AS `generic_sig`, `url_name` AS `generic_name` FROM `user` WHERE `id` = ? UNION SELECT `id`, `title` FROM `db_post` WHERE `id` = ? UNION ALL SELECT `user_id`, `value` FROM `like` UNION SELECT `user_id`, `value` FROM `like`", id, postID).Scan(&result.ID, &result.GenericSig, &result.GenericName)
 	if err != nil {
 		return nil, err
 	}

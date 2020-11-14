@@ -378,7 +378,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
           sql.push(' ALL');
         }
         sql.push(' ');
-        const nextProcessor = new SelectIOProcessor(next, opt);
+        const nextProcessor = new SelectIOProcessor(next, { ...opt, selectionLiteMode: true });
         // Merge func args and exec args.
         const nextIO = nextProcessor.convert();
         sqlHelper.mergeIOVerListsWithActionIO(funcArgs, execArgs, nextIO);
