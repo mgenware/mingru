@@ -8,6 +8,11 @@ export interface ActionToIOOptions {
   // Used in UNIONs and subqueries.
   selectionLiteMode?: boolean;
 
+  // Indicates a UNION member that is not the first child.
+  // UNION member ORDER BY and LIMIT are ignored except for the first one.
+  // See https://dev.mysql.com/doc/refman/5.7/en/union.html for details.
+  notFirstUnionMember?: boolean;
+
   // When a SELECT action contains subqueries, we don't want
   // subqueries to keep calling `from` with the action table,
   // `SQLIO` uses this option to provide a fallback bound table

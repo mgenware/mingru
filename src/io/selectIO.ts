@@ -144,12 +144,20 @@ export class SelectIOProcessor extends BaseIOProcessor {
 
   convert(): SelectIO {
     const sqlTable = this.mustGetAvailableSQLTable();
-    const sql: StringSegment[] = ['SELECT '];
     const { action, opt, selectedNames } = this;
     const { dialect } = opt;
-    const { limitValue, offsetValue, orderByColumns, groupByColumns, distinctFlag } = action;
+    const {
+      limitValue,
+      offsetValue,
+      orderByColumns,
+      groupByColumns,
+      distinctFlag,
+      unions,
+    } = action;
     const selMode = action.mode;
+    const hasUnions = unions.length;
 
+    const sql: StringSegment[] = [(hasUnions ? '(' : '') + 'SELECT '];
     if (distinctFlag) {
       sql.push('DISTINCT ');
     }
@@ -238,8 +246,51 @@ export class SelectIOProcessor extends BaseIOProcessor {
       sql.push(...whereSQL);
     }
 
+    // Func args
+    const limitTypeInfo = new VarInfo('limit', defs.intTypeInfo);
+    const offsetTypeInfo = new VarInfo('offset', defs.intTypeInfo);
+    const funcArgs = new VarList(`Func args of action "${action.__name}"`, true);
+    funcArgs.add(defs.dbxQueryableVar);
+    if (this.isFromTableInput()) {
+      funcArgs.add(defs.tableInputVar);
+    }
+    const execArgs = new VarList(`Exec args of action "${action.__name}"`, true);
+
+    // Handle UNIONs before ORDER BY.
+    // See `ActionToIOOptions.notFirstUnionMember` for details.
+    let unionIdx = 0;
+    for (const unionTuple of unions) {
+      const unionAction = unionTuple.action;
+      const isUnionAll = unionTuple.unionAll;
+      try {
+        sql.push(') UNION');
+        if (isUnionAll) {
+          sql.push(' ALL');
+        }
+        sql.push(' (');
+        const nextProcessor = new SelectIOProcessor(unionAction, {
+          ...opt,
+          selectionLiteMode: true,
+          notFirstUnionMember: true,
+        });
+        // Merge func args and exec args.
+        const nextIO = nextProcessor.convert();
+        sqlHelper.mergeIOVerListsWithActionIO(funcArgs, execArgs, nextIO);
+
+        const nextSQL = nextIO.sql;
+        if (nextSQL) {
+          sql.push(...nextSQL);
+        }
+        sql.push(')');
+        unionIdx++;
+      } catch (err) {
+        err.message += ` [UNION index ${unionIdx}]`;
+        throw err;
+      }
+    }
+
     // ORDER BY
-    if (orderByColumns.length) {
+    if (orderByColumns.length && !opt.notFirstUnionMember) {
       sql.push(' ORDER BY ');
 
       forEachWithSlots(
@@ -280,17 +331,6 @@ export class SelectIOProcessor extends BaseIOProcessor {
     if (selMode === mm.SelectActionMode.exists) {
       sql.push(')');
     }
-
-    // Func args
-    const limitTypeInfo = new VarInfo('limit', defs.intTypeInfo);
-    const offsetTypeInfo = new VarInfo('offset', defs.intTypeInfo);
-    const funcArgs = new VarList(`Func args of action "${action.__name}"`, true);
-    funcArgs.add(defs.dbxQueryableVar);
-    if (this.isFromTableInput()) {
-      funcArgs.add(defs.tableInputVar);
-    }
-
-    const execArgs = new VarList(`Exec args of action "${action.__name}"`, true);
 
     // Merge inputs.
     for (const io of this.subqueryIOs) {
@@ -366,32 +406,6 @@ export class SelectIOProcessor extends BaseIOProcessor {
         } else if (action.mode === mm.SelectActionMode.page) {
           returnValues.add(new VarInfo('hasNext', defs.boolTypeInfo));
         }
-      }
-    }
-
-    // Handle UNIONs.
-    let next = action.nextSelectAction;
-    while (next) {
-      try {
-        sql.push(' UNION');
-        if (action.unionAllFlag) {
-          sql.push(' ALL');
-        }
-        sql.push(' ');
-        const nextProcessor = new SelectIOProcessor(next, { ...opt, selectionLiteMode: true });
-        // Merge func args and exec args.
-        const nextIO = nextProcessor.convert();
-        sqlHelper.mergeIOVerListsWithActionIO(funcArgs, execArgs, nextIO);
-
-        next = next.nextSelectAction;
-
-        const nextSQL = nextIO.sql;
-        if (nextSQL) {
-          sql.push(...nextSQL);
-        }
-      } catch (err) {
-        err.message += ' [UNION]';
-        throw err;
       }
     }
 

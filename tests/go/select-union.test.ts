@@ -12,13 +12,8 @@ it('UNION', async () => {
       .select(user.id, user.sig.as('generic_sig'), user.url_name.as('generic_name'))
       .from(user)
       .by(user.id)
-      .union(
-        mm
-          .select(post.id, post.title)
-          .from(post)
-          .by(post.id, 'postID')
-          .unionAll(mm.selectRows(like.user_id, like.value).from(like)),
-      );
+      .union(mm.select(post.id, post.title).from(post).by(post.id, 'postID'))
+      .unionAll(mm.selectRows(like.user_id, like.value).from(like));
   }
   const ta = mm.tableActions(activity, ActivityTA);
 
@@ -35,15 +30,11 @@ it('UNION starting from another member', async () => {
       .by(user.id)
       .privateAttr();
 
-    t = this.#privateT.union(
-      mm
-        .select(post.id, post.title)
-        .from(post)
-        .by(post.id, 'postID')
-        .unionAll(mm.selectRows(like.user_id, like.value).from(like)),
-    );
+    t = this.#privateT
+      .union(mm.select(post.id, post.title).from(post).by(post.id, 'postID'))
+      .unionAll(mm.selectRows(like.user_id, like.value).from(like));
   }
   const ta = mm.tableActions(activity, ActivityTA);
 
-  await testBuildAsync(ta, 'select-union/unionAnotherMember');
+  await testBuildAsync(ta, 'select-union/union');
 });
