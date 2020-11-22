@@ -156,7 +156,11 @@ export class SelectIOProcessor extends BaseIOProcessor {
       groupByColumns,
       distinctFlag,
       unions,
+      pagination,
     } = action;
+
+    const isLimitInput = limitValue instanceof mm.SQLVariable;
+    const isOffsetInput = offsetValue instanceof mm.SQLVariable;
     const selMode = action.mode;
     const hasUnions = unions.length;
 
@@ -333,6 +337,20 @@ export class SelectIOProcessor extends BaseIOProcessor {
       sql.push(' HAVING ', ...havingIO.code);
     }
 
+    // LIMIT and OFFSET.
+    if (pagination || selMode === mm.SelectActionMode.page) {
+      sql.push(' LIMIT ? OFFSET ?');
+    } else if (limitValue !== undefined) {
+      sql.push(' LIMIT ');
+      sql.push(isLimitInput ? '?' : limitValue.toString());
+
+      if (offsetValue !== undefined) {
+        sql.push(' OFFSET ');
+        sql.push(isOffsetInput ? '?' : offsetValue.toString());
+      }
+    }
+
+    // ******** END OF operating on SQL string of this action ********
     // Handle ending parenthesis.
     if (selMode === mm.SelectActionMode.exists) {
       sql.push(')');
@@ -345,7 +363,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     sqlHelper.mergeIOVerListsWithSQLIO(funcArgs, execArgs, whereIO);
     sqlHelper.mergeIOVerListsWithSQLIO(funcArgs, execArgs, havingIO);
 
-    if (action.pagination) {
+    if (pagination) {
       funcArgs.add(limitTypeInfo);
       funcArgs.add(offsetTypeInfo);
       funcArgs.add(new VarInfo('max', defs.intTypeInfo));
@@ -407,7 +425,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
             new CompoundTypeInfo(resultTypeInfo, true, isResultTypeArray),
           ),
         );
-        if (action.pagination) {
+        if (pagination) {
           returnValues.add(new VarInfo('max', defs.intTypeInfo));
         } else if (action.mode === mm.SelectActionMode.page) {
           returnValues.add(new VarInfo('hasNext', defs.boolTypeInfo));
