@@ -120,6 +120,9 @@ export class SelectIOProcessor extends BaseIOProcessor {
   joinedTableCounter = 0;
   // Tracks all selected column names, and throw on duplicates.
   selectedNames = new Set<string>();
+  // K: column path, V: selected var name.
+  // NOTE: this only contains columns (no raw columns).
+  selectedNamesMap = new Map<string, string>();
 
   // Number of ORDER BY inputs.
   orderByInputCounter = 1;
@@ -207,6 +210,9 @@ export class SelectIOProcessor extends BaseIOProcessor {
           throw new Error(`The selected column name "${selIO.varName}" already exists`);
         }
         selectedNames.add(selIO.varName);
+        if (selIO.column) {
+          this.selectedNamesMap.set(selIO.column.getPath(), selIO.varName);
+        }
         colIOs.push(selIO);
 
         sql.push(...selIO.valueSQL);
@@ -437,7 +443,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
               );
             }
           }
-          return this.getColumnSQL(col);
+          return this.getColumnSQLFromExistingData(col);
         }
         return null;
       },
@@ -489,14 +495,18 @@ export class SelectIOProcessor extends BaseIOProcessor {
       return [col, [dialect.encodeName(col)]];
     }
     if (col instanceof mm.Column) {
-      return [col.mustGetName(), this.getColumnSQL(col)];
+      const varName = this.selectedNamesMap.get(col.getPath());
+      return [
+        col.mustGetName(),
+        varName ? [dialect.encodeName(varName)] : this.getColumnSQLFromExistingData(col),
+      ];
     }
     if (col instanceof mm.RawColumn) {
       if (col.selectedName) {
         return [col.selectedName, [dialect.encodeName(col.selectedName)]];
       }
       if (col.core instanceof mm.Column) {
-        return [col.core.mustGetName(), this.getColumnSQL(col.core)];
+        return [col.core.mustGetName(), this.getColumnSQLFromExistingData(col.core)];
       }
       throw new Error(
         'The argument `selectedName` is required for an SQL expression without any columns inside',
@@ -505,7 +515,12 @@ export class SelectIOProcessor extends BaseIOProcessor {
     throw new Error(`Unsupported orderBy column "${toTypeString(col)}"`);
   }
 
-  private getColumnSQL(col: mm.Column): StringSegment[] {
+  // Unlike other similar funcs in handling selected columns,
+  // this method only tries to get the SQL expression from existing joins.
+  // It never creates a join and will error when a join does not exist.
+  // It's used in ORDER BY.
+  // Returns [varName, SQL segments].
+  private getColumnSQLFromExistingData(col: mm.Column): StringSegment[] {
     const { dialect } = this.opt;
     let value = dialect.encodeColumnName(col);
     if (this.hasJoin) {
@@ -575,7 +590,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
 
   // Converts column SQL expr to SQL code segments.
   // It also returns the variable name of this column. Variable name is used to generate result property type.
-  private getColumnSQLCode(
+  private getSelectedColumnSQLCode(
     colSQL: mm.SQL,
     col: mm.Column,
     alias: string | null,
@@ -583,7 +598,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
   ): [string, StringSegment[]] {
     const sqlTable = this.mustGetAvailableSQLTable();
     // Alias is required when `hasJoin` is true.
-    const inputName = col.inputName();
+    const inputName = col.getInputName();
     if (this.hasJoin) {
       alias = alias || inputName;
     }
@@ -604,8 +619,8 @@ export class SelectIOProcessor extends BaseIOProcessor {
     const { dialect } = this.opt;
     // Plain columns like `post.id`.
     if (sCol instanceof mm.Column) {
-      const colSQL = this.handlePlainColumn(sCol);
-      const [varName, colSQLCode] = this.getColumnSQLCode(colSQL, sCol, null);
+      const colSQL = this.handlePlainSelectedColumn(sCol);
+      const [varName, colSQLCode] = this.getSelectedColumnSQLCode(colSQL, sCol, null);
 
       return new SelectedColumnIO(sCol, colSQLCode, varName, null, sCol, sCol.__type);
     }
@@ -613,8 +628,8 @@ export class SelectIOProcessor extends BaseIOProcessor {
     const { core, selectedName } = sCol;
     // Renamed columns like `post.id.as('foo')`.
     if (core instanceof mm.Column) {
-      const colSQL = this.handlePlainColumn(core);
-      const [varName, colSQLCode] = this.getColumnSQLCode(colSQL, core, selectedName);
+      const colSQL = this.handlePlainSelectedColumn(core);
+      const [varName, colSQLCode] = this.getSelectedColumnSQLCode(colSQL, core, selectedName);
 
       return new SelectedColumnIO(sCol, colSQLCode, varName, selectedName, core, core.__type);
     }
@@ -681,7 +696,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
 
   // Called by `handleSelectedColumn`.
   // Returns SQL expr of the selected plain column object.
-  private handlePlainColumn(col: mm.Column): mm.SQL {
+  private handlePlainSelectedColumn(col: mm.Column): mm.SQL {
     const sqlTable = this.mustGetAvailableSQLTable();
     const { dialect } = this.opt;
     const e = dialect.encodeName;

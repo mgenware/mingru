@@ -580,3 +580,15 @@ it('column.setModelName', async () => {
   const ta = mm.tableActions(myTable, MyTableTA);
   await testBuildAsync(ta, 'select/columnModelName');
 });
+
+it('ORDER BY columns use aliases', async () => {
+  class PostTA extends mm.TableActions {
+    selectT = mm
+      .selectRows(post.title, post.user_id.join(user).age, post.m_user_id.join(user).age)
+      .orderByAsc(post.title)
+      .orderByAsc(post.user_id.join(user).age)
+      .orderByAsc(post.m_user_id.join(user).age);
+  }
+  const ta = mm.tableActions(post, PostTA);
+  await testBuildAsync(ta, 'select/orderByColsAliases');
+});
