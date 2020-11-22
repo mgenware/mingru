@@ -1535,10 +1535,10 @@ min-indent@^1.0.0:
   resolved "https://registry.yarnpkg.com/min-indent/-/min-indent-1.0.0.tgz#cfc45c37e9ec0d8f0a0ec3dd4ef7f7c3abe39256"
   integrity sha1-z8RcN+nsDY8KDsPdTvf3w6vjklY=
 
-mingru-models@^0.45.0:
-  version "0.45.0"
-  resolved "https://registry.yarnpkg.com/mingru-models/-/mingru-models-0.45.0.tgz#341b2259feb9a26e6b87bd4d48902ea07160ccbb"
-  integrity sha512-Cm4iBAJaElQyPWH7mx2c5vZyCkBOa5IYR24DaBWb+DcSAj8+ubutJnOSaemWXTj8vlw/5LtdtrFlBrL/8OvAHw==
+mingru-models@^0.46.0:
+  version "0.46.0"
+  resolved "https://registry.yarnpkg.com/mingru-models/-/mingru-models-0.46.0.tgz#80183916b307f358b97fc2fde98c1cb6bd33cb49"
+  integrity sha512-9ziewp0QEXmO61egxqTaGX1wxAu+Fqp9Yu5XuEE4M3xkwgdnIFCU6RXrbf+fx7t0Ihhoq9mwC1HMFSo3jziHhg==
   dependencies:
     camelcase "^6.2.0"
     decamelize "^4.0.0"
