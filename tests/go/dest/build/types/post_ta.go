@@ -34,7 +34,7 @@ type PostTableSelectPostInfoResult struct {
 // SelectPostInfo ...
 func (da *TableTypePost) SelectPostInfo(queryable mingru.Queryable) (*PostTableSelectPostInfoResult, error) {
 	result := &PostTableSelectPostInfoResult{}
-	err := queryable.QueryRow("SELECT `db_post`.`n_datetime` AS `nDatetime`, `join_1`.`url_name` AS `userUrlName` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`").Scan(&result.NDatetime, &result.UserUrlName)
+	err := queryable.QueryRow("SELECT `db_post`.`n_datetime` AS `n_datetime`, `join_1`.`url_name` AS `user_url_name` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`").Scan(&result.NDatetime, &result.UserUrlName)
 	if err != nil {
 		return nil, err
 	}

@@ -15,7 +15,7 @@ import { ActionIO } from '../io/actionIO';
 import { WrapIO } from '../io/wrapIO';
 import { TransactIO } from '../io/transactIO';
 import LinesBuilder from './linesBuilder';
-import * as utils from '../lib/stringUtils';
+import * as stringUtils from '../lib/stringUtils';
 import { BuildOptions, JSONEncodingStyle } from './buildOptions';
 import GoBuilderContext from './goBuilderContext';
 
@@ -82,13 +82,13 @@ export default class GoTABuilder {
     if (!actionName) {
       throw new Error(`Unexpected empty action name, action "${io.action.__name}"`);
     }
-    const ioFuncName = utils.actionPascalName(actionName);
+    const ioFuncName = stringUtils.actionPascalName(actionName);
 
     // Prepare variables.
-    const funcName = pri ? utils.lowercaseFirstChar(ioFuncName) : ioFuncName;
+    const funcName = pri ? stringUtils.lowercaseFirstChar(ioFuncName) : ioFuncName;
     // Used for generating interface member if needed.
     let funcSigString = '';
-    // Use funcArgs.distinctList cuz duplicate vars are not allowed.
+    // Use `funcArgs.distinctList` cuz duplicate vars are not allowed.
     const funcArgs = io.funcArgs.distinctList;
     const returnValues = io.returnValues.list;
     const { className: tableClassName } = this.taIO;
@@ -104,7 +104,9 @@ export default class GoTABuilder {
     // allFuncArgs = original func args + arg stubs.
     const allFuncArgs = [...funcArgs, ...io.funcStubs];
     this.imports.addVars(allFuncArgs);
-    const funcParamsCode = allFuncArgs.map((p) => `${p.name} ${p.type.typeString}`).join(', ');
+    const funcParamsCode = allFuncArgs
+      .map((p) => `${p.camelCaseName()} ${p.type.typeString}`)
+      .join(', ');
     // Wrap all params with parentheses.
     funcSigString += `(${funcParamsCode})`;
 
@@ -154,7 +156,7 @@ export default class GoTABuilder {
         returnValueStrings.push(
           `fmt.Errorf("The array argument \`${arrayParam.name}\` cannot be empty")`,
         );
-        inputArrayChecks.push(`if len(${arrayParam.valueOrName}) == 0 {`);
+        inputArrayChecks.push(`if len(${arrayParam.valueOrName('camelCase')}) == 0 {`);
         inputArrayChecks.increaseIndent();
         inputArrayChecks.push(`return ${returnValueStrings.join(', ')}`);
         inputArrayChecks.decreaseIndent();
@@ -225,7 +227,7 @@ export default class GoTABuilder {
     const { className, instanceName } = this.taIO;
     let code = go.struct(className, [], JSONEncodingStyle.none);
     code += `\n// ${instanceName} ...
-var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
+var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
     return code;
   }
 
@@ -324,7 +326,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       // Column property name to model property name.
       // Check if model name has been explicitly set.
       const userModelName = col.column?.__modelName;
-      const fieldName = userModelName ?? mm.utils.toPascalCase(col.varName);
+      const fieldName = userModelName ?? stringUtils.toPascalCase(col.varName);
       const typeInfo = this.dialect.colTypeToGoType(col.getResultType());
       const varInfo = new VarInfo(fieldName, typeInfo);
 
@@ -610,7 +612,7 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
       // Generating the calling code of this member
       const queryParamsCode = mActionIO.funcArgs.list
         .slice(1) // Strip the first queryable param
-        .map((p) => p.valueOrName)
+        .map((p) => p.valueOrName('camelCase'))
         .join(', ');
 
       // If this is a temp member (created inside transaction),
@@ -689,16 +691,17 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
     if (variadicParams) {
       builder.push(`var ${defs.queryParamsVarName} []interface{}`);
       for (const param of args) {
-        const { valueOrName } = param;
         if (param.type instanceof CompoundTypeInfo && param.type.isArray) {
-          builder.push(`for _, item := range ${valueOrName} {`);
+          builder.push(`for _, item := range ${param.valueOrName('camelCase')} {`);
           builder.increaseIndent();
           builder.push(`${defs.queryParamsVarName} = append(${defs.queryParamsVarName}, item)`);
           builder.decreaseIndent();
           builder.push('}');
         } else {
           builder.push(
-            `${defs.queryParamsVarName} = append(${defs.queryParamsVarName}, ${param.valueOrName})`,
+            `${defs.queryParamsVarName} = append(${defs.queryParamsVarName}, ${param.valueOrName(
+              'camelCase',
+            )})`,
           );
         }
       }
@@ -719,8 +722,8 @@ var ${mm.utils.capitalizeFirstLetter(instanceName)} = &${className}{}\n\n`;
           (p) =>
             `${
               p.type instanceof CompoundTypeInfo && p.type.isArray
-                ? `...${p.valueOrName}`
-                : p.valueOrName
+                ? `...${p.valueOrName('camelCase')}`
+                : p.valueOrName('camelCase')
             }`,
         )
         .join(', ');

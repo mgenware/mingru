@@ -1,6 +1,7 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import { VarInfo, TypeInfo, AtomicTypeInfo, typeInfoToArray } from './varInfo';
+import * as stringUtils from '../lib/stringUtils';
 import Dialect from '../dialect';
 
 export class TypeInfoBuilder {
@@ -52,14 +53,14 @@ export class VarInfoBuilder {
     }
     const name = column.mustGetName();
     const table = column.mustGetTable();
-    const curName = mm.utils.toCamelCase(name);
+    const curName = stringUtils.toCamelCase(name);
 
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     if (table instanceof mm.JoinedTable) {
       if (table.associative) {
         return curName;
       }
-      return table.tableInputName() + mm.utils.capitalizeColumnName(curName);
+      return table.tableInputName() + stringUtils.toPascalCase(curName);
     }
     return curName;
   }

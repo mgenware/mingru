@@ -1,8 +1,8 @@
-import * as mm from 'mingru-models';
 import { JSONEncodingStyle } from './buildOptions';
 import VarInfo, { getAtomicTypeInfo } from '../lib/varInfo';
 import { StringSegment } from '../dialect';
 import CodeStringBuilder from '../lib/codeStringBuilder';
+import * as stringUtils from '../lib/stringUtils';
 import LinesBuilder from './linesBuilder';
 
 export class FuncSignature {
@@ -16,11 +16,11 @@ export class FuncSignature {
 
 export class MemberTagUtil {
   static getSnakeCaseJSONTag(name: string, omitEmpty: boolean) {
-    return this.getJSONTag(mm.utils.toSnakeCase(name), omitEmpty);
+    return this.getJSONTag(stringUtils.toSnakeCase(name), omitEmpty);
   }
 
   static getCamelCaseJSONTag(name: string, omitEmpty: boolean): string {
-    return this.getJSONTag(mm.utils.toCamelCase(name), omitEmpty);
+    return this.getJSONTag(stringUtils.toCamelCase(name), omitEmpty);
   }
 
   static getIgnoreJSONTag(): string {

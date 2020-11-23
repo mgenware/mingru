@@ -2,12 +2,13 @@ import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import * as mfs from 'm-fs';
 import * as nodepath from 'path';
-import * as del from 'del';
+import del from 'del';
 import Dialect from '../dialect';
 import GoBuilder from './goBuilder';
 import logger from '../logger';
 import CSQLBuilder from './csqlBuilder';
 import { BuildOptions } from './buildOptions';
+import { toSnakeCase } from '../lib/stringUtils';
 
 export default class Builder {
   opts: BuildOptions;
@@ -62,7 +63,7 @@ export default class Builder {
     let { outDir } = this;
     outDir = nodepath.join(outDir, 'create_sql');
     const builder = new CSQLBuilder(table, dialect);
-    const fileName = mm.utils.toSnakeCase(table.__name);
+    const fileName = toSnakeCase(table.__name);
     const outFile = nodepath.join(outDir, fileName + '.sql');
     const sql = builder.build();
     await mfs.writeFileAsync(outFile, sql, 'utf8');

@@ -10,6 +10,7 @@ import { BuildOptions } from './buildOptions';
 import * as go from './goCode';
 import * as defs from '../defs';
 import { ActionToIOOptions } from '../io/actionToIOOptions';
+import { toSnakeCase } from '../lib/stringUtils';
 
 export default class GoBuilder {
   async buildAsync(
@@ -30,7 +31,7 @@ export default class GoBuilder {
         const taIO = new TAIO(ta, ioOpts);
         const builder = new GoTABuilder(taIO, opts, context);
         const code = builder.build();
-        const fileName = mm.utils.toSnakeCase(taTable.__name) + '_ta'; // Add a "_ta" suffix to table actions file.
+        const fileName = toSnakeCase(taTable.__name) + '_ta'; // Add a "_ta" suffix to table actions file.
         const outFile = nodepath.join(outDir, fileName + '.go');
         return mfs.writeFileAsync(outFile, code);
       }),

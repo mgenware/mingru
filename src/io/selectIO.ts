@@ -5,7 +5,7 @@ import { throwIfFalsy } from 'throw-if-arg-empty';
 import Dialect, { StringSegment } from '../dialect';
 import { SQLIO, sqlIO, SQLIOBuilderOption } from './sqlIO';
 import { ActionIO } from './actionIO';
-import * as utils from '../lib/stringUtils';
+import * as stringUtils from '../lib/stringUtils';
 import VarInfo, { AtomicTypeInfo, CompoundTypeInfo } from '../lib/varInfo';
 import VarList from '../lib/varList';
 import { registerHandler } from './actionToIO';
@@ -63,6 +63,7 @@ export class SelectedColumnIO {
     public selectedColumn: mm.SelectActionColumns,
     public valueSQL: StringSegment[],
     // `varName` is alias if present. Otherwise, alias is auto generated from column input name.
+    // Snake case.
     public varName: string,
     public alias: string | null,
     public column: mm.Column | null,
@@ -178,8 +179,8 @@ export class SelectIOProcessor extends BaseIOProcessor {
       // NOTE: not the table defined by FROM, it's the root table defined in table actions.
       // Those fields are used to generate result type definition.
       // This process call be skipped if we don't need a result type.
-      this.tablePascalName = utils.tablePascalName(this.mustGetGroupTable().__name);
-      this.actionPascalName = utils.actionPascalName(actionName);
+      this.tablePascalName = stringUtils.tablePascalName(this.mustGetGroupTable().__name);
+      this.actionPascalName = stringUtils.actionPascalName(actionName);
       this.actionUniqueTypeName = `${this.tablePascalName}Table${this.actionPascalName}`;
     }
 
@@ -480,7 +481,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
       const values: StringSegment[][] = [];
       for (const choice of col.columns) {
         const [displayName, code] = this.getOrderByNonInputColumnSQL(choice);
-        names.push(mm.utils.toPascalCase(`${enumTypeName}${displayName}`));
+        names.push(stringUtils.toPascalCase(`${enumTypeName}${displayName}`));
         values.push(code);
       }
       this.orderByInputIOs.set(

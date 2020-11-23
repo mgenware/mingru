@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
+import { toCamelCase, toPascalCase } from './stringUtils';
 
 export class AtomicTypeInfo {
   moduleName = '';
@@ -107,7 +108,15 @@ export class VarInfo {
     Object.freeze(this);
   }
 
-  get valueOrName(): string {
+  camelCaseName(): string {
+    return toCamelCase(this.name);
+  }
+
+  pascalCaseName(): string {
+    return toPascalCase(this.name);
+  }
+
+  valueOrName(nameCase: 'camelCase' | 'pascalCase' | 'original'): string {
     const { value } = this;
     if (value) {
       if (typeof value === 'string') {
@@ -121,7 +130,14 @@ export class VarInfo {
       }
       return JSON.stringify(value.getDBName());
     }
-    return this.name;
+    switch (nameCase) {
+      case 'camelCase':
+        return this.camelCaseName();
+      case 'pascalCase':
+        return this.pascalCaseName();
+      default:
+        return this.name;
+    }
   }
 
   get hasValueRef(): boolean {

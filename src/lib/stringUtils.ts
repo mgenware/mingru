@@ -1,4 +1,22 @@
 import * as mm from 'mingru-models';
+import snakeCase from 'decamelize';
+import camelCase from 'camelcase';
+
+export function forceAllCapsTrailingID(s: string): string {
+  if (s.endsWith('Id')) {
+    // eslint-disable-next-line prefer-template
+    return s.substr(0, s.length - 'Id'.length) + 'ID';
+  }
+  return s;
+}
+
+export function toSnakeCase(s: string): string {
+  return snakeCase(s);
+}
+
+export function toCamelCase(s: string): string {
+  return forceAllCapsTrailingID(camelCase(s, { preserveConsecutiveUppercase: true }));
+}
 
 export function lowercaseFirstChar(s: string): string {
   if (!s) {
@@ -7,12 +25,22 @@ export function lowercaseFirstChar(s: string): string {
   return `${s.charAt(0).toLowerCase()}${s.substr(1)}`;
 }
 
+export function toPascalCase(s: string): string {
+  const res = forceAllCapsTrailingID(
+    camelCase(s, { preserveConsecutiveUppercase: true, pascalCase: true }),
+  );
+  if (res === 'Id') {
+    return 'ID';
+  }
+  return res;
+}
+
 export function tablePascalName(tableName: string): string {
-  return mm.utils.toPascalCase(tableName);
+  return toPascalCase(tableName);
 }
 
 export function actionPascalName(actionName: string): string {
-  return mm.utils.toPascalCase(actionName);
+  return toPascalCase(actionName);
 }
 
 export function tableTypeName(tableName: string): string {

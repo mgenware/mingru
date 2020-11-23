@@ -68,7 +68,7 @@ it('Basic join', () => {
 
   eq(
     io.getSQLCode(),
-    '"SELECT `join_1`.`url_name` AS `userUrlName`, `db_post`.`title` AS `title` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`"',
+    '"SELECT `join_1`.`url_name` AS `user_url_name`, `db_post`.`title` AS `title` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`"',
   );
 });
 
@@ -86,7 +86,7 @@ it('Multiple cols join and custom table name', () => {
 
   eq(
     io.getSQLCode(),
-    '"SELECT `join_1`.`url_name` AS `userUrlName`, `join_1`.`id` AS `userID`, `join_2`.`url_name` AS `toUserUrlName` FROM `post_cmt_rpl` AS `post_cmt_rpl` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `post_cmt_rpl`.`user_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `post_cmt_rpl`.`to_user_id`"',
+    '"SELECT `join_1`.`url_name` AS `user_url_name`, `join_1`.`id` AS `user_id`, `join_2`.`url_name` AS `to_user_url_name` FROM `post_cmt_rpl` AS `post_cmt_rpl` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `post_cmt_rpl`.`user_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `post_cmt_rpl`.`to_user_id`"',
   );
 });
 
@@ -100,7 +100,7 @@ it('Join a table with custom table name', () => {
 
   eq(
     io.getSQLCode(),
-    '"SELECT `db_post`.`user_id` AS `userID`, `join_1`.`to_user_id` AS `userToUserID` FROM `db_post` AS `db_post` INNER JOIN `post_cmt_rpl` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`"',
+    '"SELECT `db_post`.`user_id` AS `user_id`, `join_1`.`to_user_id` AS `user_to_user_id` FROM `db_post` AS `db_post` INNER JOIN `post_cmt_rpl` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`"',
   );
 });
 
@@ -114,7 +114,7 @@ it('Join a table with custom column name', () => {
 
   eq(
     io.getSQLCode(),
-    '"SELECT `db_post`.`user_id` AS `userID`, `join_1`.`to_user_id` AS `userToUserID` FROM `db_post` AS `db_post` INNER JOIN `post_cmt_rpl` AS `join_1` ON `join_1`.`haha` = `db_post`.`user_id`"',
+    '"SELECT `db_post`.`user_id` AS `user_id`, `join_1`.`to_user_id` AS `user_to_user_id` FROM `db_post` AS `db_post` INNER JOIN `post_cmt_rpl` AS `join_1` ON `join_1`.`haha` = `db_post`.`user_id`"',
   );
 });
 
@@ -142,7 +142,7 @@ it('3-table joins and WHERE', () => {
 
   eq(
     io.getSQLCode(),
-    '"SELECT `post_cmt`.`id` AS `id`, `post_cmt`.`user_id` AS `userID`, `join_1`.`title` AS `targetTitle`, `join_1`.`user_id` AS `targetUserID`, `join_2`.`url_name` AS `targetUserUrlName`, `join_2`.`id` AS `TUID2` FROM `post_cmt` AS `post_cmt` INNER JOIN `db_post` AS `join_1` ON `join_1`.`id` = `post_cmt`.`target_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `join_1`.`user_id` WHERE `post_cmt`.`user_id` = 1 AND `join_1`.`title` = 2 | `join_2`.`url_name` = ? | `post_cmt`.`id` = ? | `post_cmt`.`target_id` = ?"',
+    '"SELECT `post_cmt`.`id` AS `id`, `post_cmt`.`user_id` AS `user_id`, `join_1`.`title` AS `target_title`, `join_1`.`user_id` AS `target_user_id`, `join_2`.`url_name` AS `target_user_url_name`, `join_2`.`id` AS `TUID2` FROM `post_cmt` AS `post_cmt` INNER JOIN `db_post` AS `join_1` ON `join_1`.`id` = `post_cmt`.`target_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `join_1`.`user_id` WHERE `post_cmt`.`user_id` = 1 AND `join_1`.`title` = 2 | `join_2`.`url_name` = ? | `post_cmt`.`id` = ? | `post_cmt`.`target_id` = ?"',
   );
 });
 
@@ -168,7 +168,7 @@ it('Join and from', () => {
   eq(ta.selectT.__sqlTable, postCmt);
   eq(
     io.getSQLCode(),
-    '"SELECT `join_1`.`content` AS `cmtContent`, `join_1`.`created_at` AS `cmtCreatedAt`, `join_1`.`modified_at` AS `cmtModifiedAt`, `join_1`.`rpl_count` AS `cmtRplCount`, `join_1`.`user_id` AS `cmtUserID`, `join_2`.`url_name` AS `cmtUserUrlName` FROM `post_cmt` AS `post_cmt` INNER JOIN `cmt` AS `join_1` ON `join_1`.`id` = `post_cmt`.`cmt_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `join_1`.`user_id` WHERE `post_cmt`.`post_id` = ?"',
+    '"SELECT `join_1`.`content` AS `cmt_content`, `join_1`.`created_at` AS `cmt_created_at`, `join_1`.`modified_at` AS `cmt_modified_at`, `join_1`.`rpl_count` AS `cmt_rpl_count`, `join_1`.`user_id` AS `cmt_user_id`, `join_2`.`url_name` AS `cmt_user_url_name` FROM `post_cmt` AS `post_cmt` INNER JOIN `cmt` AS `join_1` ON `join_1`.`id` = `post_cmt`.`cmt_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `join_1`.`user_id` WHERE `post_cmt`.`post_id` = ?"',
   );
 });
 
@@ -188,7 +188,7 @@ it('AS', () => {
 
   eq(
     io.getSQLCode(),
-    '"SELECT `post_cmt`.`id` AS `id`, `post_cmt`.`user_id` AS `a`, `join_1`.`title` AS `b`, `join_2`.`url_name` AS `targetUserUrlName`, `join_2`.`url_name` AS `c` FROM `post_cmt` AS `post_cmt` INNER JOIN `db_post` AS `join_1` ON `join_1`.`id` = `post_cmt`.`target_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `join_1`.`user_id`"',
+    '"SELECT `post_cmt`.`id` AS `id`, `post_cmt`.`user_id` AS `a`, `join_1`.`title` AS `b`, `join_2`.`url_name` AS `target_user_url_name`, `join_2`.`url_name` AS `c` FROM `post_cmt` AS `post_cmt` INNER JOIN `db_post` AS `join_1` ON `join_1`.`id` = `post_cmt`.`target_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `join_1`.`user_id`"',
   );
 });
 
