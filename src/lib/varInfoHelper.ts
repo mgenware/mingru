@@ -1,7 +1,7 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import { VarInfo, TypeInfo, AtomicTypeInfo, typeInfoToArray } from './varInfo';
-import * as stringUtils from '../lib/stringUtils';
+import * as stringUtils from './stringUtils';
 import Dialect from '../dialect';
 
 export class TypeInfoBuilder {
