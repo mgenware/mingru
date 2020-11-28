@@ -1,15 +1,14 @@
 import * as mm from 'mingru-models';
-import * as assert from 'assert';
 import { itThrows } from 'it-throws';
 import user from '../models/user';
 import * as mr from '../..';
+import { eq } from '../assert-aliases';
 
-const eq = assert.equal;
 const TimePkg = 'time';
 const dialect = mr.mysql;
 
 function sqlEq(sql: mm.SQL, value: string) {
-  assert.strictEqual(mr.sqlIO(sql, dialect, null).getCodeString(), `"${value}"`);
+  eq(mr.sqlIO(sql, dialect, null).getCodeString(), `"${value}"`);
 }
 
 function testType(col: mm.Column, type: string, pkg?: string) {

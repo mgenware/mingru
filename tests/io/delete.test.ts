@@ -1,11 +1,9 @@
 import * as mm from 'mingru-models';
-import * as assert from 'assert';
 import * as mr from '../..';
 import post from '../models/post';
 import user from '../models/user';
 import { ioOpt } from './common';
-
-const eq = assert.equal;
+import { ok, eq } from '../assert-aliases';
 
 it('Delete', () => {
   class PostTA extends mm.TableActions {
@@ -15,7 +13,7 @@ it('Delete', () => {
   const v = postTA.t;
   const io = mr.deleteIO(v, ioOpt);
 
-  assert.ok(io instanceof mr.DeleteIO);
+  ok(io instanceof mr.DeleteIO);
   eq(io.getSQLCode(), '"DELETE FROM `db_post` WHERE `id` = ?"');
 });
 
@@ -74,5 +72,5 @@ it('returnValues (no WHERE)', () => {
   const v = ta.t;
   const io = mr.deleteIO(v, ioOpt);
   const { returnValues } = io;
-  assert.deepEqual(returnValues.toString(), '__rowsAffected: int');
+  eq(returnValues.toString(), '__rowsAffected: int');
 });

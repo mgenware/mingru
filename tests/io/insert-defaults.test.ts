@@ -1,8 +1,8 @@
 import * as mm from 'mingru-models';
-import * as assert from 'assert';
 import * as mr from '../..';
 import cols from '../models/cols';
 import { ioOpt } from './common';
+import { eq } from '../assert-aliases';
 
 it('dtDefault', () => {
   const { dt } = mm;
@@ -23,7 +23,7 @@ it('dtDefault', () => {
   ];
 
   for (const [type, def] of defaults) {
-    assert.equal(mr.dtDefault(type), def);
+    eq(mr.dtDefault(type), def);
   }
 });
 
@@ -35,7 +35,7 @@ it('insertWithDefaults', () => {
   const v = ta.insertT;
   const io = mr.insertIO(v, ioOpt);
 
-  assert.equal(
+  eq(
     io.getSQLCode(),
     "\"INSERT INTO `cols` (`fk`, `text`, `int`, `nullable`, `def_int`, `def_var_char`, `def_time`) VALUES (?, '', 0, NULL, -3, '一二', CURTIME())\"",
   );

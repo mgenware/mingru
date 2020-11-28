@@ -1,12 +1,10 @@
 import * as mm from 'mingru-models';
-import * as assert from 'assert';
 import { itThrows } from 'it-throws';
 import * as mr from '../..';
 import post from '../models/post';
 import user from '../models/user';
 import { ioOpt } from './common';
-
-const eq = assert.equal;
+import { eq, ok } from '../assert-aliases';
 
 it('Insert inputs', () => {
   class PostTA extends mm.TableActions {
@@ -16,7 +14,7 @@ it('Insert inputs', () => {
   const v = postTA.t;
   const io = mr.insertIO(v, ioOpt);
 
-  assert.ok(io instanceof mr.InsertIO);
+  ok(io instanceof mr.InsertIO);
   eq(io.getSQLCode(), '"INSERT INTO `db_post` (`title`, `user_id`) VALUES (?, ?)"');
 });
 
@@ -31,7 +29,7 @@ it('Insert inputs and values', () => {
   const v = postTA.t;
   const io = mr.insertIO(v, ioOpt);
 
-  assert.ok(io instanceof mr.InsertIO);
+  ok(io instanceof mr.InsertIO);
   eq(
     io.getSQLCode(),
     '"INSERT INTO `db_post` (`title`, `user_id`, `datetime`) VALUES (?, ?, NOW())"',

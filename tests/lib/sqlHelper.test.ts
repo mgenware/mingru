@@ -1,11 +1,11 @@
 import * as mm from 'mingru-models';
-import * as assert from 'assert';
 import { sniffSQLType } from '../../dist/lib/sqlHelper';
 import user from '../models/user';
 import post from '../models/post';
+import { eq } from '../assert-aliases';
 
 function tSniffSQLType(sql: mm.SQL, expected: string) {
-  assert.strictEqual(sniffSQLType(sql)?.toString(), expected);
+  eq(sniffSQLType(sql)?.toString(), expected);
 }
 
 it('sniffType', () => {

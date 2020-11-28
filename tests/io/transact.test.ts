@@ -1,11 +1,9 @@
 import * as mm from 'mingru-models';
-import * as assert from 'assert';
 import * as mr from '../..';
 import user from '../models/user';
 import post from '../models/post';
 import { ioOpt } from './common';
-
-const eq = assert.equal;
+import { eq, ok } from '../assert-aliases';
 
 it('TransactIO', () => {
   class WrapSelfTA extends mm.TableActions {
@@ -26,7 +24,7 @@ it('TransactIO', () => {
   }
   const wrapOther = mm.tableActions(post, WrapOtherTA);
   const io = mr.transactIO(wrapOther.t1, ioOpt);
-  assert.ok(io instanceof mr.TransactIO);
+  ok(io instanceof mr.TransactIO);
   eq(
     io.funcArgs.toString(),
     'db: *sql.DB|database/sql, urlName: string, id: uint64, urlName: string, sig: *string, followerCount: *string, urlName: string, id: uint64, urlName: string, followerCount: *string, urlName: string, urlName: string, sig: *string, followerCount: *string {db: *sql.DB|database/sql, urlName: string, id: uint64, sig: *string, followerCount: *string}',
@@ -51,7 +49,7 @@ it('Members with WRAP actions', () => {
   const wrapTA = mm.tableActions(user, WrapTA);
 
   const io = mr.transactIO(wrapTA.t, ioOpt);
-  assert.ok(io instanceof mr.TransactIO);
+  ok(io instanceof mr.TransactIO);
   eq(io.funcArgs.toString(), 'db: *sql.DB|database/sql, id: uint64, followerCount: *string');
   // No execArgs in TX actions
   eq(io.execArgs.toString(), '');
@@ -67,7 +65,7 @@ it('Members with WRAP actions', () => {
   );
 
   const io2 = mr.transactIO(wrapTA.t2, ioOpt);
-  assert.ok(io2 instanceof mr.TransactIO);
+  ok(io2 instanceof mr.TransactIO);
   eq(io2.funcArgs.toString(), 'db: *sql.DB|database/sql, id: uint64, followerCount: *string');
   // No execArgs in TX actions
   eq(io2.execArgs.toString(), '');
@@ -83,7 +81,7 @@ it('Members with WRAP actions', () => {
   );
 
   const io3 = mr.transactIO(wrapTA.t3, ioOpt);
-  assert.ok(io3 instanceof mr.TransactIO);
+  ok(io3 instanceof mr.TransactIO);
   eq(
     io3.funcArgs.toString(),
     'db: *sql.DB|database/sql, id: uint64, sig: *string, followerCount: *string',
@@ -99,7 +97,7 @@ it('Members with WRAP actions', () => {
   eq(m3.execArgs.toString(), 'sig: *string, followerCount: *string, id: uint64');
 
   const io4 = mr.transactIO(wrapTA.t4, ioOpt);
-  assert.ok(io4 instanceof mr.TransactIO);
+  ok(io4 instanceof mr.TransactIO);
   eq(
     io4.funcArgs.toString(),
     'db: *sql.DB|database/sql, id: uint64, sig: *string, followerCount: *string',
@@ -135,14 +133,14 @@ it('TX member IOs', () => {
   const employeeTA = mm.tableActions(employee, EmployeeTA);
   const io = mr.transactIO(employeeTA.insert2, ioOpt);
   const members = io.memberIOs;
-  assert.equal(
+  eq(
     members[0].toString(),
     'TransactMemberIO(InsertAction(insert, Table(employee|employees)), da.Insert)',
   );
-  assert.equal(
+  eq(
     members[1].toString(),
     'TransactMemberIO(InsertAction(insert, Table(employee|employees)), da.Insert)',
   );
-  assert.equal(members[0].actionIO.returnValues.toString(), '__insertedID: uint64');
-  assert.equal(members[1].actionIO.returnValues.toString(), '__insertedID: uint64');
+  eq(members[0].actionIO.returnValues.toString(), '__insertedID: uint64');
+  eq(members[1].actionIO.returnValues.toString(), '__insertedID: uint64');
 });

@@ -1,12 +1,10 @@
 import * as mm from 'mingru-models';
-import * as assert from 'assert';
 import { itThrows } from 'it-throws';
 import * as mr from '../..';
 import post from '../models/post';
 import user from '../models/user';
 import { ioOpt } from './common';
-
-const eq = assert.equal;
+import { eq, ok } from '../assert-aliases';
 
 it('Update', () => {
   class PostTA extends mm.TableActions {
@@ -21,7 +19,7 @@ it('Update', () => {
   const v = postTA.t;
   const io = mr.updateIO(v, ioOpt);
 
-  assert.ok(io instanceof mr.UpdateIO);
+  ok(io instanceof mr.UpdateIO);
   eq(
     io.getSQLCode(),
     '"UPDATE `db_post` SET `title` = \\"haha\\", `content` = ?, `cmt_c` = `cmt_c` + 1 WHERE `id` = ?"',
@@ -82,7 +80,7 @@ it('returnValues', () => {
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.updateIO(v, ioOpt);
-  assert.deepEqual(io.returnValues.toString(), '__rowsAffected: int');
+  eq(io.returnValues.toString(), '__rowsAffected: int');
 });
 
 it('Validate setters', () => {

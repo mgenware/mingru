@@ -1,15 +1,14 @@
 import * as mm from 'mingru-models';
-import * as assert from 'assert';
 import * as mr from '../..';
 import user from '../models/user';
+import { deepEq, eq } from '../assert-aliases';
 
-const eq = assert.equal;
 const dialect = mr.mysql;
 
 it('inputPlaceholder', () => {
-  eq(
+  deepEq(
     dialect.inputPlaceholder(new mm.SQLVariable({ type: 'Type', defaultValue: null }, 'name')),
-    '?',
+    ['?'],
   );
 });
 

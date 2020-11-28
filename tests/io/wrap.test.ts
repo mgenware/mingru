@@ -1,12 +1,10 @@
-import * as assert from 'assert';
 import { itThrows } from 'it-throws';
 import * as mm from 'mingru-models';
 import * as mr from '../..';
 import user from '../models/user';
 import post from '../models/post';
 import { ioOpt } from './common';
-
-const eq = assert.equal;
+import { eq, ok } from '../assert-aliases';
 
 class WrapSelfTA extends mm.TableActions {
   s = mm
@@ -34,11 +32,11 @@ const wrapOther = mm.tableActions(post, WrapOtherTA);
 
 it('WrapIO', () => {
   const wrappedIO = mr.wrapIO(wrapSelf.d, ioOpt);
-  assert.ok(wrappedIO instanceof mr.WrapIO);
+  ok(wrappedIO instanceof mr.WrapIO);
 
   // Inline inner action results in merging of outer and inner IOs.
   const innerIO = mr.wrapIO(wrapSelf.dTmp, ioOpt);
-  assert.ok(innerIO instanceof mr.UpdateIO);
+  ok(innerIO instanceof mr.UpdateIO);
 });
 
 it('getInputs (wrapSelf and innerIO)', () => {

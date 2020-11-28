@@ -1,17 +1,16 @@
 import * as mm from 'mingru-models';
-import * as assert from 'assert';
 import { itThrows } from 'it-throws';
 import * as mr from '../..';
 import user from '../models/user';
 import post from '../models/post';
+import { eq, ok } from '../assert-aliases';
 
-const eq = assert.equal;
 const dialect = mr.mysql;
 
 it('Columns and escape strings', () => {
   const sql = mm.sql`abc "aaa" ${post.user_id} ${post.user_id.join(user).url_name}`;
   const io = mr.sqlIO(sql, dialect, post);
-  assert.ok(io instanceof mr.SQLIO);
+  ok(io instanceof mr.SQLIO);
   eq(io.getCodeString(), '"abc \\"aaa\\" `user_id` `url_name`"');
 });
 
@@ -45,7 +44,7 @@ it('Nested SQLs', () => {
   const sql = mm.sql`START${sql2} OR ${user.sig} = ${i3} = ${mm.input(user.sig)} ${i4}`;
 
   const io = mr.sqlIO(sql, dialect, null);
-  assert.deepEqual(
+  eq(
     io.varList.toString(),
     'id: uint64, urlName: string, b: a, sig: *string, sig: *string, b: a {id: uint64, urlName: string, b: a, sig: *string}',
   );
@@ -57,10 +56,7 @@ it('list and distinctList', () => {
   const sql = mm.sql`${i1} ${i2} ${user.age.toInput()}`;
 
   const io = mr.sqlIO(sql, dialect, null);
-  assert.deepEqual(
-    io.varList.toString(),
-    'id: uint64, id: uint64, id: uint64, age: int {id: uint64, age: int}',
-  );
+  eq(io.varList.toString(), 'id: uint64, id: uint64, id: uint64, age: int {id: uint64, age: int}');
 });
 
 it('Conflicting names', () => {

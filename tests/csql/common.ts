@@ -1,8 +1,8 @@
 import * as nodepath from 'path';
 import * as mm from 'mingru-models';
 import * as mfs from 'm-fs';
-import * as assert from 'assert';
 import * as mr from '../..';
+import { eq } from '../assert-aliases';
 
 const dialect = mr.mysql;
 const DestDataDir = 'tests/csql/dest';
@@ -18,7 +18,7 @@ export async function testBuildAsync(table: mm.Table, path: string) {
   const builder = new mr.CSQLBuilder(table, dialect);
   const actual = builder.build(true);
   if (path) {
-    assert.equal(actual, content);
+    eq(actual, content);
   }
   return builder;
 }

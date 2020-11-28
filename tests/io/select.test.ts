@@ -9,8 +9,7 @@ import rpl from '../models/postReply';
 import postCmt from '../models/postCmt';
 import cmt2 from '../models/cmt2';
 import { ioOpt } from './common';
-
-const eq = assert.equal;
+import { eq, ok } from '../assert-aliases';
 
 it('Select', () => {
   class UserTA extends mm.TableActions {
@@ -20,7 +19,7 @@ it('Select', () => {
   const v = userTA.t;
   const io = mr.selectIO(v, ioOpt);
 
-  assert.ok(io instanceof mr.SelectIO);
+  ok(io instanceof mr.SelectIO);
   eq(io.getSQLCode(), '"SELECT `id`, `url_name` FROM `user`"');
   eq(io.whereIO, null);
 });
@@ -35,7 +34,7 @@ it('Where', () => {
   const v = userTA.t;
   const io = mr.selectIO(v, ioOpt);
 
-  assert.ok(io.whereIO instanceof mr.SQLIO);
+  ok(io.whereIO instanceof mr.SQLIO);
   eq(io.getSQLCode(), '"SELECT `id`, `url_name` FROM `user` WHERE `id` = 1 ? ?"');
 });
 
@@ -54,7 +53,7 @@ it('Where and inputs', () => {
   const v = userTA.t;
   const io = mr.selectIO(v, ioOpt);
 
-  assert.ok(io.whereIO instanceof mr.SQLIO);
+  ok(io.whereIO instanceof mr.SQLIO);
   eq(io.getSQLCode(), '"SELECT `id`, `url_name` FROM `user` WHERE `id` = ? && `url_name` = ?"');
 });
 
@@ -306,7 +305,7 @@ it('Select DISTINCT', () => {
   const v = userTA.t;
   const io = mr.selectIO(v, ioOpt);
 
-  assert.ok(io instanceof mr.SelectIO);
+  ok(io instanceof mr.SelectIO);
   eq(io.getSQLCode(), '"SELECT DISTINCT `id`, `url_name` FROM `user`"');
   eq(io.whereIO, null);
 });
