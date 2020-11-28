@@ -8,7 +8,7 @@ import { extractStringContentFromSegments } from './goCode';
 export default class CSQLBuilder {
   constructor(public table: mm.Table, public dialect: Dialect) {}
 
-  build(noHeader?: boolean): string {
+  build(noHeader: boolean): string {
     const { table, dialect } = this;
     const columns = Object.values(table.__columns);
     const body = [];
@@ -34,7 +34,7 @@ export default class CSQLBuilder {
       body.push(...fks);
     }
     let code = noHeader ? '' : defs.fileHeader;
-    code = `CREATE TABLE ${dialect.encodeTableName(table)} (\n`;
+    code += `CREATE TABLE ${dialect.encodeTableName(table)} (\n`;
     code += this.increaseIndent(body, ',\n');
     code += '\n)\n';
     code += 'CHARACTER SET=utf8mb4\nCOLLATE=utf8mb4_unicode_ci\n';
