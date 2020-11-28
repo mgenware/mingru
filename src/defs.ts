@@ -20,6 +20,14 @@ export const dbxQueryableType = new AtomicTypeInfo(
 export const dbxQueryableVar = new VarInfo(queryableParam, dbxQueryableType);
 export const sqlDBVar = new VarInfo(dbParam, sqlDBType);
 export const insertedIDVar = new VarInfo(mm.ReturnValues.insertedID, uint64TypeInfo);
+export const maxVarName = 'max';
+export const selectActionMaxVar = new VarInfo(maxVarName, intTypeInfo);
+export const pageVarName = 'page';
+export const pageVar = new VarInfo(pageVarName, intTypeInfo);
+export const pageSizeVarName = 'pageSize';
+export const pageSizeVar = new VarInfo(pageSizeVarName, intTypeInfo);
+export const hasNextVarName = 'hasNext';
+export const hasNextVar = new VarInfo(hasNextVarName, boolTypeInfo);
 
 export const resultVarName = 'result';
 export const fileHeader = `/${'*'.repeat(90)}

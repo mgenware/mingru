@@ -388,12 +388,12 @@ export class SelectIOProcessor extends BaseIOProcessor {
     if (pagination) {
       funcArgs.add(limitTypeInfo);
       funcArgs.add(offsetTypeInfo);
-      funcArgs.add(new VarInfo('max', defs.intTypeInfo));
+      funcArgs.add(defs.selectActionMaxVar);
       execArgs.add(limitTypeInfo);
       execArgs.add(offsetTypeInfo);
     } else if (selMode === mm.SelectActionMode.page) {
-      funcArgs.add(new VarInfo('page', defs.intTypeInfo));
-      funcArgs.add(new VarInfo('pageSize', defs.intTypeInfo));
+      funcArgs.add(defs.pageVar);
+      funcArgs.add(defs.pageSizeVar);
       execArgs.add(limitTypeInfo);
       execArgs.add(offsetTypeInfo);
     } else if (limitValue !== undefined) {
@@ -452,9 +452,9 @@ export class SelectIOProcessor extends BaseIOProcessor {
           ),
         );
         if (pagination) {
-          returnValues.add(new VarInfo('max', defs.intTypeInfo));
+          returnValues.add(defs.selectActionMaxVar);
         } else if (selMode === mm.SelectActionMode.page) {
-          returnValues.add(new VarInfo('hasNext', defs.boolTypeInfo));
+          returnValues.add(defs.hasNextVar);
         }
       }
     }

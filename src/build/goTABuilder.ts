@@ -390,17 +390,17 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
         // Add `fmt` import as we are using `fmt.Errorf`.
         this.imports.add(defs.fmtImport);
         builder.pushLines(
-          'if page <= 0 {',
-          '\terr := fmt.Errorf("Invalid page %v", page)',
+          `if ${defs.pageVarName} <= 0 {`,
+          `\terr := fmt.Errorf("Invalid page %v", ${defs.pageVarName})`,
           `\t${errReturnCode}`,
           '}',
-          'if pageSize <= 0 {',
-          '\terr := fmt.Errorf("Invalid page size %v", pageSize)',
+          `if ${defs.pageSizeVarName} <= 0 {`,
+          `\terr := fmt.Errorf("Invalid page size %v", ${defs.pageSizeVarName})`,
           `\t${errReturnCode}`,
           '}',
-          'limit := pageSize + 1',
-          'offset := (page - 1) * pageSize',
-          'max := pageSize',
+          `limit := ${defs.pageSizeVarName} + 1`,
+          `offset := (${defs.pageVarName} - 1) * ${defs.pageSizeVarName}`,
+          `max := ${defs.pageSizeVarName}`,
         );
       }
       // Call the `Query` method.
