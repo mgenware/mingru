@@ -147,8 +147,11 @@ export class SelectIOProcessor extends BaseIOProcessor {
   }
 
   convert(): SelectIO {
+    const isUnionMode = this.action.mode === mm.SelectActionMode.union && this.action.unionMembers;
+    const unionItems = isUnionMode ? sqlHelper.flattenUnions(this.action) : [];
+
     const sqlTable = this.mustGetAvailableSQLTable();
-    const { action, opt, selectedNames } = this;
+    const { opt, selectedNames } = this;
     const { dialect } = opt;
     const {
       limitValue,
@@ -156,24 +159,87 @@ export class SelectIOProcessor extends BaseIOProcessor {
       orderByColumns,
       groupByColumns,
       distinctFlag,
-      unions,
       pagination,
-    } = action;
+      mode: selMode,
+      columns: actionColumns,
+      whereSQLValue,
+      havingSQLValue,
+      __attrs: actionAttrs,
+    } = this.action;
 
     const isLimitInput = limitValue instanceof mm.SQLVariable;
     const isOffsetInput = offsetValue instanceof mm.SQLVariable;
-    const selMode = action.mode;
-    const hasUnions = unions.length;
 
-    const sql: StringSegment[] = [(hasUnions ? '(' : '') + 'SELECT '];
-    if (distinctFlag) {
+    // Func args
+    const limitTypeInfo = new VarInfo('limit', defs.intTypeInfo);
+    const offsetTypeInfo = new VarInfo('offset', defs.intTypeInfo);
+    const funcArgs = new VarList(`Func args of action "${this.action}"`, true);
+    funcArgs.add(defs.dbxQueryableVar);
+    if (this.isFromTableInput()) {
+      funcArgs.add(defs.tableInputVar);
+    }
+    const execArgs = new VarList(`Exec args of action "${this.action}"`, true);
+
+    const sql: StringSegment[] = [isUnionMode ? '(' : 'SELECT '];
+    let whereIO: SQLIO | null = null;
+    const colIOs: SelectedColumnIO[] = [];
+    if (isUnionMode) {
+      // Handle UNIONs.
+      // See `ActionToIOOptions.notFirstUnionMember` for details.
+
+      // Used in UNION mode to generate result type.
+      // Selected column IOs for UNION mode action is simply the selected
+      // column IOs of its first child.
+      let firstSelectedColumnIOs: SelectedColumnIO[] | null = null;
+      let unionIdx = 0;
+      for (const unionItem of unionItems) {
+        if (typeof unionItem === 'boolean') {
+          // UNION ALL flag.
+          sql.push(' UNION');
+          if (unionItem) {
+            sql.push(' ALL');
+          }
+          sql.push(' (');
+          continue;
+        }
+
+        // `unionItem` is an action.
+        const unionAction = unionItem;
+        try {
+          const childProcessor = new SelectIOProcessor(unionAction, {
+            ...opt,
+            selectionLiteMode: true,
+            notFirstUnionMember: true,
+          });
+          // Merge func args and exec args.
+          const childIO = childProcessor.convert();
+          if (!firstSelectedColumnIOs) {
+            firstSelectedColumnIOs = childIO.cols;
+          }
+          sqlHelper.mergeIOVerListsWithActionIO(funcArgs, execArgs, childIO);
+
+          const childSQL = childIO.sql;
+          if (childSQL) {
+            sql.push(...childSQL);
+          }
+          sql.push(')');
+          unionIdx++;
+        } catch (err) {
+          err.message += ` [UNION index ${unionIdx}]`;
+          throw err;
+        }
+      }
+      if (firstSelectedColumnIOs) {
+        colIOs.push(...firstSelectedColumnIOs);
+      }
+    } else if (distinctFlag) {
       sql.push('DISTINCT ');
     }
 
     if (!opt.selectionLiteMode) {
       const actionName = this.mustGetActionName();
       if (!actionName) {
-        throw new Error(`\`actionName\` is required, action "${action}"`);
+        throw new Error(`\`actionName\` is required, action "${this.action}"`);
       }
 
       // NOTE: not the table defined by FROM, it's the root table defined in table actions.
@@ -184,121 +250,77 @@ export class SelectIOProcessor extends BaseIOProcessor {
       this.actionUniqueTypeName = `${this.tablePascalName}Table${this.actionPascalName}`;
     }
 
-    let columns: mm.SelectActionColumns[];
-    if (selMode === mm.SelectActionMode.exists) {
-      if (action.columns.length) {
-        throw new Error('You cannot have selected columns in `selectExists`');
+    if (!isUnionMode) {
+      let selectedColumns: mm.SelectActionColumns[];
+      if (selMode === mm.SelectActionMode.exists) {
+        if (actionColumns.length) {
+          throw new Error('You cannot have selected columns in `selectExists`');
+        }
+        selectedColumns = [];
+      } else {
+        selectedColumns = actionColumns.length ? actionColumns : Object.values(sqlTable.__columns);
       }
-      columns = [];
-    } else {
-      columns = action.columns.length ? action.columns : Object.values(sqlTable.__columns);
-    }
 
-    // Checks if there are any joins in this query.
-    let hasJoin = columns.some((sCol) => sqlHelper.hasJoinInSelectedColumn(sCol));
-    if (!hasJoin && action.whereSQLValue) {
-      hasJoin = sqlHelper.hasJoinInSQL(action.whereSQLValue);
-    }
-    this.hasJoin = hasJoin;
-
-    // Handle columns.
-    const colIOs: SelectedColumnIO[] = [];
-
-    if (selMode === mm.SelectActionMode.exists) {
-      sql.push('EXISTS(SELECT ');
-    }
-    if (columns.length) {
-      columns.forEach((col, i) => {
-        const selIO = this.handleSelectedColumn(col);
-        const hasSeparator = i !== columns.length - 1 && columns.length > 1;
-        if (selectedNames.has(selIO.varName)) {
-          throw new Error(`The selected column name "${selIO.varName}" already exists`);
-        }
-        selectedNames.add(selIO.varName);
-        if (selIO.column) {
-          this.selectedNamesMap.set(selIO.column.getPath(), selIO.varName);
-        }
-        colIOs.push(selIO);
-
-        sql.push(...selIO.valueSQL);
-        if (hasSeparator) {
-          sql.push(', ');
-        }
-      });
-    } else {
-      sql.push('*');
-    }
-
-    // FROM
-    const fromSQL = this.handleFrom(sqlTable);
-    sql.push(' ');
-    sql.push(...fromSQL);
-
-    // WHERE
-    // Note: WHERE SQL is created here, but only appended to the `sql` variable
-    // after joins are handled below.
-    let whereIO: SQLIO | null = null;
-    let whereSQL: StringSegment[] = [];
-    if (action.whereSQLValue) {
-      whereIO = sqlIO(action.whereSQLValue, dialect, sqlTable, this.getSQLBuilderOpt(''));
-      whereSQL = [' WHERE ', ...whereIO.code];
-    }
-
-    // Joins
-    if (this.hasJoin) {
-      for (const join of this.joins) {
-        const joinSQL = join.toSQL(dialect);
-        sql.push(' ' + joinSQL);
+      // Checks if there are any joins in this query.
+      let hasJoin = selectedColumns.some((sCol) => sqlHelper.hasJoinInSelectedColumn(sCol));
+      if (!hasJoin && whereSQLValue) {
+        hasJoin = sqlHelper.hasJoinInSQL(whereSQLValue);
       }
-    }
+      this.hasJoin = hasJoin;
 
-    // Append WHERE SQL after joins
-    if (whereSQL.length) {
-      sql.push(...whereSQL);
-    }
+      // Handle columns.
+      if (selMode === mm.SelectActionMode.exists) {
+        sql.push('EXISTS(SELECT ');
+      }
+      if (selectedColumns.length) {
+        selectedColumns.forEach((col, i) => {
+          const selIO = this.handleSelectedColumn(col);
+          const hasSeparator = i !== selectedColumns.length - 1 && selectedColumns.length > 1;
+          if (selectedNames.has(selIO.varName)) {
+            throw new Error(`The selected column name "${selIO.varName}" already exists`);
+          }
+          selectedNames.add(selIO.varName);
+          if (selIO.column) {
+            this.selectedNamesMap.set(selIO.column.getPath(), selIO.varName);
+          }
+          colIOs.push(selIO);
 
-    // Func args
-    const limitTypeInfo = new VarInfo('limit', defs.intTypeInfo);
-    const offsetTypeInfo = new VarInfo('offset', defs.intTypeInfo);
-    const funcArgs = new VarList(`Func args of action "${action.__name}"`, true);
-    funcArgs.add(defs.dbxQueryableVar);
-    if (this.isFromTableInput()) {
-      funcArgs.add(defs.tableInputVar);
-    }
-    const execArgs = new VarList(`Exec args of action "${action.__name}"`, true);
-
-    // Handle UNIONs before ORDER BY.
-    // See `ActionToIOOptions.notFirstUnionMember` for details.
-    let unionIdx = 0;
-    for (const unionTuple of unions) {
-      const unionAction = unionTuple.action;
-      const isUnionAll = unionTuple.unionAll;
-      try {
-        sql.push(') UNION');
-        if (isUnionAll) {
-          sql.push(' ALL');
-        }
-        sql.push(' (');
-        const nextProcessor = new SelectIOProcessor(unionAction, {
-          ...opt,
-          selectionLiteMode: true,
-          notFirstUnionMember: true,
+          sql.push(...selIO.valueSQL);
+          if (hasSeparator) {
+            sql.push(', ');
+          }
         });
-        // Merge func args and exec args.
-        const nextIO = nextProcessor.convert();
-        sqlHelper.mergeIOVerListsWithActionIO(funcArgs, execArgs, nextIO);
-
-        const nextSQL = nextIO.sql;
-        if (nextSQL) {
-          sql.push(...nextSQL);
-        }
-        sql.push(')');
-        unionIdx++;
-      } catch (err) {
-        err.message += ` [UNION index ${unionIdx}]`;
-        throw err;
+      } else {
+        sql.push('*');
       }
-    }
+
+      // FROM
+      const fromSQL = this.handleFrom(sqlTable);
+      sql.push(' ');
+      sql.push(...fromSQL);
+
+      // WHERE
+      // Note: WHERE SQL is created here, but only appended to the `sql` variable
+      // after joins are handled below.
+      let whereSQL: StringSegment[] = [];
+      if (whereSQLValue) {
+        whereIO = sqlIO(whereSQLValue, dialect, sqlTable, this.getSQLBuilderOpt(''));
+        whereSQL = [' WHERE ', ...whereIO.code];
+      }
+
+      // Joins
+      if (this.hasJoin) {
+        for (const join of this.joins) {
+          const joinSQL = join.toSQL(dialect);
+          sql.push(' ' + joinSQL);
+        }
+      }
+
+      // Append WHERE SQL after joins
+      if (whereSQL.length) {
+        sql.push(...whereSQL);
+      }
+    } // End of `if (!isUnionMode)`
 
     // ORDER BY
     if (orderByColumns.length && !opt.notFirstUnionMember) {
@@ -328,13 +350,8 @@ export class SelectIOProcessor extends BaseIOProcessor {
 
     // HAVING
     let havingIO: SQLIO | null = null;
-    if (action.havingSQLValue) {
-      havingIO = sqlIO(
-        action.havingSQLValue,
-        dialect,
-        sqlTable,
-        this.getSQLBuilderOpt('HAVING clause'),
-      );
+    if (havingSQLValue) {
+      havingIO = sqlIO(havingSQLValue, dialect, sqlTable, this.getSQLBuilderOpt('HAVING clause'));
       sql.push(' HAVING ', ...havingIO.code);
     }
 
@@ -351,11 +368,15 @@ export class SelectIOProcessor extends BaseIOProcessor {
       }
     }
 
-    // ******** END OF operating on SQL string of this action ********
-    // Handle ending parenthesis.
     if (selMode === mm.SelectActionMode.exists) {
       sql.push(')');
     }
+    if (isUnionMode) {
+      sql.push(')');
+    }
+
+    // ******** END OF operating on SQL string of this action ********
+    // Handle ending parenthesis.
 
     // Merge inputs.
     for (const io of this.subqueryIOs) {
@@ -396,7 +417,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     }
 
     // Set return values.
-    const returnValues = new VarList(`Return values of action "${action.__name}"`, true);
+    const returnValues = new VarList(`Return values of action "${this.action}"`, true);
     if (!opt.selectionLiteMode) {
       if (selMode === mm.SelectActionMode.field) {
         const col = colIOs[0];
@@ -405,17 +426,21 @@ export class SelectIOProcessor extends BaseIOProcessor {
       } else if (selMode === mm.SelectActionMode.exists) {
         returnValues.add(new VarInfo(mm.ReturnValues.result, defs.boolTypeInfo));
       } else {
-        // `selMode` now equals `.list` or `.row`.
+        // `selMode` now equals `.list` or `.row` or `.union`.
         let resultType: string;
         // Check if result type is renamed.
-        if (action.__attrs[mm.ActionAttributes.resultTypeName]) {
-          resultType = `${action.__attrs[mm.ActionAttributes.resultTypeName]}`;
+        if (actionAttrs[mm.ActionAttributes.resultTypeName]) {
+          resultType = `${actionAttrs[mm.ActionAttributes.resultTypeName]}`;
         } else {
           resultType = `${this.actionUniqueTypeName}Result`;
         }
 
         let isResultTypeArray = false;
-        if (selMode === mm.SelectActionMode.list || selMode === mm.SelectActionMode.page) {
+        if (
+          selMode === mm.SelectActionMode.list ||
+          selMode === mm.SelectActionMode.page ||
+          selMode === mm.SelectActionMode.union
+        ) {
           isResultTypeArray = true;
         }
         const resultTypeInfo = new AtomicTypeInfo(resultType, null, null);
@@ -428,7 +453,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
         );
         if (pagination) {
           returnValues.add(new VarInfo('max', defs.intTypeInfo));
-        } else if (action.mode === mm.SelectActionMode.page) {
+        } else if (selMode === mm.SelectActionMode.page) {
           returnValues.add(new VarInfo('hasNext', defs.boolTypeInfo));
         }
       }
@@ -436,7 +461,9 @@ export class SelectIOProcessor extends BaseIOProcessor {
 
     return new SelectIO(
       dialect,
-      action,
+      // DO NOT use `coreAction` here, it might be the first UNION member, which
+      // could possibly have an empty name.
+      this.action,
       sql,
       colIOs,
       whereIO,

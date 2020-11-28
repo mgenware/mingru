@@ -380,7 +380,11 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
     }
 
     const sqlLiteral = go.makeStringFromSegments(io.sql || []);
-    if (selMode === mm.SelectActionMode.list || isPageMode) {
+    if (
+      selMode === mm.SelectActionMode.list ||
+      selMode === mm.SelectActionMode.union ||
+      isPageMode
+    ) {
       const scanParams = joinParams(selectedFields.map((p) => `&item.${p.name}`));
       if (isPageMode) {
         // Add `fmt` import as we are using `fmt.Errorf`.

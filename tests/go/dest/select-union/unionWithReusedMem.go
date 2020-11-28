@@ -11,6 +11,23 @@ var Activity = &TableTypeActivity{}
 
 // ------------ Actions ------------
 
+// ActivityTablePrivateTResult ...
+type ActivityTablePrivateTResult struct {
+	ID          uint64
+	GenericSig  *string
+	GenericName string
+}
+
+// PrivateT ...
+func (da *TableTypeActivity) PrivateT(queryable mingru.Queryable, id uint64) (*ActivityTablePrivateTResult, error) {
+	result := &ActivityTablePrivateTResult{}
+	err := queryable.QueryRow("SELECT `id`, `sig` AS `generic_sig`, `url_name` AS `generic_name` FROM `user` WHERE `id` = ?", id).Scan(&result.ID, &result.GenericSig, &result.GenericName)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 // ActivityTableTResult ...
 type ActivityTableTResult struct {
 	ID          uint64
