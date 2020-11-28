@@ -13,7 +13,8 @@ it('UNION', async () => {
       .from(user)
       .by(user.id)
       .union(mm.select(post.id, post.title).from(post).by(post.id, 'postID'))
-      .unionAll(mm.selectRows(like.user_id, like.value).from(like));
+      .unionAll(mm.selectRows(like.user_id, like.value).from(like))
+      .orderByAsc(user.id);
   }
   const ta = mm.tableActions(activity, ActivityTA);
 
@@ -31,7 +32,8 @@ it('UNION starting from another member', async () => {
 
     t = this.privateT
       .union(mm.select(post.id, post.title).from(post).by(post.id, 'postID'))
-      .unionAll(mm.selectRows(like.user_id, like.value).from(like));
+      .unionAll(mm.selectRows(like.user_id, like.value).from(like))
+      .orderByAsc('generic_sig');
   }
   const ta = mm.tableActions(activity, ActivityTA);
 
@@ -54,9 +56,32 @@ it('UNION with LIMIT n OFFSET', async () => {
     t = this.t1
       .unionAll(mm.selectRows(like.user_id, like.value).from(like))
       .union(this.t2)
+      .orderByAsc(user.id)
       .paginate();
   }
   const ta = mm.tableActions(activity, ActivityTA);
 
   await testBuildAsync(ta, 'select-union/unionLimitOffset');
+});
+
+it('UNION with page mode', async () => {
+  class Activity extends mm.GhostTable {}
+  const activity = mm.table(Activity);
+  class ActivityTA extends mm.TableActions {
+    t1 = mm
+      .selectPage(user.id, user.sig.as('generic_sig'), user.url_name.as('generic_name'))
+      .from(user)
+      .by(user.id)
+      .orderByAsc(user.id);
+
+    t2 = mm.selectRows(post.title).from(post).by(post.id).orderByAsc(post.id);
+
+    t = this.t1
+      .unionAll(mm.selectRows(like.user_id, like.value).from(like))
+      .union(this.t2, true)
+      .orderByAsc(user.id);
+  }
+  const ta = mm.tableActions(activity, ActivityTA);
+
+  await testBuildAsync(ta, 'select-union/unionPageMode');
 });

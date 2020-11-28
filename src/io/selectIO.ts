@@ -147,7 +147,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
   }
 
   convert(): SelectIO {
-    const isUnionMode = this.action.mode === mm.SelectActionMode.union && this.action.unionMembers;
+    const isUnionMode = this.action.unionMembers?.length;
     const unionItems = isUnionMode ? sqlHelper.flattenUnions(this.action) : [];
 
     const sqlTable = this.mustGetAvailableSQLTable();
@@ -180,7 +180,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     }
     const execArgs = new VarList(`Exec args of action "${this.action}"`, true);
 
-    const sql: StringSegment[] = [isUnionMode ? '(' : 'SELECT '];
+    const sql: StringSegment[] = [isUnionMode ? '' : 'SELECT '];
     let whereIO: SQLIO | null = null;
     const colIOs: SelectedColumnIO[] = [];
     if (isUnionMode) {
@@ -199,7 +199,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
           if (unionItem) {
             sql.push(' ALL');
           }
-          sql.push(' (');
+          sql.push(' ');
           continue;
         }
 
@@ -218,6 +218,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
           }
           sqlHelper.mergeIOVerListsWithActionIO(funcArgs, execArgs, childIO);
 
+          sql.push('(');
           const childSQL = childIO.sql;
           if (childSQL) {
             sql.push(...childSQL);
@@ -371,9 +372,6 @@ export class SelectIOProcessor extends BaseIOProcessor {
     if (selMode === mm.SelectActionMode.exists) {
       sql.push(')');
     }
-    if (isUnionMode) {
-      sql.push(')');
-    }
 
     // ******** END OF operating on SQL string of this action ********
     // Handle ending parenthesis.
@@ -436,11 +434,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
         }
 
         let isResultTypeArray = false;
-        if (
-          selMode === mm.SelectActionMode.list ||
-          selMode === mm.SelectActionMode.page ||
-          selMode === mm.SelectActionMode.union
-        ) {
+        if (selMode === mm.SelectActionMode.list || selMode === mm.SelectActionMode.page) {
           isResultTypeArray = true;
         }
         const resultTypeInfo = new AtomicTypeInfo(resultType, null, null);

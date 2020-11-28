@@ -164,7 +164,7 @@ export function handleNonSelectSQLFrom(
 }
 
 export function flattenUnions(action: mm.SelectAction): Array<mm.SelectAction | boolean> {
-  if (action.mode === mm.SelectActionMode.union && action.unionMembers?.length) {
+  if (action.unionMembers?.length) {
     const [a, b] = action.unionMembers;
     return [...flattenUnions(a), action.unionAllFlag, ...flattenUnions(b)];
   }
