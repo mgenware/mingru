@@ -60,7 +60,7 @@ export class OrderByInputIO {
 
 export class SelectedColumnIO {
   constructor(
-    public selectedColumn: mm.SelectActionColumns,
+    public selectedColumn: mm.SelectedColumn,
     public valueSQL: StringSegment[],
     // `varName` is alias if present. Otherwise, alias is auto generated from column input name.
     // Snake case.
@@ -252,7 +252,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     }
 
     if (!isUnionMode) {
-      let selectedColumns: mm.SelectActionColumns[];
+      let selectedColumns: mm.SelectedColumn[];
       if (selMode === mm.SelectActionMode.exists) {
         if (actionColumns.length) {
           throw new Error('You cannot have selected columns in `selectExists`');
@@ -528,7 +528,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
 
   // Gets ORDER BY value of the specified column. Returns an array of string segments
   // along with a column display name which is used in ORDER BY inputs.
-  private getOrderByNonInputColumnSQL(col: mm.SelectActionColumnNames): [string, StringSegment[]] {
+  private getOrderByNonInputColumnSQL(col: mm.SelectedColumnAndName): [string, StringSegment[]] {
     const { dialect } = this.opt;
 
     if (typeof col === 'string') {
@@ -654,7 +654,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
    * `mm.SQL` is not meant to be expressive, we have raw columns for columns with
    * an alias, we should use raw SQL aliases in `mm.SQL`.
    */
-  private handleSelectedColumn(sCol: mm.SelectActionColumns): SelectedColumnIO {
+  private handleSelectedColumn(sCol: mm.SelectedColumn): SelectedColumnIO {
     const sqlTable = this.mustGetAvailableSQLTable();
     const { dialect } = this.opt;
     // Plain columns like `post.id`.

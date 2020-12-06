@@ -93,7 +93,7 @@ export function visitColumns(sql: mm.SQL, fn: (column: mm.Column) => boolean): b
 }
 
 export function visitColumnsFromSelectedColumn(
-  sc: mm.SelectActionColumns,
+  sc: mm.SelectedColumn,
   fn: (column: mm.Column) => boolean,
 ): boolean {
   if (sc instanceof mm.Column) {
@@ -109,7 +109,7 @@ export function hasJoinForColumn(col: mm.Column): boolean {
   return col.__table instanceof mm.JoinedTable;
 }
 
-export function hasJoinInSelectedColumn(sc: mm.SelectActionColumns): boolean {
+export function hasJoinInSelectedColumn(sc: mm.SelectedColumn): boolean {
   let hasJoin = false;
   visitColumnsFromSelectedColumn(sc, (col) => {
     if (hasJoinForColumn(col)) {
