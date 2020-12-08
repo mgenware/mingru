@@ -2,13 +2,11 @@ import * as mm from 'mingru-models';
 import post from '../models/post';
 import cols from '../models/cols';
 import { testBuildAsync } from './common';
+import user from '../models/user';
 
 it('insert', async () => {
   class PostTA extends mm.TableActions {
-    insertT = mm
-      .insert()
-      .setInputs(post.title, post.user_id)
-      .setInputs();
+    insertT = mm.insert().setInputs(post.title, post.user_id).setInputs();
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'insert/insert');
@@ -60,10 +58,7 @@ it('Insert with non-input setters', async () => {
 
 it('insertWithDefaults', async () => {
   class ColsTA extends mm.TableActions {
-    insertT = mm
-      .insert()
-      .setInputs(cols.fk)
-      .setDefaults();
+    insertT = mm.insert().setInputs(cols.fk).setDefaults();
   }
   const ta = mm.tableActions(cols, ColsTA);
   await testBuildAsync(ta, 'insert/insertWithDefaults');
@@ -88,11 +83,34 @@ it('Set auto-increment as input', async () => {
   }
   const employee = mm.table(Employee, 'employees');
   class EmployeeTA extends mm.TableActions {
-    insertT = mm
-      .insertOne()
-      .setInputs(employee.id)
-      .setInputs();
+    insertT = mm.insertOne().setInputs(employee.id).setInputs();
   }
   const ta = mm.tableActions(employee, EmployeeTA);
   await testBuildAsync(ta, 'insert/aiColumnAsInput');
+});
+
+it('Nullable FK and `setDefaults`', async () => {
+  class Post extends mm.Table {
+    id = mm.pk();
+    user_id = mm.fk(user.id).nullable.default(null);
+  }
+  const myPost = mm.table(Post);
+  class PostTA extends mm.TableActions {
+    insertT = mm.insertOne().setDefaults();
+  }
+  const ta = mm.tableActions(myPost, PostTA);
+  await testBuildAsync(ta, 'insert/nullableFKSetDefaults');
+});
+
+it('Nullable FK and `setInputs`', async () => {
+  class Post extends mm.Table {
+    id = mm.pk();
+    user_id = mm.fk(user.id).nullable.default(null);
+  }
+  const myPost = mm.table(Post);
+  class PostTA extends mm.TableActions {
+    insertT = mm.insertOne().setInputs();
+  }
+  const ta = mm.tableActions(myPost, PostTA);
+  await testBuildAsync(ta, 'insert/nullableFKSetInputs');
 });
