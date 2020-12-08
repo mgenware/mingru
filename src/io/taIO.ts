@@ -14,6 +14,8 @@ export class TAIO {
   constructor(public ta: mm.TableActions, public opt: ActionToIOOptions) {
     throwIfFalsy(ta, 'ta');
 
+    const taTable = ta.__table;
+    const taTableName = taTable.__name;
     const taOpt = ta.__options;
     // Actions are sorted alphabetically.
     this.actionIOs = Object.entries(ta.__actions)
@@ -25,12 +27,10 @@ export class TAIO {
             ...opt,
             unsafeTableInput: taOpt?.unsafeTableInput,
           },
-          `action "${actionName}"`,
+          `action "${taTableName}.${actionName}"`,
         ),
       );
 
-    const taTable = ta.__table;
-    const taTableName = taTable.__name;
     this.className = utils.tableTypeName(taTableName);
     this.instanceName = utils.tablePascalName(taTableName);
   }
