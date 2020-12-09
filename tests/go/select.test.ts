@@ -286,7 +286,7 @@ it('Selected name collisions', async () => {
   const ta = mm.tableActions(post, PostTA);
   await itRejects(
     testBuildAsync(ta, ''),
-    'The selected column name "title" already exists [action "selectT"]',
+    'The selected column name "title" already exists [action "post.selectT"]',
   );
 });
 

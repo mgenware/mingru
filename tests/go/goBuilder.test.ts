@@ -15,20 +15,11 @@ it('Single action', async () => {
 it('Multiple actions', async () => {
   class PostTA extends mm.TableActions {
     selectPostTitle = mm.select(post.id, post.title);
-    selectPostInfo = mm.select(
-      post.id,
-      post.title,
-      post.user_id,
-      post.user_id.join(user).url_name,
-    );
+    selectPostInfo = mm.select(post.id, post.title, post.user_id, post.user_id.join(user).url_name);
 
-    updatePostTitle = mm
-      .unsafeUpdateAll()
-      .set(post.title, mm.sql`${mm.input(post.title)}`);
+    updatePostTitle = mm.unsafeUpdateAll().set(post.title, mm.sql`${mm.input(post.title)}`);
 
-    deleteByID = mm
-      .deleteSome()
-      .whereSQL(mm.sql`${post.id} = ${mm.input(post.id)}`);
+    deleteByID = mm.deleteSome().whereSQL(mm.sql`${post.id} = ${mm.input(post.id)}`);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildFullAsync(ta, 'goBuilder/multipleActions');
@@ -41,5 +32,5 @@ it('Action info appended to error message', async () => {
     }
     const ta = mm.tableActions(post, PostTA);
     await testBuildAsync(ta, '');
-  }, 'Source table assertion failed, expected "Table(post|db_post)", got "Table(user)". [action "t"]');
+  }, 'Source table assertion failed, expected "Table(post|db_post)", got "Table(user)". [action "post.t"]');
 });
