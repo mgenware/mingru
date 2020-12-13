@@ -1,17 +1,23 @@
-import { FuncSignature, StructInfo } from './goCode';
+import { FuncSignature, MutableStructInfo } from './goCode';
 
 export default class GoBuilderContext {
   interfaces: Record<string, Map<string, FuncSignature>> = {};
-  resultTypes: Record<string, StructInfo> = {};
+  resultTypes: Record<string, MutableStructInfo> = {};
 
   handleInterfaceMember(name: string, funcSig: FuncSignature) {
-    if (!this.interfaces[name]) {
-      this.interfaces[name] = new Map<string, FuncSignature>();
+    const { interfaces } = this;
+    if (!interfaces[name]) {
+      interfaces[name] = new Map<string, FuncSignature>();
     }
-    this.interfaces[name].set(funcSig.sig, funcSig);
+    interfaces[name].set(funcSig.sig, funcSig);
   }
 
-  handleResultType(name: string, info: StructInfo) {
-    this.resultTypes[name] = info;
+  handleResultType(name: string, info: MutableStructInfo) {
+    const { resultTypes } = this;
+    if (resultTypes[name]) {
+      resultTypes[name].merge(info);
+    } else {
+      resultTypes[name] = info;
+    }
   }
 }

@@ -112,3 +112,16 @@ it('Types', async () => {
   const actions = [userTA, postTA];
   await testBuildToDirAsync(actions, ['#types.go', 'post', 'user'], 'types');
 });
+
+it('Result type merging', async () => {
+  class UserTA extends mm.TableActions {
+    t1 = mm.select(user.id, user.age).by(user.id).resultTypeNameAttr('Res');
+    t2 = mm
+      .select(user.display_name, user.age, user.follower_count)
+      .by(user.id)
+      .resultTypeNameAttr('Res');
+  }
+  const userTA = mm.tableActions(user, UserTA);
+  const actions = [userTA];
+  await testBuildToDirAsync(actions, ['#types.go', 'user'], 'resultTypeMerging');
+});

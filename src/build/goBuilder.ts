@@ -49,7 +49,8 @@ export default class GoBuilder {
       resultTypes.sort((a, b) => a.localeCompare(b));
       for (const name of resultTypes) {
         const resultType = context.resultTypes[name];
-        imports.addVars(resultType.members);
+        const resultTypeMembers = [...resultType.members.values()];
+        imports.addVars(resultTypeMembers);
         resultTypesCode += go.struct(
           resultType.typeName,
           resultType.members,

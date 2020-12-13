@@ -226,7 +226,13 @@ export default class GoTABuilder {
 
   private buildTableObject(): string {
     const { className, instanceName } = this.taIO;
-    let code = go.struct(className, [], JSONEncodingStyle.none);
+    let code = go.struct(
+      className,
+      new Map(),
+      JSONEncodingStyle.none,
+      new Set<string>(),
+      new Set<string>(),
+    );
     code += `\n// ${instanceName} ...
 var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
     return code;
@@ -318,9 +324,9 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
     }
 
     // Selected columns.
-    const selectedFields: VarInfo[] = [];
-    const jsonIgnoreFields = new Set<VarInfo>();
-    const omitEmptyFields = new Set<VarInfo>();
+    const selectedFields = new Map<string, VarInfo>();
+    const jsonIgnoreFields = new Set<string>();
+    const omitEmptyFields = new Set<string>();
     const omitAllEmptyFields = options.jsonEncoding?.excludeEmptyValues || false;
 
     for (const col of io.cols) {
@@ -331,22 +337,22 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
       const typeInfo = this.dialect.colTypeToGoType(col.getResultType());
       const varInfo = new VarInfo(fieldName, typeInfo);
 
-      selectedFields.push(varInfo);
+      selectedFields.set(varInfo.name, varInfo);
 
       // Checking explicitly set attributes.
       if (col.selectedColumn instanceof mm.RawColumn) {
         const attrs = col.selectedColumn.__attrs;
         if (attrs.get(mm.ColumnAttribute.isPrivate) === true) {
-          jsonIgnoreFields.add(varInfo);
+          jsonIgnoreFields.add(varInfo.name);
         }
         if (omitAllEmptyFields || attrs.get(mm.ColumnAttribute.excludeEmptyValue) === true) {
-          omitEmptyFields.add(varInfo);
+          omitEmptyFields.add(varInfo.name);
         }
       }
 
       // Checking inherited attributes.
       if (omitAllEmptyFields) {
-        omitEmptyFields.add(varInfo);
+        omitEmptyFields.add(varInfo.name);
       }
     }
 
@@ -356,7 +362,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
       if (action.__attrs.get(mm.ActionAttribute.resultTypeName)) {
         this.context.handleResultType(
           atomicResultType,
-          new go.StructInfo(
+          new go.MutableStructInfo(
             atomicResultType,
             selectedFields,
             resultMemberJSONStyle,
@@ -376,13 +382,13 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
           ),
         );
 
-        this.imports.addVars(selectedFields);
+        this.imports.addVars([...selectedFields.values()]);
       }
     }
 
     const sqlLiteral = go.makeStringFromSegments(io.sql || []);
     if (selMode === mm.SelectActionMode.list || isPageMode) {
-      const scanParams = joinParams(selectedFields.map((p) => `&item.${p.name}`));
+      const scanParams = joinParams([...selectedFields.values()].map((p) => `&item.${p.name}`));
       if (isPageMode) {
         // Add `fmt` import as we are using `fmt.Errorf`.
         this.imports.add(defs.fmtImport);
@@ -461,7 +467,9 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
         scanParams = `&${defs.resultVarName}`;
         builder.push(`var ${defs.resultVarName} ${resultTypeString}`);
       } else {
-        scanParams = joinParams(selectedFields.map((p) => `&${defs.resultVarName}.${p.name}`));
+        scanParams = joinParams(
+          [...selectedFields.values()].map((p) => `&${defs.resultVarName}.${p.name}`),
+        );
         builder.push(`${go.pointerVar(defs.resultVarName, atomicResultType)}`);
       }
       // For `selectField` and `selectExists`, we return the default value,

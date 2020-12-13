@@ -32,14 +32,31 @@ export class MemberTagUtil {
   }
 }
 
-export class StructInfo {
+export class MutableStructInfo {
   constructor(
     public typeName: string,
-    public members: VarInfo[],
+    // K: Name of `VarInfo`.
+    public members: Map<string, VarInfo>,
     public nameStyle: JSONEncodingStyle,
-    public ignoredMembers: Set<VarInfo> | null,
-    public omitEmptyMembers: Set<VarInfo> | null,
+    // K: Name of `VarInfo`.
+    public ignoredMembers: Set<string>,
+    // K: Name of `VarInfo`.
+    public omitEmptyMembers: Set<string>,
   ) {}
+
+  merge(oth: MutableStructInfo) {
+    for (const v of oth.members.values()) {
+      if (!this.members.has(v.name)) {
+        this.members.set(v.name, v);
+      }
+    }
+    for (const name of oth.ignoredMembers) {
+      this.ignoredMembers.add(name);
+    }
+    for (const name of oth.omitEmptyMembers) {
+      this.omitEmptyMembers.add(name);
+    }
+  }
 }
 
 export function interfaceType(typeName: string, members: string[]): string {
@@ -55,30 +72,32 @@ type ${typeName} interface {
 
 export function struct(
   typeName: string,
-  members: VarInfo[],
+  members: Map<string, VarInfo>,
   nameStyle: JSONEncodingStyle,
-  ignoredMembers: Set<VarInfo> | null = null,
-  omitEmptyMembers: Set<VarInfo> | null = null,
+  ignoredMembers: Set<string>,
+  omitEmptyMembers: Set<string>,
 ): string {
+  const values = [...members.values()];
   let code = `// ${typeName} ...
 type ${typeName} struct {
 `;
   // Find the max length of all field names.
-  const nameMaxLen = Math.max(...members.map((m) => m.name.length));
+  const nameMaxLen = Math.max(...values.map((m) => m.name.length));
   let typeMaxLen = 0;
   if (nameStyle !== JSONEncodingStyle.none) {
-    typeMaxLen = Math.max(...members.map((m) => m.type.typeString.length));
+    typeMaxLen = Math.max(...values.map((m) => m.type.typeString.length));
   }
-  for (const mem of members) {
+  for (const mem of values) {
+    const memName = mem.name;
     let tag: string | null = null;
-    code += `\t${mem.name.padEnd(nameMaxLen)} ${mem.type.typeString.padEnd(typeMaxLen)}`;
-    const omitEmpty = omitEmptyMembers?.has(mem) || false;
-    if (ignoredMembers && ignoredMembers.has(mem)) {
+    code += `\t${memName.padEnd(nameMaxLen)} ${mem.type.typeString.padEnd(typeMaxLen)}`;
+    const omitEmpty = omitEmptyMembers.has(memName) || false;
+    if (ignoredMembers && ignoredMembers.has(memName)) {
       tag = MemberTagUtil.getIgnoreJSONTag();
     } else if (nameStyle === JSONEncodingStyle.camelCase) {
-      tag = MemberTagUtil.getCamelCaseJSONTag(mem.name, omitEmpty);
+      tag = MemberTagUtil.getCamelCaseJSONTag(memName, omitEmpty);
     } else if (nameStyle === JSONEncodingStyle.snakeCase) {
-      tag = MemberTagUtil.getSnakeCaseJSONTag(mem.name, omitEmpty);
+      tag = MemberTagUtil.getSnakeCaseJSONTag(memName, omitEmpty);
     }
     if (tag) {
       code += ` ${tag}`;
@@ -153,6 +172,9 @@ function formatImports(imports: string[]): string {
 
 export function makeImports(imports: string[]): string {
   const code = formatImports(imports);
+  if (!code) {
+    return '';
+  }
   if (imports.length === 1) {
     return `import ${code}\n\n`;
   }
