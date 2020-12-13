@@ -15,7 +15,9 @@ Goals:
 - **Strongly typed models**, models are defined in TypeScript not Go
 - Currently focuses on Go and MySQL/MariaDB
 
-## We are working on a brand new documentation site, the documentation below is outdated. Stay tuned.
+---
+
+# NOTE: The documentation below is outdated!!! We are working on a brand new documentation site. Stay tuned.
 
 ---
 
