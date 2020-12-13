@@ -218,11 +218,11 @@ it('Join as', async () => {
 it('Join as (attr should not affect other things)', async () => {
   class CmtTA extends mm.TableActions {
     selectT = mm.select(
-      cmt.id.attrs({ foo: true }),
-      cmt.user_id.as('a').attrs({ foo: true }),
-      cmt.target_id.join(post).title.as('b').attrs({ foo: true }),
-      cmt.target_id.join(post).user_id.join(user).url_name.attrs({ foo: true }),
-      cmt.target_id.join(post).user_id.join(user).url_name.as('c').attrs({ foo: true }),
+      cmt.id.attr(101, true),
+      cmt.user_id.as('a').attr(101, true),
+      cmt.target_id.join(post).title.as('b').attr(101, true),
+      cmt.target_id.join(post).user_id.join(user).url_name.attr(101, true),
+      cmt.target_id.join(post).user_id.join(user).url_name.as('c').attr(101, true),
     );
   }
   const ta = mm.tableActions(cmt, CmtTA);
@@ -438,8 +438,8 @@ it('camelCase keys', async () => {
 it('Ignored keys', async () => {
   class RplTA extends mm.TableActions {
     selectT = mm.select(
-      rpl.user_id.join(user).url_name.attrs({ [mm.ColumnAttributes.isPrivate]: true }),
-      rpl.user_id.join(user).id.attrs({ [mm.ColumnAttributes.isPrivate]: true }),
+      rpl.user_id.join(user).url_name.attr(mm.ColumnAttribute.isPrivate, true),
+      rpl.user_id.join(user).id.privateAttr(),
       rpl.to_user_id.join(user).url_name,
     );
   }
@@ -454,7 +454,7 @@ it('Ignored keys (raw columns)', async () => {
   class RplTA extends mm.TableActions {
     selectT = mm.select(
       mm.sel(mm.sql`1`, 'a', mm.int().__type),
-      mm.sel(mm.sql`1`, 'b', mm.int().__type).attrs({ [mm.ColumnAttributes.isPrivate]: true }),
+      mm.sel(mm.sql`1`, 'b', mm.int().__type).privateAttr(),
     );
   }
   const ta = mm.tableActions(rpl, RplTA);
@@ -467,16 +467,12 @@ it('Ignored keys (raw columns)', async () => {
 it('Exclude empty properties', async () => {
   class RplTA extends mm.TableActions {
     selectT = mm.select(
-      rpl.user_id.join(user).url_name.attrs({
-        [mm.ColumnAttributes.isPrivate]: true,
-        [mm.ColumnAttributes.excludeEmptyValue]: true,
-      }),
-      rpl.user_id.join(user).id.attrs({
-        [mm.ColumnAttributes.excludeEmptyValue]: true,
-      }),
-      rpl.to_user_id.join(user).url_name.attrs({
-        [mm.ColumnAttributes.excludeEmptyValue]: true,
-      }),
+      rpl.user_id
+        .join(user)
+        .url_name.attr(mm.ColumnAttribute.excludeEmptyValue, true)
+        .privateAttr(),
+      rpl.user_id.join(user).id.attr(mm.ColumnAttribute.excludeEmptyValue, true),
+      rpl.to_user_id.join(user).url_name.attr(mm.ColumnAttribute.excludeEmptyValue, true),
     );
   }
   const ta = mm.tableActions(rpl, RplTA);
@@ -489,12 +485,8 @@ it('Exclude empty properties', async () => {
 it('Exclude all empty properties', async () => {
   class RplTA extends mm.TableActions {
     selectT = mm.select(
-      rpl.user_id.join(user).url_name.attrs({
-        [mm.ColumnAttributes.isPrivate]: true,
-      }),
-      rpl.user_id.join(user).id.attrs({
-        [mm.ColumnAttributes.excludeEmptyValue]: true,
-      }),
+      rpl.user_id.join(user).url_name.attr(mm.ColumnAttribute.isPrivate, true),
+      rpl.user_id.join(user).id.attr(mm.ColumnAttribute.excludeEmptyValue, true),
       rpl.to_user_id.join(user).url_name,
     );
   }

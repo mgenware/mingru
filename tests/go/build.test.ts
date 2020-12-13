@@ -86,14 +86,10 @@ it('Types', async () => {
     selectByID = mm
       .select(user.id)
       .by(user.id)
-      .attrs({
-        [mm.ActionAttributes.groupTypeName]: 'Type1',
-        [mm.ActionAttributes.resultTypeName]: 'Res1',
-      });
+      .attr(mm.ActionAttribute.groupTypeName, 'Type1')
+      .resultTypeNameAttr('Res1');
 
-    selectProfile = mm.select(user.display_name, user.sig).attrs({
-      [mm.ActionAttributes.resultTypeName]: 'Res2',
-    });
+    selectProfile = mm.select(user.display_name, user.sig).resultTypeNameAttr('Res2');
 
     deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
   }
@@ -103,18 +99,14 @@ it('Types', async () => {
     selectByID = mm
       .select(post.id)
       .by(post.id)
-      .attrs({
-        [mm.ActionAttributes.groupTypeName]: 'Type1',
-        [mm.ActionAttributes.resultTypeName]: 'Res1',
-      });
+      .attr(mm.ActionAttribute.groupTypeName, 'Type1')
+      .resultTypeNameAttr('Res1');
 
     selectPostInfo = mm
       .select(post.n_datetime, post.user_id.join(user).url_name)
-      .attrs({ [mm.ActionAttributes.groupTypeName]: 'Type2' });
+      .attr(mm.ActionAttribute.groupTypeName, 'Type2');
 
-    selectTime = mm.select(post.n_datetime).attrs({
-      [mm.ActionAttributes.resultTypeName]: 'Res3',
-    });
+    selectTime = mm.select(post.n_datetime).resultTypeNameAttr('Res3');
   }
   const postTA = mm.tableActions(post, PostTA);
   const actions = [userTA, postTA];

@@ -123,7 +123,7 @@ export default class GoTABuilder {
     funcSigString += returnCode;
 
     const actionAttr = io.action.__attrs;
-    if (actionAttr[mm.ActionAttributes.groupTypeName]) {
+    if (actionAttr.get(mm.ActionAttribute.groupTypeName)) {
       // Remove the type name from signature:
       // example: func (a) name() ret -> name() ret.
       const idx = funcSigString.indexOf(')');
@@ -135,7 +135,8 @@ export default class GoTABuilder {
       );
 
       this.context.handleInterfaceMember(
-        actionAttr[mm.ActionAttributes.groupTypeName] as string,
+        // Convert group type name to string.
+        `${actionAttr.get(mm.ActionAttribute.groupTypeName)}`,
         funcSig,
       );
     }
@@ -335,10 +336,10 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
       // Checking explicitly set attributes.
       if (col.selectedColumn instanceof mm.RawColumn) {
         const attrs = col.selectedColumn.__attrs;
-        if (attrs[mm.ColumnAttributes.isPrivate] === true) {
+        if (attrs.get(mm.ColumnAttribute.isPrivate) === true) {
           jsonIgnoreFields.add(varInfo);
         }
-        if (omitAllEmptyFields || attrs[mm.ColumnAttributes.excludeEmptyValue] === true) {
+        if (omitAllEmptyFields || attrs.get(mm.ColumnAttribute.excludeEmptyValue) === true) {
           omitEmptyFields.add(varInfo);
         }
       }
@@ -352,7 +353,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
     // Generate result type definition.
     const resultMemberJSONStyle = options.jsonEncoding?.encodingStyle || JSONEncodingStyle.none;
     if (selMode !== mm.SelectActionMode.field && selMode !== mm.SelectActionMode.exists) {
-      if (action.__attrs[mm.ActionAttributes.resultTypeName]) {
+      if (action.__attrs.get(mm.ActionAttribute.resultTypeName)) {
         this.context.handleResultType(
           atomicResultType,
           new go.StructInfo(

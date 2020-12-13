@@ -427,8 +427,8 @@ export class SelectIOProcessor extends BaseIOProcessor {
         // `selMode` now equals `.list` or `.row` or `.union`.
         let resultType: string;
         // Check if result type is renamed.
-        if (actionAttrs[mm.ActionAttributes.resultTypeName]) {
-          resultType = `${actionAttrs[mm.ActionAttributes.resultTypeName]}`;
+        if (actionAttrs.get(mm.ActionAttribute.resultTypeName)) {
+          resultType = `${actionAttrs.get(mm.ActionAttribute.resultTypeName)}`;
         } else {
           resultType = `${this.actionUniqueTypeName}Result`;
         }
