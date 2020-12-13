@@ -17,8 +17,8 @@ var Post = &TableTypePost{}
 
 // PostTableSelectTimesResult ...
 type PostTableSelectTimesResult struct {
-	Datetime time.Time
 	Date     time.Time
+	Datetime time.Time
 }
 
 // SelectTimes ...

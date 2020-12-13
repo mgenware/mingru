@@ -13,11 +13,11 @@ var Post = &TableTypePost{}
 
 // PostTableSelectTResult ...
 type PostTableSelectTResult struct {
-	CmtCount           uint
-	MUserID            uint64
 	A                  uint64
-	MUserFollowerCount *string
+	CmtCount           uint
 	Fc                 *string
+	MUserFollowerCount *string
+	MUserID            uint64
 }
 
 // SelectT ...

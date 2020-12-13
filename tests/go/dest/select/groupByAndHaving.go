@@ -13,8 +13,8 @@ var Post = &TableTypePost{}
 
 // PostTableTResult ...
 type PostTableTResult struct {
-	Year  int
 	Total int
+	Year  int
 }
 
 // T ...

@@ -13,9 +13,9 @@ var Post = &TableTypePost{}
 
 // PostTableSelectTResult ...
 type PostTableSelectTResult struct {
-	Title      string
 	CategoryID uint64
 	ID         uint64
+	Title      string
 }
 
 // SelectT ...

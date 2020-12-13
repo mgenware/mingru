@@ -17,8 +17,8 @@ var Post = &TableTypePost{}
 
 // PostTableSelectNullableTimesResult ...
 type PostTableSelectNullableTimesResult struct {
-	NDatetime *time.Time
 	NDate     *time.Time
+	NDatetime *time.Time
 }
 
 // SelectNullableTimes ...
@@ -46,8 +46,8 @@ func (da *TableTypePost) SelectNullableTimes(queryable mingru.Queryable) ([]*Pos
 
 // PostTableSelectTimesResult ...
 type PostTableSelectTimesResult struct {
-	Datetime time.Time
 	Date     time.Time
+	Datetime time.Time
 }
 
 // SelectTimes ...

@@ -13,11 +13,11 @@ var PostCmt = &TableTypePostCmt{}
 
 // PostCmtTableSelectTResult ...
 type PostCmtTableSelectTResult struct {
-	ID                uint64
 	A                 uint64
 	B                 string
-	TargetUserUrlName string
 	C                 string
+	ID                uint64
+	TargetUserUrlName string
 }
 
 // SelectT ...

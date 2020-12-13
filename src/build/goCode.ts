@@ -77,7 +77,8 @@ export function struct(
   ignoredMembers: Set<string>,
   omitEmptyMembers: Set<string>,
 ): string {
-  const values = [...members.values()];
+  // Sort members alphabetically.
+  const values = [...members.values()].sort((a, b) => a.name.localeCompare(b.name));
   let code = `// ${typeName} ...
 type ${typeName} struct {
 `;

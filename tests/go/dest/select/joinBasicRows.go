@@ -13,8 +13,8 @@ var Post = &TableTypePost{}
 
 // PostTableSelectTResult ...
 type PostTableSelectTResult struct {
-	UserUrlName string
 	Title       string
+	UserUrlName string
 }
 
 // SelectT ...

@@ -4,8 +4,8 @@ package da
 
 // Res ...
 type Res struct {
-	ID            uint64
 	Age           int
 	DisplayName   string
 	FollowerCount *string
+	ID            uint64
 }

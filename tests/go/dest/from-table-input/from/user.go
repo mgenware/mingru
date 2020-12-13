@@ -30,8 +30,8 @@ func (da *TableTypeUser) InsertT(queryable mingru.Queryable, table string, urlNa
 
 // UserTableSelectTResult ...
 type UserTableSelectTResult struct {
-	ID  uint64
 	Age int
+	ID  uint64
 }
 
 // SelectT ...

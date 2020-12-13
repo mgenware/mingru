@@ -13,9 +13,9 @@ var Activity = &TableTypeActivity{}
 
 // ActivityTableTResult ...
 type ActivityTableTResult struct {
-	ID          uint64
-	GenericSig  *string
 	GenericName string
+	GenericSig  *string
+	ID          uint64
 }
 
 // T ...
@@ -47,9 +47,9 @@ func (da *TableTypeActivity) T(queryable mingru.Queryable, id uint64, limit int,
 
 // ActivityTableT1Result ...
 type ActivityTableT1Result struct {
-	ID          uint64
-	GenericSig  *string
 	GenericName string
+	GenericSig  *string
+	ID          uint64
 }
 
 // T1 ...

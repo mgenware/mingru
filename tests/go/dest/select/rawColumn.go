@@ -16,8 +16,8 @@ type PostTableSelectTResult struct {
 	A         int64
 	B         int16
 	C         int
-	SnakeName string
 	NDatetime int
+	SnakeName string
 }
 
 // SelectT ...

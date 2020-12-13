@@ -13,9 +13,9 @@ var Post = &TableTypePost{}
 
 // PostTableSelectTResult ...
 type PostTableSelectTResult struct {
+	MUserAge int
 	Title    string
 	UserAge  int
-	MUserAge int
 }
 
 // SelectT ...

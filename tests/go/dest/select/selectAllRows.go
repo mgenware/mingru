@@ -17,19 +17,19 @@ var Post = &TableTypePost{}
 
 // PostTableSelectTResult ...
 type PostTableSelectTResult struct {
-	ID         uint64
-	Title      string
-	Content    string
-	UserID     uint64
-	ReviewerID uint64
 	CmtCount   uint
-	Datetime   time.Time
+	Content    string
 	Date       time.Time
-	Time       time.Time
-	NDatetime  *time.Time
-	NDate      *time.Time
-	NTime      *time.Time
+	Datetime   time.Time
+	ID         uint64
 	MUserID    uint64
+	NDate      *time.Time
+	NDatetime  *time.Time
+	NTime      *time.Time
+	ReviewerID uint64
+	Time       time.Time
+	Title      string
+	UserID     uint64
 }
 
 // SelectT ...

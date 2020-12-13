@@ -13,9 +13,9 @@ var Activity = &TableTypeActivity{}
 
 // ActivityTablePrivateTResult ...
 type ActivityTablePrivateTResult struct {
-	ID          uint64
-	GenericSig  *string
 	GenericName string
+	GenericSig  *string
+	ID          uint64
 }
 
 // PrivateT ...
@@ -30,9 +30,9 @@ func (da *TableTypeActivity) PrivateT(queryable mingru.Queryable, id uint64) (*A
 
 // ActivityTableTResult ...
 type ActivityTableTResult struct {
-	ID          uint64
-	GenericSig  *string
 	GenericName string
+	GenericSig  *string
+	ID          uint64
 }
 
 // T ...

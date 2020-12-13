@@ -19,8 +19,8 @@ func (da *TableTypePost) DeleteByID(queryable mingru.Queryable, id uint64) error
 
 // PostTableSelectPostInfoResult ...
 type PostTableSelectPostInfoResult struct {
-	ID          uint64
 	Content     string
+	ID          uint64
 	UserUrlName string
 }
 

@@ -13,8 +13,8 @@ var MyTable = &TableTypeMyTable{}
 
 // MyTableTableSelectTResult ...
 type MyTableTableSelectTResult struct {
-	MyID      uint64
 	my___name string
+	MyID      uint64
 }
 
 // SelectT ...

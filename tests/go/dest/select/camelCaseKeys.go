@@ -13,9 +13,9 @@ var PostReply = &TableTypePostReply{}
 
 // PostReplyTableSelectTResult ...
 type PostReplyTableSelectTResult struct {
-	UserUrlName   string `json:"userUrlName"`
-	UserID        uint64 `json:"userID"`
 	ToUserUrlName string `json:"toUserUrlName"`
+	UserID        uint64 `json:"userID"`
+	UserUrlName   string `json:"userUrlName"`
 }
 
 // SelectT ...

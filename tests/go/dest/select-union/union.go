@@ -13,9 +13,9 @@ var Activity = &TableTypeActivity{}
 
 // ActivityTableTResult ...
 type ActivityTableTResult struct {
-	ID          uint64
-	GenericSig  *string
 	GenericName string
+	GenericSig  *string
+	ID          uint64
 }
 
 // T ...
