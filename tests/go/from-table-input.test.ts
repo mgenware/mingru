@@ -5,7 +5,7 @@ import { testBuildAsync } from './common';
 
 it('FROM table as input', async () => {
   class UserTA extends mm.TableActions {
-    selectT = mm.select(user.id, user.age);
+    selectT = mm.selectRow(user.id, user.age);
     insertT = mm.insertOne().setInputs();
     updateT = mm.updateOne().setInputs().by(user.id);
     deleteT = mm.deleteOne().by(user.id);

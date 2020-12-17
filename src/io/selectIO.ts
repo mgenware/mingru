@@ -434,7 +434,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
         }
 
         let isResultTypeArray = false;
-        if (selMode === mm.SelectActionMode.list || selMode === mm.SelectActionMode.page) {
+        if (selMode === mm.SelectActionMode.rowList || selMode === mm.SelectActionMode.page) {
           isResultTypeArray = true;
         }
         const resultTypeInfo = new AtomicTypeInfo(resultType, null, null);

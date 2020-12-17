@@ -52,7 +52,7 @@ import user from './user';
 
 export class UserTA extends mm.TableActions {
   // Select a user by ID.
-  selectUser = mm.select(user.id, user.name, user.sig).byID();
+  selectUser = mm.selectRow(user.id, user.name, user.sig).byID();
   // Select all users and order by their names.
   selectAllUsers = mm.selectRows(user.id, user.name, user.sig).orderByAsc(user.name);
   // Select a single user signature field by ID.

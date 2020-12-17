@@ -81,7 +81,7 @@ it('getInputs (wrapOther, nested)', () => {
 it('Throws on undefined inputs', () => {
   class UserTA extends mm.TableActions {
     t = mm
-      .select(user.id, user.url_name)
+      .selectRow(user.id, user.url_name)
       .whereSQL(mm.sql`${user.id.toInput()} ${user.url_name.toInput()} ${user.id.toInput()}`);
 
     t2 = this.t.wrap({

@@ -13,7 +13,7 @@ import postCmt from '../models/postCmt';
 
 it('select', async () => {
   class PostTA extends mm.TableActions {
-    selectT = mm.select(post.id, post.title);
+    selectT = mm.selectRow(post.id, post.title);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/select');
@@ -21,7 +21,7 @@ it('select', async () => {
 
 it('select *', async () => {
   class PostTA extends mm.TableActions {
-    selectT = mm.select();
+    selectT = mm.selectRow();
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectAll');
@@ -30,6 +30,14 @@ it('select *', async () => {
 it('selectRows', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm.selectRows(post.id, post.title).orderByAsc(post.id);
+  }
+  const ta = mm.tableActions(post, PostTA);
+  await testBuildAsync(ta, 'select/selectRows');
+});
+
+it('selectFieldRows', async () => {
+  class PostTA extends mm.TableActions {
+    selectT = mm.selectRows(post.title).orderByAsc(post.id);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectRows');
@@ -53,7 +61,7 @@ it('selectField', async () => {
 
 it('WHERE', async () => {
   class PostTA extends mm.TableActions {
-    selectT = mm.select(post.id, post.title).whereSQL(mm.sql`${post.id} = ${mm.input(post.id)}`);
+    selectT = mm.selectRow(post.id, post.title).whereSQL(mm.sql`${post.id} = ${mm.input(post.id)}`);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/where');
@@ -109,7 +117,7 @@ it('selectField, WHERE', async () => {
 it('WHERE: multiple cols', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm
-      .select(post.id, post.title)
+      .selectRow(post.id, post.title)
       .whereSQL(
         mm.sql`${post.id} = ${mm.input(post.id)} && ${post.title} != ${mm.input(post.title)}`,
       );
@@ -121,7 +129,7 @@ it('WHERE: multiple cols', async () => {
 it('Custom params', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm
-      .select(post.id, post.title)
+      .selectRow(post.id, post.title)
       .whereSQL(
         mm.sql`${post.id} = ${mm.input(post.id, 'id')} && raw_name = ${mm.input(
           { type: 'string', defaultValue: 0 },
@@ -135,7 +143,7 @@ it('Custom params', async () => {
 
 it('Basic join', async () => {
   class PostTA extends mm.TableActions {
-    selectT = mm.select(post.user_id.join(user).url_name, post.title);
+    selectT = mm.selectRow(post.user_id.join(user).url_name, post.title);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/joinBasic');
@@ -156,7 +164,7 @@ it('Basic join (rows)', async () => {
 it('Join implied by WHERE', async () => {
   class CmtTA extends mm.TableActions {
     selectT = mm
-      .select(cmt.id)
+      .selectRow(cmt.id)
       .whereSQL(cmt.target_id.join(post).user_id.join(user).url_name.isEqualToInput());
   }
   const ta = mm.tableActions(cmt, CmtTA);
@@ -191,7 +199,7 @@ it('Inverse join (select from A on A.id = B.a_id)', async () => {
 
 it('Same table, multiple cols join', async () => {
   class RplTA extends mm.TableActions {
-    selectT = mm.select(
+    selectT = mm.selectRow(
       rpl.user_id.join(user).url_name,
       rpl.user_id.join(user).id,
       rpl.to_user_id.join(user).url_name,
@@ -203,7 +211,7 @@ it('Same table, multiple cols join', async () => {
 
 it('Join as', async () => {
   class CmtTA extends mm.TableActions {
-    selectT = mm.select(
+    selectT = mm.selectRow(
       cmt.id,
       cmt.user_id.as('a'),
       cmt.target_id.join(post).title.as('b'),
@@ -217,7 +225,7 @@ it('Join as', async () => {
 
 it('Join as (attr should not affect other things)', async () => {
   class CmtTA extends mm.TableActions {
-    selectT = mm.select(
+    selectT = mm.selectRow(
       cmt.id.attr(101, true),
       cmt.user_id.as('a').attr(101, true),
       cmt.target_id.join(post).title.as('b').attr(101, true),
@@ -231,7 +239,7 @@ it('Join as (attr should not affect other things)', async () => {
 
 it('Explicit join', async () => {
   class PostTA extends mm.TableActions {
-    selectT = mm.select(post.title.join(user, user.url_name).age);
+    selectT = mm.selectRow(post.title.join(user, user.url_name).age);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/explicitJoin');
@@ -239,7 +247,7 @@ it('Explicit join', async () => {
 
 it('Explicit join with multiple columns', async () => {
   class PostTA extends mm.TableActions {
-    selectT = mm.select(
+    selectT = mm.selectRow(
       post.title.join(user, user.url_name, [
         [post.user_id, user.id],
         [post.m_user_id, user.id],
@@ -254,7 +262,7 @@ it('Join and from', async () => {
   const jCmt = postCmt.cmt_id.join(cmt2);
   class CmtTA extends mm.TableActions {
     selectT = mm
-      .select(
+      .selectRow(
         jCmt.content,
         jCmt.created_at,
         jCmt.modified_at,
@@ -271,7 +279,7 @@ it('Join and from', async () => {
 
 it('Selected name collisions', async () => {
   class PostTA extends mm.TableActions {
-    selectT = mm.select(
+    selectT = mm.selectRow(
       post.title,
       post.title,
       post.title.as('a'),
@@ -292,7 +300,7 @@ it('Selected name collisions', async () => {
 
 it('Raw columns', async () => {
   class PostTA extends mm.TableActions {
-    selectT = mm.select(
+    selectT = mm.selectRow(
       // User specified types
       new mm.RawColumn(mm.sql`raw expr`, 'a', new mm.ColumnType(mm.dt.bigInt)),
       new mm.RawColumn(mm.sql`xyz(${post.n_date})`, 'b', new mm.ColumnType(mm.dt.smallInt)),
@@ -312,7 +320,7 @@ it('Raw columns', async () => {
 
 it('Custom DB names', async () => {
   class PostTA extends mm.TableActions {
-    selectT = mm.select(
+    selectT = mm.selectRow(
       post.cmtCount, // cmtCount is set to cmt_c in models via `setDBName`
       post.m_user_id,
       post.m_user_id.as('a'),
@@ -363,7 +371,7 @@ it('selectPage', async () => {
 it('WHERE, inputs, joins', async () => {
   class CmtTA extends mm.TableActions {
     selectT = mm
-      .select(cmt.id)
+      .selectRow(cmt.id)
       .whereSQL(
         mm.sql` ${cmt.id.toInput()}, ${cmt.user_id.toInput()}, ${cmt.target_id
           .join(post)
@@ -377,7 +385,7 @@ it('WHERE, inputs, joins', async () => {
 it('Argument stubs', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm
-      .select(post.id, post.title)
+      .selectRow(post.id, post.title)
       .argStubs(
         new mm.SQLVariable({ type: 'int', defaultValue: 0 }, 'id1'),
         new mm.SQLVariable({ type: 'int', defaultValue: 0 }, 'id2'),
@@ -391,7 +399,7 @@ it('GROUP BY and HAVING', async () => {
   const yearCol = mm.sel(mm.sql`${mm.year(post.datetime)}`, 'year');
   class PostTA extends mm.TableActions {
     t = mm
-      .select(yearCol, mm.sel(mm.sql`${mm.sum(post.cmtCount)}`, 'total'))
+      .selectRow(yearCol, mm.sel(mm.sql`${mm.sum(post.cmtCount)}`, 'total'))
       .by(post.id)
       .groupBy(yearCol, 'total')
       .havingSQL(
@@ -407,7 +415,7 @@ it('GROUP BY and HAVING', async () => {
 
 it('snake_case keys', async () => {
   class RplTA extends mm.TableActions {
-    selectT = mm.select(
+    selectT = mm.selectRow(
       rpl.user_id.join(user).url_name,
       rpl.user_id.join(user).id,
       rpl.to_user_id.join(user).url_name,
@@ -422,7 +430,7 @@ it('snake_case keys', async () => {
 
 it('camelCase keys', async () => {
   class RplTA extends mm.TableActions {
-    selectT = mm.select(
+    selectT = mm.selectRow(
       rpl.user_id.join(user).url_name,
       rpl.user_id.join(user).id,
       rpl.to_user_id.join(user).url_name,
@@ -437,7 +445,7 @@ it('camelCase keys', async () => {
 
 it('Ignored keys', async () => {
   class RplTA extends mm.TableActions {
-    selectT = mm.select(
+    selectT = mm.selectRow(
       rpl.user_id.join(user).url_name.attr(mm.ColumnAttribute.isPrivate, true),
       rpl.user_id.join(user).id.privateAttr(),
       rpl.to_user_id.join(user).url_name,
@@ -452,7 +460,7 @@ it('Ignored keys', async () => {
 
 it('Ignored keys (raw columns)', async () => {
   class RplTA extends mm.TableActions {
-    selectT = mm.select(
+    selectT = mm.selectRow(
       mm.sel(mm.sql`1`, 'a', mm.int().__type),
       mm.sel(mm.sql`1`, 'b', mm.int().__type).privateAttr(),
     );
@@ -466,7 +474,7 @@ it('Ignored keys (raw columns)', async () => {
 
 it('Exclude empty properties', async () => {
   class RplTA extends mm.TableActions {
-    selectT = mm.select(
+    selectT = mm.selectRow(
       rpl.user_id
         .join(user)
         .url_name.attr(mm.ColumnAttribute.excludeEmptyValue, true)
@@ -484,7 +492,7 @@ it('Exclude empty properties', async () => {
 
 it('Exclude all empty properties', async () => {
   class RplTA extends mm.TableActions {
-    selectT = mm.select(
+    selectT = mm.selectRow(
       rpl.user_id.join(user).url_name.attr(mm.ColumnAttribute.isPrivate, true),
       rpl.user_id.join(user).id.attr(mm.ColumnAttribute.excludeEmptyValue, true),
       rpl.to_user_id.join(user).url_name,
@@ -502,12 +510,14 @@ it('Exclude all empty properties', async () => {
 
 it('SELECT, EXISTS, IF', async () => {
   class PostTA extends mm.TableActions {
-    t1 = mm.select(mm.sel(mm.exists(mm.select(post.user_id.join(user).sig).by(post.id)), 'a'));
+    t1 = mm.selectRow(
+      mm.sel(mm.exists(mm.selectRow(post.user_id.join(user).sig).by(post.id)), 'a'),
+    );
 
-    t2 = mm.select(
+    t2 = mm.selectRow(
       mm.sel(
         mm
-          .IF(mm.exists(mm.select(post.user_id.join(user).sig).by(post.id)), '1', '2')
+          .IF(mm.exists(mm.selectRow(post.user_id.join(user).sig).by(post.id)), '1', '2')
           .setReturnType(mm.int().__type),
         'a',
       ),
@@ -540,7 +550,7 @@ it('toInputArray', async () => {
 it('Nested AS in SQL calls', async () => {
   // The AS in selected columns should jump out of nested SQL calls, e.g. SELECT FUNC(FUNC(`col`)) AS `name1`.
   class PostTA extends mm.TableActions {
-    t = mm.select(mm.sel(mm.year(mm.year(post.id)), 'name1')).where`${mm.year(
+    t = mm.selectRow(mm.sel(mm.year(mm.year(post.id)), 'name1')).where`${mm.year(
       mm.year(post.id),
     )} == ${post.id.toInput('idInput')}`;
   }
@@ -552,7 +562,7 @@ it('Nested AS in SQL calls (with join)', async () => {
   // The AS in selected columns should jump out of nested SQL calls, e.g. SELECT FUNC(FUNC(`col`)) AS `name1`.
   const col = post.user_id.join(user).age;
   class PostTA extends mm.TableActions {
-    t = mm.select(mm.sel(mm.year(mm.year(col)), 'name1')).where`${mm.year(
+    t = mm.selectRow(mm.sel(mm.year(mm.year(col)), 'name1')).where`${mm.year(
       mm.year(col),
     )} == ${col.toInput('ageInput')}`;
   }

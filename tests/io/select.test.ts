@@ -13,7 +13,7 @@ import { eq, ok } from '../assert-aliases';
 
 it('Select', () => {
   class UserTA extends mm.TableActions {
-    t = mm.select(user.id, user.url_name);
+    t = mm.selectRow(user.id, user.url_name);
   }
   const userTA = mm.tableActions(user, UserTA);
   const v = userTA.t;
@@ -27,7 +27,7 @@ it('Select', () => {
 it('Where', () => {
   class UserTA extends mm.TableActions {
     t = mm
-      .select(user.id, user.url_name)
+      .selectRow(user.id, user.url_name)
       .whereSQL(mm.sql`${user.id} = 1 ${user.id.toInput()} ${user.id.toInput()}`);
   }
   const userTA = mm.tableActions(user, UserTA);
@@ -41,7 +41,7 @@ it('Where', () => {
 it('Where and inputs', () => {
   class UserTA extends mm.TableActions {
     t = mm
-      .select(user.id, user.url_name)
+      .selectRow(user.id, user.url_name)
       .whereSQL(
         mm.sql`${user.id} = ${mm.input(user.id)} && ${user.url_name} = ${mm.input(
           { type: 'string', defaultValue: null },
@@ -59,7 +59,7 @@ it('Where and inputs', () => {
 
 it('Basic join', () => {
   class PostTA extends mm.TableActions {
-    t = mm.select(post.user_id.join(user).url_name, post.title);
+    t = mm.selectRow(post.user_id.join(user).url_name, post.title);
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
@@ -73,7 +73,7 @@ it('Basic join', () => {
 
 it('Multiple cols join and custom table name', () => {
   class RplTA extends mm.TableActions {
-    t = mm.select(
+    t = mm.selectRow(
       rpl.user_id.join(user).url_name,
       rpl.user_id.join(user).id,
       rpl.to_user_id.join(user).url_name,
@@ -91,7 +91,7 @@ it('Multiple cols join and custom table name', () => {
 
 it('Join a table with custom table name', () => {
   class PostTA extends mm.TableActions {
-    t = mm.select(post.user_id, post.user_id.join(rpl).to_user_id);
+    t = mm.selectRow(post.user_id, post.user_id.join(rpl).to_user_id);
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
@@ -105,7 +105,7 @@ it('Join a table with custom table name', () => {
 
 it('Join a table with custom column name', () => {
   class PostTA extends mm.TableActions {
-    t = mm.select(post.user_id, post.user_id.join(rpl, rpl.custom_id).to_user_id);
+    t = mm.selectRow(post.user_id, post.user_id.join(rpl, rpl.custom_id).to_user_id);
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
@@ -120,7 +120,7 @@ it('Join a table with custom column name', () => {
 it('3-table joins and WHERE', () => {
   class CmtTA extends mm.TableActions {
     t = mm
-      .select(
+      .selectRow(
         cmt.id,
         cmt.user_id,
         cmt.target_id.join(post).title,
@@ -149,7 +149,7 @@ it('Join and from', () => {
   const jCmt = postCmt.cmt_id.join(cmt2);
   class PostTA extends mm.TableActions {
     selectT = mm
-      .select(
+      .selectRow(
         jCmt.content,
         jCmt.created_at,
         jCmt.modified_at,
@@ -173,7 +173,7 @@ it('Join and from', () => {
 
 it('AS', () => {
   class CmtTA extends mm.TableActions {
-    t = mm.select(
+    t = mm.selectRow(
       cmt.id,
       cmt.user_id.as('a'),
       cmt.target_id.join(post).title.as('b'),
@@ -193,7 +193,7 @@ it('AS', () => {
 
 it('Duplicate selected names', () => {
   class PostTA extends mm.TableActions {
-    t = mm.select(
+    t = mm.selectRow(
       post.title,
       post.title,
       post.title.as('a'),
@@ -213,7 +213,7 @@ it('Duplicate selected names', () => {
 it('getInputs', () => {
   class UserTA extends mm.TableActions {
     t = mm
-      .select(user.id, user.url_name)
+      .selectRow(user.id, user.url_name)
       .whereSQL(mm.sql`${user.id.toInput()} ${user.url_name.toInput()} ${user.id.toInput()}`);
   }
   const ta = mm.tableActions(user, UserTA);
@@ -227,7 +227,7 @@ it('getInputs', () => {
 
 it('getInputs (no WHERE)', () => {
   class UserTA extends mm.TableActions {
-    t = mm.select(user.id, user.url_name);
+    t = mm.selectRow(user.id, user.url_name);
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
@@ -238,7 +238,7 @@ it('getInputs (no WHERE)', () => {
 it('returnValues', () => {
   class UserTA extends mm.TableActions {
     t = mm
-      .select(user.id)
+      .selectRow(user.id)
       .whereSQL(mm.sql`${user.id.toInput()} ${post.title.toInput()} ${user.id.toInput()}`);
   }
   const ta = mm.tableActions(user, UserTA);
@@ -251,7 +251,7 @@ it('GROUP BY and HAVING', () => {
   const yearCol = mm.sel(mm.sql`${mm.year(post.datetime)}`, 'year');
   class PostTA extends mm.TableActions {
     t = mm
-      .select(yearCol, mm.sel(mm.sql`${mm.sum(post.cmtCount)}`, 'total'))
+      .selectRow(yearCol, mm.sel(mm.sql`${mm.sum(post.cmtCount)}`, 'total'))
       .by(post.id)
       .groupBy(yearCol, 'total')
       .havingSQL(mm.and(mm.sql`${yearCol} > 2010`, mm.sql`\`total\` > 100`));
@@ -269,7 +269,7 @@ it('Unrelated cols', () => {
   // Selected cols
   itThrows(() => {
     class UserTA extends mm.TableActions {
-      t = mm.select(post.user_id);
+      t = mm.selectRow(post.user_id);
     }
     const ta = mm.tableActions(user, UserTA);
     const v = ta.t;
@@ -279,7 +279,7 @@ it('Unrelated cols', () => {
   // WHERE col
   itThrows(() => {
     class UserTA extends mm.TableActions {
-      t = mm.select(user.id).whereSQL(mm.sql`${post.id}`);
+      t = mm.selectRow(user.id).whereSQL(mm.sql`${post.id}`);
     }
     const ta = mm.tableActions(user, UserTA);
     const v = ta.t;
@@ -289,7 +289,7 @@ it('Unrelated cols', () => {
   // Do NOT throws on inputs
   assert.doesNotThrow(() => {
     class UserTA extends mm.TableActions {
-      t = mm.select(user.id).whereSQL(mm.sql`${post.id.toInput()}`);
+      t = mm.selectRow(user.id).whereSQL(mm.sql`${post.id.toInput()}`);
     }
     const ta = mm.tableActions(user, UserTA);
     const v = ta.t;
@@ -299,7 +299,7 @@ it('Unrelated cols', () => {
 
 it('Select DISTINCT', () => {
   class UserTA extends mm.TableActions {
-    t = mm.select(user.id, user.url_name).distinct();
+    t = mm.selectRow(user.id, user.url_name).distinct();
   }
   const userTA = mm.tableActions(user, UserTA);
   const v = userTA.t;

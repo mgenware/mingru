@@ -179,7 +179,7 @@ it('Reference property values', async () => {
   const user = mm.table(User);
   class UserTA extends mm.TableActions {
     t = mm.transact(
-      mm.select(user.age, user.name).declareReturnValue(mm.ReturnValues.result, 'res'),
+      mm.selectRow(user.age, user.name).declareReturnValue(mm.ReturnValues.result, 'res'),
       mm
         .insertOne()
         .setInputs()

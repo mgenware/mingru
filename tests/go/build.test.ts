@@ -6,8 +6,13 @@ import { testBuildToDirAsync } from './common';
 
 it('Single table', async () => {
   class PostTA extends mm.TableActions {
-    selectPostTitle = mm.select(post.id, post.title);
-    selectPostInfo = mm.select(post.id, post.title, post.user_id, post.user_id.join(user).url_name);
+    selectPostTitle = mm.selectRow(post.id, post.title);
+    selectPostInfo = mm.selectRow(
+      post.id,
+      post.title,
+      post.user_id,
+      post.user_id.join(user).url_name,
+    );
 
     updatePostTitle = mm.unsafeUpdateAll().set(post.title, mm.sql`${mm.input(post.title)}`);
 
@@ -19,14 +24,14 @@ it('Single table', async () => {
 
 it('Multiple tables', async () => {
   class UserTA extends mm.TableActions {
-    selectProfile = mm.select(user.display_name, user.sig);
+    selectProfile = mm.selectRow(user.display_name, user.sig);
     updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
     deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
   }
   const userTA = mm.tableActions(user, UserTA);
 
   class PostTA extends mm.TableActions {
-    selectPostInfo = mm.select(post.id, post.content, post.user_id.join(user).url_name);
+    selectPostInfo = mm.selectRow(post.id, post.content, post.user_id.join(user).url_name);
 
     updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToInput());
 
@@ -39,7 +44,7 @@ it('Multiple tables', async () => {
 
 it('Custom package name', async () => {
   class PostTA extends mm.TableActions {
-    selectPostTitle = mm.select(post.id, post.title);
+    selectPostTitle = mm.selectRow(post.id, post.title);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'customPackageName', {
@@ -57,14 +62,14 @@ it('Table DBName', async () => {
 
 it('Multiple tables + CSQL', async () => {
   class UserTA extends mm.TableActions {
-    selectProfile = mm.select(user.display_name, user.sig);
+    selectProfile = mm.selectRow(user.display_name, user.sig);
     updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
     deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
   }
   const userTA = mm.tableActions(user, UserTA);
 
   class PostTA extends mm.TableActions {
-    selectPostInfo = mm.select(post.id, post.content, post.user_id.join(user).url_name);
+    selectPostInfo = mm.selectRow(post.id, post.content, post.user_id.join(user).url_name);
 
     updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToInput());
 
@@ -84,12 +89,12 @@ it('Multiple tables + CSQL', async () => {
 it('Types', async () => {
   class UserTA extends mm.TableActions {
     selectByID = mm
-      .select(user.id)
+      .selectRow(user.id)
       .by(user.id)
       .attr(mm.ActionAttribute.groupTypeName, 'Type1')
       .resultTypeNameAttr('Res1');
 
-    selectProfile = mm.select(user.display_name, user.sig).resultTypeNameAttr('Res2');
+    selectProfile = mm.selectRow(user.display_name, user.sig).resultTypeNameAttr('Res2');
 
     deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
   }
@@ -97,16 +102,16 @@ it('Types', async () => {
 
   class PostTA extends mm.TableActions {
     selectByID = mm
-      .select(post.id)
+      .selectRow(post.id)
       .by(post.id)
       .attr(mm.ActionAttribute.groupTypeName, 'Type1')
       .resultTypeNameAttr('Res1');
 
     selectPostInfo = mm
-      .select(post.n_datetime, post.user_id.join(user).url_name)
+      .selectRow(post.n_datetime, post.user_id.join(user).url_name)
       .attr(mm.ActionAttribute.groupTypeName, 'Type2');
 
-    selectTime = mm.select(post.n_datetime).resultTypeNameAttr('Res3');
+    selectTime = mm.selectRow(post.n_datetime).resultTypeNameAttr('Res3');
   }
   const postTA = mm.tableActions(post, PostTA);
   const actions = [userTA, postTA];
@@ -115,9 +120,9 @@ it('Types', async () => {
 
 it('Result type merging', async () => {
   class UserTA extends mm.TableActions {
-    t1 = mm.select(user.id, user.age).by(user.id).resultTypeNameAttr('Res');
+    t1 = mm.selectRow(user.id, user.age).by(user.id).resultTypeNameAttr('Res');
     t2 = mm
-      .select(user.display_name, user.age, user.follower_count)
+      .selectRow(user.display_name, user.age, user.follower_count)
       .by(user.id)
       .resultTypeNameAttr('Res');
   }
