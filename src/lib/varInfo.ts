@@ -89,11 +89,25 @@ export function typeInfoToArray(typeInfo: TypeInfo): CompoundTypeInfo {
   return new CompoundTypeInfo(typeInfo, false, true);
 }
 
+export function typeInfoWithoutArray(typeInfo: TypeInfo): TypeInfo {
+  if (typeInfo instanceof CompoundTypeInfo) {
+    return new CompoundTypeInfo(typeInfo.core, typeInfo.isPointer, false);
+  }
+  return typeInfo;
+}
+
 export function typeInfoToPointer(typeInfo: TypeInfo): CompoundTypeInfo {
   if (typeInfo instanceof CompoundTypeInfo) {
     return new CompoundTypeInfo(typeInfo.core, true, typeInfo.isArray);
   }
   return new CompoundTypeInfo(typeInfo, true, false);
+}
+
+export function typeInfoWithoutPointer(typeInfo: TypeInfo): TypeInfo {
+  if (typeInfo instanceof CompoundTypeInfo) {
+    return new CompoundTypeInfo(typeInfo.core, false, typeInfo.isArray);
+  }
+  return typeInfo;
 }
 
 export type VarValue = string | mm.ValueRef | mm.Table | number;

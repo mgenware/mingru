@@ -43,6 +43,14 @@ it('selectFieldRows', async () => {
   await testBuildAsync(ta, 'select/selectFieldRows');
 });
 
+it('selectFieldRows + nullable', async () => {
+  class PostTA extends mm.TableActions {
+    selectT = mm.selectFieldRows(post.n_datetime).orderByAsc(post.id);
+  }
+  const ta = mm.tableActions(post, PostTA);
+  await testBuildAsync(ta, 'select/selectFieldRowsNullable');
+});
+
 it('selectAllRows', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm.selectRows().orderByAsc(post.id);
@@ -57,6 +65,14 @@ it('selectField', async () => {
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectField');
+});
+
+it('selectField + nullable', async () => {
+  class PostTA extends mm.TableActions {
+    selectT = mm.selectField(post.n_datetime);
+  }
+  const ta = mm.tableActions(post, PostTA);
+  await testBuildAsync(ta, 'select/selectFieldNullable');
 });
 
 it('WHERE', async () => {

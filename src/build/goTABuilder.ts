@@ -6,7 +6,7 @@ import { SelectIO } from '../io/selectIO';
 import { UpdateIO } from '../io/updateIO';
 import { InsertIO } from '../io/insertIO';
 import { DeleteIO } from '../io/deleteIO';
-import VarInfo, { CompoundTypeInfo, getAtomicTypeInfo } from '../lib/varInfo';
+import VarInfo, { CompoundTypeInfo, getAtomicTypeInfo, typeInfoWithoutArray } from '../lib/varInfo';
 import * as go from './goCode';
 import * as defs from '../defs';
 import logger from '../logger';
@@ -396,6 +396,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
       selMode === mm.SelectActionMode.fieldList ||
       isPageMode
     ) {
+      const itemVarType = typeInfoWithoutArray(firstReturnParam.type).typeString;
       const scanParams =
         selMode === mm.SelectActionMode.fieldList
           ? `&${defs.itemVarName}`
@@ -434,7 +435,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
       builder.pushLines(
         go.makeArray(
           defs.resultVarName,
-          selMode === mm.SelectActionMode.fieldList ? atomicResultType : `*${atomicResultType}`,
+          selMode === mm.SelectActionMode.fieldList ? itemVarType : `*${atomicResultType}`,
           0,
           pagination ? defs.limitVarName : 0,
         ),
@@ -450,7 +451,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
       }
       builder.pushLines(
         selMode === mm.SelectActionMode.fieldList
-          ? `var ${defs.itemVarName} ${atomicResultType}`
+          ? `var ${defs.itemVarName} ${itemVarType}`
           : go.newStructPointerVar(defs.itemVarName, atomicResultType),
         `err = rows.Scan(${scanParams})`,
         'if err != nil {',
