@@ -271,15 +271,15 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
     }
     errReturnCode = 'return ' + errReturnCode;
 
-    let succReturnCode = '';
+    let successReturnCode = '';
     if (isPageMode) {
-      succReturnCode = `${defs.resultVarName}, itemCounter > len(${defs.resultVarName}), nil`;
+      successReturnCode = `${defs.resultVarName}, itemCounter > len(${defs.resultVarName}), nil`;
     } else if (pagination) {
-      succReturnCode = `${defs.resultVarName}, itemCounter, nil`;
+      successReturnCode = `${defs.resultVarName}, itemCounter, nil`;
     } else {
-      succReturnCode = `${defs.resultVarName}, nil`;
+      successReturnCode = `${defs.resultVarName}, nil`;
     }
-    succReturnCode = 'return ' + succReturnCode;
+    successReturnCode = 'return ' + successReturnCode;
 
     const builder = new LinesBuilder();
 
@@ -358,7 +358,11 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
 
     // Generate result type definition.
     const resultMemberJSONStyle = options.jsonEncoding?.encodingStyle || JSONEncodingStyle.none;
-    if (selMode !== mm.SelectActionMode.field && selMode !== mm.SelectActionMode.exists) {
+    if (
+      selMode !== mm.SelectActionMode.field &&
+      selMode !== mm.SelectActionMode.exists &&
+      selMode !== mm.SelectActionMode.fieldList
+    ) {
       if (action.__attrs.get(mm.ActionAttribute.resultTypeName)) {
         this.context.handleResultType(
           atomicResultType,
@@ -387,8 +391,15 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
     }
 
     const sqlLiteral = go.makeStringFromSegments(io.sql || []);
-    if (selMode === mm.SelectActionMode.rowList || isPageMode) {
-      const scanParams = joinParams([...selectedFields.values()].map((p) => `&item.${p.name}`));
+    if (
+      selMode === mm.SelectActionMode.rowList ||
+      selMode === mm.SelectActionMode.fieldList ||
+      isPageMode
+    ) {
+      const scanParams =
+        selMode === mm.SelectActionMode.fieldList
+          ? `&${defs.itemVarName}`
+          : joinParams([...selectedFields.values()].map((p) => `&item.${p.name}`));
       if (isPageMode) {
         // Add `fmt` import as we are using `fmt.Errorf`.
         this.imports.add(defs.fmtImport);
@@ -423,7 +434,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
       builder.pushLines(
         go.makeArray(
           defs.resultVarName,
-          `*${atomicResultType}`,
+          selMode === mm.SelectActionMode.fieldList ? atomicResultType : `*${atomicResultType}`,
           0,
           pagination ? defs.limitVarName : 0,
         ),
@@ -438,7 +449,9 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
         builder.increaseIndent();
       }
       builder.pushLines(
-        go.pointerVar('item', atomicResultType),
+        selMode === mm.SelectActionMode.fieldList
+          ? `var ${defs.itemVarName} ${atomicResultType}`
+          : go.newStructPointerVar(defs.itemVarName, atomicResultType),
         `err = rows.Scan(${scanParams})`,
         'if err != nil {',
       );
@@ -446,7 +459,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
       builder.push(errReturnCode);
       builder.decreaseIndent();
       builder.push('}');
-      builder.push(`${defs.resultVarName} = append(${defs.resultVarName}, item)`);
+      builder.push(`${defs.resultVarName} = append(${defs.resultVarName}, ${defs.itemVarName})`);
       if (pagination) {
         builder.decreaseIndent();
         builder.push('}');
@@ -460,7 +473,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
       builder.decreaseIndent();
       builder.push('}');
     } else {
-      // For `select/selectField`.
+      // `selMode` == `select/selectField`.
       let scanParams: string;
       // Declare the result variable.
       if (selMode === mm.SelectActionMode.field || selMode === mm.SelectActionMode.exists) {
@@ -470,10 +483,10 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
         scanParams = joinParams(
           [...selectedFields.values()].map((p) => `&${defs.resultVarName}.${p.name}`),
         );
-        builder.push(`${go.pointerVar(defs.resultVarName, atomicResultType)}`);
+        builder.push(`${go.newStructPointerVar(defs.resultVarName, atomicResultType)}`);
       }
       // For `selectField` and `selectExists`, we return the default value,
-      // for `select`, return nil.
+      // for `selectRow`, return nil.
       const resultVarOnError =
         selMode === mm.SelectActionMode.field || selMode === mm.SelectActionMode.exists
           ? defs.resultVarName
@@ -495,7 +508,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
       builder.push('}');
     }
     // Return the result.
-    builder.push(succReturnCode);
+    builder.push(successReturnCode);
 
     return new CodeMap(builder, headerCode);
   }

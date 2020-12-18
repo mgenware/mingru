@@ -37,10 +37,10 @@ it('selectRows', async () => {
 
 it('selectFieldRows', async () => {
   class PostTA extends mm.TableActions {
-    selectT = mm.selectRows(post.title).orderByAsc(post.id);
+    selectT = mm.selectFieldRows(post.title).orderByAsc(post.id);
   }
   const ta = mm.tableActions(post, PostTA);
-  await testBuildAsync(ta, 'select/selectRows');
+  await testBuildAsync(ta, 'select/selectFieldRows');
 });
 
 it('selectAllRows', async () => {

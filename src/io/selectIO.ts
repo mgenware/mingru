@@ -6,7 +6,7 @@ import Dialect, { StringSegment } from '../dialect';
 import { SQLIO, sqlIO, SQLIOBuilderOption } from './sqlIO';
 import { ActionIO } from './actionIO';
 import * as stringUtils from '../lib/stringUtils';
-import VarInfo, { AtomicTypeInfo, CompoundTypeInfo } from '../lib/varInfo';
+import VarInfo, { AtomicTypeInfo, CompoundTypeInfo, typeInfoToArray } from '../lib/varInfo';
 import VarList from '../lib/varList';
 import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
@@ -417,16 +417,22 @@ export class SelectIOProcessor extends BaseIOProcessor {
     // Set return values.
     const returnValues = new VarList(`Return values of action "${this.action}"`, true);
     if (!opt.selectionLiteMode) {
-      if (selMode === mm.SelectActionMode.field) {
+      if (selMode === mm.SelectActionMode.field || selMode === mm.SelectActionMode.fieldList) {
         const col = colIOs[0];
         const typeInfo = dialect.colTypeToGoType(col.getResultType());
-        returnValues.add(new VarInfo(mm.ReturnValues.result, typeInfo));
+        returnValues.add(
+          new VarInfo(
+            mm.ReturnValues.result,
+            selMode === mm.SelectActionMode.field ? typeInfo : typeInfoToArray(typeInfo),
+          ),
+        );
       } else if (selMode === mm.SelectActionMode.exists) {
         returnValues.add(new VarInfo(mm.ReturnValues.result, defs.boolTypeInfo));
       } else {
-        // `selMode` now equals `.list` or `.row` or `.union`.
+        // Handle return types that can be customized by attributes.
+        // `selMode` == `.rowList` or `fieldList` or `.row` or `.union`.
         let resultType: string;
-        // Check if result type is renamed.
+        // Check if result type was renamed.
         if (actionAttrs.get(mm.ActionAttribute.resultTypeName)) {
           resultType = `${actionAttrs.get(mm.ActionAttribute.resultTypeName)}`;
         } else {

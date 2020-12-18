@@ -114,12 +114,12 @@ export function sep(s: string): string {
 `;
 }
 
-export function newPointer(typeName: string): string {
+export function newStructPointer(typeName: string): string {
   return `&${typeName}{}`;
 }
 
-export function pointerVar(name: string, typeName: string): string {
-  return `${name} := ${newPointer(typeName)}`;
+export function newStructPointerVar(name: string, typeName: string): string {
+  return `${name} := ${newStructPointer(typeName)}`;
 }
 
 export function makeArray(
