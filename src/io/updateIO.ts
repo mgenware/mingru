@@ -1,11 +1,11 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import Dialect, { StringSegment } from '../dialect';
+import { Dialect, StringSegment } from '../dialect';
 import { settersToVarList, SetterIO } from './setterIO';
 import { SQLIO, sqlIO } from './sqlIO';
 import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
-import VarInfo from '../lib/varInfo';
+import { VarInfo } from '../lib/varInfo';
 import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
 import * as utils from '../lib/stringUtils';

@@ -132,7 +132,7 @@ export class VarInfo {
 
   valueOrName(nameCase: 'camelCase' | 'pascalCase' | 'original'): string {
     const { value } = this;
-    if (value) {
+    if (value !== undefined) {
       if (typeof value === 'string') {
         return value;
       }
@@ -160,7 +160,7 @@ export class VarInfo {
 
   toString(): string {
     let s = `${this.name}: ${this.type.toString()}`;
-    if (this.value) {
+    if (this.value !== undefined) {
       s += `=${this.value}`;
     }
     return s;

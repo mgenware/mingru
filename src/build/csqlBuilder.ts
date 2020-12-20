@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 import * as mm from 'mingru-models';
 import * as defs from '../defs';
-import Dialect from '../dialect';
+import { Dialect } from '../dialect';
 import { sqlIO } from '../io/sqlIO';
 import { extractStringContentFromSegments } from './goCode';
 
@@ -20,6 +20,9 @@ export default class CSQLBuilder {
     const pks: string[] = [];
     const fks: string[] = [];
     for (const col of columns) {
+      if (!col) {
+        continue;
+      }
       const colType = col.__mustGetType();
       const fk = col.__getData().foreignColumn;
       if (colType.pk) {

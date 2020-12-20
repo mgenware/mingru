@@ -2,8 +2,8 @@ import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import { SQLIO, sqlIO, SQLIOBuilderOption } from './sqlIO';
 import VarList from '../lib/varList';
-import Dialect from '../dialect';
-import VarInfo from '../lib/varInfo';
+import { Dialect } from '../dialect';
+import { VarInfo } from '../lib/varInfo';
 import dtDefault from '../build/dtDefault';
 
 export class SetterIO {
@@ -38,6 +38,9 @@ export class SetterIO {
     });
 
     for (const col of Object.values(table.__getData().columns)) {
+      if (!col) {
+        continue;
+      }
       // Skip user setters.
       const userSetterValue = actionSetters.get(col);
       if (userSetterValue !== undefined && userSetterValue !== null) {

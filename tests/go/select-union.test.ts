@@ -70,7 +70,7 @@ it('UNION with page mode', async () => {
   class ActivityTA extends mm.TableActions {
     t1 = mm
       .selectRows(user.id, user.sig.as('generic_sig'), user.url_name.as('generic_name'))
-      .paginate()
+      .pageMode()
       .from(user)
       .by(user.id)
       .orderByAsc(user.id);
@@ -80,7 +80,7 @@ it('UNION with page mode', async () => {
     t = this.t1
       .unionAll(mm.selectRows(like.user_id, like.value).from(like))
       .union(this.t2)
-      .paginate()
+      .pageMode()
       .orderByAsc(user.id);
   }
   const ta = mm.tableActions(activity, ActivityTA);

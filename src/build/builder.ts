@@ -3,7 +3,7 @@ import { throwIfFalsy } from 'throw-if-arg-empty';
 import * as mfs from 'm-fs';
 import * as nodepath from 'path';
 import del from 'del';
-import Dialect from '../dialect';
+import { Dialect } from '../dialect';
 import GoBuilder from './goBuilder';
 import logger from '../logger';
 import CSQLBuilder from './csqlBuilder';

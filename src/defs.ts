@@ -1,5 +1,5 @@
 import * as mm from 'mingru-models';
-import VarInfo, { AtomicTypeInfo, typeInfoToPointer } from './lib/varInfo';
+import { VarInfo, AtomicTypeInfo, typeInfoToPointer } from './lib/varInfo';
 
 export const queryableParam = 'queryable';
 export const dbParam = 'db';

@@ -1,11 +1,11 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import Dialect from '../dialect';
+import { Dialect } from '../dialect';
 import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
-import VarInfo from '../lib/varInfo';
+import { VarInfo } from '../lib/varInfo';
 import * as utils from '../lib/stringUtils';
-import actionToIO, { registerHandler } from './actionToIO';
+import { registerHandler, actionToIO } from './actionToIO';
 import * as defs from '../defs';
 import { ActionToIOOptions } from './actionToIOOptions';
 import BaseIOProcessor from './baseIOProcessor';
@@ -80,7 +80,7 @@ class WrapIOProcessor extends BaseIOProcessor {
       // In this case, `x` has a `ValueRef` value and is taken care of by the caller of this func
       // because the `ValueRef`
       // is only valid at the caller context.
-      if (!inputArg) {
+      if (inputArg === undefined) {
         funcArgs.add(arg);
       } else if (inputArg instanceof mm.ValueRef) {
         funcArgs.add(VarInfo.withValue(arg, inputArg));
@@ -99,7 +99,7 @@ class WrapIOProcessor extends BaseIOProcessor {
         const arg = innerExecArgs.list[i];
         const input = args[arg.name];
         // If argument is a constant, update the `innerExecArgs`.
-        if (input instanceof mm.ValueRef === false && input) {
+        if (input instanceof mm.ValueRef === false && input !== undefined) {
           innerExecArgs.list[i] = VarInfo.withValue(arg, input);
         }
       }
@@ -128,7 +128,7 @@ class WrapIOProcessor extends BaseIOProcessor {
     for (const arg of innerFuncArgs.distinctList) {
       const input = args[arg.name];
       // Update all arguments in `execArgs` that have been overwritten as constant.
-      if (input instanceof mm.ValueRef === false && input) {
+      if (input instanceof mm.ValueRef === false && input !== undefined) {
         execArgs.add(VarInfo.withValue(arg, input));
       } else {
         execArgs.add(arg);

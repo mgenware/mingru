@@ -1,5 +1,5 @@
 import * as mm from 'mingru-models';
-import Dialect from '../dialect';
+import { Dialect } from '../dialect';
 
 export interface ActionToIOOptions {
   dialect: Dialect;

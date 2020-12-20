@@ -1,10 +1,10 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import Dialect, { StringSegment } from '../dialect';
+import { Dialect, StringSegment } from '../dialect';
 import { ActionIO } from './actionIO';
 import { SQLIO, sqlIO } from './sqlIO';
 import VarList from '../lib/varList';
-import VarInfo from '../lib/varInfo';
+import { VarInfo } from '../lib/varInfo';
 import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
 import BaseIOProcessor from './baseIOProcessor';
@@ -39,7 +39,7 @@ class DeleteIOProcessor extends BaseIOProcessor {
     const sqlTable = this.mustGetAvailableSQLTable();
     const actionData = action.__getData();
 
-    if (!action.whereSQL && !actionData.unsafeMode) {
+    if (!actionData.whereSQLValue && !actionData.unsafeMode) {
       throw new Error(
         `You have to call \`unsafeDeleteAll\` to build an action without a WHERE clause, action "${action}"`,
       );

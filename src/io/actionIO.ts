@@ -1,8 +1,8 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import VarList from '../lib/varList';
-import VarInfo from '../lib/varInfo';
-import Dialect, { StringSegment } from '../dialect';
+import { VarInfo } from '../lib/varInfo';
+import { Dialect, StringSegment } from '../dialect';
 import { VarInfoBuilder } from '../lib/varInfoHelper';
 import { makeStringFromSegments } from '../build/goCode';
 

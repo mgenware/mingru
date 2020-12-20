@@ -10,9 +10,6 @@ export default class BaseIOProcessor {
 
   mustGetAvailableSQLTable(): mm.Table {
     const table = this.action.__mustGetAvailableSQLTable(this.opt.groupTable);
-    if (!table) {
-      throw new Error(`No available SQL tables, action "${this.action}"`);
-    }
     return table;
   }
 

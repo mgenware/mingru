@@ -2,11 +2,11 @@
 import * as mm from 'mingru-models';
 import toTypeString from 'to-type-string';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import Dialect, { StringSegment } from '../dialect';
+import { Dialect, StringSegment } from '../dialect';
 import { SQLIO, sqlIO, SQLIOBuilderOption } from './sqlIO';
 import { ActionIO } from './actionIO';
 import * as stringUtils from '../lib/stringUtils';
-import VarInfo, { AtomicTypeInfo, CompoundTypeInfo, typeInfoToArray } from '../lib/varInfo';
+import { VarInfo, AtomicTypeInfo, CompoundTypeInfo, typeInfoToArray } from '../lib/varInfo';
 import VarList from '../lib/varList';
 import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
@@ -267,7 +267,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
       } else {
         selectedColumns = actionColumns?.length
           ? actionColumns
-          : Object.values(sqlTable.__getData().columns);
+          : (Object.values(sqlTable.__getData().columns).filter((v) => v) as mm.SelectedColumn[]);
       }
 
       // Checks if there are any joins in this query.

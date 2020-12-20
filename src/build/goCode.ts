@@ -1,5 +1,5 @@
 import { JSONEncodingStyle } from './buildOptions';
-import VarInfo, { getAtomicTypeInfo } from '../lib/varInfo';
+import { VarInfo, getAtomicTypeInfo } from '../lib/varInfo';
 import { StringSegment } from '../dialect';
 import CodeStringBuilder from '../lib/codeStringBuilder';
 import * as stringUtils from '../lib/stringUtils';
@@ -93,7 +93,7 @@ type ${typeName} struct {
     let tag: string | null = null;
     code += `\t${memName.padEnd(nameMaxLen)} ${mem.type.typeString.padEnd(typeMaxLen)}`;
     const omitEmpty = omitEmptyMembers.has(memName) || false;
-    if (ignoredMembers && ignoredMembers.has(memName)) {
+    if (ignoredMembers.has(memName)) {
       tag = MemberTagUtil.getIgnoreJSONTag();
     } else if (nameStyle === JSONEncodingStyle.camelCase) {
       tag = MemberTagUtil.getCamelCaseJSONTag(memName, omitEmpty);
@@ -129,7 +129,8 @@ export function makeArray(
   capacity?: number | string,
 ): string {
   // eslint-disable-next-line no-param-reassign
-  size = size || 0;
+  size = size ?? 0;
+  // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
   const capacityParam = capacity ? `, ${capacity}` : '';
   return `${name} := make([]${type}, ${size}${capacityParam})`;
 }
@@ -148,7 +149,7 @@ function joinImports(imports: string[], newline: boolean): string {
 }
 
 function formatImports(imports: string[]): string {
-  if (!imports || !imports.length) {
+  if (!imports.length) {
     return '';
   }
 

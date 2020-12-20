@@ -1,6 +1,6 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import Dialect, { StringSegment } from '../dialect';
+import { Dialect, StringSegment } from '../dialect';
 import { settersToVarList, SetterIO } from './setterIO';
 import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';

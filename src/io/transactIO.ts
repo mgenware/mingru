@@ -1,12 +1,12 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import Dialect from '../dialect';
+import { Dialect } from '../dialect';
 import { ActionIO } from './actionIO';
 import VarList from '../lib/varList';
-import actionToIO, { registerHandler } from './actionToIO';
+import { actionToIO, registerHandler } from './actionToIO';
 import * as utils from '../lib/stringUtils';
 import * as defs from '../defs';
-import VarInfo from '../lib/varInfo';
+import { VarInfo } from '../lib/varInfo';
 import BaseIOProcessor from './baseIOProcessor';
 import { ActionToIOOptions } from './actionToIOOptions';
 
@@ -35,7 +35,7 @@ export class TransactIO extends ActionIO {
     funcArgs: VarList,
     execArgs: VarList,
     returnValues: VarList,
-    public childReturnValues: { [name: string]: TXMReturnValueInfo },
+    public childReturnValues: { [name: string]: TXMReturnValueInfo | undefined },
   ) {
     super(dialect, transactAction, null, funcArgs, execArgs, returnValues);
     throwIfFalsy(transactAction, 'transactAction');
@@ -140,7 +140,7 @@ class TransactIOProcessor extends BaseIOProcessor {
      */
 
     // K: declared return value (name), V: info.
-    const crv: { [name: string]: TXMReturnValueInfo } = {};
+    const crv: { [name: string]: TXMReturnValueInfo | undefined } = {};
     for (const mem of memberIOs) {
       // Return values of current TX member.
       // NOT to be confused with `ActionIO.returnValues` which is a `VarList`.
@@ -157,6 +157,9 @@ class TransactIOProcessor extends BaseIOProcessor {
       // NOTE: `ActionIO.returnValues` K:
       for (const key of Object.keys(memReturnValues)) {
         const retValueName = memReturnValues[key];
+        if (!retValueName) {
+          continue;
+        }
 
         // Check if declared return value exists in TX members.
         const srcVarInfo = mem.actionIO.returnValues.getByName(key);
@@ -182,8 +185,9 @@ class TransactIOProcessor extends BaseIOProcessor {
           for (const value of Object.values(memAction.__getData().args ?? {})) {
             if (value instanceof mm.ValueRef) {
               const refName = value.firstName;
-              if (crv[refName]) {
-                crv[refName].refs.push(TXMReturnValueSource.reference);
+              const crvRes = crv[refName];
+              if (crvRes) {
+                crvRes.refs.push(TXMReturnValueSource.reference);
               }
             }
           }
@@ -210,10 +214,10 @@ class TransactIOProcessor extends BaseIOProcessor {
     // Check TX return value refs.
     if (actionData.returnValues) {
       for (const name of actionData.returnValues) {
-        if (!crv[name]) {
+        const info = crv[name];
+        if (!info) {
           throw new Error(`The return value named "${name}" is not declared by any member`);
         }
-        const info = crv[name];
         info.refs.push(TXMReturnValueSource.returnValue);
         returnValues.add(info.typeInfo);
       }

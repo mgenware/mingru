@@ -6,7 +6,7 @@ export default class GoBuilderContext {
 
   handleInterfaceMember(name: string, funcSig: FuncSignature) {
     const { interfaces } = this;
-    if (!interfaces[name]) {
+    if (interfaces[name] === undefined) {
       interfaces[name] = new Map<string, FuncSignature>();
     }
     interfaces[name].set(funcSig.sig, funcSig);
@@ -14,7 +14,7 @@ export default class GoBuilderContext {
 
   handleResultType(name: string, info: MutableStructInfo) {
     const { resultTypes } = this;
-    if (resultTypes[name]) {
+    if (resultTypes[name] !== undefined) {
       resultTypes[name].merge(info);
     } else {
       resultTypes[name] = info;
