@@ -376,12 +376,20 @@ it('selectRows, paginate, WHERE', async () => {
   await testBuildAsync(ta, 'select/selectRowsPaginateWithWhere');
 });
 
-it('selectPage', async () => {
+it('Select rows, page mode', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm.selectRows(post.id, post.title).by(post.id).pageMode().orderByAsc(post.id);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectPage');
+});
+
+it('Select fields, page mode', async () => {
+  class PostTA extends mm.TableActions {
+    selectT = mm.selectFieldRows(post.n_datetime).by(post.id).pageMode().orderByAsc(post.id);
+  }
+  const ta = mm.tableActions(post, PostTA);
+  await testBuildAsync(ta, 'select/selectFieldRowsPage');
 });
 
 it('WHERE, inputs, joins', async () => {
@@ -555,9 +563,9 @@ it('toInputArray', async () => {
   class PostTA extends mm.TableActions {
     t = mm.selectRows(post.id, post.title).where`${post.id} IN ${post.id.toArrayInput(
       'ids',
-    )} OR ${post.id.isNotEqualToInput('idInput')} OR ${post.id} IN ${post.id.toArrayInput(
-      'ids2',
-    )}`.orderByAsc(post.id);
+    )} OR ${post.id.isNotEqualToInput('idInput')} OR ${post.id.isInArrayInput('ids2')}`.orderByAsc(
+      post.id,
+    );
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/toInputArray');

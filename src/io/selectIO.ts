@@ -438,6 +438,12 @@ export class SelectIOProcessor extends BaseIOProcessor {
             selMode === mm.SelectActionMode.field ? typeInfo : typeInfoToArray(typeInfo),
           ),
         );
+
+        if (pgMode === mm.SelectActionPaginationMode.pagination) {
+          returnValues.add(defs.selectActionMaxVar);
+        } else if (pgMode === mm.SelectActionPaginationMode.pageMode) {
+          returnValues.add(defs.hasNextVar);
+        }
       } else if (selMode === mm.SelectActionMode.exists) {
         returnValues.add(new VarInfo(mm.ReturnValues.result, defs.boolTypeInfo));
       } else {
