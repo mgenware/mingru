@@ -42,9 +42,10 @@ class UpdateIOProcessor extends BaseIOProcessor {
     const sql: StringSegment[] = ['UPDATE '];
     const { action, opt } = this;
     const { dialect } = opt;
+    const actionData = action.__getData();
     const sqlTable = this.mustGetAvailableSQLTable();
 
-    if (!action.whereSQL && !action.allowEmptyWhere) {
+    if (!actionData.whereSQLValue && !actionData.unsafeMode) {
       throw new Error(
         'You have to call `unsafeUpdateAll` to build an action without a WHERE clause',
       );
@@ -56,7 +57,9 @@ class UpdateIOProcessor extends BaseIOProcessor {
     sql.push(' SET ');
 
     // Setters
-    utils.validateSetters(action.setters, sqlTable);
+    if (actionData.setters) {
+      utils.validateSetters(actionData.setters, sqlTable);
+    }
     const setterIOs = SetterIO.fromAction(action, dialect, true, sqlTable);
 
     forEachWithSlots(
@@ -69,21 +72,23 @@ class UpdateIOProcessor extends BaseIOProcessor {
     );
 
     // WHERE
-    const whereIO = action.whereSQLValue ? sqlIO(action.whereSQLValue, dialect, sqlTable) : null;
+    const whereIO = actionData.whereSQLValue
+      ? sqlIO(actionData.whereSQLValue, dialect, sqlTable)
+      : null;
     if (whereIO) {
       sql.push(' WHERE ');
       sql.push(...whereIO.code);
     }
 
     // funcArgs
-    const setterVars = settersToVarList(`SetterInputs of action "${action.__name}"`, setterIOs);
-    const funcArgs = new VarList(`Func args of action "${action.__name}"`, true);
+    const setterVars = settersToVarList(`SetterInputs of action "${action}"`, setterIOs);
+    const funcArgs = new VarList(`Func args of action "${action}"`, true);
     funcArgs.add(defs.dbxQueryableVar);
     if (this.isFromTableInput()) {
       funcArgs.add(defs.tableInputVar);
     }
 
-    const execArgs = new VarList(`Exec args of action "${action.__name}"`, true);
+    const execArgs = new VarList(`Exec args of action "${action}"`, true);
     // funcArgs = WHERE(distinct) + setters
     // execArgs = setters + WHERE(all)
     execArgs.merge(setterVars.list);
@@ -94,10 +99,13 @@ class UpdateIOProcessor extends BaseIOProcessor {
     funcArgs.merge(setterVars.list);
 
     // Return values
-    const returnValues = new VarList(`Return values of action ${action.__name}`);
-    if (!action.ensureOneRowAffected) {
+    const returnValues = new VarList(`Return values of action "${action}"`);
+    if (!actionData.ensureOneRowAffected) {
       returnValues.add(
-        new VarInfo(mm.ReturnValues.rowsAffected, dialect.colTypeToGoType(mm.int().__type)),
+        new VarInfo(
+          mm.ReturnValues.rowsAffected,
+          dialect.colTypeToGoType(mm.int().__mustGetType()),
+        ),
       );
     }
 

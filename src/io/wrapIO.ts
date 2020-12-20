@@ -33,7 +33,11 @@ class WrapIOProcessor extends BaseIOProcessor {
   convert(): ActionIO {
     const { action, opt } = this;
     const { dialect } = opt;
-    const innerAction = action.action;
+    const actionData = action.__getData();
+    const { innerAction } = actionData;
+    if (!innerAction) {
+      throw new Error(`Unexpected empty inner action on action "${action}"`);
+    }
     const actionName = this.mustGetActionName();
     const groupTable = this.mustGetGroupTable();
     if (!actionName) {
@@ -45,23 +49,22 @@ class WrapIOProcessor extends BaseIOProcessor {
       { ...opt, groupTable, actionName },
       `WrapAction "${actionName}"`,
     );
+    const innerActionData = innerAction.__getData();
 
-    const { args } = action;
+    const args = actionData.args || {};
     // Throw on non-existing argument names.
     const innerFuncArgs = innerIO.funcArgs;
     for (const key of Object.keys(args)) {
       if (!innerFuncArgs.getByName(key)) {
         throw new Error(
-          `The argument "${key}" doesn't exist in action "${
-            action.__name
-          }", available arguments "${innerFuncArgs.getKeysString()}", got "${JSON.stringify(
+          `The argument "${key}" doesn't exist in action "${action}", available arguments "${innerFuncArgs.getKeysString()}", got "${JSON.stringify(
             args,
           )}"`,
         );
       }
     }
     // funcArgs
-    const funcArgs = new VarList(`Func args of action "${action.__name}"`, true);
+    const funcArgs = new VarList(`Func args of action "${action}"`, true);
     funcArgs.add(defs.dbxQueryableVar);
 
     // Skip the first param, which is always `mingru.Queryable` or `db.Tx`.
@@ -89,7 +92,7 @@ class WrapIOProcessor extends BaseIOProcessor {
     // Example:
     //   mm.update().wrap(args) -> mm.update(args)
     // NOTE that `innerIO` might be any action types.
-    if (!innerAction.__name) {
+    if (!innerActionData.name) {
       innerIO.funcArgs = funcArgs;
       const innerExecArgs = innerIO.execArgs;
       for (let i = 0; i < innerExecArgs.list.length; i++) {
@@ -109,18 +112,19 @@ class WrapIOProcessor extends BaseIOProcessor {
     }
 
     // Non-inline case.
-    const innerActionGroupTable = innerAction.__groupTable;
-    // `innerActionGroupTable` should not be null as `innerAction` should be initialized at the point.
+    const innerActionGroupTable = innerActionData.groupTable;
+    // `innerActionGroupTable` should not be null as `innerAction` should
+    // be initialized at the point.
     if (!innerActionGroupTable) {
-      throw new Error(`Unexpected uninitialized WRAP action "${innerAction.__name}"`);
+      throw new Error(`Unexpected uninitialized WRAP action "${innerActionData.name}"`);
     }
     const funcPath = utils.actionCallPath(
-      innerActionGroupTable === groupTable ? null : innerActionGroupTable.__name,
-      innerAction.__name || actionName,
+      innerActionGroupTable === groupTable ? null : innerActionGroupTable.__getData().name,
+      innerActionData.name || actionName,
       false,
     );
 
-    const execArgs = new VarList(`Exec args of action "${action.__name}"`, true);
+    const execArgs = new VarList(`Exec args of action "${action}"`, true);
     for (const arg of innerFuncArgs.distinctList) {
       const input = args[arg.name];
       // Update all arguments in `execArgs` that have been overwritten as constant.

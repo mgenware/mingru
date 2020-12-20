@@ -47,7 +47,8 @@ export class MySQL extends Dialect {
 
   colToSQLType(col: mm.Column): mm.SQL {
     throwIfFalsy(col, 'col');
-    const colType = col.__type;
+    const colType = col.__mustGetType();
+    const colData = col.__getData();
     let typeString = this.absoluteSQLType(colType);
     if (colType.length) {
       typeString = `${typeString}(${colType.length})`;
@@ -59,13 +60,13 @@ export class MySQL extends Dialect {
       builder.pushWithSpace('UNSIGNED');
     }
     builder.pushWithSpace(colType.nullable ? 'NULL' : 'NOT NULL');
-    if (!col.__noDefaultOnCSQL) {
-      const defValue = col.__defaultValue;
+    if (!colData.noDefaultValueOnCSQL) {
+      const defValue = colData.defaultValue;
       if (defValue !== undefined && defValue instanceof mm.SQL === false) {
         builder.pushWithSpace('DEFAULT');
 
         // MySQL doesn't allow dynamic value as default value, we simply ignore SQL expr here.
-        builder.pushWithSpace(this.objToSQL(defValue, col.getSourceTable()));
+        builder.pushWithSpace(this.objToSQL(defValue, col.__getSourceTable()));
       } else if (colType.nullable) {
         builder.pushWithSpace('DEFAULT');
         builder.pushWithSpace('NULL');
@@ -227,7 +228,7 @@ export class MySQL extends Dialect {
     throw new Error(`Type not supported: ${this.inspectTypes(colType.types)}`);
   }
 
-  private inspectTypes(types: string[]): string {
+  private inspectTypes(types?: string[]): string {
     if (!types) {
       return 'null';
     }

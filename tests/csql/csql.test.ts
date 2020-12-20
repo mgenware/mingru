@@ -45,7 +45,7 @@ it('FK', async () => {
 it('noDefaultOnCSQL', async () => {
   class User extends mm.Table {
     a = mm.int().default(1);
-    b = mm.int().default(1).noDefaultOnCSQL;
+    b = mm.int().default(1).noDefaultValueOnCSQL;
   }
   const t = mm.table(User);
   await testBuildAsync(t, 'noDefaultOnCSQL/user');

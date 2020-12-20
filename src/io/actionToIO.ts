@@ -30,16 +30,19 @@ export function actionToIO(
     if (cached) {
       return cached;
     }
-
-    const handler = handlers.get(action.actionType);
+    const { actionType } = action.__getData();
+    if (actionType === undefined) {
+      throw new Error(`Unexpected undefined action type on action "${action}"`);
+    }
+    const handler = handlers.get(actionType);
     if (!handler) {
-      throw new Error(`The type "${action.actionType}" is not supported in actionToIO`);
+      throw new Error(`The type "${actionType}" is not supported in actionToIO`);
     }
     const result = handler(action, opt);
     actionToIOMap.set(action, result);
     return result;
   } catch (err) {
-    if (err.message) {
+    if (err.message !== undefined) {
       err.message += ` [${descMsg}]`;
     }
     throw err;

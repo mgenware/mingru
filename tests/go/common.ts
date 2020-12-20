@@ -11,7 +11,7 @@ const dialect = mr.mysql;
 const DestDataDir = 'tests/go/dest';
 
 function defaultOptions(opts?: mr.BuildOptions) {
-  if (opts) {
+  if (opts !== undefined) {
     return opts;
   }
   const defOpts: mr.BuildOptions = {};
@@ -34,7 +34,7 @@ export async function testBuildAsync(
   const builder = new mr.GoTABuilder(
     new mr.TAIO(ta, ioOpt),
     defaultOptions(opts),
-    ctx || new mr.GoBuilderContext(),
+    ctx ?? new mr.GoBuilderContext(),
   );
   const actual = builder.build();
   if (path) {
@@ -58,7 +58,7 @@ export async function testBuildFullAsync(
   const builder = new mr.GoTABuilder(
     new mr.TAIO(ta, ioOpt),
     defaultOptions(opts),
-    ctx || new mr.GoBuilderContext(),
+    ctx ?? new mr.GoBuilderContext(),
   );
   const actual = builder.build();
   if (path) {
@@ -79,7 +79,7 @@ export async function testBuildToDirAsync(
   opts?: mr.BuildOptions,
   buildCSQL = false,
 ) {
-  opts = opts || {};
+  opts = opts ?? {};
   opts.noFileHeader = true;
   opts.noOutput = true;
   const tmpDir = tempy.directory();
@@ -88,7 +88,9 @@ export async function testBuildToDirAsync(
   await builder.buildAsync(async () => {
     await builder.buildActionsAsync(actions);
     if (buildCSQL) {
-      await builder.buildCreateTableSQLFilesAsync(actions.map((a) => a.__table as mm.Table));
+      await builder.buildCreateTableSQLFilesAsync(
+        actions.map((a) => a.__getData().table as mm.Table),
+      );
     }
   });
 

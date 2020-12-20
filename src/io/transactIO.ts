@@ -19,7 +19,7 @@ export class TransactMemberIO {
   ) {}
 
   get isInline(): boolean {
-    return !this.member.action.__name;
+    return !this.member.action.__getData().name;
   }
 
   toString(): string {
@@ -63,14 +63,19 @@ class TransactIOProcessor extends BaseIOProcessor {
 
   convert(): TransactIO {
     const { action, opt } = this;
-    const parentName = action.mustGetName();
-    const groupTable = action.mustGetGroupTable();
+    const parentName = action.__mustGetName();
+    const groupTable = action.__mustGetGroupTable();
+    const actionData = action.__getData();
     const { dialect } = opt;
-    const { members } = action;
+    const { members } = actionData;
+    if (!members) {
+      throw new Error(`Unexpected empty members at action ${action}`);
+    }
     const memberIOs = members.map((mem, idx) => {
       const childAction = mem.action;
-      const childGroupTable = childAction.__groupTable;
-      const childName = childAction.__name || mem.name || `${parentName}Child${idx + 1}`;
+      const childActionData = mem.action.__getData();
+      const childGroupTable = childActionData.groupTable;
+      const childName = childActionData.name || mem.name || `${parentName}Child${idx + 1}`;
 
       const io = actionToIO(
         childAction,
@@ -78,10 +83,10 @@ class TransactIOProcessor extends BaseIOProcessor {
         `Transaction child number ${idx + 1}`,
       );
 
-      const isChildInline = !childAction.__name;
+      const isChildInline = !childActionData.name;
       const isChildSameRoot = isChildInline || groupTable === childGroupTable;
       const callPath = utils.actionCallPath(
-        isChildSameRoot ? null : childGroupTable?.__name || null,
+        isChildSameRoot ? null : childGroupTable?.__getData().name || null,
         childName,
         isChildInline,
       );
@@ -89,7 +94,7 @@ class TransactIOProcessor extends BaseIOProcessor {
     });
 
     // funcArgs
-    const funcArgs = new VarList(`Func args of action "${action.__name}"`, true);
+    const funcArgs = new VarList(`Func args of action "${action}"`, true);
     funcArgs.add(defs.sqlDBVar);
     for (const mem of memberIOs) {
       const mAction = mem.actionIO;
@@ -101,9 +106,9 @@ class TransactIOProcessor extends BaseIOProcessor {
       }
     }
     // execArgs is empty for transact io
-    const execArgs = new VarList(`Exec args of action "${action.__name}"`, true);
+    const execArgs = new VarList(`Exec args of action "${action}"`, true);
 
-    const returnValues = new VarList(`Return values of action ${action.__name}`, false);
+    const returnValues = new VarList(`Return values of action ${action}`, false);
 
     /**
      * Child return values (CRV)
@@ -174,7 +179,7 @@ class TransactIOProcessor extends BaseIOProcessor {
         // Check values referenced by other TX members.
         const memAction = mem.actionIO.action;
         if (memAction instanceof mm.WrapAction) {
-          for (const value of Object.values(memAction.args)) {
+          for (const value of Object.values(memAction.__getData().args ?? {})) {
             if (value instanceof mm.ValueRef) {
               const refName = value.firstName;
               if (crv[refName]) {
@@ -194,7 +199,7 @@ class TransactIOProcessor extends BaseIOProcessor {
       if (memberAction instanceof mm.WrapAction === false) {
         continue;
       }
-      const argValues = Object.values((memberAction as mm.WrapAction).args);
+      const argValues = Object.values((memberAction as mm.WrapAction).__getData().args ?? {});
       for (const value of argValues) {
         if (value instanceof mm.ValueRef) {
           varRefs.add(value.firstName);
@@ -203,8 +208,8 @@ class TransactIOProcessor extends BaseIOProcessor {
     }
 
     // Check TX return value refs.
-    if (action.returnValues) {
-      for (const name of action.returnValues) {
+    if (actionData.returnValues) {
+      for (const name of actionData.returnValues) {
         if (!crv[name]) {
           throw new Error(`The return value named "${name}" is not declared by any member`);
         }

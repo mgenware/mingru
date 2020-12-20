@@ -49,7 +49,7 @@ function getSQLCode(
     if (element.type === mm.SQLElementType.column) {
       const col = element.toColumn();
       if (sourceTable) {
-        col.checkSourceTable(sourceTable);
+        col.__checkSourceTable(sourceTable);
       }
     }
     let rewriteElementRes: StringSegment[] | null = null;
@@ -76,12 +76,12 @@ function handleSubquery(
   dialect: Dialect,
 ): ActionIO {
   if (action instanceof mm.SelectAction) {
-    const groupTable = action.__groupTable || defaultGroupTable;
+    const groupTable = action.__getData().groupTable || defaultGroupTable;
     if (!groupTable) {
       throw new Error('No group table available for subquery initialization');
     }
     // Embedded actions are not validated by mingru-models.
-    action.validate(groupTable);
+    action.__validate(groupTable);
 
     const io = actionToIO(
       action,
@@ -134,9 +134,12 @@ function handleElement(
 
     case mm.SQLElementType.rawColumn: {
       const rawCol = element.toRawColumn();
-      const { selectedName, core } = rawCol;
-      if (rawCol.selectedName) {
-        return [dialect.encodeName(rawCol.selectedName)];
+      const { selectedName, core } = rawCol.__getData();
+      if (!core) {
+        throw new Error(`Unexpected undefined core at raw column "${rawCol}"`);
+      }
+      if (selectedName) {
+        return [dialect.encodeName(selectedName)];
       }
       if (core instanceof mm.Column) {
         if (selectedName) {
@@ -168,7 +171,7 @@ function handleElement(
     case mm.SQLElementType.action: {
       const action = element.value;
       if (action instanceof mm.Action) {
-        const io = handleSubquery(action, action.__groupTable || defaultTable, dialect);
+        const io = handleSubquery(action, action.__getData().groupTable || defaultTable, dialect);
         subqueryCallback?.(action, io);
         if (!io.sql) {
           throw new Error(`Unexpected empty SQL code from IO, action "${action}"`);

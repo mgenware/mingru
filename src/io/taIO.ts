@@ -13,12 +13,12 @@ export class TAIO {
 
   constructor(public ta: mm.TableActions, public opt: ActionToIOOptions) {
     throwIfFalsy(ta, 'ta');
-
-    const taTable = ta.__table;
-    const taTableName = taTable.__name;
-    const taOpt = ta.__options;
+    const taData = ta.__getData();
+    const taTable = taData.table;
+    const taTableName = taTable.__getData().name;
+    const taOpt = taData.options;
     // Actions are sorted alphabetically.
-    this.actionIOs = Object.entries(ta.__actions)
+    this.actionIOs = Object.entries(taData.actions)
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([actionName, action]) =>
         actionToIO(

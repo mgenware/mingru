@@ -18,5 +18,8 @@ it('sniffType', () => {
   tSniffSQLType(mm.sql`${mm.ifNull(post.title, post.id)}`, 'ColType(SQL.VARCHAR)');
   // RawColumn
   tSniffSQLType(mm.sql`haha${user.id.as('abc')}`, 'ColType(SQL.BIGINT)');
-  tSniffSQLType(mm.sql`haha${mm.sel(mm.sql`abc`, 'name', mm.int().__type)}`, 'ColType(SQL.INT)');
+  tSniffSQLType(
+    mm.sql`haha${mm.sel(mm.sql`abc`, 'name', mm.int().__mustGetType())}`,
+    'ColType(SQL.INT)',
+  );
 });

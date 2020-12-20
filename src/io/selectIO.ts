@@ -35,13 +35,13 @@ export class JoinIO {
     const alias1 = e(this.tableAlias);
     const alias2 = e(this.localTable);
     let sql = `INNER JOIN ${e(this.remoteTable)} AS ${e(this.tableAlias)} ON ${alias1}.${e(
-      this.remoteColumn.getDBName(),
-    )} = ${alias2}.${e(this.localColumn.getDBName())}`;
+      this.remoteColumn.__getDBName(),
+    )} = ${alias2}.${e(this.localColumn.__getDBName())}`;
 
     // Handle multiple columns in a join.
     if (this.extraColumns.length) {
       for (const [col1, col2] of this.extraColumns) {
-        sql += ` AND ${alias1}.${e(col1.getDBName())} = ${alias2}.${e(col2.getDBName())}`;
+        sql += ` AND ${alias1}.${e(col1.__getDBName())} = ${alias2}.${e(col2.__getDBName())}`;
       }
     }
     return sql;
@@ -65,11 +65,11 @@ export class SelectedColumnIO {
     // `varName` is alias if present. Otherwise, alias is auto generated from column input name.
     // Snake case.
     public varName: string,
-    public alias: string | null,
-    public column: mm.Column | null,
+    public alias: string | undefined,
+    public column: mm.Column | undefined,
     // Available when we can guess the evaluated type,
     // e.g. an expression containing only one column or `SQLCall`.
-    public resultType: mm.ColumnType | null,
+    public resultType: mm.ColumnType | undefined,
   ) {
     throwIfFalsy(selectedColumn, 'selectedColumn');
     throwIfFalsy(valueSQL, 'valueSQL');
@@ -79,14 +79,15 @@ export class SelectedColumnIO {
     if (this.resultType) {
       return this.resultType;
     }
-    if (!this.selectedColumn.__type) {
+    const colType = this.selectedColumn.__getData().type;
+    if (!colType) {
       throw new Error(
         `No column type found on column "${toTypeString(
           this.selectedColumn,
         )}", SQL: "${this.valueSQL.toString()}"`,
       );
     }
-    return this.selectedColumn.__type;
+    return colType;
   }
 }
 
@@ -147,7 +148,8 @@ export class SelectIOProcessor extends BaseIOProcessor {
   }
 
   convert(): SelectIO {
-    const isUnionMode = this.action.unionMembers?.length;
+    const actionData = this.action.__getData();
+    const isUnionMode = !!actionData.unionMembers?.length;
     const unionItems = isUnionMode ? sqlHelper.flattenUnions(this.action) : [];
 
     const sqlTable = this.mustGetAvailableSQLTable();
@@ -159,13 +161,17 @@ export class SelectIOProcessor extends BaseIOProcessor {
       orderByColumns,
       groupByColumns,
       distinctFlag,
-      pagination,
+      paginationMode: pgMode,
       mode: selMode,
       columns: actionColumns,
       whereSQLValue,
       havingSQLValue,
-      __attrs: actionAttrs,
-    } = this.action;
+      attrs: actionAttrs,
+    } = actionData;
+
+    if (selMode === undefined) {
+      throw new Error('Unexpected undefined selection mode');
+    }
 
     const isLimitInput = limitValue instanceof mm.SQLVariable;
     const isOffsetInput = offsetValue instanceof mm.SQLVariable;
@@ -246,7 +252,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
       // NOTE: not the table defined by FROM, it's the root table defined in table actions.
       // Those fields are used to generate result type definition.
       // This process call be skipped if we don't need a result type.
-      this.tablePascalName = stringUtils.tablePascalName(this.mustGetGroupTable().__name);
+      this.tablePascalName = stringUtils.tablePascalName(this.mustGetGroupTable().__getData().name);
       this.actionPascalName = stringUtils.actionPascalName(actionName);
       this.actionUniqueTypeName = `${this.tablePascalName}Table${this.actionPascalName}`;
     }
@@ -254,12 +260,14 @@ export class SelectIOProcessor extends BaseIOProcessor {
     if (!isUnionMode) {
       let selectedColumns: mm.SelectedColumn[];
       if (selMode === mm.SelectActionMode.exists) {
-        if (actionColumns.length) {
+        if (actionColumns?.length) {
           throw new Error('You cannot have selected columns in `selectExists`');
         }
         selectedColumns = [];
       } else {
-        selectedColumns = actionColumns.length ? actionColumns : Object.values(sqlTable.__columns);
+        selectedColumns = actionColumns?.length
+          ? actionColumns
+          : Object.values(sqlTable.__getData().columns);
       }
 
       // Checks if there are any joins in this query.
@@ -282,7 +290,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
           }
           selectedNames.add(selIO.varName);
           if (selIO.column) {
-            this.selectedNamesMap.set(selIO.column.getPath(), selIO.varName);
+            this.selectedNamesMap.set(selIO.column.__getPath(), selIO.varName);
           }
           colIOs.push(selIO);
 
@@ -324,7 +332,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     } // End of `if (!isUnionMode)`
 
     // ORDER BY
-    if (orderByColumns.length && !opt.notFirstUnionMember) {
+    if (orderByColumns?.length && !opt.notFirstUnionMember) {
       sql.push(' ORDER BY ');
 
       forEachWithSlots(
@@ -337,7 +345,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     }
 
     // GROUP BY
-    if (groupByColumns.length) {
+    if (groupByColumns?.length) {
       sql.push(' GROUP BY ');
 
       forEachWithSlots(
@@ -356,8 +364,12 @@ export class SelectIOProcessor extends BaseIOProcessor {
       sql.push(' HAVING ', ...havingIO.code);
     }
 
-    // LIMIT and OFFSET.
-    if (pagination || selMode === mm.SelectActionMode.page) {
+    // Add LIMIT and OFFSET if needed.
+    // When `offsetFlag` is true, `limitFlag` must also be true.
+    if (
+      pgMode === mm.SelectActionPaginationMode.pagination ||
+      pgMode === mm.SelectActionPaginationMode.pageMode
+    ) {
       sql.push(' LIMIT ? OFFSET ?');
     } else if (limitValue !== undefined) {
       sql.push(' LIMIT ');
@@ -383,13 +395,13 @@ export class SelectIOProcessor extends BaseIOProcessor {
     sqlHelper.mergeIOVerListsWithSQLIO(funcArgs, execArgs, whereIO);
     sqlHelper.mergeIOVerListsWithSQLIO(funcArgs, execArgs, havingIO);
 
-    if (pagination) {
+    if (pgMode === mm.SelectActionPaginationMode.pagination) {
       funcArgs.add(limitTypeInfo);
       funcArgs.add(offsetTypeInfo);
       funcArgs.add(defs.selectActionMaxVar);
       execArgs.add(limitTypeInfo);
       execArgs.add(offsetTypeInfo);
-    } else if (selMode === mm.SelectActionMode.page) {
+    } else if (pgMode === mm.SelectActionPaginationMode.pageMode) {
       funcArgs.add(defs.pageVar);
       funcArgs.add(defs.pageSizeVar);
       execArgs.add(limitTypeInfo);
@@ -430,17 +442,17 @@ export class SelectIOProcessor extends BaseIOProcessor {
         returnValues.add(new VarInfo(mm.ReturnValues.result, defs.boolTypeInfo));
       } else {
         // Handle return types that can be customized by attributes.
-        // `selMode` == `.rowList` or `fieldList` or `.row` or `.union`.
+        // `selMode` == `.rowList` or `.row` or `.union`.
         let resultType: string;
         // Check if result type was renamed.
-        if (actionAttrs.get(mm.ActionAttribute.resultTypeName)) {
+        if (actionAttrs?.get(mm.ActionAttribute.resultTypeName) !== undefined) {
           resultType = `${actionAttrs.get(mm.ActionAttribute.resultTypeName)}`;
         } else {
           resultType = `${this.actionUniqueTypeName}Result`;
         }
 
         let isResultTypeArray = false;
-        if (selMode === mm.SelectActionMode.rowList || selMode === mm.SelectActionMode.page) {
+        if (selMode === mm.SelectActionMode.rowList) {
           isResultTypeArray = true;
         }
         const resultTypeInfo = new AtomicTypeInfo(resultType, null, null);
@@ -451,9 +463,9 @@ export class SelectIOProcessor extends BaseIOProcessor {
             new CompoundTypeInfo(resultTypeInfo, true, isResultTypeArray),
           ),
         );
-        if (pagination) {
+        if (pgMode === mm.SelectActionPaginationMode.pagination) {
           returnValues.add(defs.selectActionMaxVar);
-        } else if (selMode === mm.SelectActionMode.page) {
+        } else if (pgMode === mm.SelectActionPaginationMode.pageMode) {
           returnValues.add(defs.hasNextVar);
         }
       }
@@ -479,14 +491,12 @@ export class SelectIOProcessor extends BaseIOProcessor {
       rewriteElement: (ele) => {
         if (ele.type === mm.SQLElementType.column) {
           const col = ele.toColumn();
-          const colTable = col.mustGetTable();
+          const colTable = col.__mustGetTable();
           if (colTable instanceof mm.JoinedTable) {
             if (!noJoinRegion) {
               this.handleJoinRecursively(col);
             } else {
-              throw new Error(
-                `Join is not allowed in ${noJoinRegion}, offending column "${col.__name}"`,
-              );
+              throw new Error(`Join is not allowed in ${noJoinRegion}, offending column "${col}"`);
             }
           }
           return this.getColumnSQLFromExistingData(col);
@@ -541,18 +551,19 @@ export class SelectIOProcessor extends BaseIOProcessor {
       return [col, [dialect.encodeName(col)]];
     }
     if (col instanceof mm.Column) {
-      const varName = this.selectedNamesMap.get(col.getPath());
+      const varName = this.selectedNamesMap.get(col.__getPath());
       return [
-        col.mustGetName(),
+        col.__mustGetName(),
         varName ? [dialect.encodeName(varName)] : this.getColumnSQLFromExistingData(col),
       ];
     }
     if (col instanceof mm.RawColumn) {
-      if (col.selectedName) {
-        return [col.selectedName, [dialect.encodeName(col.selectedName)]];
+      const colData = col.__getData();
+      if (colData.selectedName) {
+        return [colData.selectedName, [dialect.encodeName(colData.selectedName)]];
       }
-      if (col.core instanceof mm.Column) {
-        return [col.core.mustGetName(), this.getColumnSQLFromExistingData(col.core)];
+      if (colData.core instanceof mm.Column) {
+        return [colData.core.__mustGetName(), this.getColumnSQLFromExistingData(colData.core)];
       }
       throw new Error(
         'The argument `selectedName` is required for an SQL expression without any columns inside',
@@ -570,9 +581,9 @@ export class SelectIOProcessor extends BaseIOProcessor {
     const { dialect } = this.opt;
     let value = dialect.encodeColumnName(col);
     if (this.hasJoin) {
-      const colTable = col.mustGetTable();
+      const colTable = col.__mustGetTable();
       if (colTable instanceof mm.JoinedTable) {
-        const jt = col.__table as mm.JoinedTable;
+        const jt = col.__getData().table as mm.JoinedTable;
         const joinPath = jt.keyPath;
         const join = this.jcMap.get(joinPath);
         if (!join) {
@@ -592,7 +603,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
   private handleFrom(table: mm.Table): StringSegment[] {
     const { opt } = this;
     const e = opt.dialect.encodeName;
-    const tableDBName = table.getDBName();
+    const tableDBName = table.__getDBName();
     const encodedTableName = e(tableDBName);
     const segList: StringSegment[] = ['FROM '];
     if (this.isFromTableInput()) {
@@ -607,22 +618,23 @@ export class SelectIOProcessor extends BaseIOProcessor {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  private guessColumnType(sql: mm.SQL): mm.ColumnType | null {
+  private guessColumnType(sql: mm.SQL): mm.ColumnType | undefined {
     if (sql.elements.length === 1) {
       const first = sql.elements[0];
       if (first.type === mm.SQLElementType.column) {
-        return first.toColumn().__type;
+        return first.toColumn().__mustGetType();
       }
       if (first.type === mm.SQLElementType.call) {
         const call = first.toCall();
         const { returnType } = call;
         if (typeof returnType === 'number') {
           const returnTypeArg = call.params[returnType];
+          // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
           if (!returnTypeArg) {
             throw new Error(`Index of out range when probing return type, index: ${returnType}`);
           }
           if (returnTypeArg instanceof mm.Column) {
-            return returnTypeArg.__type;
+            return returnTypeArg.__mustGetType();
           }
           throw new Error(
             `Index-based return type data is not a \`Column\`, got ${toTypeString(returnTypeArg)}`,
@@ -631,20 +643,21 @@ export class SelectIOProcessor extends BaseIOProcessor {
         return returnType;
       }
     }
-    return null;
+    return undefined;
   }
 
   // Converts column SQL expr to SQL code segments.
-  // It also returns the variable name of this column. Variable name is used to generate result property type.
+  // It also returns the variable name of this column. Variable name is used to
+  // generate result property type.
   private getSelectedColumnSQLCode(
     colSQL: mm.SQL,
     col: mm.Column,
-    alias: string | null,
+    alias: string | undefined,
     opt?: SQLIOBuilderOption,
   ): [string, StringSegment[]] {
     const sqlTable = this.mustGetAvailableSQLTable();
     // Alias is required when `hasJoin` is true.
-    const inputName = col.getInputName();
+    const inputName = col.__getInputName();
     if (this.hasJoin) {
       alias = alias || inputName;
     }
@@ -666,18 +679,28 @@ export class SelectIOProcessor extends BaseIOProcessor {
     // Plain columns like `post.id`.
     if (sCol instanceof mm.Column) {
       const colSQL = this.handlePlainSelectedColumn(sCol);
-      const [varName, colSQLCode] = this.getSelectedColumnSQLCode(colSQL, sCol, null);
+      const [varName, colSQLCode] = this.getSelectedColumnSQLCode(colSQL, sCol, undefined);
 
-      return new SelectedColumnIO(sCol, colSQLCode, varName, null, sCol, sCol.__type);
+      return new SelectedColumnIO(sCol, colSQLCode, varName, undefined, sCol, sCol.__mustGetType());
     }
 
-    const { core, selectedName } = sCol;
+    const { core, selectedName } = sCol.__getData();
+    if (!core) {
+      throw new Error('Unexpected undefined `RawColumn.core`');
+    }
     // Renamed columns like `post.id.as('foo')`.
     if (core instanceof mm.Column) {
       const colSQL = this.handlePlainSelectedColumn(core);
       const [varName, colSQLCode] = this.getSelectedColumnSQLCode(colSQL, core, selectedName);
 
-      return new SelectedColumnIO(sCol, colSQLCode, varName, selectedName, core, core.__type);
+      return new SelectedColumnIO(
+        sCol,
+        colSQLCode,
+        varName,
+        selectedName,
+        core,
+        core.__mustGetType(),
+      );
     }
 
     // Raw column with an SQL expr.
@@ -690,7 +713,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     // If we cannot guess the result type (`resultType` is null), and neither does a user specified.
     // Throw an error cuz we cannot determine the result type.
     const resultType = this.guessColumnType(core);
-    if (!resultType && !sCol.__type) {
+    if (!resultType && !sCol.__getData().type) {
       throw new Error(
         `Column type is required for a "${toTypeString(sCol)}" without any embedded columns`,
       );
@@ -704,13 +727,13 @@ export class SelectIOProcessor extends BaseIOProcessor {
       info.code,
       selectedName, // inputName
       selectedName, // alias is always present in this case.
-      null,
+      undefined,
       resultType,
     );
   }
 
   private handleJoinRecursively(jc: mm.Column): JoinIO {
-    const table = jc.__table as mm.JoinedTable;
+    const table = jc.__getData().table as mm.JoinedTable;
     const result = this.jcMap.get(table.keyPath);
     if (result) {
       return result;
@@ -718,7 +741,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
 
     let localTableName: string;
     const { srcColumn, destColumn, destTable } = table;
-    const srcTable = srcColumn.mustGetTable();
+    const srcTable = srcColumn.__mustGetTable();
     if (srcTable instanceof mm.JoinedTable) {
       const srcIO = this.handleJoinRecursively(srcColumn);
       localTableName = srcIO.tableAlias;
@@ -731,7 +754,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
       this.nextJoinedTableName(),
       localTableName,
       srcColumn,
-      destTable.getDBName(),
+      destTable.__getDBName(),
       destColumn,
       table.extraColumns,
     );
@@ -747,24 +770,25 @@ export class SelectIOProcessor extends BaseIOProcessor {
     const { dialect } = this.opt;
     const e = dialect.encodeName;
     // Make sure column is initialized.
-    const colTable = col.mustGetTable();
+    const colTable = col.__mustGetTable();
     // Make sure column is from current table.
-    col.checkSourceTable(sqlTable);
+    col.__checkSourceTable(sqlTable);
 
     let colSQL: mm.SQL;
     if (colTable instanceof mm.JoinedTable) {
       const joinIO = this.handleJoinRecursively(col);
-      if (!col.__mirroredColumn) {
+      const mirroredCol = col.__getData().mirroredColumn;
+      if (!mirroredCol) {
         throw new Error(
           `Internal error: unexpected empty \`mirroredColumn\` in joined column "${toTypeString(
             col,
           )}"`,
         );
       }
-      colSQL = mm.sql`${e(joinIO.tableAlias)}.${e(col.__mirroredColumn.getDBName())}`;
+      colSQL = mm.sql`${e(joinIO.tableAlias)}.${e(mirroredCol.__getDBName())}`;
     } else {
       // Column without a join.
-      colSQL = mm.sql`${e(col.getDBName())}`;
+      colSQL = mm.sql`${e(col.__getDBName())}`;
       if (this.hasJoin) {
         // Each column must have a prefix in a SQL with joins.
         // NOTE: use table `DBName` as alias.
@@ -781,7 +805,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
 
   // eslint-disable-next-line class-methods-use-this
   private localTableAlias(table: mm.Table): string {
-    return table.getDBName();
+    return table.__getDBName();
   }
 }
 

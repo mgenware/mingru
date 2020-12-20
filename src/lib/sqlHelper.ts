@@ -11,7 +11,7 @@ export function sniffSQLType(sql: mm.SQL): mm.ColumnType | null {
   for (const element of sql.elements) {
     const { type } = element;
     if (type === mm.SQLElementType.column) {
-      return element.toColumn().__type;
+      return element.toColumn().__mustGetType();
     }
     if (type === mm.SQLElementType.call) {
       const call = element.toCall();
@@ -21,11 +21,12 @@ export function sniffSQLType(sql: mm.SQL): mm.ColumnType | null {
       }
       // `returnType` is the index of the specified param that indicates the return type.
       const param = call.params[returnType];
+      // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
       if (!param) {
         throw new Error(`Unexpected empty param from return type index ${returnType}`);
       }
       if (param instanceof mm.Column) {
-        return param.__type;
+        return param.__mustGetType();
       }
       if (param instanceof mm.SQL) {
         return sniffSQLType(param);
@@ -38,11 +39,12 @@ export function sniffSQLType(sql: mm.SQL): mm.ColumnType | null {
     }
     if (type === mm.SQLElementType.rawColumn) {
       const raw = element.toRawColumn();
-      if (raw.type) {
-        return raw.type;
+      const { type: rawType, core: rawCore } = raw.__getData();
+      if (rawType) {
+        return rawType;
       }
-      if (raw.core instanceof mm.Column) {
-        return raw.core.__type;
+      if (rawCore instanceof mm.Column) {
+        return rawCore.__mustGetType();
       }
     }
   }
@@ -56,8 +58,9 @@ export function visitElements(sql: mm.SQL, fn: (element: mm.SQLElement) => boole
     }
     if (element.type === mm.SQLElementType.rawColumn) {
       const rawCol = element.toRawColumn();
-      if (rawCol.core instanceof mm.SQL) {
-        if (!visitElements(rawCol.core, fn)) {
+      const { core: rawCore } = rawCol.__getData();
+      if (rawCore instanceof mm.SQL) {
+        if (!visitElements(rawCore, fn)) {
           return false;
         }
       }
@@ -81,7 +84,7 @@ export function visitColumns(sql: mm.SQL, fn: (column: mm.Column) => boolean): b
         return false;
       }
     } else if (value instanceof mm.RawColumn) {
-      const { core } = value;
+      const { core } = value.__getData();
       if (core instanceof mm.Column) {
         if (!fn(core)) {
           return false;
@@ -99,14 +102,18 @@ export function visitColumnsFromSelectedColumn(
   if (sc instanceof mm.Column) {
     return fn(sc);
   }
-  if (sc.core instanceof mm.Column) {
-    return fn(sc.core);
+  const { core: scCore } = sc.__getData();
+  if (!scCore) {
+    throw new Error(`Unexpected undefined core at row column "${sc}"`);
   }
-  return visitColumns(sc.core, fn);
+  if (scCore instanceof mm.Column) {
+    return fn(scCore);
+  }
+  return visitColumns(scCore, fn);
 }
 
 export function hasJoinForColumn(col: mm.Column): boolean {
-  return col.__table instanceof mm.JoinedTable;
+  return col.__getData().table instanceof mm.JoinedTable;
 }
 
 export function hasJoinInSelectedColumn(sc: mm.SelectedColumn): boolean {
@@ -160,13 +167,14 @@ export function handleNonSelectSQLFrom(
   const e = processor.opt.dialect.encodeName;
   return processor.isFromTableInput()
     ? [{ code: defs.tableInputName }]
-    : [`${e(table.getDBName())}`];
+    : [`${e(table.__getDBName())}`];
 }
 
 export function flattenUnions(action: mm.SelectAction): Array<mm.SelectAction | boolean> {
-  if (action.unionMembers?.length) {
-    const [a, b] = action.unionMembers;
-    return [...flattenUnions(a), action.unionAllFlag, ...flattenUnions(b)];
+  const { unionMembers, unionAllFlag } = action.__getData();
+  if (unionMembers?.length) {
+    const [a, b] = unionMembers;
+    return [...flattenUnions(a), !!unionAllFlag, ...flattenUnions(b)];
   }
   return [action];
 }

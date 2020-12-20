@@ -12,13 +12,11 @@ function sqlEq(sql: mm.SQL, value: string) {
 }
 
 function testType(col: mm.Column, type: string, pkg?: string) {
-  // `VarInfo` is not exported, we'll use `any` here to bypass type validation.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const typeInfo = dialect.colTypeToGoType(col.__type) as any;
+  const typeInfo = dialect.colTypeToGoType(col.__mustGetType());
   eq(typeInfo.typeString, type);
 
-  const atomicInfo = typeInfo.core ? typeInfo.core : typeInfo;
-  eq(atomicInfo.moduleName || null, pkg || null);
+  const atomicInfo = mr.getAtomicTypeInfo(typeInfo);
+  eq(atomicInfo.moduleName ?? null, pkg ?? null);
 }
 
 it('encodeName', () => {
@@ -63,8 +61,8 @@ it('DT', () => {
   for (const t of tests) {
     const column = t[0] as mm.Column;
     testType(column, t[1] as string, t[2] as string);
-    if (!column.__type.pk) {
-      column.__type.nullable = true;
+    if (!column.__mustGetType().pk) {
+      column.__mustGetType().nullable = true;
       testType(column, `*${t[1]}` as string, t[2] as string);
     }
   }

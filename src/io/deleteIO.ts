@@ -37,10 +37,11 @@ class DeleteIOProcessor extends BaseIOProcessor {
     const { action, opt } = this;
     const { dialect } = opt;
     const sqlTable = this.mustGetAvailableSQLTable();
+    const actionData = action.__getData();
 
-    if (!action.whereSQL && !action.allowNoWhere) {
+    if (!action.whereSQL && !actionData.unsafeMode) {
       throw new Error(
-        `You have to call \`unsafeDeleteAll\` to build an action without a WHERE clause, action name: "${action.__name}"`,
+        `You have to call \`unsafeDeleteAll\` to build an action without a WHERE clause, action "${action}"`,
       );
     }
 
@@ -49,29 +50,34 @@ class DeleteIOProcessor extends BaseIOProcessor {
     sql.push(...fromSQL);
 
     // WHERE
-    const whereIO = action.whereSQLValue ? sqlIO(action.whereSQLValue, dialect, sqlTable) : null;
+    const whereIO = actionData.whereSQLValue
+      ? sqlIO(actionData.whereSQLValue, dialect, sqlTable)
+      : null;
     if (whereIO) {
       sql.push(' WHERE ');
       sql.push(...whereIO.code);
     }
 
     // Inputs
-    const funcArgs = new VarList(`Func args of action "${action.__name}"`, true);
+    const funcArgs = new VarList(`Func args of action "${action}"`, true);
     funcArgs.add(defs.dbxQueryableVar);
     if (this.isFromTableInput()) {
       funcArgs.add(defs.tableInputVar);
     }
-    const execArgs = new VarList(`Exec args of action "${action.__name}"`, true);
+    const execArgs = new VarList(`Exec args of action "${action}"`, true);
     if (whereIO) {
       funcArgs.merge(whereIO.distinctVars);
       execArgs.merge(whereIO.vars);
     }
 
     // Return values.
-    const returnValues = new VarList(`Return values of action ${action.__name}`, false);
-    if (!action.ensureOneRowAffected) {
+    const returnValues = new VarList(`Return values of action ${action}`, false);
+    if (!actionData.ensureOneRowAffected) {
       returnValues.add(
-        new VarInfo(mm.ReturnValues.rowsAffected, dialect.colTypeToGoType(mm.int().__type)),
+        new VarInfo(
+          mm.ReturnValues.rowsAffected,
+          dialect.colTypeToGoType(mm.int().__mustGetType()),
+        ),
       );
     }
 

@@ -63,6 +63,6 @@ export function paginateCoreFuncName(name: string): string {
 
 export function validateSetters(setters: ReadonlyMap<mm.Column, unknown>, table: mm.Table) {
   for (const setter of setters.keys()) {
-    setter.checkSourceTable(table);
+    setter.__checkSourceTable(table);
   }
 }

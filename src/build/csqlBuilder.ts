@@ -6,22 +6,27 @@ import { sqlIO } from '../io/sqlIO';
 import { extractStringContentFromSegments } from './goCode';
 
 export default class CSQLBuilder {
-  constructor(public table: mm.Table, public dialect: Dialect) {}
+  tableData: mm.TableData;
+
+  constructor(public table: mm.Table, public dialect: Dialect) {
+    this.tableData = table.__getData();
+  }
 
   build(noHeader: boolean): string {
-    const { table, dialect } = this;
-    const columns = Object.values(table.__columns);
+    const { table, dialect, tableData } = this;
+    const columns = Object.values(tableData.columns);
     const body = [];
 
     const pks: string[] = [];
     const fks: string[] = [];
     for (const col of columns) {
-      const colType = col.__type;
+      const colType = col.__mustGetType();
+      const fk = col.__getData().foreignColumn;
       if (colType.pk) {
-        pks.push(col.getDBName());
+        pks.push(col.__getDBName());
       }
-      if (col.__foreignColumn) {
-        const exp = this.fkExpression(col, col.__foreignColumn);
+      if (fk) {
+        const exp = this.fkExpression(col, fk);
         fks.push(exp);
       }
       const io = sqlIO(dialect.colToSQLType(col), dialect, null);
@@ -54,8 +59,8 @@ export default class CSQLBuilder {
     const { dialect } = this;
     return `CONSTRAINT FOREIGN KEY(${dialect.encodeColumnName(
       col,
-    )}) REFERENCES ${dialect.encodeTableName(fCol.__table as mm.Table)} (${dialect.encodeColumnName(
-      fCol,
-    )}) ON DELETE CASCADE`;
+    )}) REFERENCES ${dialect.encodeTableName(
+      fCol.__getData().table as mm.Table,
+    )} (${dialect.encodeColumnName(fCol)}) ON DELETE CASCADE`;
   }
 }

@@ -368,7 +368,7 @@ it('selectRows, LIMIT and OFFSET', async () => {
   await testBuildAsync(ta, 'select/selectRowsLimitOffset');
 });
 
-it('selectRows, paginate, where', async () => {
+it('selectRows, paginate, WHERE', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm.selectRows(post.id, post.title).by(post.id).paginate().orderByAsc(post.id);
   }
@@ -378,7 +378,7 @@ it('selectRows, paginate, where', async () => {
 
 it('selectPage', async () => {
   class PostTA extends mm.TableActions {
-    selectT = mm.selectPage(post.id, post.title).by(post.id).orderByAsc(post.id);
+    selectT = mm.selectRows(post.id, post.title).by(post.id).pageMode().orderByAsc(post.id);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/selectPage');
@@ -477,8 +477,8 @@ it('Ignored keys', async () => {
 it('Ignored keys (raw columns)', async () => {
   class RplTA extends mm.TableActions {
     selectT = mm.selectRow(
-      mm.sel(mm.sql`1`, 'a', mm.int().__type),
-      mm.sel(mm.sql`1`, 'b', mm.int().__type).privateAttr(),
+      mm.sel(mm.sql`1`, 'a', mm.int().__mustGetType()),
+      mm.sel(mm.sql`1`, 'b', mm.int().__mustGetType()).privateAttr(),
     );
   }
   const ta = mm.tableActions(rpl, RplTA);
@@ -534,7 +534,7 @@ it('SELECT, EXISTS, IF', async () => {
       mm.sel(
         mm
           .IF(mm.exists(mm.selectRow(post.user_id.join(user).sig).by(post.id)), '1', '2')
-          .setReturnType(mm.int().__type),
+          .setReturnType(mm.int().__mustGetType()),
         'a',
       ),
     );
@@ -564,7 +564,8 @@ it('toInputArray', async () => {
 });
 
 it('Nested AS in SQL calls', async () => {
-  // The AS in selected columns should jump out of nested SQL calls, e.g. SELECT FUNC(FUNC(`col`)) AS `name1`.
+  // The AS in selected columns should jump out of nested SQL calls,
+  // e.g. SELECT FUNC(FUNC(`col`)) AS `name1`.
   class PostTA extends mm.TableActions {
     t = mm.selectRow(mm.sel(mm.year(mm.year(post.id)), 'name1')).where`${mm.year(
       mm.year(post.id),
@@ -575,7 +576,8 @@ it('Nested AS in SQL calls', async () => {
 });
 
 it('Nested AS in SQL calls (with join)', async () => {
-  // The AS in selected columns should jump out of nested SQL calls, e.g. SELECT FUNC(FUNC(`col`)) AS `name1`.
+  // The AS in selected columns should jump out of nested SQL calls,
+  // e.g. SELECT FUNC(FUNC(`col`)) AS `name1`.
   const col = post.user_id.join(user).age;
   class PostTA extends mm.TableActions {
     t = mm.selectRow(mm.sel(mm.year(mm.year(col)), 'name1')).where`${mm.year(

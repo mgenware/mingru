@@ -142,7 +142,7 @@ export class VarInfo {
       if (value instanceof mm.ValueRef) {
         return value.path;
       }
-      return JSON.stringify(value.getDBName());
+      return JSON.stringify(value.__getDBName());
     }
     switch (nameCase) {
       case 'camelCase':

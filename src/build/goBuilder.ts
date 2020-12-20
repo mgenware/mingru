@@ -27,11 +27,11 @@ export default class GoBuilder {
     const context = new GoBuilderContext();
     await Promise.all(
       tas.map((ta) => {
-        const taTable = ta.__table;
+        const taTable = ta.__getData().table;
         const taIO = new TAIO(ta, ioOpts);
         const builder = new GoTABuilder(taIO, opts, context);
         const code = builder.build();
-        const fileName = toSnakeCase(taTable.__name) + '_ta'; // Add a "_ta" suffix to table actions file.
+        const fileName = toSnakeCase(taTable.__getData().name) + '_ta'; // Add a "_ta" suffix to table actions file.
         const outFile = nodepath.join(outDir, fileName + '.go');
         return mfs.writeFileAsync(outFile, code);
       }),

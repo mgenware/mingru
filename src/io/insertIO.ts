@@ -40,16 +40,24 @@ export class InsertIOProcessor extends BaseIOProcessor {
     const sql: StringSegment[] = ['INSERT INTO '];
     const { action, opt } = this;
     const { dialect } = opt;
+    const actionData = action.__getData();
     const sqlTable = this.mustGetAvailableSQLTable();
-    const fetchInsertedID = action.ensureOneRowAffected && !!sqlTable.__aiPKs.length;
+    const fetchInsertedID = actionData.ensureOneRowAffected && !!sqlTable.__getData().aiPKs.length;
 
     // Table
     const tableSQL = handleNonSelectSQLFrom(this, sqlTable);
     sql.push(...tableSQL);
 
     // Setters
-    utils.validateSetters(action.setters, sqlTable);
-    const setterIOs = SetterIO.fromAction(action, dialect, action.allowUnsetColumns, sqlTable);
+    if (actionData.setters) {
+      utils.validateSetters(actionData.setters, sqlTable);
+    }
+    const setterIOs = SetterIO.fromAction(
+      action,
+      dialect,
+      !!actionData.allowUnsetColumns,
+      sqlTable,
+    );
     const colNames = setterIOs.map((s) => dialect.encodeColumnName(s.col));
     sql.push(` (${colNames.join(', ')})`);
 
@@ -73,17 +81,17 @@ export class InsertIOProcessor extends BaseIOProcessor {
       precedingElements.push(defs.tableInputVar);
     }
     const funcArgs = settersToVarList(
-      `Func args of action ${action.__name}`,
+      `Func args of action ${action}`,
       setterIOs,
       precedingElements,
     );
 
-    const execArgs = new VarList(`Exec args of action ${action.__name}`);
+    const execArgs = new VarList(`Exec args of action ${action}`);
     // Skip the first param, which is queryable.
     execArgs.merge(funcArgs.list.slice(1));
 
     // Return values.
-    const returnValue = new VarList(`Return values of action ${action.__name}`);
+    const returnValue = new VarList(`Return values of action ${action}`);
     if (fetchInsertedID) {
       returnValue.add(defs.insertedIDVar);
     }
@@ -93,7 +101,7 @@ export class InsertIOProcessor extends BaseIOProcessor {
       action,
       sql,
       setterIOs,
-      fetchInsertedID,
+      !!fetchInsertedID,
       funcArgs,
       execArgs,
       returnValue,

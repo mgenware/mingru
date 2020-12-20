@@ -12,7 +12,7 @@ export class TypeInfoBuilder {
 
     let typeInfo: TypeInfo;
     if (type instanceof mm.Column) {
-      typeInfo = dialect.colTypeToGoType(type.__type);
+      typeInfo = dialect.colTypeToGoType(type.__mustGetType());
     } else if (type instanceof mm.ColumnType) {
       typeInfo = dialect.colTypeToGoType(type);
     } else {
@@ -48,11 +48,12 @@ export class VarInfoBuilder {
     if (!column) {
       throw new Error(`Missing \`inputName\` for variable ${v}`);
     }
-    if (column.__inputName) {
-      return column.__inputName;
+    const colData = column.__getData();
+    if (colData.inputName) {
+      return colData.inputName;
     }
-    const name = column.mustGetName();
-    const table = column.mustGetTable();
+    const name = column.__mustGetName();
+    const table = column.__mustGetTable();
     const curName = stringUtils.toCamelCase(name);
 
     // eslint-disable-next-line @typescript-eslint/no-use-before-define

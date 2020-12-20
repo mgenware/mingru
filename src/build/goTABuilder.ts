@@ -77,10 +77,12 @@ export default class GoTABuilder {
     fallbackActionName: string | undefined,
     pri?: boolean,
   ): string {
-    logger.debug(`Building action "${io.action.__name}"`);
-    const actionName = io.action.__name || fallbackActionName;
+    logger.debug(`Building action "${io.action}"`);
+    const { action } = io;
+    const actionData = action.__getData();
+    const actionName = actionData.name || fallbackActionName;
     if (!actionName) {
-      throw new Error(`Unexpected empty action name, action "${io.action.__name}"`);
+      throw new Error(`Unexpected empty action name, action "${action}"`);
     }
     const ioFuncName = stringUtils.actionPascalName(actionName);
 
@@ -122,8 +124,8 @@ export default class GoTABuilder {
     }
     funcSigString += returnCode;
 
-    const actionAttr = io.action.__attrs;
-    if (actionAttr.get(mm.ActionAttribute.groupTypeName)) {
+    const actionAttr = actionData.attrs;
+    if (actionAttr?.get(mm.ActionAttribute.groupTypeName)) {
       // Remove the type name from signature:
       // example: func (a) name() ret -> name() ret.
       const idx = funcSigString.indexOf(')');
@@ -167,7 +169,7 @@ export default class GoTABuilder {
     const variadicQueryParams = !!arrayParams.length;
 
     let bodyMap: CodeMap;
-    switch (io.action.actionType) {
+    switch (actionData.actionType) {
       case mm.ActionType.select: {
         bodyMap = this.select(io as SelectIO, variadicQueryParams);
         break;
@@ -200,7 +202,7 @@ export default class GoTABuilder {
 
       default: {
         throw new Error(
-          `Not supported action type "${io.action.actionType}" in \`goBuilder.processActionIO\``,
+          `Not supported action type "${actionData.actionType}" in \`goBuilder.processActionIO\``,
         );
       }
     }
@@ -241,13 +243,12 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
   private select(io: SelectIO, variadicQueryParams: boolean): CodeMap {
     const { options } = this;
     const { selectAction: action } = io;
-    const selMode = action.mode;
-    const isPageMode = selMode === mm.SelectActionMode.page;
-    let { pagination } = action;
-    if (isPageMode) {
-      // Page mode can be considered a special case of pagination.
-      pagination = true;
-    }
+    const actionData = action.__getData();
+    const selMode = actionData.mode;
+    const pgMode = actionData.paginationMode;
+    const pgModePaginationOrPageMode =
+      pgMode === mm.SelectActionPaginationMode.pagination ||
+      pgMode === mm.SelectActionPaginationMode.pageMode;
 
     // We only need the type name here, module name (or import path) is already
     // handled in `processActionIO`.
@@ -262,9 +263,9 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
     let headerCode = '';
 
     let errReturnCode = '';
-    if (isPageMode) {
+    if (pgMode === mm.SelectActionPaginationMode.pageMode) {
       errReturnCode = 'nil, false, err';
-    } else if (pagination) {
+    } else if (pgMode === mm.SelectActionPaginationMode.pagination) {
       errReturnCode = 'nil, 0, err';
     } else {
       errReturnCode = 'nil, err';
@@ -272,9 +273,9 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
     errReturnCode = 'return ' + errReturnCode;
 
     let successReturnCode = '';
-    if (isPageMode) {
+    if (pgMode === mm.SelectActionPaginationMode.pageMode) {
       successReturnCode = `${defs.resultVarName}, itemCounter > len(${defs.resultVarName}), nil`;
-    } else if (pagination) {
+    } else if (pgMode === mm.SelectActionPaginationMode.pagination) {
       successReturnCode = `${defs.resultVarName}, itemCounter, nil`;
     } else {
       successReturnCode = `${defs.resultVarName}, nil`;
@@ -332,7 +333,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
     for (const col of io.cols) {
       // Column property name to model property name.
       // Check if model name has been explicitly set.
-      const userModelName = col.column?.__modelName;
+      const userModelName = col.column?.__getData().modelName;
       const fieldName = userModelName ?? stringUtils.toPascalCase(col.varName);
       const typeInfo = this.dialect.colTypeToGoType(col.getResultType());
       const varInfo = new VarInfo(fieldName, typeInfo);
@@ -341,11 +342,11 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
 
       // Checking explicitly set attributes.
       if (col.selectedColumn instanceof mm.RawColumn) {
-        const attrs = col.selectedColumn.__attrs;
-        if (attrs.get(mm.ColumnAttribute.isPrivate) === true) {
+        const { attrs } = col.selectedColumn.__getData();
+        if (attrs?.get(mm.ColumnAttribute.isPrivate) === true) {
           jsonIgnoreFields.add(varInfo.name);
         }
-        if (omitAllEmptyFields || attrs.get(mm.ColumnAttribute.excludeEmptyValue) === true) {
+        if (omitAllEmptyFields || attrs?.get(mm.ColumnAttribute.excludeEmptyValue) === true) {
           omitEmptyFields.add(varInfo.name);
         }
       }
@@ -363,7 +364,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
       selMode !== mm.SelectActionMode.exists &&
       selMode !== mm.SelectActionMode.fieldList
     ) {
-      if (action.__attrs.get(mm.ActionAttribute.resultTypeName)) {
+      if (action.__getData().attrs?.get(mm.ActionAttribute.resultTypeName) !== undefined) {
         this.context.handleResultType(
           atomicResultType,
           new go.MutableStructInfo(
@@ -391,17 +392,13 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
     }
 
     const sqlLiteral = go.makeStringFromSegments(io.sql || []);
-    if (
-      selMode === mm.SelectActionMode.rowList ||
-      selMode === mm.SelectActionMode.fieldList ||
-      isPageMode
-    ) {
+    if (selMode === mm.SelectActionMode.rowList || selMode === mm.SelectActionMode.fieldList) {
       const itemVarType = typeInfoWithoutArray(firstReturnParam.type).typeString;
       const scanParams =
         selMode === mm.SelectActionMode.fieldList
           ? `&${defs.itemVarName}`
           : joinParams([...selectedFields.values()].map((p) => `&item.${p.name}`));
-      if (isPageMode) {
+      if (pgMode === mm.SelectActionPaginationMode.pageMode) {
         // Add `fmt` import as we are using `fmt.Errorf`.
         this.imports.add(defs.fmtImport);
         builder.pushLines(
@@ -437,15 +434,15 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
           defs.resultVarName,
           selMode === mm.SelectActionMode.fieldList ? itemVarType : `*${atomicResultType}`,
           0,
-          pagination ? defs.limitVarName : 0,
+          pgModePaginationOrPageMode ? defs.limitVarName : 0,
         ),
-        pagination ? 'itemCounter := 0' : null,
+        pgModePaginationOrPageMode ? 'itemCounter := 0' : null,
         'defer rows.Close()',
         'for rows.Next() {',
       );
       builder.increaseIndent();
       // Wrap the object scan code inside a "if itemCounter <= max" block if hasLimit
-      if (pagination) {
+      if (pgModePaginationOrPageMode) {
         builder.pushLines('itemCounter++', 'if itemCounter <= max {');
         builder.increaseIndent();
       }
@@ -461,7 +458,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
       builder.decreaseIndent();
       builder.push('}');
       builder.push(`${defs.resultVarName} = append(${defs.resultVarName}, ${defs.itemVarName})`);
-      if (pagination) {
+      if (pgModePaginationOrPageMode) {
         builder.decreaseIndent();
         builder.push('}');
       }
@@ -530,7 +527,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
     );
 
     // Return the result
-    if (action.ensureOneRowAffected) {
+    if (action.__getData().ensureOneRowAffected) {
       builder.push(`return mingru.CheckOneRowAffectedWithError(${defs.resultVarName}, err)`);
     } else {
       builder.push(`return mingru.GetRowsAffectedIntWithError(${defs.resultVarName}, err)`);
@@ -576,7 +573,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
     );
 
     // Return the result
-    if (action.ensureOneRowAffected) {
+    if (action.__getData().ensureOneRowAffected) {
       builder.push(`return mingru.CheckOneRowAffectedWithError(${defs.resultVarName}, err)`);
     } else {
       builder.push(`return mingru.GetRowsAffectedIntWithError(${defs.resultVarName}, err)`);

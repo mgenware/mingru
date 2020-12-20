@@ -31,11 +31,11 @@ export class Dialect {
   }
 
   encodeColumnName(column: mm.Column): string {
-    return this.encodeName(column.getDBName());
+    return this.encodeName(column.__getDBName());
   }
 
   encodeTableName(table: mm.Table): string {
-    return this.encodeName(table.getDBName());
+    return this.encodeName(table.__getDBName());
   }
 
   inputPlaceholder(v: mm.SQLVariable): StringSegment[] {

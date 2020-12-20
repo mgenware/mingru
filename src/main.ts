@@ -21,3 +21,4 @@ export * from './io/transactIO';
 
 // Used by tests.
 export * from './io/actionToIOOptions';
+export * from './lib/varInfo';

@@ -22,7 +22,8 @@ export class ActionIO {
     throwIfFalsy(execArgs, 'execArgs');
     throwIfFalsy(returnValues, 'returnValues');
 
-    this.funcStubs = action.__argStubs.map((v) => VarInfoBuilder.fromSQLVar(v, dialect));
+    const { argStubs } = action.__getData();
+    this.funcStubs = (argStubs ?? []).map((v) => VarInfoBuilder.fromSQLVar(v, dialect));
   }
 
   getSQLCode(): string {
