@@ -571,6 +571,18 @@ it('toInputArray', async () => {
   await testBuildAsync(ta, 'select/toInputArray');
 });
 
+it('Inputs', async () => {
+  class PostTA extends mm.TableActions {
+    t = mm.selectRow(post.id).where`${post.n_datetime.toInput()} ${post.n_datetime.toInput('p2', {
+      nullable: false,
+    })} ${post.n_datetime.toInput('p3', {
+      nullable: true,
+    })} ${post.id.toInput('p4', { nullable: false })} ${post.id.toInput('p5', { nullable: true })}`;
+  }
+  const ta = mm.tableActions(post, PostTA);
+  await testBuildAsync(ta, 'select/inputs');
+});
+
 it('Nested AS in SQL calls', async () => {
   // The AS in selected columns should jump out of nested SQL calls,
   // e.g. SELECT FUNC(FUNC(`col`)) AS `name1`.

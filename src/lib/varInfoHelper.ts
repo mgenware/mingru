@@ -1,6 +1,13 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import { VarInfo, TypeInfo, AtomicTypeInfo, typeInfoToArray } from './varInfo';
+import {
+  VarInfo,
+  TypeInfo,
+  AtomicTypeInfo,
+  typeInfoToArray,
+  typeInfoToPointer,
+  typeInfoWithoutPointer,
+} from './varInfo';
 import * as stringUtils from './stringUtils';
 import { Dialect } from '../dialect';
 
@@ -24,6 +31,10 @@ export class TypeInfoBuilder {
     }
     if (variable.isArray) {
       typeInfo = typeInfoToArray(typeInfo);
+    }
+    // Handle nullability attributes, which can override inferred nullability.
+    if (variable.nullable !== undefined) {
+      return variable.nullable ? typeInfoToPointer(typeInfo) : typeInfoWithoutPointer(typeInfo);
     }
     return typeInfo;
   }
