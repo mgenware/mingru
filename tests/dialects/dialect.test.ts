@@ -1,4 +1,3 @@
-import * as mm from 'mingru-models';
 import * as mr from '../..';
 import user from '../models/user';
 import { deepEq, eq } from '../assert-aliases';
@@ -6,10 +5,7 @@ import { deepEq, eq } from '../assert-aliases';
 const dialect = mr.mysql;
 
 it('inputPlaceholder', () => {
-  deepEq(
-    dialect.inputPlaceholder(new mm.SQLVariable({ type: 'Type', defaultValue: null }, 'name')),
-    ['?'],
-  );
+  deepEq(dialect.inputPlaceholder(), ['?']);
 });
 
 it('encodeColumnName', () => {

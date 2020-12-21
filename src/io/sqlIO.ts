@@ -129,7 +129,13 @@ function handleElement(
     }
 
     case mm.SQLElementType.input: {
-      return dialect.inputPlaceholder(element.toInput());
+      const input = element.toInput();
+      if (input.isArray) {
+        return [
+          { code: `mingru.InputPlaceholders(len(${VarInfoBuilder.getSQLVarInputName(input)}))` },
+        ];
+      }
+      return dialect.inputPlaceholder();
     }
 
     case mm.SQLElementType.rawColumn: {

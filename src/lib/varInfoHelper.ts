@@ -41,11 +41,15 @@ export class TypeInfoBuilder {
 }
 
 export class VarInfoBuilder {
+  static getSQLVarInputName(v: mm.SQLVariable): string {
+    return this.getInputNameFromColumn(v, v.name, v.column);
+  }
+
   static fromSQLVar(v: mm.SQLVariable, dialect: Dialect): VarInfo {
     throwIfFalsy(v, 'v');
     throwIfFalsy(dialect, 'dialect');
     const typeInfo = TypeInfoBuilder.fromSQLVariable(v, dialect);
-    return new VarInfo(this.getInputNameFromColumn(v, v.name, v.column), typeInfo);
+    return new VarInfo(this.getSQLVarInputName(v), typeInfo);
   }
 
   private static getInputNameFromColumn(

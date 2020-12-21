@@ -38,10 +38,7 @@ export class Dialect {
     return this.encodeName(table.__getDBName());
   }
 
-  inputPlaceholder(v: mm.SQLVariable): StringSegment[] {
-    if (v.isArray) {
-      return [{ code: `mingru.InputPlaceholders(len(${v.name ?? v.column?.__getInputName()}))` }];
-    }
+  inputPlaceholder(): StringSegment[] {
     return ['?'];
   }
 
