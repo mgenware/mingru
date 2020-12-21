@@ -22,22 +22,22 @@ type PostTableTResult struct {
 }
 
 // T ...
-func (da *TableTypePost) T(queryable mingru.Queryable, ids []uint64, idInput uint64, ids2 []uint64) ([]*PostTableTResult, error) {
+func (da *TableTypePost) T(queryable mingru.Queryable, ids []uint64, idInput uint64, id []uint64) ([]*PostTableTResult, error) {
 	if len(ids) == 0 {
 		return nil, fmt.Errorf("The array argument `ids` cannot be empty")
 	}
-	if len(ids2) == 0 {
-		return nil, fmt.Errorf("The array argument `ids2` cannot be empty")
+	if len(id) == 0 {
+		return nil, fmt.Errorf("The array argument `id` cannot be empty")
 	}
 	var queryParams []interface{}
 	for _, item := range ids {
 		queryParams = append(queryParams, item)
 	}
 	queryParams = append(queryParams, idInput)
-	for _, item := range ids2 {
+	for _, item := range id {
 		queryParams = append(queryParams, item)
 	}
-	rows, err := queryable.Query("SELECT `id`, `title` FROM `db_post` WHERE `id` IN "+mingru.InputPlaceholders(len(ids))+" OR `id` <> ? OR `id` IN "+mingru.InputPlaceholders(len(ids2))+" ORDER BY `id`", queryParams...)
+	rows, err := queryable.Query("SELECT `id`, `title` FROM `db_post` WHERE `id` IN "+mingru.InputPlaceholders(len(ids))+" OR `id` <> ? OR `id` IN "+mingru.InputPlaceholders(len(id))+" ORDER BY `id`", queryParams...)
 	if err != nil {
 		return nil, err
 	}

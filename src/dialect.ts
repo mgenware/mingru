@@ -40,7 +40,7 @@ export class Dialect {
 
   inputPlaceholder(v: mm.SQLVariable): StringSegment[] {
     if (v.isArray) {
-      return [{ code: `mingru.InputPlaceholders(len(${v.name}))` }];
+      return [{ code: `mingru.InputPlaceholders(len(${v.name ?? v.column?.__getInputName()}))` }];
     }
     return ['?'];
   }
