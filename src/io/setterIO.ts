@@ -100,6 +100,9 @@ export class SetterIO {
         value = mm.sql`NULL`;
       } else {
         const type = colType.types[0];
+        if (!type) {
+          throw new Error('Unexpected empty column types');
+        }
         const def = dtDefault(type);
         if (def === null) {
           throw new Error(

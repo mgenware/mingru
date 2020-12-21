@@ -3,7 +3,7 @@ export function forEachWithSlots<T>(
   callback: (item: T) => void,
   slotCallback: () => void,
 ) {
-  if (array.length === 1) {
+  if (array.length === 1 && array[0] !== undefined) {
     callback(array[0]);
     return;
   }

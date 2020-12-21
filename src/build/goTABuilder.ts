@@ -253,6 +253,9 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
     // We only need the type name here, module name (or import path) is already
     // handled in `processActionIO`.
     const firstReturnParam = io.returnValues.getByIndex(0);
+    if (!firstReturnParam) {
+      throw new Error(`No return types defined in action "${action}"`);
+    }
     const resultTypeString = firstReturnParam.type.typeString;
 
     // `atomicResultType` is used to generate additional type definition,
@@ -302,9 +305,11 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
         // Switch-case code.
         const cases: Record<string, string> = {};
         inputIO.enumNames.forEach((enumName, i) => {
-          cases[enumName] = `${resultVarName} = ${go.makeStringFromSegments(
-            inputIO.enumValues[i],
-          )}`;
+          const enumValue = inputIO.enumValues[i];
+          if (!enumValue) {
+            throw new Error('Unexpected undefined enum value');
+          }
+          cases[enumName] = `${resultVarName} = ${go.makeStringFromSegments(enumValue)}`;
         });
 
         // Add `fmt` import as we are using `fmt.Errorf`.

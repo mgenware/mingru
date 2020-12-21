@@ -11,6 +11,7 @@
     "noUnusedParameters": true,
     "newLine": "lf",
     "lib": ["es2019"],
+    "noUncheckedIndexedAccess": true,
     "esModuleInterop": true
   }
 }

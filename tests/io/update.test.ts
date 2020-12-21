@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as mm from 'mingru-models';
 import { itThrows } from 'it-throws';
 import * as mr from '../..';
@@ -25,10 +26,10 @@ it('Update', () => {
     '"UPDATE `db_post` SET `title` = \\"haha\\", `content` = ?, `cmt_c` = `cmt_c` + 1 WHERE `id` = ?"',
   );
   eq(io.setters.length, 3);
-  eq(io.setters[0].col, post.title);
-  eq(io.setters[0].sql.sql.toString(), 'SQL(E("haha", type = 0))');
-  eq(io.setters[1].col, post.content);
-  eq(io.setters[2].col, post.cmtCount);
+  eq(io.setters[0]!.col, post.title);
+  eq(io.setters[0]!.sql.sql.toString(), 'SQL(E("haha", type = 0))');
+  eq(io.setters[1]!.col, post.content);
+  eq(io.setters[2]!.col, post.cmtCount);
 });
 
 it('Update with WHERE', () => {

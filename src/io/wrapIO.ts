@@ -70,6 +70,9 @@ class WrapIOProcessor extends BaseIOProcessor {
     // Skip the first param, which is always `mingru.Queryable` or `db.Tx`.
     for (let i = 1; i < innerFuncArgs.list.length; i++) {
       const arg = innerFuncArgs.list[i];
+      if (!arg) {
+        throw new Error('Unexpected func argument');
+      }
       const inputArg = args[arg.name];
       // This argument is still exposed if it's not overwritten or it's overwritten by a `ValueRef`.
       // Imagine a func `func(x, y)`.
@@ -95,14 +98,13 @@ class WrapIOProcessor extends BaseIOProcessor {
     if (!innerActionData.name) {
       innerIO.funcArgs = funcArgs;
       const innerExecArgs = innerIO.execArgs;
-      for (let i = 0; i < innerExecArgs.list.length; i++) {
-        const arg = innerExecArgs.list[i];
+      innerExecArgs.list.forEach((arg, i) => {
         const input = args[arg.name];
         // If argument is a constant, update the `innerExecArgs`.
         if (input instanceof mm.ValueRef === false && input !== undefined) {
           innerExecArgs.list[i] = VarInfo.withValue(arg, input);
         }
-      }
+      });
 
       // IMPORTANT! Give `innerIO` a name as it doesn't have one.
       // Calling `__configure` with another table won't inner action's

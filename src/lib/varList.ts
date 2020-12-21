@@ -26,7 +26,7 @@ export default class VarList {
     return [...this.map.values()];
   }
 
-  getByIndex(idx: number): VarInfo {
+  getByIndex(idx: number): VarInfo | undefined {
     return this.list[idx];
   }
 

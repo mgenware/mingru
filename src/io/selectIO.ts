@@ -431,6 +431,9 @@ export class SelectIOProcessor extends BaseIOProcessor {
     if (!opt.selectionLiteMode) {
       if (selMode === mm.SelectActionMode.field || selMode === mm.SelectActionMode.fieldList) {
         const col = colIOs[0];
+        if (!col) {
+          throw new Error('Unexpected empty selected columns');
+        }
         const typeInfo = dialect.colTypeToGoType(col.getResultType());
         returnValues.add(
           new VarInfo(
@@ -627,6 +630,9 @@ export class SelectIOProcessor extends BaseIOProcessor {
   private guessColumnType(sql: mm.SQL): mm.ColumnType | undefined {
     if (sql.elements.length === 1) {
       const first = sql.elements[0];
+      if (!first) {
+        throw new Error('Unexpected empty SQL expression');
+      }
       if (first.type === mm.SQLElementType.column) {
         return first.toColumn().__mustGetType();
       }

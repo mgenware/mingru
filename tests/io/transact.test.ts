@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as mm from 'mingru-models';
 import * as mr from '../..';
 import user from '../models/user';
@@ -54,7 +55,7 @@ it('Members with WRAP actions', () => {
   // No execArgs in TX actions
   eq(io.execArgs.toString(), '');
 
-  const m1 = io.memberIOs[0].actionIO;
+  const m1 = io.memberIOs[0]!.actionIO;
   eq(
     m1.funcArgs.toString(),
     'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, followerCount: *string',
@@ -70,7 +71,7 @@ it('Members with WRAP actions', () => {
   // No execArgs in TX actions
   eq(io2.execArgs.toString(), '');
 
-  const m2 = io2.memberIOs[0].actionIO;
+  const m2 = io2.memberIOs[0]!.actionIO;
   eq(
     m2.funcArgs.toString(),
     'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, followerCount: *string',
@@ -89,7 +90,7 @@ it('Members with WRAP actions', () => {
   // No execArgs in TX actions
   eq(io3.execArgs.toString(), '');
 
-  const m3 = io3.memberIOs[0].actionIO;
+  const m3 = io3.memberIOs[0]!.actionIO;
   eq(
     m3.funcArgs.toString(),
     'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, sig: *string, followerCount: *string',
@@ -105,7 +106,7 @@ it('Members with WRAP actions', () => {
   // No execArgs in TX actions
   eq(io4.execArgs.toString(), '');
 
-  const m4 = io4.memberIOs[0].actionIO;
+  const m4 = io4.memberIOs[0]!.actionIO;
   eq(
     m4.funcArgs.toString(),
     'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, sig: *string, followerCount: *string',
@@ -134,13 +135,13 @@ it('TX member IOs', () => {
   const io = mr.transactIO(employeeTA.insert2, ioOpt);
   const members = io.memberIOs;
   eq(
-    members[0].toString(),
+    members[0]!.toString(),
     'TransactMemberIO(InsertAction(insert, Table(employee|employees)), da.Insert)',
   );
   eq(
-    members[1].toString(),
+    members[1]!.toString(),
     'TransactMemberIO(InsertAction(insert, Table(employee|employees)), da.Insert)',
   );
-  eq(members[0].actionIO.returnValues.toString(), '__insertedID: uint64');
-  eq(members[1].actionIO.returnValues.toString(), '__insertedID: uint64');
+  eq(members[0]!.actionIO.returnValues.toString(), '__insertedID: uint64');
+  eq(members[1]!.actionIO.returnValues.toString(), '__insertedID: uint64');
 });

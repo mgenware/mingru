@@ -18,10 +18,11 @@ export class AtomicTypeInfo {
     if (typePath) {
       const parts = typePath.split('|');
       if (parts.length === 2) {
-        [this.moduleName, this.importPath] = parts;
+        this.moduleName = parts[0] ?? '';
+        this.importPath = parts[1];
       } else {
-        [this.moduleName] = parts;
-        [this.importPath] = parts;
+        this.moduleName = parts[0] ?? '';
+        this.importPath = parts[0];
       }
     }
     this.typeString = this.getTypeString();

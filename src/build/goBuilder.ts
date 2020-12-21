@@ -49,6 +49,9 @@ export default class GoBuilder {
       resultTypes.sort((a, b) => a.localeCompare(b));
       for (const name of resultTypes) {
         const resultType = context.resultTypes[name];
+        if (!resultType) {
+          throw new Error('Unexpected undefined context value');
+        }
         const resultTypeMembers = [...resultType.members.values()];
         imports.addVars(resultTypeMembers);
         resultTypesCode += go.struct(
@@ -70,8 +73,12 @@ export default class GoBuilder {
       // Sort interfaces alphabetically.
       interfaces.sort((a, b) => a.localeCompare(b));
       for (const name of interfaces) {
+        const contextValue = context.interfaces[name];
+        if (!contextValue) {
+          throw new Error('Unexpected undefined context value');
+        }
         // Sort interface members alphabetically.
-        const members = [...context.interfaces[name].values()];
+        const members = [...contextValue.values()];
         members.sort((a, b) => a.name.localeCompare(b.name));
 
         interfacesCode += go.interfaceType(

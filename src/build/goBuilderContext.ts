@@ -9,13 +9,13 @@ export default class GoBuilderContext {
     if (interfaces[name] === undefined) {
       interfaces[name] = new Map<string, FuncSignature>();
     }
-    interfaces[name].set(funcSig.sig, funcSig);
+    interfaces[name]?.set(funcSig.sig, funcSig);
   }
 
   handleResultType(name: string, info: MutableStructInfo) {
     const { resultTypes } = this;
     if (resultTypes[name] !== undefined) {
-      resultTypes[name].merge(info);
+      resultTypes[name]?.merge(info);
     } else {
       resultTypes[name] = info;
     }
