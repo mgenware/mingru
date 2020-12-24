@@ -72,7 +72,7 @@ export class VarInfoBuilder {
     const curName = stringUtils.toCamelCase(name);
 
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    if (table instanceof mm.JoinedTable) {
+    if (table instanceof mm.JoinTable) {
       if (table.associative) {
         return curName;
       }

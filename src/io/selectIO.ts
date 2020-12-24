@@ -20,6 +20,7 @@ const orderByInputParamName = 'orderBy';
 
 export class JoinIO {
   constructor(
+    public joinType: mm.JoinType,
     public path: string,
     public tableAlias: string,
     // Note that `localTable` can also be an alias of another join.
@@ -34,9 +35,11 @@ export class JoinIO {
     const e = dialect.encodeName;
     const alias1 = e(this.tableAlias);
     const alias2 = e(this.localTable);
-    let sql = `INNER JOIN ${e(this.remoteTable)} AS ${e(this.tableAlias)} ON ${alias1}.${e(
-      this.remoteColumn.__getDBName(),
-    )} = ${alias2}.${e(this.localColumn.__getDBName())}`;
+    let sql = `${this.getJoinTypeSQL()} JOIN ${e(this.remoteTable)} AS ${e(
+      this.tableAlias,
+    )} ON ${alias1}.${e(this.remoteColumn.__getDBName())} = ${alias2}.${e(
+      this.localColumn.__getDBName(),
+    )}`;
 
     // Handle multiple columns in a join.
     if (this.extraColumns.length) {
@@ -45,6 +48,19 @@ export class JoinIO {
       }
     }
     return sql;
+  }
+
+  private getJoinTypeSQL(): string {
+    switch (this.joinType) {
+      case mm.JoinType.full:
+        return 'FULL';
+      case mm.JoinType.left:
+        return 'LEFT';
+      case mm.JoinType.right:
+        return 'RIGHT';
+      default:
+        return 'INNER';
+    }
   }
 }
 
@@ -501,7 +517,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
         if (ele.type === mm.SQLElementType.column) {
           const col = ele.toColumn();
           const colTable = col.__mustGetTable();
-          if (colTable instanceof mm.JoinedTable) {
+          if (colTable instanceof mm.JoinTable) {
             if (!noJoinRegion) {
               this.handleJoinRecursively(col);
             } else {
@@ -591,8 +607,8 @@ export class SelectIOProcessor extends BaseIOProcessor {
     let value = dialect.encodeColumnName(col);
     if (this.hasJoin) {
       const colTable = col.__mustGetTable();
-      if (colTable instanceof mm.JoinedTable) {
-        const jt = col.__getData().table as mm.JoinedTable;
+      if (colTable instanceof mm.JoinTable) {
+        const jt = col.__getData().table as mm.JoinTable;
         const joinPath = jt.keyPath;
         const join = this.jcMap.get(joinPath);
         if (!join) {
@@ -745,7 +761,10 @@ export class SelectIOProcessor extends BaseIOProcessor {
   }
 
   private handleJoinRecursively(jc: mm.Column): JoinIO {
-    const table = jc.__getData().table as mm.JoinedTable;
+    const { table } = jc.__getData();
+    if (!(table instanceof mm.JoinTable)) {
+      throw new Error(`Assertion failed, ${table} must be a \`JoinTable\``);
+    }
     const result = this.jcMap.get(table.keyPath);
     if (result) {
       return result;
@@ -754,7 +773,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     let localTableName: string;
     const { srcColumn, destColumn, destTable } = table;
     const srcTable = srcColumn.__mustGetTable();
-    if (srcTable instanceof mm.JoinedTable) {
+    if (srcTable instanceof mm.JoinTable) {
       const srcIO = this.handleJoinRecursively(srcColumn);
       localTableName = srcIO.tableAlias;
     } else {
@@ -762,6 +781,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     }
 
     const joinIO = new JoinIO(
+      table.joinType,
       table.keyPath,
       this.nextJoinedTableName(),
       localTableName,
@@ -787,7 +807,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     col.__checkSourceTable(sqlTable);
 
     let colSQL: mm.SQL;
-    if (colTable instanceof mm.JoinedTable) {
+    if (colTable instanceof mm.JoinTable) {
       const joinIO = this.handleJoinRecursively(col);
       const mirroredCol = col.__getData().mirroredColumn;
       if (!mirroredCol) {

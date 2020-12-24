@@ -309,3 +309,24 @@ it('Select DISTINCT', () => {
   eq(io.getSQLCode(), '"SELECT DISTINCT `id`, `url_name` FROM `user`"');
   eq(io.whereIO, null);
 });
+
+it('Join types', () => {
+  class PostTA extends mm.TableActions {
+    left = mm.selectRow(post.user_id.leftJoin(user).url_name);
+    right = mm.selectRow(post.user_id.rightJoin(user).url_name);
+    full = mm.selectRow(post.user_id.fullJoin(user).url_name);
+  }
+  const postTA = mm.tableActions(post, PostTA);
+  eq(
+    mr.selectIO(postTA.left, ioOpt).getSQLCode(),
+    '"SELECT `join_1`.`url_name` AS `user_url_name` FROM `db_post` AS `db_post` LEFT JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`"',
+  );
+  eq(
+    mr.selectIO(postTA.right, ioOpt).getSQLCode(),
+    '"SELECT `join_1`.`url_name` AS `user_url_name` FROM `db_post` AS `db_post` RIGHT JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`"',
+  );
+  eq(
+    mr.selectIO(postTA.full, ioOpt).getSQLCode(),
+    '"SELECT `join_1`.`url_name` AS `user_url_name` FROM `db_post` AS `db_post` FULL JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`"',
+  );
+});

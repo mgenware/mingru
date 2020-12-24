@@ -113,7 +113,7 @@ export function visitColumnsFromSelectedColumn(
 }
 
 export function hasJoinForColumn(col: mm.Column): boolean {
-  return col.__getData().table instanceof mm.JoinedTable;
+  return col.__getData().table instanceof mm.JoinTable;
 }
 
 export function hasJoinInSelectedColumn(sc: mm.SelectedColumn): boolean {
