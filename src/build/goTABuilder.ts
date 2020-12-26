@@ -6,7 +6,13 @@ import { SelectIO } from '../io/selectIO';
 import { UpdateIO } from '../io/updateIO';
 import { InsertIO } from '../io/insertIO';
 import { DeleteIO } from '../io/deleteIO';
-import { VarInfo, CompoundTypeInfo, getAtomicTypeInfo, typeInfoWithoutArray } from '../lib/varInfo';
+import {
+  VarInfo,
+  CompoundTypeInfo,
+  getAtomicTypeInfo,
+  typeInfoWithoutArray,
+  typeInfoToPointer,
+} from '../lib/varInfo';
 import * as go from './goCode';
 import * as defs from '../defs';
 import logger from '../logger';
@@ -340,7 +346,8 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
       // Check if model name has been explicitly set.
       const userModelName = col.column?.__getData().modelName;
       const fieldName = userModelName ?? stringUtils.toPascalCase(col.varName);
-      const typeInfo = this.dialect.colTypeToGoType(col.getResultType());
+      const originalTypeInfo = this.dialect.colTypeToGoType(col.getResultType());
+      const typeInfo = col.nullable ? typeInfoToPointer(originalTypeInfo) : originalTypeInfo;
       const varInfo = new VarInfo(fieldName, typeInfo);
 
       selectedFields.set(varInfo.name, varInfo);

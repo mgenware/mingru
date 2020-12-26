@@ -658,3 +658,36 @@ it('ORDER BY columns use aliases (without joins)', async () => {
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/orderByColsAliasesNoJoins');
 });
+
+it('Left join', async () => {
+  class PostTA extends mm.TableActions {
+    row = mm.selectRow(post.user_id.leftJoin(user).url_name, post.id).by(post.id);
+    rows = mm.selectRows(post.user_id.leftJoin(user).url_name, post.id).noOrderBy();
+    field = mm.selectField(post.user_id.leftJoin(user).url_name);
+    fieldRows = mm.selectFieldRows(post.user_id.leftJoin(user).url_name).noOrderBy();
+  }
+  const ta = mm.tableActions(post, PostTA);
+  await testBuildAsync(ta, 'select/leftJoin');
+});
+
+it('Right join', async () => {
+  class PostTA extends mm.TableActions {
+    row = mm.selectRow(post.user_id.rightJoin(user).url_name, post.id).by(post.id);
+    rows = mm.selectRows(post.user_id.rightJoin(user).url_name, post.id).noOrderBy();
+    field = mm.selectField(post.user_id.rightJoin(user).url_name);
+    fieldRows = mm.selectFieldRows(post.user_id.rightJoin(user).url_name).noOrderBy();
+  }
+  const ta = mm.tableActions(post, PostTA);
+  await testBuildAsync(ta, 'select/rightJoin');
+});
+
+it('Full join', async () => {
+  class PostTA extends mm.TableActions {
+    row = mm.selectRow(post.user_id.fullJoin(user).url_name, post.id).by(post.id);
+    rows = mm.selectRows(post.user_id.fullJoin(user).url_name, post.id).noOrderBy();
+    field = mm.selectField(post.user_id.fullJoin(user).url_name);
+    fieldRows = mm.selectFieldRows(post.user_id.fullJoin(user).url_name).noOrderBy();
+  }
+  const ta = mm.tableActions(post, PostTA);
+  await testBuildAsync(ta, 'select/fullJoin');
+});

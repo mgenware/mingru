@@ -6,7 +6,13 @@ import { Dialect, StringSegment } from '../dialect';
 import { SQLIO, sqlIO, SQLIOBuilderOption } from './sqlIO';
 import { ActionIO } from './actionIO';
 import * as stringUtils from '../lib/stringUtils';
-import { VarInfo, AtomicTypeInfo, CompoundTypeInfo, typeInfoToArray } from '../lib/varInfo';
+import {
+  VarInfo,
+  AtomicTypeInfo,
+  CompoundTypeInfo,
+  typeInfoToArray,
+  typeInfoToPointer,
+} from '../lib/varInfo';
 import VarList from '../lib/varList';
 import { registerHandler } from './actionToIO';
 import * as defs from '../defs';
@@ -86,6 +92,8 @@ export class SelectedColumnIO {
     // Available when we can guess the evaluated type,
     // e.g. an expression containing only one column or `SQLCall`.
     public resultType: mm.ColumnType | undefined,
+    // True when this column is NULLABLE as a result of a Join, like a full join.
+    public nullable: boolean,
   ) {
     throwIfFalsy(selectedColumn, 'selectedColumn');
     throwIfFalsy(valueSQL, 'valueSQL');
@@ -128,7 +136,13 @@ export class SelectIO extends ActionIO {
 }
 
 export class SelectIOProcessor extends BaseIOProcessor {
-  hasJoin = false;
+  // If true, this is a full join or right join, which means home table columns
+  // are all nullable.
+  homeTableJoinType?: mm.JoinType;
+  get hasJoin(): boolean {
+    return !!this.homeTableJoinType;
+  }
+
   // Tracks all processed joins, when processing a new join,
   // we can reuse the JoinIO if it already exists (K: join path, V: `JoinIO`).
   jcMap = new Map<string, JoinIO>();
@@ -287,11 +301,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
       }
 
       // Checks if there are any joins in this query.
-      let hasJoin = selectedColumns.some((sCol) => sqlHelper.hasJoinInSelectedColumn(sCol));
-      if (!hasJoin && whereSQLValue) {
-        hasJoin = sqlHelper.hasJoinInSQL(whereSQLValue);
-      }
-      this.hasJoin = hasJoin;
+      this.scanJoins(selectedColumns, whereSQLValue);
 
       // Handle columns.
       if (selMode === mm.SelectActionMode.exists) {
@@ -450,7 +460,8 @@ export class SelectIOProcessor extends BaseIOProcessor {
         if (!col) {
           throw new Error('Unexpected empty selected columns');
         }
-        const typeInfo = dialect.colTypeToGoType(col.getResultType());
+        const originalTypeInfo = dialect.colTypeToGoType(col.getResultType());
+        const typeInfo = col.nullable ? typeInfoToPointer(originalTypeInfo) : originalTypeInfo;
         returnValues.add(
           new VarInfo(
             mm.ReturnValues.result,
@@ -706,10 +717,18 @@ export class SelectIOProcessor extends BaseIOProcessor {
     const { dialect } = this.opt;
     // Plain columns like `post.id`.
     if (sCol instanceof mm.Column) {
-      const colSQL = this.handlePlainSelectedColumn(sCol);
-      const [varName, colSQLCode] = this.getSelectedColumnSQLCode(colSQL, sCol, undefined);
+      const colResult = this.handlePlainSelectedColumn(sCol);
+      const [varName, colSQLCode] = this.getSelectedColumnSQLCode(colResult.sql, sCol, undefined);
 
-      return new SelectedColumnIO(sCol, colSQLCode, varName, undefined, sCol, sCol.__mustGetType());
+      return new SelectedColumnIO(
+        sCol,
+        colSQLCode,
+        varName,
+        undefined,
+        sCol,
+        sCol.__mustGetType(),
+        colResult.nullable,
+      );
     }
 
     const { core, selectedName } = sCol.__getData();
@@ -718,8 +737,12 @@ export class SelectIOProcessor extends BaseIOProcessor {
     }
     // Renamed columns like `post.id.as('foo')`.
     if (core instanceof mm.Column) {
-      const colSQL = this.handlePlainSelectedColumn(core);
-      const [varName, colSQLCode] = this.getSelectedColumnSQLCode(colSQL, core, selectedName);
+      const colResult = this.handlePlainSelectedColumn(core);
+      const [varName, colSQLCode] = this.getSelectedColumnSQLCode(
+        colResult.sql,
+        core,
+        selectedName,
+      );
 
       return new SelectedColumnIO(
         sCol,
@@ -728,6 +751,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
         selectedName,
         core,
         core.__mustGetType(),
+        colResult.nullable,
       );
     }
 
@@ -757,6 +781,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
       selectedName, // alias is always present in this case.
       undefined,
       resultType,
+      false,
     );
   }
 
@@ -797,7 +822,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
 
   // Called by `handleSelectedColumn`.
   // Returns SQL expr of the selected plain column object.
-  private handlePlainSelectedColumn(col: mm.Column): mm.SQL {
+  private handlePlainSelectedColumn(col: mm.Column): { sql: mm.SQL; nullable: boolean } {
     const sqlTable = this.mustGetAvailableSQLTable();
     const { dialect } = this.opt;
     const e = dialect.encodeName;
@@ -807,6 +832,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     col.__checkSourceTable(sqlTable);
 
     let colSQL: mm.SQL;
+    let nullable: boolean;
     if (colTable instanceof mm.JoinTable) {
       const joinIO = this.handleJoinRecursively(col);
       const mirroredCol = col.__getData().mirroredColumn;
@@ -818,7 +844,9 @@ export class SelectIOProcessor extends BaseIOProcessor {
         );
       }
       colSQL = mm.sql`${e(joinIO.tableAlias)}.${e(mirroredCol.__getDBName())}`;
+      nullable = colTable.joinType === mm.JoinType.full || colTable.joinType === mm.JoinType.right;
     } else {
+      const { homeTableJoinType } = this;
       // Column without a join.
       colSQL = mm.sql`${e(col.__getDBName())}`;
       if (this.hasJoin) {
@@ -826,8 +854,9 @@ export class SelectIOProcessor extends BaseIOProcessor {
         // NOTE: use table `DBName` as alias.
         colSQL = mm.sql`${e(this.localTableAlias(colTable))}.${colSQL}`;
       }
+      nullable = homeTableJoinType === mm.JoinType.full || homeTableJoinType === mm.JoinType.left;
     }
-    return colSQL;
+    return { sql: colSQL, nullable };
   }
 
   private nextJoinedTableName(): string {
@@ -838,6 +867,26 @@ export class SelectIOProcessor extends BaseIOProcessor {
   // eslint-disable-next-line class-methods-use-this
   private localTableAlias(table: mm.Table): string {
     return table.__getDBName();
+  }
+
+  // Called at the beginning of the `convert` function. It runs through all selected
+  // columns, and returns the join type of the home table if there's a join.
+  private scanJoins(selectedCols: mm.SelectedColumn[], whereSQL: mm.SQL | undefined) {
+    const sqlTable = this.mustGetAvailableSQLTable();
+    for (const sc of selectedCols) {
+      const [rootCol, joinType] = sqlHelper.findRootColumnJoinInfoForSelectedColumn(sc);
+      if (rootCol?.__getData().table === sqlTable && joinType) {
+        this.homeTableJoinType = joinType;
+        break;
+      }
+    }
+    // Scan WHERE SQL if no join is found at this point.
+    if (!this.homeTableJoinType && whereSQL) {
+      const [rootCol, joinType] = sqlHelper.findRootColumnJoinInfoForSQL(whereSQL);
+      if (rootCol?.__getData().table === sqlTable && joinType) {
+        this.homeTableJoinType = joinType;
+      }
+    }
   }
 }
 
