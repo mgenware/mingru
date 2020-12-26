@@ -844,7 +844,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
         );
       }
       colSQL = mm.sql`${e(joinIO.tableAlias)}.${e(mirroredCol.__getDBName())}`;
-      nullable = colTable.joinType === mm.JoinType.full || colTable.joinType === mm.JoinType.right;
+      nullable = colTable.joinType === mm.JoinType.full || colTable.joinType === mm.JoinType.left;
     } else {
       const { homeTableJoinType } = this;
       // Column without a join.
@@ -854,7 +854,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
         // NOTE: use table `DBName` as alias.
         colSQL = mm.sql`${e(this.localTableAlias(colTable))}.${colSQL}`;
       }
-      nullable = homeTableJoinType === mm.JoinType.full || homeTableJoinType === mm.JoinType.left;
+      nullable = homeTableJoinType === mm.JoinType.full || homeTableJoinType === mm.JoinType.right;
     }
     return { sql: colSQL, nullable };
   }
