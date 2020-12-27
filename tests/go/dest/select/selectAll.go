@@ -33,11 +33,11 @@ type PostTableSelectTResult struct {
 }
 
 // SelectT ...
-func (da *TableTypePost) SelectT(queryable mingru.Queryable) (*PostTableSelectTResult, error) {
-	result := &PostTableSelectTResult{}
+func (da *TableTypePost) SelectT(queryable mingru.Queryable) (PostTableSelectTResult, error) {
+	var result PostTableSelectTResult
 	err := queryable.QueryRow("SELECT `id`, `title`, `content`, `user_id`, `reviewer_id`, `cmt_c`, `datetime`, `date`, `time`, `n_datetime`, `n_date`, `n_time`, `my_user_id` FROM `db_post`").Scan(&result.ID, &result.Title, &result.Content, &result.UserID, &result.ReviewerID, &result.CmtCount, &result.Datetime, &result.Date, &result.Time, &result.NDatetime, &result.NDate, &result.NTime, &result.MUserID)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 	return result, nil
 }

@@ -26,11 +26,11 @@ type PostTableSelectPostInfoResult struct {
 }
 
 // SelectPostInfo ...
-func (da *TableTypePost) SelectPostInfo(queryable mingru.Queryable) (*PostTableSelectPostInfoResult, error) {
-	result := &PostTableSelectPostInfoResult{}
+func (da *TableTypePost) SelectPostInfo(queryable mingru.Queryable) (PostTableSelectPostInfoResult, error) {
+	var result PostTableSelectPostInfoResult
 	err := queryable.QueryRow("SELECT `db_post`.`id` AS `id`, `db_post`.`title` AS `title`, `db_post`.`user_id` AS `user_id`, `join_1`.`url_name` AS `user_url_name` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`").Scan(&result.ID, &result.Title, &result.UserID, &result.UserUrlName)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 	return result, nil
 }
@@ -42,11 +42,11 @@ type PostTableSelectPostTitleResult struct {
 }
 
 // SelectPostTitle ...
-func (da *TableTypePost) SelectPostTitle(queryable mingru.Queryable) (*PostTableSelectPostTitleResult, error) {
-	result := &PostTableSelectPostTitleResult{}
+func (da *TableTypePost) SelectPostTitle(queryable mingru.Queryable) (PostTableSelectPostTitleResult, error) {
+	var result PostTableSelectPostTitleResult
 	err := queryable.QueryRow("SELECT `id`, `title` FROM `db_post`").Scan(&result.ID, &result.Title)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 	return result, nil
 }

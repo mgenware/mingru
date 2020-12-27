@@ -17,7 +17,7 @@ func (da *TableTypePost) SelectT(queryable mingru.Queryable) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	result := make([]string, 0)
+	var result []string
 	defer rows.Close()
 	for rows.Next() {
 		var item string

@@ -24,11 +24,11 @@ type UserTableSelectProfileResult struct {
 }
 
 // SelectProfile ...
-func (da *TableTypeUser) SelectProfile(queryable mingru.Queryable) (*UserTableSelectProfileResult, error) {
-	result := &UserTableSelectProfileResult{}
+func (da *TableTypeUser) SelectProfile(queryable mingru.Queryable) (UserTableSelectProfileResult, error) {
+	var result UserTableSelectProfileResult
 	err := queryable.QueryRow("SELECT `display_name`, `sig` FROM `user`").Scan(&result.DisplayName, &result.Sig)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 	return result, nil
 }

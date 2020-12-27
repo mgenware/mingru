@@ -18,11 +18,11 @@ type PostTableTResult struct {
 }
 
 // T ...
-func (da *TableTypePost) T(queryable mingru.Queryable, id uint64, year int, total int) (*PostTableTResult, error) {
-	result := &PostTableTResult{}
+func (da *TableTypePost) T(queryable mingru.Queryable, id uint64, year int, total int) (PostTableTResult, error) {
+	var result PostTableTResult
 	err := queryable.QueryRow("SELECT YEAR(`datetime`) AS `year`, SUM(`cmt_c`) AS `total` FROM `db_post` WHERE `id` = ? GROUP BY `year`, `total` HAVING `year` > ? AND `total` > ?", id, year, total).Scan(&result.Year, &result.Total)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 	return result, nil
 }

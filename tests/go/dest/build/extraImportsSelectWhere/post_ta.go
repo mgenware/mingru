@@ -22,15 +22,15 @@ type PostTableSelectTimesResult struct {
 }
 
 // SelectTimes ...
-func (da *TableTypePost) SelectTimes(queryable mingru.Queryable, nDatetime *time.Time, nDate *time.Time) ([]*PostTableSelectTimesResult, error) {
+func (da *TableTypePost) SelectTimes(queryable mingru.Queryable, nDatetime *time.Time, nDate *time.Time) ([]PostTableSelectTimesResult, error) {
 	rows, err := queryable.Query("SELECT `datetime`, `date` FROM `db_post` WHERE `n_datetime` = ? OR `n_date` = ? ORDER BY `id`", nDatetime, nDate)
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*PostTableSelectTimesResult, 0)
+	var result []PostTableSelectTimesResult
 	defer rows.Close()
 	for rows.Next() {
-		item := &PostTableSelectTimesResult{}
+		var item PostTableSelectTimesResult
 		err = rows.Scan(&item.Datetime, &item.Date)
 		if err != nil {
 			return nil, err

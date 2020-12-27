@@ -18,15 +18,15 @@ type MyTableTableSelectTResult struct {
 }
 
 // SelectT ...
-func (da *TableTypeMyTable) SelectT(queryable mingru.Queryable) ([]*MyTableTableSelectTResult, error) {
+func (da *TableTypeMyTable) SelectT(queryable mingru.Queryable) ([]MyTableTableSelectTResult, error) {
 	rows, err := queryable.Query("SELECT `my_id`, `my_name` FROM `my_table` ORDER BY `id`")
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*MyTableTableSelectTResult, 0)
+	var result []MyTableTableSelectTResult
 	defer rows.Close()
 	for rows.Next() {
-		item := &MyTableTableSelectTResult{}
+		var item MyTableTableSelectTResult
 		err = rows.Scan(&item.MyID, &item.my___name)
 		if err != nil {
 			return nil, err

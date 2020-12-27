@@ -17,11 +17,11 @@ type PostCmtTableSelectTResult struct {
 }
 
 // SelectT ...
-func (da *TableTypePostCmt) SelectT(queryable mingru.Queryable, id uint64, userID uint64, targetTitle string, targetUserUrlName string) (*PostCmtTableSelectTResult, error) {
-	result := &PostCmtTableSelectTResult{}
+func (da *TableTypePostCmt) SelectT(queryable mingru.Queryable, id uint64, userID uint64, targetTitle string, targetUserUrlName string) (PostCmtTableSelectTResult, error) {
+	var result PostCmtTableSelectTResult
 	err := queryable.QueryRow("SELECT `id` FROM `post_cmt` WHERE  ?, ?, ?, ?", id, userID, targetTitle, targetUserUrlName).Scan(&result.ID)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 	return result, nil
 }

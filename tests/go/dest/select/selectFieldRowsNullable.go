@@ -21,7 +21,7 @@ func (da *TableTypePost) SelectT(queryable mingru.Queryable) ([]*time.Time, erro
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*time.Time, 0)
+	var result []*time.Time
 	defer rows.Close()
 	for rows.Next() {
 		var item *time.Time

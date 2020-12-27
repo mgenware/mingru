@@ -244,7 +244,7 @@ it('returnValues', () => {
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.selectIO(v, ioOpt);
-  eq(io.returnValues.toString(), '__result: *UserTableTResult');
+  eq(io.returnValues.toString(), '__result: UserTableTResult');
 });
 
 it('GROUP BY and HAVING', () => {

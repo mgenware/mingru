@@ -491,12 +491,12 @@ export class SelectIOProcessor extends BaseIOProcessor {
         if (selMode === mm.SelectActionMode.rowList) {
           isResultTypeArray = true;
         }
-        const resultTypeInfo = new AtomicTypeInfo(resultType, null, null);
+        const resultTypeInfo = new AtomicTypeInfo(resultType, `${resultType}{}`, null);
 
         returnValues.add(
           new VarInfo(
             mm.ReturnValues.result,
-            new CompoundTypeInfo(resultTypeInfo, true, isResultTypeArray),
+            new CompoundTypeInfo(resultTypeInfo, false, isResultTypeArray),
           ),
         );
         if (pgMode === mm.SelectActionPaginationMode.pagination) {

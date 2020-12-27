@@ -17,11 +17,11 @@ type PostTableT1Result struct {
 }
 
 // T1 ...
-func (da *TableTypePost) T1(queryable mingru.Queryable, id uint64) (*PostTableT1Result, error) {
-	result := &PostTableT1Result{}
+func (da *TableTypePost) T1(queryable mingru.Queryable, id uint64) (PostTableT1Result, error) {
+	var result PostTableT1Result
 	err := queryable.QueryRow("SELECT EXISTS(SELECT `join_1`.`sig` AS `user_sig` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id` WHERE `db_post`.`id` = ?) AS `a` FROM `db_post`", id).Scan(&result.A)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 	return result, nil
 }
@@ -32,11 +32,11 @@ type PostTableT2Result struct {
 }
 
 // T2 ...
-func (da *TableTypePost) T2(queryable mingru.Queryable, id uint64) (*PostTableT2Result, error) {
-	result := &PostTableT2Result{}
+func (da *TableTypePost) T2(queryable mingru.Queryable, id uint64) (PostTableT2Result, error) {
+	var result PostTableT2Result
 	err := queryable.QueryRow("SELECT IF(EXISTS(SELECT `join_1`.`sig` AS `user_sig` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id` WHERE `db_post`.`id` = ?), 1, 2) AS `a` FROM `db_post`", id).Scan(&result.A)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 	return result, nil
 }
