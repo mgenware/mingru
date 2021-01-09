@@ -18,15 +18,15 @@ type PostTableSelectTResult struct {
 }
 
 // SelectT ...
-func (da *TableTypePost) SelectT(queryable mingru.Queryable) ([]*PostTableSelectTResult, error) {
+func (da *TableTypePost) SelectT(queryable mingru.Queryable) ([]PostTableSelectTResult, error) {
 	rows, err := queryable.Query("SELECT `title`, `user_id` FROM `db_post` ORDER BY `title`, `user_id`, `my_user_id`")
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*PostTableSelectTResult, 0)
+	var result []PostTableSelectTResult
 	defer rows.Close()
 	for rows.Next() {
-		item := &PostTableSelectTResult{}
+		var item PostTableSelectTResult
 		err = rows.Scan(&item.Title, &item.UserID)
 		if err != nil {
 			return nil, err

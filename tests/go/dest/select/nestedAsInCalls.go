@@ -17,11 +17,11 @@ type PostTableTResult struct {
 }
 
 // T ...
-func (da *TableTypePost) T(queryable mingru.Queryable, idInput uint64) (*PostTableTResult, error) {
-	result := &PostTableTResult{}
+func (da *TableTypePost) T(queryable mingru.Queryable, idInput uint64) (PostTableTResult, error) {
+	var result PostTableTResult
 	err := queryable.QueryRow("SELECT YEAR(YEAR(`id`)) AS `name1` FROM `db_post` WHERE YEAR(YEAR(`id`)) == ?", idInput).Scan(&result.Name1)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 	return result, nil
 }

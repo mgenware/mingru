@@ -128,6 +128,10 @@ export function makeArray(
   size?: number | string,
   capacity?: number | string,
 ): string {
+  // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+  if (!size && !capacity) {
+    return `var ${name} []${type}`;
+  }
   // eslint-disable-next-line no-param-reassign
   size = size ?? 0;
   // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions

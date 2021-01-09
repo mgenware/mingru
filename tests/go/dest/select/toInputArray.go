@@ -22,7 +22,7 @@ type PostTableTResult struct {
 }
 
 // T ...
-func (da *TableTypePost) T(queryable mingru.Queryable, ids []uint64, idInput uint64, id []uint64) ([]*PostTableTResult, error) {
+func (da *TableTypePost) T(queryable mingru.Queryable, ids []uint64, idInput uint64, id []uint64) ([]PostTableTResult, error) {
 	if len(ids) == 0 {
 		return nil, fmt.Errorf("The array argument `ids` cannot be empty")
 	}
@@ -41,10 +41,10 @@ func (da *TableTypePost) T(queryable mingru.Queryable, ids []uint64, idInput uin
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*PostTableTResult, 0)
+	var result []PostTableTResult
 	defer rows.Close()
 	for rows.Next() {
-		item := &PostTableTResult{}
+		var item PostTableTResult
 		err = rows.Scan(&item.ID, &item.Title)
 		if err != nil {
 			return nil, err

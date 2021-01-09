@@ -22,15 +22,15 @@ type PostTableSelectNullableTimesResult struct {
 }
 
 // SelectNullableTimes ...
-func (da *TableTypePost) SelectNullableTimes(queryable mingru.Queryable) ([]*PostTableSelectNullableTimesResult, error) {
+func (da *TableTypePost) SelectNullableTimes(queryable mingru.Queryable) ([]PostTableSelectNullableTimesResult, error) {
 	rows, err := queryable.Query("SELECT `n_datetime`, `n_date` FROM `db_post` ORDER BY `id`")
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*PostTableSelectNullableTimesResult, 0)
+	var result []PostTableSelectNullableTimesResult
 	defer rows.Close()
 	for rows.Next() {
-		item := &PostTableSelectNullableTimesResult{}
+		var item PostTableSelectNullableTimesResult
 		err = rows.Scan(&item.NDatetime, &item.NDate)
 		if err != nil {
 			return nil, err
@@ -51,15 +51,15 @@ type PostTableSelectTimesResult struct {
 }
 
 // SelectTimes ...
-func (da *TableTypePost) SelectTimes(queryable mingru.Queryable) ([]*PostTableSelectTimesResult, error) {
+func (da *TableTypePost) SelectTimes(queryable mingru.Queryable) ([]PostTableSelectTimesResult, error) {
 	rows, err := queryable.Query("SELECT `datetime`, `date` FROM `db_post` ORDER BY `id`")
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*PostTableSelectTimesResult, 0)
+	var result []PostTableSelectTimesResult
 	defer rows.Close()
 	for rows.Next() {
-		item := &PostTableSelectTimesResult{}
+		var item PostTableSelectTimesResult
 		err = rows.Scan(&item.Datetime, &item.Date)
 		if err != nil {
 			return nil, err

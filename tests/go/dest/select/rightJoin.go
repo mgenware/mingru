@@ -27,7 +27,7 @@ func (da *TableTypePost) FieldRows(queryable mingru.Queryable) ([]string, error)
 	if err != nil {
 		return nil, err
 	}
-	result := make([]string, 0)
+	var result []string
 	defer rows.Close()
 	for rows.Next() {
 		var item string
@@ -51,11 +51,11 @@ type PostTableRowResult struct {
 }
 
 // Row ...
-func (da *TableTypePost) Row(queryable mingru.Queryable, id uint64) (*PostTableRowResult, error) {
-	result := &PostTableRowResult{}
+func (da *TableTypePost) Row(queryable mingru.Queryable, id uint64) (PostTableRowResult, error) {
+	var result PostTableRowResult
 	err := queryable.QueryRow("SELECT `join_1`.`url_name` AS `user_url_name`, `db_post`.`id` AS `id` FROM `db_post` AS `db_post` RIGHT JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id` WHERE `db_post`.`id` = ?", id).Scan(&result.UserUrlName, &result.ID)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 	return result, nil
 }
@@ -67,15 +67,15 @@ type PostTableRowsResult struct {
 }
 
 // Rows ...
-func (da *TableTypePost) Rows(queryable mingru.Queryable) ([]*PostTableRowsResult, error) {
+func (da *TableTypePost) Rows(queryable mingru.Queryable) ([]PostTableRowsResult, error) {
 	rows, err := queryable.Query("SELECT `join_1`.`url_name` AS `user_url_name`, `db_post`.`id` AS `id` FROM `db_post` AS `db_post` RIGHT JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`")
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*PostTableRowsResult, 0)
+	var result []PostTableRowsResult
 	defer rows.Close()
 	for rows.Next() {
-		item := &PostTableRowsResult{}
+		var item PostTableRowsResult
 		err = rows.Scan(&item.UserUrlName, &item.ID)
 		if err != nil {
 			return nil, err

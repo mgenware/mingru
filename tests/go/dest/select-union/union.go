@@ -19,15 +19,15 @@ type ActivityTableTResult struct {
 }
 
 // T ...
-func (da *TableTypeActivity) T(queryable mingru.Queryable, id uint64, postID uint64) ([]*ActivityTableTResult, error) {
+func (da *TableTypeActivity) T(queryable mingru.Queryable, id uint64, postID uint64) ([]ActivityTableTResult, error) {
 	rows, err := queryable.Query("(SELECT `id`, `sig` AS `generic_sig`, `url_name` AS `generic_name` FROM `user` WHERE `id` = ?) UNION (SELECT `id`, `title` FROM `db_post` WHERE `id` = ?) UNION ALL (SELECT `user_id`, `value` FROM `like`) ORDER BY `id`", id, postID)
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*ActivityTableTResult, 0)
+	var result []ActivityTableTResult
 	defer rows.Close()
 	for rows.Next() {
-		item := &ActivityTableTResult{}
+		var item ActivityTableTResult
 		err = rows.Scan(&item.ID, &item.GenericSig, &item.GenericName)
 		if err != nil {
 			return nil, err

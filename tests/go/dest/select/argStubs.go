@@ -18,11 +18,11 @@ type PostTableSelectTResult struct {
 }
 
 // SelectT ...
-func (da *TableTypePost) SelectT(queryable mingru.Queryable, id1 int, id2 int) (*PostTableSelectTResult, error) {
-	result := &PostTableSelectTResult{}
+func (da *TableTypePost) SelectT(queryable mingru.Queryable, id1 int, id2 int) (PostTableSelectTResult, error) {
+	var result PostTableSelectTResult
 	err := queryable.QueryRow("SELECT `id`, `title` FROM `db_post`").Scan(&result.ID, &result.Title)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 	return result, nil
 }

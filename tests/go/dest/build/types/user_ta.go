@@ -18,21 +18,21 @@ func (da *TableTypeUser) DeleteByID(queryable mingru.Queryable, id uint64) error
 }
 
 // SelectByID ...
-func (da *TableTypeUser) SelectByID(queryable mingru.Queryable, id uint64) (*Res1, error) {
-	result := &Res1{}
+func (da *TableTypeUser) SelectByID(queryable mingru.Queryable, id uint64) (Res1, error) {
+	var result Res1
 	err := queryable.QueryRow("SELECT `id` FROM `user` WHERE `id` = ?", id).Scan(&result.ID)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 	return result, nil
 }
 
 // SelectProfile ...
-func (da *TableTypeUser) SelectProfile(queryable mingru.Queryable) (*Res2, error) {
-	result := &Res2{}
+func (da *TableTypeUser) SelectProfile(queryable mingru.Queryable) (Res2, error) {
+	var result Res2
 	err := queryable.QueryRow("SELECT `display_name`, `sig` FROM `user`").Scan(&result.DisplayName, &result.Sig)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 	return result, nil
 }

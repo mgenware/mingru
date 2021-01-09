@@ -22,7 +22,7 @@ type PostTableSelectTResult struct {
 }
 
 // SelectT ...
-func (da *TableTypePost) SelectT(queryable mingru.Queryable, id uint64, page int, pageSize int) ([]*PostTableSelectTResult, bool, error) {
+func (da *TableTypePost) SelectT(queryable mingru.Queryable, id uint64, page int, pageSize int) ([]PostTableSelectTResult, bool, error) {
 	if page <= 0 {
 		err := fmt.Errorf("Invalid page %v", page)
 		return nil, false, err
@@ -38,13 +38,13 @@ func (da *TableTypePost) SelectT(queryable mingru.Queryable, id uint64, page int
 	if err != nil {
 		return nil, false, err
 	}
-	result := make([]*PostTableSelectTResult, 0, limit)
+	result := make([]PostTableSelectTResult, 0, limit)
 	itemCounter := 0
 	defer rows.Close()
 	for rows.Next() {
 		itemCounter++
 		if itemCounter <= max {
-			item := &PostTableSelectTResult{}
+			var item PostTableSelectTResult
 			err = rows.Scan(&item.ID, &item.Title)
 			if err != nil {
 				return nil, false, err

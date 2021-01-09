@@ -21,11 +21,11 @@ type UserTableTChild1Result struct {
 	Name string
 }
 
-func (da *TableTypeUser) tChild1(queryable mingru.Queryable) (*UserTableTChild1Result, error) {
-	result := &UserTableTChild1Result{}
+func (da *TableTypeUser) tChild1(queryable mingru.Queryable) (UserTableTChild1Result, error) {
+	var result UserTableTChild1Result
 	err := queryable.QueryRow("SELECT `age`, `name` FROM `user`").Scan(&result.Age, &result.Name)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 	return result, nil
 }

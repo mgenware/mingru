@@ -57,13 +57,13 @@ export default class GoTABuilder {
     let code = options.noFileHeader ? '' : defs.fileHeader;
     code += `package ${options.packageName || defs.defaultPackageName}\n\n`;
 
-    // this.buildActions will set this.systemImports and this.userImports
+    // `this.buildActions` will set `this.systemImports` and `this.userImports`.
     let body = '';
     body += this.buildTableObject();
     body += go.sep('Actions');
     body += this.buildActions();
 
-    // Add imports
+    // Add imports.
     code = code + this.imports.code() + body;
     return code;
   }
@@ -77,7 +77,7 @@ export default class GoTABuilder {
     return code;
   }
 
-  // `fallbackActionName` used by TRANSACT members as they don't have a `__name`.
+  // `fallbackActionName` is used by TRANSACT members as they don't have a `__name`.
   private buildActionIO(
     io: ActionIO,
     fallbackActionName: string | undefined,
@@ -108,7 +108,7 @@ export default class GoTABuilder {
     }
     funcSigString += `func (da *${tableClassName}) ${funcName}`;
 
-    // Build func params
+    // Build func params.
     // allFuncArgs = original func args + arg stubs.
     const allFuncArgs = [...funcArgs, ...io.funcStubs];
     this.imports.addVars(allFuncArgs);
@@ -265,7 +265,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
     const resultTypeString = firstReturnParam.type.typeString;
 
     // `atomicResultType` is used to generate additional type definition,
-    // e.g. if `resultType` is `[]*Person`, `atomicResultType` is `Person`.
+    // e.g. if `resultType` is `[]Person`, `atomicResultType` is `Person`.
     const atomicResultType =
       getAtomicTypeInfo(firstReturnParam.type).typeString || resultTypeString;
     // Additional type definitions for result type or ORDER BY inputs.
@@ -276,8 +276,13 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
       errReturnCode = 'nil, false, err';
     } else if (pgMode === mm.SelectActionPaginationMode.pagination) {
       errReturnCode = 'nil, 0, err';
-    } else {
+    } else if (
+      selMode === mm.SelectActionMode.rowList ||
+      selMode === mm.SelectActionMode.fieldList
+    ) {
       errReturnCode = 'nil, err';
+    } else {
+      errReturnCode = 'result, err';
     }
     errReturnCode = 'return ' + errReturnCode;
 
@@ -444,7 +449,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
       builder.pushLines(
         go.makeArray(
           defs.resultVarName,
-          selMode === mm.SelectActionMode.fieldList ? itemVarType : `*${atomicResultType}`,
+          selMode === mm.SelectActionMode.fieldList ? itemVarType : atomicResultType,
           0,
           pgModePaginationOrPageMode ? defs.limitVarName : 0,
         ),
@@ -461,7 +466,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
       builder.pushLines(
         selMode === mm.SelectActionMode.fieldList
           ? `var ${defs.itemVarName} ${itemVarType}`
-          : go.newStructPointerVar(defs.itemVarName, atomicResultType),
+          : `var ${defs.itemVarName} ${atomicResultType}`,
         `err = rows.Scan(${scanParams})`,
         'if err != nil {',
       );
@@ -483,7 +488,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
       builder.decreaseIndent();
       builder.push('}');
     } else {
-      // `selMode` == `select/selectField`.
+      // `selMode` == `selectRow / selectField / selectExists`.
       let scanParams: string;
       // Declare the result variable.
       if (selMode === mm.SelectActionMode.field || selMode === mm.SelectActionMode.exists) {
@@ -493,14 +498,8 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
         scanParams = joinParams(
           [...selectedFields.values()].map((p) => `&${defs.resultVarName}.${p.name}`),
         );
-        builder.push(`${go.newStructPointerVar(defs.resultVarName, atomicResultType)}`);
+        builder.push(`var ${defs.resultVarName} ${atomicResultType}`);
       }
-      // For `selectField` and `selectExists`, we return the default value,
-      // for `selectRow`, return nil.
-      const resultVarOnError =
-        selMode === mm.SelectActionMode.field || selMode === mm.SelectActionMode.exists
-          ? defs.resultVarName
-          : 'nil';
 
       // Call the `Query` func.
       this.injectQueryPreparationCode(builder, io.execArgs.list, variadicQueryParams);
@@ -513,7 +512,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
       );
       builder.push('if err != nil {');
       builder.increaseIndent();
-      builder.push(`return ${resultVarOnError}, err`);
+      builder.push(errReturnCode);
       builder.decreaseIndent();
       builder.push('}');
     }

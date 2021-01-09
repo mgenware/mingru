@@ -24,15 +24,15 @@ type GhostTableSelectTResult struct {
 }
 
 // SelectT ...
-func (da *TableTypeGhost) SelectT(queryable mingru.Queryable) ([]*GhostTableSelectTResult, error) {
+func (da *TableTypeGhost) SelectT(queryable mingru.Queryable) ([]GhostTableSelectTResult, error) {
 	rows, err := queryable.Query("SELECT `id`, `title` FROM `db_post` ORDER BY `id`")
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*GhostTableSelectTResult, 0)
+	var result []GhostTableSelectTResult
 	defer rows.Close()
 	for rows.Next() {
-		item := &GhostTableSelectTResult{}
+		var item GhostTableSelectTResult
 		err = rows.Scan(&item.ID, &item.Title)
 		if err != nil {
 			return nil, err

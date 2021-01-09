@@ -35,11 +35,11 @@ type UserTableSelectTResult struct {
 }
 
 // SelectT ...
-func (da *TableTypeUser) SelectT(queryable mingru.Queryable, table string) (*UserTableSelectTResult, error) {
-	result := &UserTableSelectTResult{}
+func (da *TableTypeUser) SelectT(queryable mingru.Queryable, table string) (UserTableSelectTResult, error) {
+	var result UserTableSelectTResult
 	err := queryable.QueryRow("SELECT `id`, `age` FROM "+table).Scan(&result.ID, &result.Age)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 	return result, nil
 }
