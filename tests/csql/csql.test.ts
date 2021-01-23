@@ -66,13 +66,24 @@ it('Composite PKs', async () => {
   await testBuildAsync(like, 'compositePKs/like');
 });
 
-it('UNIQUE', async () => {
+it('UNIQUE constraint', async () => {
   class User extends mm.Table {
     a = mm.pk();
-    b = mm.uBigInt().unique;
+    b = mm.uBigInt().uniqueConstraint;
   }
   const t = mm.table(User);
   await testBuildAsync(t, 'unique/user');
+});
+
+it('INDEX', async () => {
+  class User extends mm.Table {
+    a = mm.pk();
+    b = mm.uBigInt().uniqueConstraint;
+    c = mm.uBigInt().index;
+    d = mm.uBigInt().uniqueIndex;
+  }
+  const t = mm.table(User);
+  await testBuildAsync(t, 'index/user');
 });
 
 it('Numeric length', async () => {

@@ -19,18 +19,24 @@ export default class CSQLBuilder {
 
     const pks: string[] = [];
     const fks: string[] = [];
+    const indicesLines: string[] = [];
     for (const col of columns) {
       if (!col) {
         continue;
       }
       const colType = col.__mustGetType();
-      const fk = col.__getData().foreignColumn;
+      const colData = col.__getData();
+      const colDBNameEncoded = this.dialect.encodeColumnName(col);
+      const fk = colData.foreignColumn;
       if (colType.pk) {
-        pks.push(col.__getDBName());
+        pks.push(colDBNameEncoded);
       }
       if (fk) {
         const exp = this.fkExpression(col, fk);
         fks.push(exp);
+      }
+      if (colData.index) {
+        indicesLines.push(`${colData.isUniqueIndex ? 'UNIQUE ' : ''}INDEX (${colDBNameEncoded})`);
       }
       const io = sqlIO(dialect.colToSQLType(col), dialect, null);
       body.push(`${dialect.encodeColumnName(col)} ${extractStringContentFromSegments(io.code)}`);
@@ -40,6 +46,9 @@ export default class CSQLBuilder {
     }
     if (fks.length) {
       body.push(...fks);
+    }
+    if (indicesLines.length) {
+      body.push(...indicesLines);
     }
     let code = noHeader ? '' : defs.fileHeader;
     code += `CREATE TABLE ${dialect.encodeTableName(table)} (\n`;
@@ -51,7 +60,7 @@ export default class CSQLBuilder {
   }
 
   private groupNames(names: string[]): string {
-    return `(${names.map((n) => this.dialect.encodeName(n)).join(', ')})`;
+    return `(${names.join(', ')})`;
   }
 
   private increaseIndent(lines: string[], sep: string): string {

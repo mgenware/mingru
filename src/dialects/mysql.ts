@@ -72,7 +72,7 @@ export class MySQL extends Dialect {
         builder.pushWithSpace('NULL');
       }
     }
-    if (colType.unique) {
+    if (colData.uniqueConstraint) {
       builder.pushWithSpace('UNIQUE');
     }
     if (colType.autoIncrement) {
