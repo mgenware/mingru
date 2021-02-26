@@ -1533,12 +1533,12 @@ min-indent@^1.0.0:
   resolved "https://registry.yarnpkg.com/min-indent/-/min-indent-1.0.0.tgz#cfc45c37e9ec0d8f0a0ec3dd4ef7f7c3abe39256"
   integrity sha1-z8RcN+nsDY8KDsPdTvf3w6vjklY=
 
-mingru-models@^0.53.0:
-  version "0.53.0"
-  resolved "https://registry.yarnpkg.com/mingru-models/-/mingru-models-0.53.0.tgz#a0810d0f7ff01c5d289b47ffd74e58072f1e6766"
-  integrity sha512-LpB7NaTN3fVD3x53Ff46gaKARuEDWRSQqOvQmhaCHuUs+9DybgCLGCgQq4Gnm48XKSmd6hX+xu7hgmGW2/436w==
+mingru-models@^0.54.0:
+  version "0.54.0"
+  resolved "https://registry.yarnpkg.com/mingru-models/-/mingru-models-0.54.0.tgz#3131bcff48772ca76db54b568ccf51f9388b4490"
+  integrity sha512-aFTk53EauGY8FKE0FZlStf30bSHkCMMO6osw8SAPkpY5g44jC95GPcNG/Qx8iQ/x8fP/cn/k4iGPrrzScMAOAg==
   dependencies:
-    decamelize "^4.0.0"
+    decamelize "^5.0.0"
     throw-if-arg-empty "^2.2.1"
     to-type-string "^1.1.0"
 
