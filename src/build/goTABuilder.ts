@@ -54,7 +54,7 @@ export default class GoTABuilder {
 
   build(): string {
     const { options } = this;
-    let code = options.noFileHeader ? '' : defs.fileHeader;
+    let code = options.fileHeader ?? defs.fileHeader;
     code += `package ${options.packageName || defs.defaultPackageName}\n\n`;
 
     // `this.buildActions` will set `this.systemImports` and `this.userImports`.

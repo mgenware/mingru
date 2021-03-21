@@ -12,7 +12,7 @@ export default class CSQLBuilder {
     this.tableData = table.__getData();
   }
 
-  build(noHeader: boolean): string {
+  build(header: string | undefined): string {
     const { table, dialect, tableData } = this;
     const columns = Object.values(tableData.columns);
     const body = [];
@@ -50,7 +50,7 @@ export default class CSQLBuilder {
     if (indicesLines.length) {
       body.push(...indicesLines);
     }
-    let code = noHeader ? '' : defs.fileHeader;
+    let code = header ?? defs.fileHeader;
     code += `CREATE TABLE ${dialect.encodeTableName(table)} (\n`;
     code += this.increaseIndent(body, ',\n');
     code += '\n)\n';

@@ -447,7 +447,7 @@ it('snake_case keys', async () => {
   }
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/snakeCaseKeys', {
-    noFileHeader: true,
+    fileHeader: '',
     jsonEncoding: { encodingStyle: mr.JSONEncodingStyle.snakeCase },
   });
 });
@@ -462,7 +462,7 @@ it('camelCase keys', async () => {
   }
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/camelCaseKeys', {
-    noFileHeader: true,
+    fileHeader: '',
     jsonEncoding: { encodingStyle: mr.JSONEncodingStyle.camelCase },
   });
 });
@@ -477,7 +477,7 @@ it('Ignored keys', async () => {
   }
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/ignoredKeys', {
-    noFileHeader: true,
+    fileHeader: '',
     jsonEncoding: { encodingStyle: mr.JSONEncodingStyle.camelCase },
   });
 });
@@ -491,7 +491,7 @@ it('Ignored keys (raw columns)', async () => {
   }
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/ignoredKeysRawCols', {
-    noFileHeader: true,
+    fileHeader: '',
     jsonEncoding: { encodingStyle: mr.JSONEncodingStyle.camelCase },
   });
 });
@@ -509,7 +509,7 @@ it('Exclude empty properties', async () => {
   }
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/excludedEmptyProps', {
-    noFileHeader: true,
+    fileHeader: '',
     jsonEncoding: { encodingStyle: mr.JSONEncodingStyle.camelCase },
   });
 });
@@ -524,7 +524,7 @@ it('Exclude all empty properties', async () => {
   }
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/excludedEmptyProps', {
-    noFileHeader: true,
+    fileHeader: '',
     jsonEncoding: {
       encodingStyle: mr.JSONEncodingStyle.camelCase,
       excludeEmptyValues: true,

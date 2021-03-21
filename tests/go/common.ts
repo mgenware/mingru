@@ -15,7 +15,7 @@ function defaultOptions(opts?: mr.BuildOptions) {
     return opts;
   }
   const defOpts: mr.BuildOptions = {};
-  defOpts.noFileHeader = true;
+  defOpts.fileHeader = '';
   return defOpts;
 }
 
@@ -80,7 +80,7 @@ export async function testBuildToDirAsync(
   buildCSQL = false,
 ) {
   opts = opts ?? {};
-  opts.noFileHeader = true;
+  opts.fileHeader = '';
   opts.noOutput = true;
   const tmpDir = tempy.directory();
 

@@ -11,7 +11,7 @@ export interface JSONEncodingOptions {
 
 export interface BuildOptions {
   packageName?: string;
-  noFileHeader?: boolean;
+  fileHeader?: string;
   cleanBuild?: boolean;
   noOutput?: boolean;
   jsonEncoding?: JSONEncodingOptions;

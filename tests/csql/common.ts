@@ -16,7 +16,7 @@ export async function testBuildAsync(table: mm.Table, path: string) {
   }
   mr.logger.enabled = false;
   const builder = new mr.CSQLBuilder(table, dialect);
-  const actual = builder.build(true);
+  const actual = builder.build('');
   if (path) {
     eq(actual, content);
   }

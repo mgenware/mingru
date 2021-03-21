@@ -65,7 +65,7 @@ export default class Builder {
     const builder = new CSQLBuilder(table, dialect);
     const fileName = toSnakeCase(table.__getData().name);
     const outFile = nodepath.join(outDir, fileName + '.sql');
-    const sql = builder.build(this.opts.noFileHeader || false);
+    const sql = builder.build(this.opts.fileHeader);
     await mfs.writeFileAsync(outFile, sql, 'utf8');
   }
 }
