@@ -101,7 +101,7 @@ export default class GoBuilder {
         code = code.substr(0, code.length - 1);
       }
       const outFile = nodepath.join(outDir, 'types.go');
-      await mfs.writeFileAsync(outFile, code);
+      await mfs.writeFileAsync(outFile, (opts.fileHeader ?? '') + code);
     }
   }
 }
