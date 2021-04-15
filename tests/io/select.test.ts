@@ -261,7 +261,7 @@ it('GROUP BY and HAVING', () => {
   const io = mr.selectIO(v, ioOpt);
   eq(
     io.getSQLCode(),
-    '"SELECT YEAR(`datetime`) AS `year`, SUM(`cmt_c`) AS `total` FROM `db_post` WHERE `id` = ? GROUP BY `year`, `total` HAVING `year` > 2010 AND `total` > 100"',
+    '"SELECT YEAR(`datetime`) AS `year`, SUM(`cmt_c`) AS `total` FROM `db_post` WHERE `id` = ? GROUP BY `year`, `total` HAVING (`year` > 2010 AND `total` > 100)"',
   );
 });
 
