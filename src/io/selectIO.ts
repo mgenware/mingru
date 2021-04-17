@@ -301,7 +301,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
       }
 
       // Checks if there are any joins in this query.
-      this.scanJoins(selectedColumns, whereSQLValue);
+      this.scanJoins(selectedColumns, whereSQLValue, havingSQLValue);
 
       // Handle columns.
       if (selMode === mm.SelectActionMode.exists) {
@@ -339,7 +339,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
       // after joins are handled below.
       let whereSQL: StringSegment[] = [];
       if (whereSQLValue) {
-        whereIO = sqlIO(whereSQLValue, dialect, sqlTable, this.getSQLBuilderOpt(''));
+        whereIO = sqlIO(whereSQLValue, dialect, sqlTable, this.getSQLBuilderOpt());
         whereSQL = [' WHERE ', ...whereIO.code];
       }
 
@@ -386,7 +386,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     // HAVING
     let havingIO: SQLIO | null = null;
     if (havingSQLValue) {
-      havingIO = sqlIO(havingSQLValue, dialect, sqlTable, this.getSQLBuilderOpt('HAVING clause'));
+      havingIO = sqlIO(havingSQLValue, dialect, sqlTable, this.getSQLBuilderOpt());
       sql.push(' HAVING ', ...havingIO.code);
     }
 
@@ -522,19 +522,11 @@ export class SelectIOProcessor extends BaseIOProcessor {
     );
   }
 
-  private getSQLBuilderOpt(noJoinRegion: string): SQLIOBuilderOption {
+  private getSQLBuilderOpt(): SQLIOBuilderOption {
     return {
       rewriteElement: (ele) => {
         if (ele.type === mm.SQLElementType.column) {
           const col = ele.toColumn();
-          const colTable = col.__mustGetTable();
-          if (colTable instanceof mm.JoinTable) {
-            if (!noJoinRegion) {
-              this.handleJoinRecursively(col);
-            } else {
-              throw new Error(`Join is not allowed in ${noJoinRegion}, offending column "${col}"`);
-            }
-          }
           return this.getColumnSQLFromExistingData(col);
         }
         return null;
@@ -773,7 +765,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
 
     // Add alias.
     const rawExpr = dialect.as(core, selectedName);
-    const info = sqlIO(rawExpr, dialect, sqlTable, this.getSQLBuilderOpt(''));
+    const info = sqlIO(rawExpr, dialect, sqlTable, this.getSQLBuilderOpt());
     return new SelectedColumnIO(
       sCol,
       info.code,
@@ -785,11 +777,13 @@ export class SelectIOProcessor extends BaseIOProcessor {
     );
   }
 
-  private handleJoinRecursively(jc: mm.Column): JoinIO {
+  private scanJoinsFromCol(jc: mm.Column): JoinIO | null {
+    // TODO: `homeTableJoinType` may be set multiple time in this func.
     const { table } = jc.__getData();
     if (!(table instanceof mm.JoinTable)) {
-      throw new Error(`Assertion failed, ${table} must be a \`JoinTable\``);
+      return null;
     }
+
     const result = this.jcMap.get(table.keyPath);
     if (result) {
       return result;
@@ -799,10 +793,14 @@ export class SelectIOProcessor extends BaseIOProcessor {
     const { srcColumn, destColumn, destTable } = table;
     const srcTable = srcColumn.__mustGetTable();
     if (srcTable instanceof mm.JoinTable) {
-      const srcIO = this.handleJoinRecursively(srcColumn);
+      const srcIO = this.scanJoinsFromCol(srcColumn);
+      if (!srcIO) {
+        throw new Error('Unexpected null result from `scanJoinsFromCol`');
+      }
       localTableName = srcIO.tableAlias;
     } else {
       localTableName = this.localTableAlias(srcTable);
+      this.homeTableJoinType = table.joinType;
     }
 
     const joinIO = new JoinIO(
@@ -834,7 +832,10 @@ export class SelectIOProcessor extends BaseIOProcessor {
     let colSQL: mm.SQL;
     let nullable: boolean;
     if (colTable instanceof mm.JoinTable) {
-      const joinIO = this.handleJoinRecursively(col);
+      const joinIO = this.jcMap.get(colTable.keyPath);
+      if (!joinIO) {
+        throw new Error(`Unexpected null \`JoinIO\` for table "${colTable}"`);
+      }
       const mirroredCol = col.__getData().mirroredColumn;
       if (!mirroredCol) {
         throw new Error(
@@ -871,21 +872,24 @@ export class SelectIOProcessor extends BaseIOProcessor {
 
   // Called at the beginning of the `convert` function. It runs through all selected
   // columns, and returns the join type of the home table if there's a join.
-  private scanJoins(selectedCols: mm.SelectedColumn[], whereSQL: mm.SQL | undefined) {
-    const sqlTable = this.mustGetAvailableSQLTable();
+  private scanJoins(
+    selectedCols: mm.SelectedColumn[],
+    whereSQL: mm.SQL | undefined,
+    havingSQL: mm.SQL | undefined,
+  ) {
+    const visitColFn = (c: mm.Column) => {
+      this.scanJoinsFromCol(c);
+      return true;
+    };
     for (const sc of selectedCols) {
-      const [rootCol, joinType] = sqlHelper.findRootColumnJoinInfoForSelectedColumn(sc);
-      if (rootCol?.__getData().table === sqlTable && joinType) {
-        this.homeTableJoinType = joinType;
-        break;
-      }
+      sqlHelper.visitColumnsFromSelectedColumn(sc, visitColFn);
     }
-    // Scan WHERE SQL if no join is found at this point.
-    if (!this.homeTableJoinType && whereSQL) {
-      const [rootCol, joinType] = sqlHelper.findRootColumnJoinInfoForSQL(whereSQL);
-      if (rootCol?.__getData().table === sqlTable && joinType) {
-        this.homeTableJoinType = joinType;
+
+    for (const sql of [whereSQL, havingSQL]) {
+      if (!sql) {
+        continue;
       }
+      sqlHelper.visitColumns(sql, visitColFn);
     }
   }
 }

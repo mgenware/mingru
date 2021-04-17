@@ -437,6 +437,16 @@ it('GROUP BY and HAVING', async () => {
   await testBuildAsync(ta, 'select/groupByAndHaving');
 });
 
+it('HAVING and JOIN', async () => {
+  class PostTA extends mm.TableActions {
+    t = mm.selectRows(post.n_time).groupBy(post.title).having`${post.user_id
+      .join(user)
+      .id.isEqualToInput()}`.orderByAsc(post.user_id);
+  }
+  const ta = mm.tableActions(post, PostTA);
+  await testBuildAsync(ta, 'select/groupByAndHavingJoin');
+});
+
 it('snake_case keys', async () => {
   class RplTA extends mm.TableActions {
     selectT = mm.selectRow(
