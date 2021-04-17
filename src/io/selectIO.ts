@@ -35,24 +35,34 @@ export class JoinIO {
     public remoteTable: string,
     public remoteColumn: mm.Column,
     public extraColumns: [mm.Column, mm.Column][],
+    public extraSQL: SQLIO | undefined,
   ) {}
 
-  toSQL(dialect: Dialect): string {
+  toSegments(dialect: Dialect): StringSegment[] {
+    const sql: StringSegment[] = [];
     const e = dialect.encodeName;
     const alias1 = e(this.tableAlias);
     const alias2 = e(this.localTable);
-    let sql = `${this.getJoinTypeSQL()} JOIN ${e(this.remoteTable)} AS ${e(
-      this.tableAlias,
-    )} ON ${alias1}.${e(this.remoteColumn.__getDBName())} = ${alias2}.${e(
-      this.localColumn.__getDBName(),
-    )}`;
+    sql.push(
+      `${this.getJoinTypeSQL()} JOIN ${e(this.remoteTable)} AS ${e(
+        this.tableAlias,
+      )} ON ${alias1}.${e(this.remoteColumn.__getDBName())} = ${alias2}.${e(
+        this.localColumn.__getDBName(),
+      )}`,
+    );
 
     // Handle multiple columns in a join.
     if (this.extraColumns.length) {
       for (const [col1, col2] of this.extraColumns) {
-        sql += ` AND ${alias1}.${e(col1.__getDBName())} = ${alias2}.${e(col2.__getDBName())}`;
+        sql.push(` AND ${alias1}.${e(col1.__getDBName())} = ${alias2}.${e(col2.__getDBName())}`);
       }
     }
+
+    // Handle extra SQL in a join.
+    if (this.extraSQL) {
+      sql.push(' ', ...this.extraSQL.code);
+    }
+
     return sql;
   }
 
@@ -346,8 +356,8 @@ export class SelectIOProcessor extends BaseIOProcessor {
       // Joins
       if (this.hasJoin) {
         for (const join of this.joins) {
-          const joinSQL = join.toSQL(dialect);
-          sql.push(' ' + joinSQL);
+          const code = join.toSegments(dialect);
+          sql.push(' ', ...code);
         }
       }
 
@@ -789,6 +799,10 @@ export class SelectIOProcessor extends BaseIOProcessor {
       return result;
     }
 
+    const sqlTable = this.mustGetAvailableSQLTable();
+    const { dialect } = this.opt;
+
+    // Handle nested joins.
     let localTableName: string;
     const { srcColumn, destColumn, destTable } = table;
     const srcTable = srcColumn.__mustGetTable();
@@ -803,6 +817,17 @@ export class SelectIOProcessor extends BaseIOProcessor {
       this.homeTableJoinType = table.joinType;
     }
 
+    // Handle extra data that might contain joins.
+    let extraSQLIO: SQLIO | undefined;
+    if (table.extraSQL) {
+      sqlHelper.visitColumns(table.extraSQL, (c) => {
+        this.scanJoinsFromCol(c);
+        return true;
+      });
+
+      extraSQLIO = sqlIO(table.extraSQL, dialect, sqlTable, this.getSQLBuilderOpt());
+    }
+
     const joinIO = new JoinIO(
       table.joinType,
       table.keyPath,
@@ -812,6 +837,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
       destTable.__getDBName(),
       destColumn,
       table.extraColumns,
+      extraSQLIO,
     );
     this.jcMap.set(table.keyPath, joinIO);
     this.joins.push(joinIO);
