@@ -112,54 +112,6 @@ export function visitColumnsFromSelectedColumn(
   return visitColumns(scCore, fn);
 }
 
-function findRootColumnJoinInfoCore(
-  col: mm.Column,
-  joinType: mm.JoinType | undefined,
-): [mm.Column, mm.JoinType | undefined] {
-  const { table } = col.__getData();
-  if (table instanceof mm.JoinTable) {
-    return findRootColumnJoinInfoCore(table.srcColumn, table.joinType);
-  }
-  return [col, joinType];
-}
-
-// Example: `table.a.rightJoin(b).col.leftJoin(c).d` returns [table.a, rightJoinType].
-export function findRootColumnJoinInfo(col: mm.Column): [mm.Column, mm.JoinType | undefined] {
-  return findRootColumnJoinInfoCore(col, undefined);
-}
-
-export function findRootColumnJoinInfoForSelectedColumn(
-  sc: mm.SelectedColumn,
-): [mm.Column | undefined, mm.JoinType | undefined] {
-  let rootCol: mm.Column | undefined;
-  let joinType: mm.JoinType | undefined;
-  visitColumnsFromSelectedColumn(sc, (col) => {
-    [rootCol, joinType] = findRootColumnJoinInfo(col);
-    // Stop if we found a join.
-    if (joinType !== undefined) {
-      return false;
-    }
-    return true;
-  });
-  return [rootCol, joinType];
-}
-
-export function findRootColumnJoinInfoForSQL(
-  sql: mm.SQL,
-): [mm.Column | undefined, mm.JoinType | undefined] {
-  let rootCol: mm.Column | undefined;
-  let joinType: mm.JoinType | undefined;
-  visitColumns(sql, (col) => {
-    [rootCol, joinType] = findRootColumnJoinInfo(col);
-    // Stop if we found a join.
-    if (joinType !== undefined) {
-      return false;
-    }
-    return true;
-  });
-  return [rootCol, joinType];
-}
-
 export function mergeIOVerListsWithSQLIO(funcArgs: VarList, execArgs: VarList, io: SQLIO | null) {
   if (!io) {
     return;
