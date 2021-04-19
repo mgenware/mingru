@@ -25,6 +25,13 @@ import * as sqlHelper from '../lib/sqlHelper';
 const orderByInputParamName = 'orderBy';
 
 export class JoinIO {
+  // `JoinTable.extraSQL` is not included in `JoinTable.keyPath` to avoid
+  // circular deps, cuz a join might contain an extra SQL with itself in it.
+  // This may end up with multiple joins with same key paths but different
+  // `extraSQL`s. During join scanning, a non-empty `extraSQL` will always
+  // override the previous one.
+  extraSQL: SQLIO | undefined;
+
   constructor(
     public joinType: mm.JoinType,
     public path: string,
@@ -35,7 +42,6 @@ export class JoinIO {
     public remoteTable: string,
     public remoteColumn: mm.Column,
     public extraColumns: [mm.Column, mm.Column][],
-    public extraSQL: SQLIO | undefined,
   ) {}
 
   toSegments(dialect: Dialect): StringSegment[] {
@@ -156,7 +162,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
   // Tracks all processed joins, when processing a new join,
   // we can reuse the JoinIO if it already exists (K: join path, V: `JoinIO`).
   jcMap = new Map<string, JoinIO>();
-  // All processed joins
+  // Joins in insertion order.
   joins: JoinIO[] = [];
   // Make sure all join table alias names are unique.
   joinedTableCounter = 0;
@@ -427,6 +433,12 @@ export class SelectIOProcessor extends BaseIOProcessor {
     // Merge inputs.
     for (const io of this.subqueryIOs) {
       sqlHelper.mergeIOVerListsWithActionIO(funcArgs, execArgs, io);
+    }
+    // Handle inputs in join extra SQLs.
+    for (const joinIO of this.joins) {
+      if (joinIO.extraSQL) {
+        sqlHelper.mergeIOVerListsWithSQLIO(funcArgs, execArgs, joinIO.extraSQL);
+      }
     }
     sqlHelper.mergeIOVerListsWithSQLIO(funcArgs, execArgs, whereIO);
     sqlHelper.mergeIOVerListsWithSQLIO(funcArgs, execArgs, havingIO);
@@ -788,19 +800,22 @@ export class SelectIOProcessor extends BaseIOProcessor {
   }
 
   private scanJoinsFromCol(jc: mm.Column): JoinIO | null {
-    // TODO: `homeTableJoinType` may be set multiple time in this func.
     const { table } = jc.__getData();
     if (!(table instanceof mm.JoinTable)) {
       return null;
     }
 
-    const result = this.jcMap.get(table.keyPath);
-    if (result) {
-      return result;
-    }
-
     const sqlTable = this.mustGetAvailableSQLTable();
     const { dialect } = this.opt;
+    const result = this.jcMap.get(table.keyPath);
+    if (result) {
+      // Update `JoinIO.extraSQL` if needed.
+      // See `JoinIO.extraSQL` for details.
+      if (!result.extraSQL && table.extraSQL) {
+        result.extraSQL = sqlIO(table.extraSQL, dialect, sqlTable, this.getSQLBuilderOpt());
+      }
+      return result;
+    }
 
     // Handle nested joins.
     let localTableName: string;
@@ -817,17 +832,6 @@ export class SelectIOProcessor extends BaseIOProcessor {
       this.homeTableJoinType = table.joinType;
     }
 
-    // Handle extra data that might contain joins.
-    let extraSQLIO: SQLIO | undefined;
-    if (table.extraSQL) {
-      sqlHelper.visitColumns(table.extraSQL, (c) => {
-        this.scanJoinsFromCol(c);
-        return true;
-      });
-
-      extraSQLIO = sqlIO(table.extraSQL, dialect, sqlTable, this.getSQLBuilderOpt());
-    }
-
     const joinIO = new JoinIO(
       table.joinType,
       table.keyPath,
@@ -837,10 +841,22 @@ export class SelectIOProcessor extends BaseIOProcessor {
       destTable.__getDBName(),
       destColumn,
       table.extraColumns,
-      extraSQLIO,
     );
     this.jcMap.set(table.keyPath, joinIO);
     this.joins.push(joinIO);
+
+    // Handle extra data that might contain joins.
+    // This must happen after join IO is added in `jcMap`. Otherwise, stack overflow
+    // will happen if current join table is in extra SQL.
+    if (table.extraSQL) {
+      sqlHelper.visitColumns(table.extraSQL, (c) => {
+        this.scanJoinsFromCol(c);
+        return true;
+      });
+
+      const extraSQLIO = sqlIO(table.extraSQL, dialect, sqlTable, this.getSQLBuilderOpt());
+      joinIO.extraSQL = extraSQLIO;
+    }
     return joinIO;
   }
 

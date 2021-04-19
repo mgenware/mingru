@@ -281,7 +281,7 @@ it('Explicit join with multiple columns and an extra SQL', async () => {
         user,
         user.url_name,
         [[post.m_user_id, user.id]],
-        mm.sql`OR ${post.user_id.join(user).age} = 10`,
+        (jt) => mm.sql`AND ${jt.age.isEqualToInput()} AND ${post.id.isEqualToInput()}`,
       ).age,
     );
   }
