@@ -492,7 +492,7 @@ it('camelCase keys', async () => {
   });
 });
 
-it('Ignored keys', async () => {
+it('Private columns', async () => {
   class RplTA extends mm.TableActions {
     selectT = mm.selectRow(
       rpl.user_id.join(user).url_name.attr(mm.ColumnAttribute.isPrivate, true),
@@ -507,7 +507,7 @@ it('Ignored keys', async () => {
   });
 });
 
-it('Ignored keys (raw columns)', async () => {
+it('Private columns (raw columns)', async () => {
   class RplTA extends mm.TableActions {
     selectT = mm.selectRow(
       mm.sel(mm.sql`1`, 'a', mm.int().__mustGetType()),
@@ -518,6 +518,23 @@ it('Ignored keys (raw columns)', async () => {
   await testBuildAsync(ta, 'select/ignoredKeysRawCols', {
     fileHeader: '',
     jsonEncoding: { encodingStyle: mr.JSONEncodingStyle.camelCase },
+  });
+});
+
+it('Forced public columns', async () => {
+  class RplTA extends mm.TableActions {
+    selectT = mm
+      .selectRow(
+        rpl.user_id.join(user).url_name.attr(mm.ColumnAttribute.isPrivate, true),
+        rpl.user_id.join(user).id.privateAttr(),
+        rpl.to_user_id.join(user).url_name,
+      )
+      .attr(mm.ActionAttribute.ignorePrivateColumns, true);
+  }
+  const ta = mm.tableActions(rpl, RplTA);
+  await testBuildAsync(ta, 'select/forcedPublicColumns', {
+    fileHeader: '',
+    jsonEncoding: { encodingStyle: mr.JSONEncodingStyle.camelCase, excludeEmptyValues: true },
   });
 });
 
