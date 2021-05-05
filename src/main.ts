@@ -1,4 +1,4 @@
-export * from './dialects/mysql';
+export * from './dialects/mysql.js';
 export { default as Builder } from './build/builder.js';
 export { default as dtDefault } from './build/dtDefault.js';
 export { default as logger } from './logger.js';
