@@ -1,6 +1,6 @@
 {
   "name": "mingru",
-  "version": "0.45.1",
+  "version": "0.46.0",
   "description": "SQL Generator for mingru-models",
   "type": "module",
   "exports": "./dist/main.js",
