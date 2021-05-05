@@ -1,11 +1,11 @@
 import * as mm from 'mingru-models';
 import toTypeString from 'to-type-string';
-import { ActionIO } from '../io/actionIO';
-import { SQLIO } from '../io/sqlIO';
-import VarList from './varList';
-import * as defs from '../defs';
-import { StringSegment } from '../dialect';
-import BaseIOProcessor from '../io/baseIOProcessor';
+import { ActionIO } from '../io/actionIO.js';
+import { SQLIO } from '../io/sqlIO.js';
+import VarList from './varList.js';
+import * as defs from '../defs.js';
+import { StringSegment } from '../dialect.js';
+import BaseIOProcessor from '../io/baseIOProcessor.js';
 
 export function sniffSQLType(sql: mm.SQL): mm.ColumnType | null {
   for (const element of sql.elements) {

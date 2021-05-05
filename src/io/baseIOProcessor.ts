@@ -1,6 +1,6 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import { ActionToIOOptions } from './actionToIOOptions';
+import { ActionToIOOptions } from './actionToIOOptions.js';
 
 export default class BaseIOProcessor {
   constructor(public action: mm.Action, public opt: ActionToIOOptions) {

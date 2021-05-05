@@ -1,9 +1,9 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import * as utils from '../lib/stringUtils';
-import { ActionIO } from './actionIO';
-import { actionToIO } from './actionToIO';
-import { ActionToIOOptions } from './actionToIOOptions';
+import * as utils from '../lib/stringUtils.js';
+import { ActionIO } from './actionIO.js';
+import { actionToIO } from './actionToIO.js';
+import { ActionToIOOptions } from './actionToIOOptions.js';
 
 // IO object for TA(Tabla actions)
 export class TAIO {

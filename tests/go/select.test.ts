@@ -1,15 +1,15 @@
 import * as mm from 'mingru-models';
 import { itRejects } from 'it-throws';
-import * as mr from '../..';
-import post from '../models/post';
-import cmt from '../models/cmt';
-import rpl from '../models/postReply';
-import user from '../models/user';
-import { testBuildAsync } from './common';
-import postCategory from '../models/postCategory';
-import category from '../models/category';
-import cmt2 from '../models/cmt2';
-import postCmt from '../models/postCmt';
+import * as mr from '../../dist/main.js';
+import post from '../models/post.js';
+import cmt from '../models/cmt.js';
+import rpl from '../models/postReply.js';
+import user from '../models/user.js';
+import { testBuildAsync } from './common.js';
+import postCategory from '../models/postCategory.js';
+import category from '../models/category.js';
+import cmt2 from '../models/cmt2.js';
+import postCmt from '../models/postCmt.js';
 
 it('select', async () => {
   class PostTA extends mm.TableActions {

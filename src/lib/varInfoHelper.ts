@@ -7,9 +7,9 @@ import {
   typeInfoToArray,
   typeInfoToPointer,
   typeInfoWithoutPointer,
-} from './varInfo';
-import * as stringUtils from './stringUtils';
-import { Dialect } from '../dialect';
+} from './varInfo.js';
+import * as stringUtils from './stringUtils.js';
+import { Dialect } from '../dialect.js';
 
 export class TypeInfoBuilder {
   static fromSQLVariable(variable: mm.SQLVariable, dialect: Dialect): TypeInfo {

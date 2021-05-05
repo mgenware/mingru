@@ -1,8 +1,8 @@
 import * as mm from 'mingru-models';
-import { testBuildAsync } from './common';
-import user from '../models/user';
-import post from '../models/post';
-import like from '../models/like';
+import { testBuildAsync } from './common.js';
+import user from '../models/user.js';
+import post from '../models/post.js';
+import like from '../models/like.js';
 
 it('Common (NULL, defaults)', async () => {
   class User extends mm.Table {

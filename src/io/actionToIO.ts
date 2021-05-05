@@ -1,7 +1,7 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import { ActionIO } from './actionIO';
-import { ActionToIOOptions } from './actionToIOOptions';
+import { ActionIO } from './actionIO.js';
+import { ActionToIOOptions } from './actionToIOOptions.js';
 
 export type HandlerType = (action: mm.Action, opt: ActionToIOOptions) => ActionIO;
 

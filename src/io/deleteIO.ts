@@ -1,15 +1,15 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import { Dialect, StringSegment } from '../dialect';
-import { ActionIO } from './actionIO';
-import { SQLIO, sqlIO } from './sqlIO';
-import VarList from '../lib/varList';
-import { VarInfo } from '../lib/varInfo';
-import { registerHandler } from './actionToIO';
-import * as defs from '../defs';
-import BaseIOProcessor from './baseIOProcessor';
-import { ActionToIOOptions } from './actionToIOOptions';
-import { handleNonSelectSQLFrom } from '../lib/sqlHelper';
+import { Dialect, StringSegment } from '../dialect.js';
+import { ActionIO } from './actionIO.js';
+import { SQLIO, sqlIO } from './sqlIO.js';
+import VarList from '../lib/varList.js';
+import { VarInfo } from '../lib/varInfo.js';
+import { registerHandler } from './actionToIO.js';
+import * as defs from '../defs.js';
+import BaseIOProcessor from './baseIOProcessor.js';
+import { ActionToIOOptions } from './actionToIOOptions.js';
+import { handleNonSelectSQLFrom } from '../lib/sqlHelper.js';
 
 export class DeleteIO extends ActionIO {
   constructor(

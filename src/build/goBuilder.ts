@@ -3,14 +3,14 @@ import * as mm from 'mingru-models';
 import { throwIfEmpty } from 'throw-if-arg-empty';
 import * as nodepath from 'path';
 import * as mfs from 'm-fs';
-import GoTABuilder from './goTABuilder';
-import GoBuilderContext from './goBuilderContext';
-import { TAIO } from '../io/taIO';
-import { BuildOptions } from './buildOptions';
-import * as go from './goCode';
-import * as defs from '../defs';
-import { ActionToIOOptions } from '../io/actionToIOOptions';
-import { toSnakeCase } from '../lib/stringUtils';
+import GoTABuilder from './goTABuilder.js';
+import GoBuilderContext from './goBuilderContext.js';
+import { TAIO } from '../io/taIO.js';
+import { BuildOptions } from './buildOptions.js';
+import * as go from './goCode.js';
+import * as defs from '../defs.js';
+import { ActionToIOOptions } from '../io/actionToIOOptions.js';
+import { toSnakeCase } from '../lib/stringUtils.js';
 
 export default class GoBuilder {
   async buildAsync(

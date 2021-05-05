@@ -1,6 +1,6 @@
 import * as mm from 'mingru-models';
-import user from './user';
-import post from './post';
+import user from './user.js';
+import post from './post.js';
 
 class PostCmt extends mm.Table {
   id = mm.pk();

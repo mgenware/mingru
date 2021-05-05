@@ -1,9 +1,9 @@
 /* eslint-disable class-methods-use-this */
 import * as mm from 'mingru-models';
-import * as defs from '../defs';
-import { Dialect } from '../dialect';
-import { sqlIO } from '../io/sqlIO';
-import { extractStringContentFromSegments } from './goCode';
+import * as defs from '../defs.js';
+import { Dialect } from '../dialect.js';
+import { sqlIO } from '../io/sqlIO.js';
+import { extractStringContentFromSegments } from './goCode.js';
 
 export default class CSQLBuilder {
   tableData: mm.TableData;

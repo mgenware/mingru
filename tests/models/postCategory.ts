@@ -1,6 +1,6 @@
 import * as mm from 'mingru-models';
-import post from './post';
-import category from './category';
+import post from './post.js';
+import category from './category.js';
 
 class PostCategory extends mm.Table {
   post_id = post.id;

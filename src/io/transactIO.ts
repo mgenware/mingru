@@ -1,14 +1,14 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import { Dialect } from '../dialect';
-import { ActionIO } from './actionIO';
-import VarList from '../lib/varList';
-import { actionToIO, registerHandler } from './actionToIO';
-import * as utils from '../lib/stringUtils';
-import * as defs from '../defs';
-import { VarInfo } from '../lib/varInfo';
-import BaseIOProcessor from './baseIOProcessor';
-import { ActionToIOOptions } from './actionToIOOptions';
+import { Dialect } from '../dialect.js';
+import { ActionIO } from './actionIO.js';
+import VarList from '../lib/varList.js';
+import { actionToIO, registerHandler } from './actionToIO.js';
+import * as utils from '../lib/stringUtils.js';
+import * as defs from '../defs.js';
+import { VarInfo } from '../lib/varInfo.js';
+import BaseIOProcessor from './baseIOProcessor.js';
+import { ActionToIOOptions } from './actionToIOOptions.js';
 
 export class TransactMemberIO {
   constructor(

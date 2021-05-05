@@ -1,29 +1,29 @@
 /* eslint-disable class-methods-use-this */
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import { Dialect } from '../dialect';
-import { SelectIO } from '../io/selectIO';
-import { UpdateIO } from '../io/updateIO';
-import { InsertIO } from '../io/insertIO';
-import { DeleteIO } from '../io/deleteIO';
+import { Dialect } from '../dialect.js';
+import { SelectIO } from '../io/selectIO.js';
+import { UpdateIO } from '../io/updateIO.js';
+import { InsertIO } from '../io/insertIO.js';
+import { DeleteIO } from '../io/deleteIO.js';
 import {
   VarInfo,
   CompoundTypeInfo,
   getAtomicTypeInfo,
   typeInfoWithoutArray,
   typeInfoToPointer,
-} from '../lib/varInfo';
-import * as go from './goCode';
-import * as defs from '../defs';
-import logger from '../logger';
-import { TAIO } from '../io/taIO';
-import { ActionIO } from '../io/actionIO';
-import { WrapIO } from '../io/wrapIO';
-import { TransactIO } from '../io/transactIO';
-import LinesBuilder from './linesBuilder';
-import * as stringUtils from '../lib/stringUtils';
-import { BuildOptions, JSONEncodingStyle } from './buildOptions';
-import GoBuilderContext from './goBuilderContext';
+} from '../lib/varInfo.js';
+import * as go from './goCode.js';
+import * as defs from '../defs.js';
+import logger from '../logger.js';
+import { TAIO } from '../io/taIO.js';
+import { ActionIO } from '../io/actionIO.js';
+import { WrapIO } from '../io/wrapIO.js';
+import { TransactIO } from '../io/transactIO.js';
+import LinesBuilder from './linesBuilder.js';
+import * as stringUtils from '../lib/stringUtils.js';
+import { BuildOptions, JSONEncodingStyle } from './buildOptions.js';
+import GoBuilderContext from './goBuilderContext.js';
 
 function joinParams(arr: string[]): string {
   return arr.join(', ');

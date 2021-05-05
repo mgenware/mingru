@@ -1,4 +1,4 @@
-import { FuncSignature, MutableStructInfo } from './goCode';
+import { FuncSignature, MutableStructInfo } from './goCode.js';
 
 export default class GoBuilderContext {
   interfaces: Record<string, Map<string, FuncSignature>> = {};

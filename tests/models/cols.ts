@@ -1,5 +1,5 @@
 import * as mm from 'mingru-models';
-import user from './user';
+import user from './user.js';
 
 class Cols extends mm.Table {
   id = mm.pk();

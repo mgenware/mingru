@@ -1,8 +1,8 @@
 import * as mm from 'mingru-models';
 import { itRejects } from 'it-throws';
-import user from '../models/user';
-import post from '../models/post';
-import { testBuildFullAsync, testBuildAsync } from './common';
+import user from '../models/user.js';
+import post from '../models/post.js';
+import { testBuildFullAsync, testBuildAsync } from './common.js';
 
 it('Single action', async () => {
   class PostTA extends mm.TableActions {

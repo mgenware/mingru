@@ -1,8 +1,8 @@
 import * as mm from 'mingru-models';
 import { itThrows } from 'it-throws';
-import user from '../models/user';
-import * as mr from '../..';
-import { eq } from '../assert-aliases';
+import user from '../models/user.js';
+import * as mr from '../../dist/main.js';
+import { eq } from '../assert-aliases.js';
 
 const TimePkg = 'time';
 const dialect = mr.mysql;

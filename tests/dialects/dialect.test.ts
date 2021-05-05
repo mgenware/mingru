@@ -1,6 +1,6 @@
-import * as mr from '../..';
-import user from '../models/user';
-import { deepEq, eq } from '../assert-aliases';
+import * as mr from '../../dist/main.js';
+import user from '../models/user.js';
+import { deepEq, eq } from '../assert-aliases.js';
 
 const dialect = mr.mysql;
 

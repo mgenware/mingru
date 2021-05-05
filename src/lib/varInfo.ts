@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import { toCamelCase, toPascalCase } from './stringUtils';
+import { toCamelCase, toPascalCase } from './stringUtils.js';
 
 export class AtomicTypeInfo {
   moduleName = '';

@@ -2,14 +2,14 @@
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import toTypeString from 'to-type-string';
 import * as mm from 'mingru-models';
-import { Dialect, StringSegment } from '../dialect';
-import VarList from '../lib/varList';
-import { VarInfo } from '../lib/varInfo';
-import { VarInfoBuilder } from '../lib/varInfoHelper';
-import { makeStringFromSegments } from '../build/goCode';
-import { join2DArrays } from '../lib/arrayUtils';
-import { actionToIO } from './actionToIO';
-import { ActionIO } from './actionIO';
+import { Dialect, StringSegment } from '../dialect.js';
+import VarList from '../lib/varList.js';
+import { VarInfo } from '../lib/varInfo.js';
+import { VarInfoBuilder } from '../lib/varInfoHelper.js';
+import { makeStringFromSegments } from '../build/goCode.js';
+import { join2DArrays } from '../lib/arrayUtils.js';
+import { actionToIO } from './actionToIO.js';
+import { ActionIO } from './actionIO.js';
 
 export class SQLIO {
   get vars(): VarInfo[] {

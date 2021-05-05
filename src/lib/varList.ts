@@ -1,5 +1,5 @@
 import { throwIfFalsy, throwIfFalsyStrict } from 'throw-if-arg-empty';
-import { VarInfo } from './varInfo';
+import { VarInfo } from './varInfo.js';
 
 /**
  * Note that variables with same names and types are considered duplicates. Variables with same

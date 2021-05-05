@@ -2,8 +2,8 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import toTypeString from 'to-type-string';
-import { Dialect } from '../dialect';
-import { AtomicTypeInfo, CompoundTypeInfo, TypeInfo } from '../lib/varInfo';
+import { Dialect } from '../dialect.js';
+import { AtomicTypeInfo, CompoundTypeInfo, TypeInfo } from '../lib/varInfo.js';
 
 // eslint-disable-next-line
 const escapeString = require('sql-escape-string');

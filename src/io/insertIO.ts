@@ -1,16 +1,16 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import { Dialect, StringSegment } from '../dialect';
-import { settersToVarList, SetterIO } from './setterIO';
-import { ActionIO } from './actionIO';
-import VarList from '../lib/varList';
-import { registerHandler } from './actionToIO';
-import * as defs from '../defs';
-import * as utils from '../lib/stringUtils';
-import { forEachWithSlots } from '../lib/arrayUtils';
-import { ActionToIOOptions } from './actionToIOOptions';
-import BaseIOProcessor from './baseIOProcessor';
-import { handleNonSelectSQLFrom } from '../lib/sqlHelper';
+import { Dialect, StringSegment } from '../dialect.js';
+import { settersToVarList, SetterIO } from './setterIO.js';
+import { ActionIO } from './actionIO.js';
+import VarList from '../lib/varList.js';
+import { registerHandler } from './actionToIO.js';
+import * as defs from '../defs.js';
+import * as utils from '../lib/stringUtils.js';
+import { forEachWithSlots } from '../lib/arrayUtils.js';
+import { ActionToIOOptions } from './actionToIOOptions.js';
+import BaseIOProcessor from './baseIOProcessor.js';
+import { handleNonSelectSQLFrom } from '../lib/sqlHelper.js';
 
 export class InsertIO extends ActionIO {
   returnMember: ActionIO | undefined;

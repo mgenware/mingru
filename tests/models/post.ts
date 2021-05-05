@@ -1,5 +1,5 @@
 import * as mm from 'mingru-models';
-import user from './user';
+import user from './user.js';
 
 class Post extends mm.Table {
   id = mm.pk();
@@ -7,10 +7,7 @@ class Post extends mm.Table {
   content = mm.varChar(100);
   user_id = user.id;
   reviewer_id = user.id;
-  cmtCount = mm
-    .uInt()
-    .default(0)
-    .setDBName('cmt_c');
+  cmtCount = mm.uInt().default(0).setDBName('cmt_c');
 
   datetime = mm.datetime();
   date = mm.date();

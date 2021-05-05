@@ -1,9 +1,9 @@
 import * as mm from 'mingru-models';
-import * as mr from '../..';
-import post from '../models/post';
-import user from '../models/user';
-import { ioOpt } from './common';
-import { ok, eq } from '../assert-aliases';
+import * as mr from '../../dist/main.js';
+import post from '../models/post.js';
+import user from '../models/user.js';
+import { ioOpt } from './common.js';
+import { ok, eq } from '../assert-aliases.js';
 
 it('Delete', () => {
   class PostTA extends mm.TableActions {

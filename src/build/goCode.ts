@@ -1,9 +1,9 @@
-import { JSONEncodingStyle } from './buildOptions';
-import { VarInfo, getAtomicTypeInfo } from '../lib/varInfo';
-import { StringSegment } from '../dialect';
-import CodeStringBuilder from '../lib/codeStringBuilder';
-import * as stringUtils from '../lib/stringUtils';
-import LinesBuilder from './linesBuilder';
+import { JSONEncodingStyle } from './buildOptions.js';
+import { VarInfo, getAtomicTypeInfo } from '../lib/varInfo.js';
+import { StringSegment } from '../dialect.js';
+import CodeStringBuilder from '../lib/codeStringBuilder.js';
+import * as stringUtils from '../lib/stringUtils.js';
+import LinesBuilder from './linesBuilder.js';
 
 export class FuncSignature {
   constructor(

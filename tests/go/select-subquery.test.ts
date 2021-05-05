@@ -1,7 +1,7 @@
 import * as mm from 'mingru-models';
-import post from '../models/post';
-import user from '../models/user';
-import { testBuildAsync } from './common';
+import post from '../models/post.js';
+import user from '../models/user.js';
+import { testBuildAsync } from './common.js';
 
 it('WHERE', async () => {
   class PostTA extends mm.TableActions {

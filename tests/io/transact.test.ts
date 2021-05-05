@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as mm from 'mingru-models';
-import * as mr from '../..';
-import user from '../models/user';
-import post from '../models/post';
-import { ioOpt } from './common';
-import { eq, ok } from '../assert-aliases';
+import * as mr from '../../dist/main.js';
+import user from '../models/user.js';
+import post from '../models/post.js';
+import { ioOpt } from './common.js';
+import { eq, ok } from '../assert-aliases.js';
 
 it('TransactIO', () => {
   class WrapSelfTA extends mm.TableActions {

@@ -1,15 +1,15 @@
 import * as mm from 'mingru-models';
 import * as assert from 'assert';
 import { itThrows } from 'it-throws';
-import * as mr from '../..';
-import user from '../models/user';
-import post from '../models/post';
-import cmt from '../models/cmt';
-import rpl from '../models/postReply';
-import postCmt from '../models/postCmt';
-import cmt2 from '../models/cmt2';
-import { ioOpt } from './common';
-import { eq, ok } from '../assert-aliases';
+import * as mr from '../../dist/main.js';
+import user from '../models/user.js';
+import post from '../models/post.js';
+import cmt from '../models/cmt.js';
+import rpl from '../models/postReply.js';
+import postCmt from '../models/postCmt.js';
+import cmt2 from '../models/cmt2.js';
+import { ioOpt } from './common.js';
+import { eq, ok } from '../assert-aliases.js';
 
 it('Select', () => {
   class UserTA extends mm.TableActions {

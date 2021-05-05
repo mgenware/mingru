@@ -1,14 +1,14 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import { Dialect } from '../dialect';
-import { ActionIO } from './actionIO';
-import VarList from '../lib/varList';
-import { VarInfo } from '../lib/varInfo';
-import * as utils from '../lib/stringUtils';
-import { registerHandler, actionToIO } from './actionToIO';
-import * as defs from '../defs';
-import { ActionToIOOptions } from './actionToIOOptions';
-import BaseIOProcessor from './baseIOProcessor';
+import { Dialect } from '../dialect.js';
+import { ActionIO } from './actionIO.js';
+import VarList from '../lib/varList.js';
+import { VarInfo } from '../lib/varInfo.js';
+import * as utils from '../lib/stringUtils.js';
+import { registerHandler, actionToIO } from './actionToIO.js';
+import * as defs from '../defs.js';
+import { ActionToIOOptions } from './actionToIOOptions.js';
+import BaseIOProcessor from './baseIOProcessor.js';
 
 export class WrapIO extends ActionIO {
   constructor(

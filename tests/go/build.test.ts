@@ -1,8 +1,8 @@
 import * as mm from 'mingru-models';
-import user from '../models/user';
-import post from '../models/post';
-import postReply from '../models/postReply';
-import { testBuildToDirAsync } from './common';
+import user from '../models/user.js';
+import post from '../models/post.js';
+import postReply from '../models/postReply.js';
+import { testBuildToDirAsync } from './common.js';
 
 it('Single table', async () => {
   class PostTA extends mm.TableActions {

@@ -1,8 +1,8 @@
 import * as mm from 'mingru-models';
-import { sniffSQLType } from '../../dist/lib/sqlHelper';
-import user from '../models/user';
-import post from '../models/post';
-import { eq } from '../assert-aliases';
+import { sniffSQLType } from '../../dist/lib/sqlHelper.js';
+import user from '../models/user.js';
+import post from '../models/post.js';
+import { eq } from '../assert-aliases.js';
 
 function tSniffSQLType(sql: mm.SQL, expected: string) {
   eq(sniffSQLType(sql)?.toString(), expected);

@@ -1,8 +1,8 @@
 import * as nodepath from 'path';
 import * as mm from 'mingru-models';
 import * as mfs from 'm-fs';
-import * as mr from '../..';
-import { eq } from '../assert-aliases';
+import * as mr from '../../dist/main.js';
+import { eq } from '../assert-aliases.js';
 
 const dialect = mr.mysql;
 const DestDataDir = 'tests/csql/dest';

@@ -1,7 +1,7 @@
 import * as mm from 'mingru-models';
-import cols from '../models/cols';
-import post from '../models/post';
-import { testBuildAsync } from './common';
+import cols from '../models/cols.js';
+import post from '../models/post.js';
+import { testBuildAsync } from './common.js';
 
 it('Ghost table', async () => {
   class Ghost extends mm.GhostTable {}

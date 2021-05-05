@@ -2,25 +2,25 @@
 import * as mm from 'mingru-models';
 import toTypeString from 'to-type-string';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import { Dialect, StringSegment } from '../dialect';
-import { SQLIO, sqlIO, SQLIOBuilderOption } from './sqlIO';
-import { ActionIO } from './actionIO';
-import * as stringUtils from '../lib/stringUtils';
+import { Dialect, StringSegment } from '../dialect.js';
+import { SQLIO, sqlIO, SQLIOBuilderOption } from './sqlIO.js';
+import { ActionIO } from './actionIO.js';
+import * as stringUtils from '../lib/stringUtils.js';
 import {
   VarInfo,
   AtomicTypeInfo,
   CompoundTypeInfo,
   typeInfoToArray,
   typeInfoToPointer,
-} from '../lib/varInfo';
-import VarList from '../lib/varList';
-import { registerHandler } from './actionToIO';
-import * as defs from '../defs';
-import { VarInfoBuilder } from '../lib/varInfoHelper';
-import { forEachWithSlots } from '../lib/arrayUtils';
-import { ActionToIOOptions } from './actionToIOOptions';
-import BaseIOProcessor from './baseIOProcessor';
-import * as sqlHelper from '../lib/sqlHelper';
+} from '../lib/varInfo.js';
+import VarList from '../lib/varList.js';
+import { registerHandler } from './actionToIO.js';
+import * as defs from '../defs.js';
+import { VarInfoBuilder } from '../lib/varInfoHelper.js';
+import { forEachWithSlots } from '../lib/arrayUtils.js';
+import { ActionToIOOptions } from './actionToIOOptions.js';
+import BaseIOProcessor from './baseIOProcessor.js';
+import * as sqlHelper from '../lib/sqlHelper.js';
 
 const orderByInputParamName = 'orderBy';
 

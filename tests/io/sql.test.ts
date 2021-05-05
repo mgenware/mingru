@@ -1,9 +1,9 @@
 import * as mm from 'mingru-models';
 import { itThrows } from 'it-throws';
-import * as mr from '../..';
-import user from '../models/user';
-import post from '../models/post';
-import { eq, ok } from '../assert-aliases';
+import * as mr from '../../dist/main.js';
+import user from '../models/user.js';
+import post from '../models/post.js';
+import { eq, ok } from '../assert-aliases.js';
 
 const dialect = mr.mysql;
 

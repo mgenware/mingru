@@ -3,12 +3,12 @@ import { throwIfFalsy } from 'throw-if-arg-empty';
 import * as mfs from 'm-fs';
 import * as nodepath from 'path';
 import del from 'del';
-import { Dialect } from '../dialect';
-import GoBuilder from './goBuilder';
-import logger from '../logger';
-import CSQLBuilder from './csqlBuilder';
-import { BuildOptions } from './buildOptions';
-import { toSnakeCase } from '../lib/stringUtils';
+import { Dialect } from '../dialect.js';
+import GoBuilder from './goBuilder.js';
+import logger from '../logger.js';
+import CSQLBuilder from './csqlBuilder.js';
+import { BuildOptions } from './buildOptions.js';
+import { toSnakeCase } from '../lib/stringUtils.js';
 
 export default class Builder {
   opts: BuildOptions;

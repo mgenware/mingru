@@ -1,8 +1,8 @@
 import * as mm from 'mingru-models';
-import * as mr from '../..';
-import cols from '../models/cols';
-import { ioOpt } from './common';
-import { eq } from '../assert-aliases';
+import * as mr from '../../dist/main.js';
+import cols from '../models/cols.js';
+import { ioOpt } from './common.js';
+import { eq } from '../assert-aliases.js';
 
 it('dtDefault', () => {
   const { dt } = mm;

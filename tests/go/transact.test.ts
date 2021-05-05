@@ -1,8 +1,8 @@
 import * as mm from 'mingru-models';
-import { testBuildAsync } from './common';
-import cmt2 from '../models/cmt2';
-import postCmt from '../models/postCmt';
-import post from '../models/post';
+import { testBuildAsync } from './common.js';
+import cmt2 from '../models/cmt2.js';
+import postCmt from '../models/postCmt.js';
+import post from '../models/post.js';
 
 it('Declare return types', async () => {
   class Employee extends mm.Table {

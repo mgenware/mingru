@@ -1,7 +1,7 @@
 import * as mm from 'mingru-models';
-import { testBuildAsync } from './common';
-import user from '../models/user';
-import post from '../models/post';
+import { testBuildAsync } from './common.js';
+import user from '../models/user.js';
+import post from '../models/post.js';
 
 it('Wrap', async () => {
   class UserTA extends mm.TableActions {

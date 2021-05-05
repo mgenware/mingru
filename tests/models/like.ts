@@ -1,5 +1,5 @@
 import * as mm from 'mingru-models';
-import user from './user';
+import user from './user.js';
 
 class Like extends mm.Table {
   user_id = mm.pk(user.id);

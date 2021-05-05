@@ -1,13 +1,11 @@
 import * as mm from 'mingru-models';
-import post from '../models/post';
-import { testBuildToDirAsync } from './common';
+import post from '../models/post.js';
+import { testBuildToDirAsync } from './common.js';
 
 it('Select', async () => {
   class PostTA extends mm.TableActions {
     selectTimes = mm.selectRows(post.datetime, post.date).orderByAsc(post.id);
-    selectNullableTimes = mm
-      .selectRows(post.n_datetime, post.n_date)
-      .orderByAsc(post.id);
+    selectNullableTimes = mm.selectRows(post.n_datetime, post.n_date).orderByAsc(post.id);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'extraImportsSelect');
@@ -39,9 +37,7 @@ it('Select field', async () => {
 it('Update', async () => {
   class PostTA extends mm.TableActions {
     updateTimes = mm.unsafeUpdateAll().setInputs(post.datetime, post.date);
-    updateNullableTimes = mm
-      .unsafeUpdateAll()
-      .setInputs(post.n_datetime, post.n_date);
+    updateNullableTimes = mm.unsafeUpdateAll().setInputs(post.n_datetime, post.n_date);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'extraImportsUpdate');
@@ -78,9 +74,7 @@ it('Delete (where)', async () => {
 
 it('Insert', async () => {
   class PostTA extends mm.TableActions {
-    insertTimes = mm
-      .unsafeInsertOne()
-      .setInputs(post.datetime, post.n_datetime);
+    insertTimes = mm.unsafeInsertOne().setInputs(post.datetime, post.n_datetime);
   }
   const ta = mm.tableActions(post, PostTA);
   await testBuildToDirAsync([ta], ['post'], 'extraImportsInsert');
