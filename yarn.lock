@@ -1568,13 +1568,13 @@ min-indent@^1.0.0:
   resolved "https://registry.yarnpkg.com/min-indent/-/min-indent-1.0.0.tgz#cfc45c37e9ec0d8f0a0ec3dd4ef7f7c3abe39256"
   integrity sha1-z8RcN+nsDY8KDsPdTvf3w6vjklY=
 
-mingru-models@^0.56.0:
-  version "0.56.0"
-  resolved "https://registry.yarnpkg.com/mingru-models/-/mingru-models-0.56.0.tgz#295b91e94998d90ea9940ef40ef74c50b854fdf2"
-  integrity sha512-juexppdPQMVqEWK02t9MbX92xjUsy8gcAFlmuYGSjBFknxTgBWQ+SHksf5Q58VQn4lqUfB9uhBXlCSycpWWLPg==
+mingru-models@^0.56.1:
+  version "0.56.1"
+  resolved "https://registry.yarnpkg.com/mingru-models/-/mingru-models-0.56.1.tgz#f192f976758492a25e707f9d5c9365118a8683e9"
+  integrity sha512-7w7jeN4jbRlhk6tbqI9YI+HOBsJT0CsECre5TidTp3Z4GoV1KZAVuAfpkmrv9XjQpe+KVzaWRa9EgPRnvbIp8w==
   dependencies:
     decamelize "^5.0.0"
-    throw-if-arg-empty "^2.2.1"
+    throw-if-arg-empty "^3.0.0"
     to-type-string "^2.0.0"
 
 minimatch@3.0.4, minimatch@^3.0.4:
@@ -2311,11 +2311,6 @@ text-table@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
   integrity sha1-f17oI66AUgfACvLfSoTsP8+lcLQ=
-
-throw-if-arg-empty@^2.2.1:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/throw-if-arg-empty/-/throw-if-arg-empty-2.2.1.tgz#11943398b93dec94531d2834b0216950b9b9ca8d"
-  integrity sha512-/xUwfM9w3W2pzpQkA9eC0SXbgPwDirTXCcPsvlg+BF1A0hpWtptpzUlMv0D9ZiSJ8rFu3Wm93bisKp+co07iMw==
 
 throw-if-arg-empty@^3.0.0:
   version "3.0.0"
