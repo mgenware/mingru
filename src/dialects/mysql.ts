@@ -4,9 +4,7 @@ import { throwIfFalsy } from 'throw-if-arg-empty';
 import toTypeString from 'to-type-string';
 import { Dialect } from '../dialect.js';
 import { AtomicTypeInfo, CompoundTypeInfo, TypeInfo } from '../lib/varInfo.js';
-
-// eslint-disable-next-line
-const escapeString = require('sql-escape-string');
+import escapeSQLString from './sqlEscapeString.js';
 
 const TimeType = new AtomicTypeInfo('Time', 'time.Time{}', 'time');
 
@@ -28,7 +26,7 @@ export class MySQL extends Dialect {
       return mm.sql`${valueString}`;
     }
     if (typeof value === 'string') {
-      return mm.sql`${escapeString(value)}`;
+      return mm.sql`${escapeSQLString(value)}`;
     }
     if (value instanceof mm.SQL) {
       return value;

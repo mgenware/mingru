@@ -4,12 +4,12 @@
   "description": "SQL Generator for mingru-models",
   "type": "module",
   "exports": "./dist/main.js",
-  "types": "dist/main.d.ts",
+  "types": "./dist/main.d.ts",
   "author": "Mgenware (https://github.com/mgenware)",
   "homepage": "https://github.com/mgenware/mingru",
   "bugs": "https://github.com/mgenware/mingru/issues",
   "keywords": [
-    "mingru"
+    "mingru-models"
   ],
   "repository": {
     "type": "git",
@@ -51,8 +51,7 @@
     "del": "^6.0.0",
     "eslint-config-mgenware": "^0.1.0",
     "m-fs": "^5.0.0",
-    "sql-escape-string": "^1.1.0",
-    "throw-if-arg-empty": "^2.2.1",
+    "throw-if-arg-empty": "^3.0.0",
     "to-type-string": "^2.0.0"
   }
 }
