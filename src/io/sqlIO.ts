@@ -213,6 +213,8 @@ export function sqlIO(
   }
   for (const element of sql.elements) {
     if (element.type === mm.SQLElementType.input) {
+      // eslint-disable-next-line max-len
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
       const sqlVar = element.toInput();
       const varInfo = VarInfoBuilder.fromSQLVar(sqlVar, dialect);
       vars.add(varInfo);

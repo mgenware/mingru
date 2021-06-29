@@ -9,5 +9,6 @@ module.exports = {
     'no-underscore-dangle': 'off',
     'prefer-template': 'off',
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
+    '@typescript-eslint/unbound-method': 'off',
   },
 };

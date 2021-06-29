@@ -88,9 +88,7 @@ export async function testBuildToDirAsync(
   await builder.buildAsync(async () => {
     await builder.buildActionsAsync(actions);
     if (buildCSQL) {
-      await builder.buildCreateTableSQLFilesAsync(
-        actions.map((a) => a.__getData().table as mm.Table),
-      );
+      await builder.buildCreateTableSQLFilesAsync(actions.map((a) => a.__getData().table));
     }
   });
 

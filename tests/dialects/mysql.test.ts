@@ -59,11 +59,11 @@ it('DT', () => {
   ];
 
   for (const t of tests) {
-    const column = t[0] as mm.Column;
-    testType(column, t[1] as string, t[2] as string);
+    const column = t[0];
+    testType(column, t[1], t[2] as string);
     if (!column.__mustGetType().pk) {
       column.__mustGetType().nullable = true;
-      testType(column, `*${t[1]}` as string, t[2] as string);
+      testType(column, `*${t[1]}`, t[2] as string);
     }
   }
 });
@@ -78,6 +78,7 @@ it('as', () => {
 });
 
 it('SQL calls', () => {
+  // eslint-disable-next-line @typescript-eslint/unbound-method
   const t = dialect.sqlCall;
   eq(t(mm.SQLCallType.localDateNow), 'CURDATE');
   eq(t(mm.SQLCallType.localTimeNow), 'CURTIME');
