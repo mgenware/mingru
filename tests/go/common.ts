@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import * as nodepath from 'path';
 import * as mm from 'mingru-models';
-import * as tempy from 'tempy';
+import tempy from 'tempy';
 import * as mfs from 'm-fs';
 import * as mr from '../../dist/main.js';
 import { ioOpt } from '../io/common.js';
