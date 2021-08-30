@@ -41,7 +41,8 @@ export function actionToIO(
     const result = handler(action, opt);
     actionToIOMap.set(action, result);
     return result;
-  } catch (err) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
     if (err.message !== undefined) {
       err.message += ` [${descMsg}]`;
     }
