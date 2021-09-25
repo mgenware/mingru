@@ -3,7 +3,7 @@ import * as mm from 'mingru-models';
 import * as mr from '../../dist/main.js';
 import user from '../models/user.js';
 import post from '../models/post.js';
-import { ioOpt } from './common.js';
+import { commonIOOptions } from './common.js';
 import { eq, ok } from '../assert-aliases.js';
 
 class WrapSelfTA extends mm.TableActions {
@@ -31,16 +31,16 @@ class WrapOtherTA extends mm.TableActions {
 const wrapOther = mm.tableActions(post, WrapOtherTA);
 
 it('WrapIO', () => {
-  const wrappedIO = mr.wrapIO(wrapSelf.d, ioOpt);
+  const wrappedIO = mr.wrapIO(wrapSelf.d, commonIOOptions);
   ok(wrappedIO instanceof mr.WrapIO);
 
   // Inline inner action results in merging of outer and inner IOs.
-  const innerIO = mr.wrapIO(wrapSelf.dTmp, ioOpt);
+  const innerIO = mr.wrapIO(wrapSelf.dTmp, commonIOOptions);
   ok(innerIO instanceof mr.UpdateIO);
 });
 
 it('getInputs (wrapSelf and innerIO)', () => {
-  const io = mr.wrapIO(wrapSelf.d, ioOpt) as mr.WrapIO;
+  const io = mr.wrapIO(wrapSelf.d, commonIOOptions) as mr.WrapIO;
   eq(
     io.funcArgs.toString(),
     'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, id: uint64, urlName: string, followerCount: *string {queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, id: uint64, followerCount: *string}',
@@ -53,7 +53,7 @@ it('getInputs (wrapSelf and innerIO)', () => {
 });
 
 it('getInputs (wrapOther)', () => {
-  const io = mr.wrapIO(wrapOther.standard, ioOpt) as mr.WrapIO;
+  const io = mr.wrapIO(wrapOther.standard, commonIOOptions) as mr.WrapIO;
   eq(
     io.funcArgs.toString(),
     'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, urlName: string, sig: *string, followerCount: *string {queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, sig: *string, followerCount: *string}',
@@ -66,7 +66,7 @@ it('getInputs (wrapOther)', () => {
 });
 
 it('getInputs (wrapOther, nested)', () => {
-  const io = mr.wrapIO(wrapOther.nested, ioOpt) as mr.WrapIO;
+  const io = mr.wrapIO(wrapOther.nested, commonIOOptions) as mr.WrapIO;
   eq(
     io.funcArgs.toString(),
     'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, urlName: string, followerCount: *string {queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, followerCount: *string}',
@@ -91,13 +91,13 @@ it('Throws on undefined inputs', () => {
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t2;
   itThrows(
-    () => mr.wrapIO(v, ioOpt),
+    () => mr.wrapIO(v, commonIOOptions),
     'The argument "haha" doesn\'t exist in action "WrapAction(t2, Table(user))", available arguments "queryable, id, urlName", got "{"haha":"\\"tony\\""}"',
   );
 });
 
 it('ReturnRef', () => {
-  const io = mr.wrapIO(wrapOther.retValue, ioOpt) as mr.WrapIO;
+  const io = mr.wrapIO(wrapOther.retValue, commonIOOptions) as mr.WrapIO;
   eq(
     io.funcArgs.toString(),
     'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, id: uint64=ValueRef(extID), urlName: string, followerCount: *string {queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, id: uint64=ValueRef(extID), followerCount: *string}',

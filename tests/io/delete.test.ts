@@ -2,7 +2,7 @@ import * as mm from 'mingru-models';
 import * as mr from '../../dist/main.js';
 import post from '../models/post.js';
 import user from '../models/user.js';
-import { ioOpt } from './common.js';
+import { commonIOOptions } from './common.js';
 import { ok, eq } from '../assert-aliases.js';
 
 it('Delete', () => {
@@ -11,7 +11,7 @@ it('Delete', () => {
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
-  const io = mr.deleteIO(v, ioOpt);
+  const io = mr.deleteIO(v, commonIOOptions);
 
   ok(io instanceof mr.DeleteIO);
   eq(io.getSQLCode(), '"DELETE FROM `db_post` WHERE `id` = ?"');
@@ -23,7 +23,7 @@ it('Delete with where', () => {
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
-  const io = mr.deleteIO(v, ioOpt);
+  const io = mr.deleteIO(v, commonIOOptions);
 
   eq(io.getSQLCode(), '"DELETE FROM `db_post` WHERE `id` = 1"');
 });
@@ -34,7 +34,7 @@ it('getInputs', () => {
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
-  const io = mr.deleteIO(v, ioOpt);
+  const io = mr.deleteIO(v, commonIOOptions);
   eq(
     io.funcArgs.toString(),
     'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, urlName: string',
@@ -48,7 +48,7 @@ it('returnValues', () => {
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
-  const io = mr.deleteIO(v, ioOpt);
+  const io = mr.deleteIO(v, commonIOOptions);
   const { returnValues } = io;
   eq(returnValues.toString(), '');
 });
@@ -59,7 +59,7 @@ it('getInputs (no WHERE)', () => {
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
-  const io = mr.deleteIO(v, ioOpt);
+  const io = mr.deleteIO(v, commonIOOptions);
   const inputs = io.funcArgs;
   eq(inputs.list.length, 1);
 });
@@ -70,7 +70,7 @@ it('returnValues (no WHERE)', () => {
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
-  const io = mr.deleteIO(v, ioOpt);
+  const io = mr.deleteIO(v, commonIOOptions);
   const { returnValues } = io;
   eq(returnValues.toString(), '__rowsAffected: int');
 });

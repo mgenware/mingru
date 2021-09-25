@@ -18,9 +18,12 @@ export interface ActionToIOOptions {
   // `SQLIO` uses this option to provide a fallback bound table
   // for subqueries when they don't have a bound table.
   groupTable?: mm.Table;
+
   // Like `contextTable`, a fallback value for `__name`, used by
   // TRANSACT members.
   actionName?: string;
 
   unsafeTableInput?: boolean;
+
+  noColumnAlias?: boolean;
 }

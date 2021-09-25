@@ -1,3 +1,3 @@
 import * as mr from '../../dist/main.js';
 
-export const ioOpt: mr.ActionToIOOptions = { dialect: mr.mysql };
+export const commonIOOptions: mr.ActionToIOOptions = { dialect: mr.mysql };

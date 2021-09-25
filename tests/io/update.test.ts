@@ -4,7 +4,7 @@ import { itThrows } from 'it-throws';
 import * as mr from '../../dist/main.js';
 import post from '../models/post.js';
 import user from '../models/user.js';
-import { ioOpt } from './common.js';
+import { commonIOOptions } from './common.js';
 import { eq, ok } from '../assert-aliases.js';
 
 it('Update', () => {
@@ -18,7 +18,7 @@ it('Update', () => {
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
-  const io = mr.updateIO(v, ioOpt);
+  const io = mr.updateIO(v, commonIOOptions);
 
   ok(io instanceof mr.UpdateIO);
   eq(
@@ -41,7 +41,7 @@ it('Update with WHERE', () => {
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
-  const io = mr.updateIO(v, ioOpt);
+  const io = mr.updateIO(v, commonIOOptions);
 
   eq(io.getSQLCode(), '"UPDATE `db_post` SET `title` = \\"haha\\" WHERE `id` = 1"');
 });
@@ -57,7 +57,7 @@ it('getInputs', () => {
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
-  const io = mr.updateIO(v, ioOpt);
+  const io = mr.updateIO(v, commonIOOptions);
   eq(io.setterArgs.toString(), 'urlName: string, sig: *string');
   eq(
     io.funcArgs.toString(),
@@ -80,7 +80,7 @@ it('returnValues', () => {
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
-  const io = mr.updateIO(v, ioOpt);
+  const io = mr.updateIO(v, commonIOOptions);
   eq(io.returnValues.toString(), '__rowsAffected: int');
 });
 
@@ -90,7 +90,7 @@ it('Validate setters', () => {
       t = mm.unsafeUpdateAll().setInputs(user.id).setInputs();
     }
     const ta = mm.tableActions(post, PostTA);
-    mr.insertIO(ta.t, ioOpt);
+    mr.insertIO(ta.t, commonIOOptions);
   }, 'Source table assertion failed, expected "Table(post|db_post)", got "Table(user)".');
 });
 
@@ -108,7 +108,7 @@ it('setDefaults', () => {
   }
   const postTA = mm.tableActions(post2, PostTA);
   const v = postTA.t;
-  const io = mr.updateIO(v, ioOpt);
+  const io = mr.updateIO(v, commonIOOptions);
 
   eq(io.getSQLCode(), '"UPDATE `post` SET `datetime` = UTC_TIMESTAMP()"');
 });

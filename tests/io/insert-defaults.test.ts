@@ -1,7 +1,7 @@
 import * as mm from 'mingru-models';
 import * as mr from '../../dist/main.js';
 import cols from '../models/cols.js';
-import { ioOpt } from './common.js';
+import { commonIOOptions } from './common.js';
 import { eq } from '../assert-aliases.js';
 
 it('dtDefault', () => {
@@ -33,7 +33,7 @@ it('insertWithDefaults', () => {
   }
   const ta = mm.tableActions(cols, ColsTA);
   const v = ta.insertT;
-  const io = mr.insertIO(v, ioOpt);
+  const io = mr.insertIO(v, commonIOOptions);
 
   eq(
     io.getSQLCode(),

@@ -8,7 +8,7 @@ import cmt from '../models/cmt.js';
 import rpl from '../models/postReply.js';
 import postCmt from '../models/postCmt.js';
 import cmt2 from '../models/cmt2.js';
-import { ioOpt } from './common.js';
+import { commonIOOptions } from './common.js';
 import { eq, ok } from '../assert-aliases.js';
 
 it('Select', () => {
@@ -17,7 +17,7 @@ it('Select', () => {
   }
   const userTA = mm.tableActions(user, UserTA);
   const v = userTA.t;
-  const io = mr.selectIO(v, ioOpt);
+  const io = mr.selectIO(v, commonIOOptions);
 
   ok(io instanceof mr.SelectIO);
   eq(io.getSQLCode(), '"SELECT `id`, `url_name` FROM `user`"');
@@ -32,7 +32,7 @@ it('Where', () => {
   }
   const userTA = mm.tableActions(user, UserTA);
   const v = userTA.t;
-  const io = mr.selectIO(v, ioOpt);
+  const io = mr.selectIO(v, commonIOOptions);
 
   ok(io.whereIO instanceof mr.SQLIO);
   eq(io.getSQLCode(), '"SELECT `id`, `url_name` FROM `user` WHERE `id` = 1 ? ?"');
@@ -51,7 +51,7 @@ it('Where and inputs', () => {
   }
   const userTA = mm.tableActions(user, UserTA);
   const v = userTA.t;
-  const io = mr.selectIO(v, ioOpt);
+  const io = mr.selectIO(v, commonIOOptions);
 
   ok(io.whereIO instanceof mr.SQLIO);
   eq(io.getSQLCode(), '"SELECT `id`, `url_name` FROM `user` WHERE `id` = ? && `url_name` = ?"');
@@ -63,7 +63,7 @@ it('Basic join', () => {
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
-  const io = mr.selectIO(v, ioOpt);
+  const io = mr.selectIO(v, commonIOOptions);
 
   eq(
     io.getSQLCode(),
@@ -81,7 +81,7 @@ it('Multiple cols join and custom table name', () => {
   }
   const rplTA = mm.tableActions(rpl, RplTA);
   const v = rplTA.t;
-  const io = mr.selectIO(v, ioOpt);
+  const io = mr.selectIO(v, commonIOOptions);
 
   eq(
     io.getSQLCode(),
@@ -95,7 +95,7 @@ it('Join a table with custom table name', () => {
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
-  const io = mr.selectIO(v, ioOpt);
+  const io = mr.selectIO(v, commonIOOptions);
 
   eq(
     io.getSQLCode(),
@@ -109,7 +109,7 @@ it('Join a table with custom column name', () => {
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
-  const io = mr.selectIO(v, ioOpt);
+  const io = mr.selectIO(v, commonIOOptions);
 
   eq(
     io.getSQLCode(),
@@ -137,7 +137,7 @@ it('3-table joins and WHERE', () => {
   }
   const cmtTA = mm.tableActions(cmt, CmtTA);
   const v = cmtTA.t;
-  const io = mr.selectIO(v, ioOpt);
+  const io = mr.selectIO(v, commonIOOptions);
 
   eq(
     io.getSQLCode(),
@@ -161,7 +161,7 @@ it('Join and from', () => {
       .by(postCmt.post_id);
   }
   const ta = mm.tableActions(post, PostTA);
-  const io = mr.selectIO(ta.selectT, ioOpt);
+  const io = mr.selectIO(ta.selectT, commonIOOptions);
 
   eq(ta.__getData().table, post);
   eq(ta.selectT.__getData().sqlTable, postCmt);
@@ -183,7 +183,7 @@ it('AS', () => {
   }
   const cmtTA = mm.tableActions(cmt, CmtTA);
   const v = cmtTA.t;
-  const io = mr.selectIO(v, ioOpt);
+  const io = mr.selectIO(v, commonIOOptions);
 
   eq(
     io.getSQLCode(),
@@ -207,7 +207,10 @@ it('Duplicate selected names', () => {
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
-  itThrows(() => mr.selectIO(v, ioOpt), 'The selected column name "title" already exists');
+  itThrows(
+    () => mr.selectIO(v, commonIOOptions),
+    'The selected column name "title" already exists',
+  );
 });
 
 it('getInputs', () => {
@@ -218,7 +221,7 @@ it('getInputs', () => {
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
-  const io = mr.selectIO(v, ioOpt);
+  const io = mr.selectIO(v, commonIOOptions);
   eq(
     io.funcArgs.toString(),
     'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, urlName: string',
@@ -231,7 +234,7 @@ it('getInputs (no WHERE)', () => {
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
-  const io = mr.selectIO(v, ioOpt);
+  const io = mr.selectIO(v, commonIOOptions);
   eq(io.funcArgs.list.length, 1);
 });
 
@@ -243,7 +246,7 @@ it('returnValues', () => {
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
-  const io = mr.selectIO(v, ioOpt);
+  const io = mr.selectIO(v, commonIOOptions);
   eq(io.returnValues.toString(), '__result: UserTableTResult');
 });
 
@@ -258,7 +261,7 @@ it('GROUP BY and HAVING', () => {
   }
   const ta = mm.tableActions(post, PostTA);
   const v = ta.t;
-  const io = mr.selectIO(v, ioOpt);
+  const io = mr.selectIO(v, commonIOOptions);
   eq(
     io.getSQLCode(),
     '"SELECT YEAR(`datetime`) AS `year`, SUM(`cmt_c`) AS `total` FROM `db_post` WHERE `id` = ? GROUP BY `year`, `total` HAVING (`year` > 2010 AND `total` > 100)"',
@@ -273,7 +276,7 @@ it('Unrelated cols', () => {
     }
     const ta = mm.tableActions(user, UserTA);
     const v = ta.t;
-    mr.selectIO(v, ioOpt);
+    mr.selectIO(v, commonIOOptions);
   }, 'Source table assertion failed, expected "Table(user)", got "Table(post|db_post)".');
 
   // WHERE col
@@ -283,7 +286,7 @@ it('Unrelated cols', () => {
     }
     const ta = mm.tableActions(user, UserTA);
     const v = ta.t;
-    mr.selectIO(v, ioOpt);
+    mr.selectIO(v, commonIOOptions);
   }, 'Source table assertion failed, expected "Table(user)", got "Table(post|db_post)".');
 
   // Do NOT throws on inputs
@@ -293,7 +296,7 @@ it('Unrelated cols', () => {
     }
     const ta = mm.tableActions(user, UserTA);
     const v = ta.t;
-    mr.selectIO(v, ioOpt);
+    mr.selectIO(v, commonIOOptions);
   });
 });
 
@@ -303,7 +306,7 @@ it('Select DISTINCT', () => {
   }
   const userTA = mm.tableActions(user, UserTA);
   const v = userTA.t;
-  const io = mr.selectIO(v, ioOpt);
+  const io = mr.selectIO(v, commonIOOptions);
 
   ok(io instanceof mr.SelectIO);
   eq(io.getSQLCode(), '"SELECT DISTINCT `id`, `url_name` FROM `user`"');
@@ -318,15 +321,15 @@ it('Join types', () => {
   }
   const postTA = mm.tableActions(post, PostTA);
   eq(
-    mr.selectIO(postTA.left, ioOpt).getSQLCode(),
+    mr.selectIO(postTA.left, commonIOOptions).getSQLCode(),
     '"SELECT `join_1`.`url_name` AS `user_url_name` FROM `db_post` AS `db_post` LEFT JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`"',
   );
   eq(
-    mr.selectIO(postTA.right, ioOpt).getSQLCode(),
+    mr.selectIO(postTA.right, commonIOOptions).getSQLCode(),
     '"SELECT `join_1`.`url_name` AS `user_url_name` FROM `db_post` AS `db_post` RIGHT JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`"',
   );
   eq(
-    mr.selectIO(postTA.full, ioOpt).getSQLCode(),
+    mr.selectIO(postTA.full, commonIOOptions).getSQLCode(),
     '"SELECT `join_1`.`url_name` AS `user_url_name` FROM `db_post` AS `db_post` FULL JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`"',
   );
 });

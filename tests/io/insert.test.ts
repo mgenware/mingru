@@ -3,7 +3,7 @@ import { itThrows } from 'it-throws';
 import * as mr from '../../dist/main.js';
 import post from '../models/post.js';
 import user from '../models/user.js';
-import { ioOpt } from './common.js';
+import { commonIOOptions } from './common.js';
 import { eq, ok } from '../assert-aliases.js';
 
 it('Insert inputs', () => {
@@ -12,7 +12,7 @@ it('Insert inputs', () => {
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
-  const io = mr.insertIO(v, ioOpt);
+  const io = mr.insertIO(v, commonIOOptions);
 
   ok(io instanceof mr.InsertIO);
   eq(io.getSQLCode(), '"INSERT INTO `db_post` (`title`, `user_id`) VALUES (?, ?)"');
@@ -27,7 +27,7 @@ it('Insert inputs and values', () => {
   }
   const postTA = mm.tableActions(post, PostTA);
   const v = postTA.t;
-  const io = mr.insertIO(v, ioOpt);
+  const io = mr.insertIO(v, commonIOOptions);
 
   ok(io instanceof mr.InsertIO);
   eq(
@@ -45,7 +45,7 @@ it('getInputs', () => {
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
-  const io = mr.insertIO(v, ioOpt);
+  const io = mr.insertIO(v, commonIOOptions);
   eq(
     io.funcArgs.toString(),
     'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, sig: *string, id: uint64, b: string',
@@ -62,7 +62,7 @@ it('returnValues (insert)', () => {
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
-  const io = mr.insertIO(v, ioOpt);
+  const io = mr.insertIO(v, commonIOOptions);
   eq(io.returnValues.toString(), '');
 });
 
@@ -75,7 +75,7 @@ it('returnValues (insertOne)', () => {
   }
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
-  const io = mr.insertIO(v, ioOpt);
+  const io = mr.insertIO(v, commonIOOptions);
   eq(io.returnValues.toString(), '__insertedID: uint64');
 });
 
@@ -85,7 +85,7 @@ it('Validate setters', () => {
       t = mm.unsafeInsert().setInputs(user.id);
     }
     const ta = mm.tableActions(post, PostTA);
-    mr.insertIO(ta.t, ioOpt);
+    mr.insertIO(ta.t, commonIOOptions);
   }, 'Source table assertion failed, expected "Table(post|db_post)", got "Table(user)".');
 });
 
@@ -103,7 +103,7 @@ it('setDefaults', () => {
   }
   const postTA = mm.tableActions(post2, PostTA);
   const v = postTA.t;
-  const io = mr.insertIO(v, ioOpt);
+  const io = mr.insertIO(v, commonIOOptions);
 
   eq(
     io.getSQLCode(),

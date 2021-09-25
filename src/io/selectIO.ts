@@ -718,7 +718,12 @@ export class SelectIOProcessor extends BaseIOProcessor {
     if (this.hasJoin) {
       alias = alias || inputName;
     }
-    const sql = alias ? this.opt.dialect.as(colSQL, stringUtils.toSnakeCase(alias)) : colSQL;
+    let sql: mm.SQL;
+    if (alias && !this.opt.noColumnAlias) {
+      sql = this.opt.dialect.as(colSQL, stringUtils.toSnakeCase(alias));
+    } else {
+      sql = colSQL;
+    }
     const variableName = alias || inputName;
     return [variableName, sqlIO(sql, this.opt.dialect, sqlTable, opt).code];
   }
@@ -790,7 +795,9 @@ export class SelectIOProcessor extends BaseIOProcessor {
     }
 
     // Add alias.
-    const rawExpr = dialect.as(core, stringUtils.toSnakeCase(selectedName));
+    const rawExpr = this.opt.noColumnAlias
+      ? core
+      : dialect.as(core, stringUtils.toSnakeCase(selectedName));
     const info = sqlIO(rawExpr, dialect, sqlTable, this.getSQLBuilderOpt());
     return new SelectedColumnIO(
       sCol,

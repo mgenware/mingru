@@ -3,7 +3,7 @@ import * as mm from 'mingru-models';
 import * as mr from '../../dist/main.js';
 import user from '../models/user.js';
 import post from '../models/post.js';
-import { ioOpt } from './common.js';
+import { commonIOOptions } from './common.js';
 import { eq, ok } from '../assert-aliases.js';
 
 it('TransactIO', () => {
@@ -24,7 +24,7 @@ it('TransactIO', () => {
     t1 = mm.transact(wrapSelf.s, wrapSelf.d, this.standard);
   }
   const wrapOther = mm.tableActions(post, WrapOtherTA);
-  const io = mr.transactIO(wrapOther.t1, ioOpt);
+  const io = mr.transactIO(wrapOther.t1, commonIOOptions);
   ok(io instanceof mr.TransactIO);
   eq(
     io.funcArgs.toString(),
@@ -49,7 +49,7 @@ it('Members with WRAP actions', () => {
   }
   const wrapTA = mm.tableActions(user, WrapTA);
 
-  const io = mr.transactIO(wrapTA.t, ioOpt);
+  const io = mr.transactIO(wrapTA.t, commonIOOptions);
   ok(io instanceof mr.TransactIO);
   eq(io.funcArgs.toString(), 'db: *sql.DB|database/sql, id: uint64, followerCount: *string');
   // No execArgs in TX actions
@@ -65,7 +65,7 @@ it('Members with WRAP actions', () => {
     'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, sig: *string="haha", followerCount: *string',
   );
 
-  const io2 = mr.transactIO(wrapTA.t2, ioOpt);
+  const io2 = mr.transactIO(wrapTA.t2, commonIOOptions);
   ok(io2 instanceof mr.TransactIO);
   eq(io2.funcArgs.toString(), 'db: *sql.DB|database/sql, id: uint64, followerCount: *string');
   // No execArgs in TX actions
@@ -81,7 +81,7 @@ it('Members with WRAP actions', () => {
     'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, sig: *string="haha", followerCount: *string',
   );
 
-  const io3 = mr.transactIO(wrapTA.t3, ioOpt);
+  const io3 = mr.transactIO(wrapTA.t3, commonIOOptions);
   ok(io3 instanceof mr.TransactIO);
   eq(
     io3.funcArgs.toString(),
@@ -97,7 +97,7 @@ it('Members with WRAP actions', () => {
   );
   eq(m3.execArgs.toString(), 'sig: *string, followerCount: *string, id: uint64');
 
-  const io4 = mr.transactIO(wrapTA.t4, ioOpt);
+  const io4 = mr.transactIO(wrapTA.t4, commonIOOptions);
   ok(io4 instanceof mr.TransactIO);
   eq(
     io4.funcArgs.toString(),
@@ -132,7 +132,7 @@ it('TX member IOs', () => {
       .setReturnValues('id2');
   }
   const employeeTA = mm.tableActions(employee, EmployeeTA);
-  const io = mr.transactIO(employeeTA.insert2, ioOpt);
+  const io = mr.transactIO(employeeTA.insert2, commonIOOptions);
   const members = io.memberIOs;
   eq(
     members[0]!.toString(),

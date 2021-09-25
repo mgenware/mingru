@@ -421,7 +421,7 @@ it('WHERE, inputs, joins', async () => {
   await testBuildAsync(ta, 'select/whereInputsJoins');
 });
 
-it('Aliases', async () => {
+it('Column aliases', async () => {
   class CmtTA extends mm.TableActions {
     selectT = mm
       .selectRow(
@@ -440,6 +440,27 @@ it('Aliases', async () => {
   }
   const ta = mm.tableActions(cmt, CmtTA);
   await testBuildAsync(ta, 'select/aliases');
+});
+
+it('No column aliases', async () => {
+  class CmtTA extends mm.TableActions {
+    selectT = mm
+      .selectRow(
+        cmt.votes,
+        cmt.votes.as('user_votes'),
+        cmt.votes.join(post).time,
+        cmt.votes.join(post).time.as('alias_in_join'),
+        cmt.votes.join(post).time.as('PascalCaseAlias'),
+      )
+      .whereSQL(
+        mm.sql`${cmt.votes.join(post).reviewer_id} ${cmt.target_id
+          .join(post)
+          .user_id.join(user)
+          .url_name.toInput()}`,
+      );
+  }
+  const ta = mm.tableActions(cmt, CmtTA);
+  await testBuildAsync(ta, 'select/noAliases', { noColumnAlias: true, fileHeader: '' });
 });
 
 it('Argument stubs', async () => {

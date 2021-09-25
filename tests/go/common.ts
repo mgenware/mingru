@@ -4,19 +4,25 @@ import * as mm from 'mingru-models';
 import tempy from 'tempy';
 import * as mfs from 'm-fs';
 import * as mr from '../../dist/main.js';
-import { ioOpt } from '../io/common.js';
+import { commonIOOptions } from '../io/common.js';
 import { eq } from '../assert-aliases.js';
 
 const dialect = mr.mysql;
 const DestDataDir = 'tests/go/dest';
 
-function defaultOptions(opts?: mr.BuildOptions) {
-  if (opts !== undefined) {
-    return opts;
-  }
+function defaultOptions() {
   const defOpts: mr.BuildOptions = {};
   defOpts.fileHeader = '';
   return defOpts;
+}
+
+function getTAIOOption(buildOpt: mr.BuildOptions | undefined): mr.ActionToIOOptions {
+  const ioOpt = { ...commonIOOptions };
+  // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+  if (buildOpt?.noColumnAlias) {
+    ioOpt.noColumnAlias = true;
+  }
+  return ioOpt;
 }
 
 export async function testBuildAsync(
@@ -32,8 +38,8 @@ export async function testBuildAsync(
   }
   mr.logger.enabled = false;
   const builder = new mr.GoTABuilder(
-    new mr.TAIO(ta, ioOpt),
-    defaultOptions(opts),
+    new mr.TAIO(ta, getTAIOOption(opts)),
+    opts ?? defaultOptions(),
     ctx ?? new mr.GoBuilderContext(),
   );
   const actual = builder.build();
@@ -56,8 +62,8 @@ export async function testBuildFullAsync(
   }
   mr.logger.enabled = false;
   const builder = new mr.GoTABuilder(
-    new mr.TAIO(ta, ioOpt),
-    defaultOptions(opts),
+    new mr.TAIO(ta, getTAIOOption(opts)),
+    opts ?? defaultOptions(),
     ctx ?? new mr.GoBuilderContext(),
   );
   const actual = builder.build();

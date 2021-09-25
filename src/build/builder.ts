@@ -38,7 +38,12 @@ export default class Builder {
     throwIfFalsy(actions, 'actions');
     this.checkBuildStatus();
     const goBuilder = new GoBuilder();
-    await goBuilder.buildAsync(actions, this.outDir, { dialect: this.dialect }, this.opts);
+    await goBuilder.buildAsync(
+      actions,
+      this.outDir,
+      { dialect: this.dialect, noColumnAlias: this.opts.noColumnAlias },
+      this.opts,
+    );
     logger.debug('🎉  Action build succeeded');
   }
 
