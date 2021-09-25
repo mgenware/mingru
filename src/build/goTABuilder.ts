@@ -236,7 +236,7 @@ export default class GoTABuilder {
     const { className, instanceName } = this.taIO;
     let code = go.struct(
       className,
-      new Map(),
+      [],
       JSONEncodingStyle.none,
       new Set<string>(),
       new Set<string>(),
@@ -399,7 +399,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
           headerCode,
           go.struct(
             atomicResultType,
-            selectedFields,
+            [...selectedFields.values()],
             resultMemberJSONStyle,
             jsonIgnoreFields,
             omitEmptyFields,
@@ -416,7 +416,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
       const scanParams =
         selMode === mm.SelectActionMode.fieldList
           ? `&${defs.itemVarName}`
-          : joinParams([...selectedFields.values()].map((p) => `&item.${p.name}`));
+          : joinParams([...selectedFields.values()].map((p) => `&item.${p.pascalName}`));
       if (pgMode === mm.SelectActionPaginationMode.pageMode) {
         // Add `fmt` import as we are using `fmt.Errorf`.
         this.imports.add(defs.fmtImport);

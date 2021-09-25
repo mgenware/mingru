@@ -119,7 +119,10 @@ export class VarInfo {
     return new VarInfo(v.name, v.type, value);
   }
 
+  readonly pascalName: string;
+
   constructor(public name: string, public type: TypeInfo, public value?: VarValue) {
+    this.pascalName = toPascalCase(name);
     Object.freeze(this);
   }
 

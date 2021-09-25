@@ -13,8 +13,8 @@ var MyTable = &TableTypeMyTable{}
 
 // MyTableTableSelectTResult ...
 type MyTableTableSelectTResult struct {
-	my___name string
-	MyID      uint64
+	MyName string
+	MyID   uint64
 }
 
 // SelectT ...
@@ -27,7 +27,7 @@ func (da *TableTypeMyTable) SelectT(queryable mingru.Queryable) ([]MyTableTableS
 	defer rows.Close()
 	for rows.Next() {
 		var item MyTableTableSelectTResult
-		err = rows.Scan(&item.MyID, &item.my___name)
+		err = rows.Scan(&item.MyID, &item.MyName)
 		if err != nil {
 			return nil, err
 		}

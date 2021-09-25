@@ -56,7 +56,7 @@ export default class GoBuilder {
         imports.addVars(resultTypeMembers);
         resultTypesCode += go.struct(
           resultType.typeName,
-          resultType.members,
+          resultTypeMembers,
           resultType.nameStyle,
           resultType.ignoredMembers,
           resultType.omitEmptyMembers,

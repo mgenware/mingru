@@ -72,24 +72,24 @@ type ${typeName} interface {
 
 export function struct(
   typeName: string,
-  members: Map<string, VarInfo>,
+  members: VarInfo[],
   nameStyle: JSONEncodingStyle,
   ignoredMembers: Set<string>,
   omitEmptyMembers: Set<string>,
 ): string {
   // Sort members alphabetically.
-  const values = [...members.values()].sort((a, b) => a.name.localeCompare(b.name));
+  const sortedMems = [...members].sort((a, b) => a.name.localeCompare(b.name));
   let code = `// ${typeName} ...
 type ${typeName} struct {
 `;
   // Find the max length of all field names.
-  const nameMaxLen = Math.max(...values.map((m) => m.name.length));
+  const nameMaxLen = Math.max(...sortedMems.map((m) => m.pascalName.length));
   let typeMaxLen = 0;
   if (nameStyle !== JSONEncodingStyle.none) {
-    typeMaxLen = Math.max(...values.map((m) => m.type.typeString.length));
+    typeMaxLen = Math.max(...sortedMems.map((m) => m.type.typeString.length));
   }
-  for (const mem of values) {
-    const memName = mem.name;
+  for (const mem of sortedMems) {
+    const memName = mem.pascalName;
     let tag: string | null = null;
     code += `\t${memName.padEnd(nameMaxLen)} ${mem.type.typeString.padEnd(typeMaxLen)}`;
     const omitEmpty = omitEmptyMembers.has(memName) || false;

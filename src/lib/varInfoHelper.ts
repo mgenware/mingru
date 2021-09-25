@@ -42,7 +42,7 @@ export class TypeInfoBuilder {
 
 export class VarInfoBuilder {
   static getSQLVarInputName(v: mm.SQLVariable): string {
-    return this.getInputNameFromColumn(v, v.name, v.column);
+    return stringUtils.toCamelCase(this.getInputNameFromColumn(v, v.name, v.column));
   }
 
   static fromSQLVar(v: mm.SQLVariable, dialect: Dialect): VarInfo {
@@ -63,6 +63,6 @@ export class VarInfoBuilder {
     if (!column) {
       throw new Error(`Missing \`inputName\` for variable ${v}`);
     }
-    return stringUtils.toCamelCase(column.__getModelName());
+    return column.__getModelName();
   }
 }
