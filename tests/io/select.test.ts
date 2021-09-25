@@ -141,7 +141,7 @@ it('3-table joins and WHERE', () => {
 
   eq(
     io.getSQLCode(),
-    '"SELECT `post_cmt`.`id` AS `id`, `post_cmt`.`user_id` AS `user_id`, `join_1`.`title` AS `target_title`, `join_1`.`user_id` AS `target_user_id`, `join_2`.`url_name` AS `target_user_url_name`, `join_2`.`id` AS `TUID2` FROM `post_cmt` AS `post_cmt` INNER JOIN `db_post` AS `join_1` ON `join_1`.`id` = `post_cmt`.`target_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `join_1`.`user_id` WHERE `post_cmt`.`user_id` = 1 AND `join_1`.`title` = 2 | `join_2`.`url_name` = ? | `post_cmt`.`id` = ? | `post_cmt`.`target_id` = ?"',
+    '"SELECT `post_cmt`.`id` AS `id`, `post_cmt`.`user_id` AS `user_id`, `join_1`.`title` AS `target_title`, `join_1`.`user_id` AS `target_user_id`, `join_2`.`url_name` AS `target_user_url_name`, `join_2`.`id` AS `tuid2` FROM `post_cmt` AS `post_cmt` INNER JOIN `db_post` AS `join_1` ON `join_1`.`id` = `post_cmt`.`target_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `join_1`.`user_id` WHERE `post_cmt`.`user_id` = 1 AND `join_1`.`title` = 2 | `join_2`.`url_name` = ? | `post_cmt`.`id` = ? | `post_cmt`.`target_id` = ?"',
   );
 });
 

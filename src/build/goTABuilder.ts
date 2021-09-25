@@ -498,7 +498,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
         builder.push(`var ${defs.resultVarName} ${resultTypeString}`);
       } else {
         scanParams = joinParams(
-          [...selectedFields.values()].map((p) => `&${defs.resultVarName}.${p.name}`),
+          [...selectedFields.values()].map((p) => `&${defs.resultVarName}.${p.pascalName}`),
         );
         builder.push(`var ${defs.resultVarName} ${atomicResultType}`);
       }

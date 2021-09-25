@@ -19,7 +19,7 @@ type PostTableTResult struct {
 // T ...
 func (da *TableTypePost) T(queryable mingru.Queryable) (PostTableTResult, error) {
 	var result PostTableTResult
-	err := queryable.QueryRow("SELECT `title` FROM `db_post` WHERE `user_id` = SELECT MAX(`id`) AS `maxID` FROM `user`").Scan(&result.Title)
+	err := queryable.QueryRow("SELECT `title` FROM `db_post` WHERE `user_id` = SELECT MAX(`id`) AS `max_id` FROM `user`").Scan(&result.Title)
 	if err != nil {
 		return result, err
 	}
