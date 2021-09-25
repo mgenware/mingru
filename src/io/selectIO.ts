@@ -676,7 +676,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
         throw new Error('Unexpected empty SQL expression');
       }
       if (first.type === mm.SQLElementType.column) {
-        return first.toColumn().__mustGetType();
+        return first.toColumn().__type();
       }
       if (first.type === mm.SQLElementType.call) {
         const call = first.toCall();
@@ -688,7 +688,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
             throw new Error(`Index of out range when probing return type, index: ${returnType}`);
           }
           if (returnTypeArg instanceof mm.Column) {
-            return returnTypeArg.__mustGetType();
+            return returnTypeArg.__type();
           }
           throw new Error(
             `Index-based return type data is not a \`Column\`, got ${toTypeString(returnTypeArg)}`,
@@ -741,7 +741,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
         varName,
         undefined,
         sCol,
-        sCol.__mustGetType(),
+        sCol.__type(),
         colResult.nullable,
       );
     }
@@ -765,7 +765,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
         varName,
         selectedName,
         core,
-        core.__mustGetType(),
+        core.__type(),
         colResult.nullable,
       );
     }

@@ -48,7 +48,7 @@ export class SetterIO {
       }
 
       // Skip AUTO_INCREMENT PKs.
-      const colType = col.__mustGetType();
+      const colType = col.__type();
       if (colType.autoIncrement) {
         continue;
       }
@@ -88,7 +88,7 @@ export class SetterIO {
     if (autoSetter === mm.AutoSetterType.default) {
       let value: mm.SQL;
       const colData = col.__getData();
-      const colType = col.__mustGetType();
+      const colType = col.__type();
       const defValue = colData.defaultValue;
       if (defValue !== undefined && defValue !== null) {
         if (defValue instanceof mm.SQL) {

@@ -510,8 +510,8 @@ it('Private columns', async () => {
 it('Private columns (raw columns)', async () => {
   class RplTA extends mm.TableActions {
     selectT = mm.selectRow(
-      mm.sel(mm.sql`1`, 'a', mm.int().__mustGetType()),
-      mm.sel(mm.sql`1`, 'b', mm.int().__mustGetType()).privateAttr(),
+      mm.sel(mm.sql`1`, 'a', mm.int().__type()),
+      mm.sel(mm.sql`1`, 'b', mm.int().__type()).privateAttr(),
     );
   }
   const ta = mm.tableActions(rpl, RplTA);
@@ -584,7 +584,7 @@ it('SELECT, EXISTS, IF', async () => {
       mm.sel(
         mm
           .IF(mm.exists(mm.selectRow(post.user_id.join(user).sig).by(post.id)), '1', '2')
-          .setReturnType(mm.int().__mustGetType()),
+          .setReturnType(mm.int().__type()),
         'a',
       ),
     );

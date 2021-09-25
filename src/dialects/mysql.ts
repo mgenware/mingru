@@ -45,7 +45,7 @@ export class MySQL extends Dialect {
 
   colToSQLType(col: mm.Column): mm.SQL {
     throwIfFalsy(col, 'col');
-    const colType = col.__mustGetType();
+    const colType = col.__type();
     const colData = col.__getData();
     let typeString = this.absoluteSQLType(colType);
     if (colType.length) {

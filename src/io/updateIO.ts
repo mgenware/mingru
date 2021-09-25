@@ -102,10 +102,7 @@ class UpdateIOProcessor extends BaseIOProcessor {
     const returnValues = new VarList(`Return values of action "${action}"`);
     if (!actionData.ensureOneRowAffected) {
       returnValues.add(
-        new VarInfo(
-          mm.ReturnValues.rowsAffected,
-          dialect.colTypeToGoType(mm.int().__mustGetType()),
-        ),
+        new VarInfo(mm.ReturnValues.rowsAffected, dialect.colTypeToGoType(mm.int().__type())),
       );
     }
 

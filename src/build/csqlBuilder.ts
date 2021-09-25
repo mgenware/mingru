@@ -24,7 +24,7 @@ export default class CSQLBuilder {
       if (!col) {
         continue;
       }
-      const colType = col.__mustGetType();
+      const colType = col.__type();
       const colData = col.__getData();
       const colDBNameEncoded = this.dialect.encodeColumnName(col);
       const fk = colData.foreignColumn;

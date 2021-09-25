@@ -12,7 +12,7 @@ function sqlEq(sql: mm.SQL, value: string) {
 }
 
 function testType(col: mm.Column, type: string, pkg?: string) {
-  const typeInfo = dialect.colTypeToGoType(col.__mustGetType());
+  const typeInfo = dialect.colTypeToGoType(col.__type());
   eq(typeInfo.typeString, type);
 
   const atomicInfo = mr.getAtomicTypeInfo(typeInfo);
@@ -61,8 +61,8 @@ it('DT', () => {
   for (const t of tests) {
     const column = t[0];
     testType(column, t[1], t[2] as string);
-    if (!column.__mustGetType().pk) {
-      column.__mustGetType().nullable = true;
+    if (!column.__type().pk) {
+      column.__type().nullable = true;
       testType(column, `*${t[1]}`, t[2] as string);
     }
   }

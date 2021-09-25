@@ -19,7 +19,7 @@ export class TypeInfoBuilder {
 
     let typeInfo: TypeInfo;
     if (type instanceof mm.Column) {
-      typeInfo = dialect.colTypeToGoType(type.__mustGetType());
+      typeInfo = dialect.colTypeToGoType(type.__type());
     } else if (type instanceof mm.ColumnType) {
       typeInfo = dialect.colTypeToGoType(type);
     } else {

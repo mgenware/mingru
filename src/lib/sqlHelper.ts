@@ -11,7 +11,7 @@ export function sniffSQLType(sql: mm.SQL): mm.ColumnType | null {
   for (const element of sql.elements) {
     const { type } = element;
     if (type === mm.SQLElementType.column) {
-      return element.toColumn().__mustGetType();
+      return element.toColumn().__type();
     }
     if (type === mm.SQLElementType.call) {
       const call = element.toCall();
@@ -26,7 +26,7 @@ export function sniffSQLType(sql: mm.SQL): mm.ColumnType | null {
         throw new Error(`Unexpected empty param from return type index ${returnType}`);
       }
       if (param instanceof mm.Column) {
-        return param.__mustGetType();
+        return param.__type();
       }
       if (param instanceof mm.SQL) {
         return sniffSQLType(param);
@@ -44,7 +44,7 @@ export function sniffSQLType(sql: mm.SQL): mm.ColumnType | null {
         return rawType;
       }
       if (rawCore instanceof mm.Column) {
-        return rawCore.__mustGetType();
+        return rawCore.__type();
       }
     }
   }
