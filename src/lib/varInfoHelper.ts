@@ -63,21 +63,6 @@ export class VarInfoBuilder {
     if (!column) {
       throw new Error(`Missing \`inputName\` for variable ${v}`);
     }
-    const colData = column.__getData();
-    if (colData.inputName) {
-      return colData.inputName;
-    }
-    const name = column.__mustGetName();
-    const table = column.__mustGetTable();
-    const curName = stringUtils.toCamelCase(name);
-
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    if (table instanceof mm.JoinTable) {
-      if (table.associative) {
-        return curName;
-      }
-      return table.tableInputName() + stringUtils.toPascalCase(curName);
-    }
-    return curName;
+    return stringUtils.toCamelCase(column.__getModelName());
   }
 }

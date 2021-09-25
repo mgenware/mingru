@@ -192,19 +192,19 @@ it('Inverse join (select from A on A.id = B.a_id)', async () => {
     selectT = mm
       .selectRows(
         post.title,
-        post.id.join(postCategory, postCategory.post_id).category_id.setInputName('category_id'),
+        post.id.join(postCategory, postCategory.post_id).category_id.setModelName('category_id'),
         post.id
           .join(postCategory, postCategory.post_id)
           .category_id.join(category)
-          .id.setInputName('id'),
+          .id.setModelName('id'),
       )
       .whereSQL(
         mm.sql`${post.title}|${post.id
           .join(postCategory, postCategory.post_id)
-          .category_id.setInputName('category_id')}|${post.id
+          .category_id.setModelName('category_id')}|${post.id
           .join(postCategory, postCategory.post_id)
           .category_id.join(category)
-          .id.setInputName('id')}`,
+          .id.setModelName('id')}`,
       )
       .orderByAsc(post.id.join(postCategory, postCategory.post_id).category_id.join(category).id)
       .orderByDesc(post.user_id);

@@ -604,7 +604,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     if (col instanceof mm.Column) {
       const varName = this.selectedNamesMap.get(col.__getPath());
       return [
-        col.__mustGetName(),
+        col.__mustGetPropertyName(),
         varName ? [dialect.encodeName(varName)] : this.getColumnSQLFromExistingData(col),
       ];
     }
@@ -614,7 +614,10 @@ export class SelectIOProcessor extends BaseIOProcessor {
         return [colData.selectedName, [dialect.encodeName(colData.selectedName)]];
       }
       if (colData.core instanceof mm.Column) {
-        return [colData.core.__mustGetName(), this.getColumnSQLFromExistingData(colData.core)];
+        return [
+          colData.core.__mustGetPropertyName(),
+          this.getColumnSQLFromExistingData(colData.core),
+        ];
       }
       throw new Error(
         'The argument `selectedName` is required for an SQL expression without any columns inside',
@@ -711,7 +714,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
   ): [string, StringSegment[]] {
     const sqlTable = this.mustGetAvailableSQLTable();
     // Alias is required when `hasJoin` is true.
-    const inputName = col.__getInputName();
+    const inputName = col.__getModelName();
     if (this.hasJoin) {
       alias = alias || inputName;
     }
