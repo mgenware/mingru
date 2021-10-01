@@ -98,11 +98,12 @@ export class OrderByInputIO {
 
 export class SelectedColumnIO {
   constructor(
+    public id: StringSegment,
     public selectedColumn: mm.SelectedColumn,
     public valueSQL: StringSegment[],
-    // `varName` is alias if present. Otherwise, alias is auto generated from column input name.
+    // `modelName` is alias if present. Otherwise, alias is auto generated from column model name.
     // Snake case.
-    public varName: string,
+    public modelName: string,
     public alias: string | undefined,
     public column: mm.Column | undefined,
     // Available when we can guess the evaluated type,
@@ -166,11 +167,28 @@ export class SelectIOProcessor extends BaseIOProcessor {
   joins: JoinIO[] = [];
   // Make sure all join table alias names are unique.
   joinedTableCounter = 0;
-  // Tracks all selected column names, and throw on duplicates.
-  selectedNames = new Set<string>();
-  // K: column path, V: selected var name.
-  // NOTE: this only contains columns (no raw columns).
-  selectedNamesMap = new Map<string, string>();
+
+  /**
+   * Selected column paths and IDs.
+   *
+   * Each mingru-models column (not including raw columns) comes with
+   * a path which you can get from `Column.__getPath`. That path can
+   * uniquely identify a column including columns from a join.
+   *
+   * `selectedModelNames` tracks all selected column model names and throws
+   * on duplicate ones. The reason for this is we can't map duplicate
+   * columns into duplicate fields in a Go struct (compile errors).
+   *
+   * Column ID represents an ID which can be used in SQL to identity a
+   * selected columns, e.g. `my_table`.`my_col`. As mentioned above,
+   * we use `Column.__getPath` to identity a column internally. To get
+   * a column ID, use `SelectedColumnIO.id` instead.
+   */
+
+  // Gets an IO from a column path.
+  columnPathToIOMap = new Map<string, SelectedColumnIO>();
+  // Tracks all selected model names.
+  selectedModelNames = new Set<string>();
 
   // Number of ORDER BY inputs.
   orderByInputCounter = 1;
@@ -199,7 +217,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     const unionItems = isUnionMode ? sqlHelper.flattenUnions(this.action) : [];
 
     const sqlTable = this.mustGetAvailableSQLTable();
-    const { opt, selectedNames } = this;
+    const { opt, selectedModelNames } = this;
     const { dialect } = opt;
     const {
       limitValue,
@@ -327,13 +345,14 @@ export class SelectIOProcessor extends BaseIOProcessor {
       if (selectedColumns.length) {
         selectedColumns.forEach((col, i) => {
           const selIO = this.handleSelectedColumn(col);
+
           const hasSeparator = i !== selectedColumns.length - 1 && selectedColumns.length > 1;
-          if (selectedNames.has(selIO.varName)) {
-            throw new Error(`The selected column name "${selIO.varName}" already exists`);
+          if (selectedModelNames.has(selIO.modelName)) {
+            throw new Error(`The selected column name "${selIO.modelName}" already exists`);
           }
-          selectedNames.add(selIO.varName);
+          selectedModelNames.add(selIO.modelName);
           if (selIO.column) {
-            this.selectedNamesMap.set(selIO.column.__getPath(), selIO.varName);
+            this.columnPathToIOMap.set(selIO.column.__getPath(), selIO);
           }
           colIOs.push(selIO);
 
@@ -602,11 +621,8 @@ export class SelectIOProcessor extends BaseIOProcessor {
       return [col, [dialect.encodeName(col)]];
     }
     if (col instanceof mm.Column) {
-      const varName = this.selectedNamesMap.get(col.__getPath());
-      return [
-        col.__mustGetPropertyName(),
-        varName ? [dialect.encodeName(varName)] : this.getColumnSQLFromExistingData(col),
-      ];
+      const io = this.columnPathToIOMap.get(col.__getPath());
+      return [col.__mustGetPropertyName(), io ? [io.id] : this.getColumnSQLFromExistingData(col)];
     }
     if (col instanceof mm.RawColumn) {
       const colData = col.__getData();
@@ -704,27 +720,23 @@ export class SelectIOProcessor extends BaseIOProcessor {
   }
 
   // Converts column SQL expr to SQL code segments.
-  // It also returns the variable name of this column. Variable name is used to
-  // generate result property type.
+  // Returns [column ID, model name, SQL expression].
   private getSelectedColumnSQLCode(
     colSQL: mm.SQL,
     col: mm.Column,
-    alias: string | undefined,
+    alias: string | null,
     opt?: SQLIOBuilderOption,
   ): [string, StringSegment[]] {
     const sqlTable = this.mustGetAvailableSQLTable();
     // Alias is required when `hasJoin` is true.
-    const inputName = col.__getModelName();
-    if (this.hasJoin) {
-      alias = alias || inputName;
-    }
+    const modelName = col.__getModelName();
     let sql: mm.SQL;
-    if (alias && !this.opt.noColumnAlias) {
+    if (alias) {
       sql = this.opt.dialect.as(colSQL, stringUtils.toSnakeCase(alias));
     } else {
       sql = colSQL;
     }
-    const variableName = alias || inputName;
+    const variableName = alias || modelName;
     return [variableName, sqlIO(sql, this.opt.dialect, sqlTable, opt).code];
   }
 
@@ -741,9 +753,10 @@ export class SelectIOProcessor extends BaseIOProcessor {
     // Plain columns like `post.id`.
     if (sCol instanceof mm.Column) {
       const colResult = this.handlePlainSelectedColumn(sCol);
-      const [varName, colSQLCode] = this.getSelectedColumnSQLCode(colResult.sql, sCol, undefined);
+      const [varName, colSQLCode] = this.getSelectedColumnSQLCode(colResult.sql, sCol, null);
 
       return new SelectedColumnIO(
+        colResult.id,
         sCol,
         colSQLCode,
         varName,
@@ -764,10 +777,11 @@ export class SelectIOProcessor extends BaseIOProcessor {
       const [varName, colSQLCode] = this.getSelectedColumnSQLCode(
         colResult.sql,
         core,
-        selectedName,
+        selectedName ?? null,
       );
 
       return new SelectedColumnIO(
+        colResult.id,
         sCol,
         colSQLCode,
         varName,
@@ -795,11 +809,10 @@ export class SelectIOProcessor extends BaseIOProcessor {
     }
 
     // Add alias.
-    const rawExpr = this.opt.noColumnAlias
-      ? core
-      : dialect.as(core, stringUtils.toSnakeCase(selectedName));
+    const rawExpr = dialect.as(core, stringUtils.toSnakeCase(selectedName));
     const info = sqlIO(rawExpr, dialect, sqlTable, this.getSQLBuilderOpt());
     return new SelectedColumnIO(
+      dialect.encodeName(selectedName),
       sCol,
       info.code,
       selectedName, // inputName
@@ -873,7 +886,11 @@ export class SelectIOProcessor extends BaseIOProcessor {
 
   // Called by `handleSelectedColumn`.
   // Returns SQL expr of the selected plain column object.
-  private handlePlainSelectedColumn(col: mm.Column): { sql: mm.SQL; nullable: boolean } {
+  private handlePlainSelectedColumn(col: mm.Column): {
+    sql: mm.SQL;
+    nullable: boolean;
+    id: StringSegment;
+  } {
     const sqlTable = this.mustGetAvailableSQLTable();
     const { dialect } = this.opt;
     const e = dialect.encodeName;
@@ -882,7 +899,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     // Make sure column is from current table.
     col.__checkSourceTable(sqlTable);
 
-    let colSQL: mm.SQL;
+    let colIDString: string;
     let nullable: boolean;
     if (colTable instanceof mm.JoinTable) {
       const joinIO = this.jcMap.get(colTable.keyPath);
@@ -897,20 +914,21 @@ export class SelectIOProcessor extends BaseIOProcessor {
           )}"`,
         );
       }
-      colSQL = mm.sql`${e(joinIO.tableAlias)}.${e(mirroredCol.__getDBName())}`;
+
+      colIDString = `${e(joinIO.tableAlias)}.${e(mirroredCol.__getDBName())}`;
       nullable = colTable.joinType === mm.JoinType.full || colTable.joinType === mm.JoinType.left;
     } else {
       const { homeTableJoinType } = this;
-      // Column without a join.
-      colSQL = mm.sql`${e(col.__getDBName())}`;
+
+      colIDString = `${e(col.__getDBName())}`;
       if (this.hasJoin) {
-        // Each column must have a prefix in a SQL with joins.
+        // Each column must have a prefix in an SQL expression with joins.
         // NOTE: use table `DBName` as alias.
-        colSQL = mm.sql`${e(this.localTableAlias(colTable))}.${colSQL}`;
+        colIDString = `${e(this.localTableAlias(colTable))}.${colIDString}`;
       }
       nullable = homeTableJoinType === mm.JoinType.full || homeTableJoinType === mm.JoinType.right;
     }
-    return { sql: colSQL, nullable };
+    return { sql: mm.sql`${colIDString}`, nullable, id: colIDString };
   }
 
   private nextJoinedTableName(): string {
