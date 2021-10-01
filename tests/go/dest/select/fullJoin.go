@@ -14,7 +14,7 @@ var Post = &TableTypePost{}
 // Field ...
 func (da *TableTypePost) Field(queryable mingru.Queryable) (*string, error) {
 	var result *string
-	err := queryable.QueryRow("SELECT `join_1`.`url_name` AS `user_url_name` FROM `db_post` AS `db_post` FULL JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`").Scan(&result)
+	err := queryable.QueryRow("SELECT `join_1`.`url_name` FROM `db_post` AS `db_post` FULL JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`").Scan(&result)
 	if err != nil {
 		return result, err
 	}
@@ -23,7 +23,7 @@ func (da *TableTypePost) Field(queryable mingru.Queryable) (*string, error) {
 
 // FieldRows ...
 func (da *TableTypePost) FieldRows(queryable mingru.Queryable) ([]*string, error) {
-	rows, err := queryable.Query("SELECT `join_1`.`url_name` AS `user_url_name` FROM `db_post` AS `db_post` FULL JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`")
+	rows, err := queryable.Query("SELECT `join_1`.`url_name` FROM `db_post` AS `db_post` FULL JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`")
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ type PostTableRowResult struct {
 // Row ...
 func (da *TableTypePost) Row(queryable mingru.Queryable, id uint64) (PostTableRowResult, error) {
 	var result PostTableRowResult
-	err := queryable.QueryRow("SELECT `join_1`.`url_name` AS `user_url_name`, `db_post`.`id` AS `id` FROM `db_post` AS `db_post` FULL JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id` WHERE `db_post`.`id` = ?", id).Scan(&result.UserUrlName, &result.ID)
+	err := queryable.QueryRow("SELECT `join_1`.`url_name`, `db_post`.`id` FROM `db_post` AS `db_post` FULL JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id` WHERE `db_post`.`id` = ?", id).Scan(&result.UserUrlName, &result.ID)
 	if err != nil {
 		return result, err
 	}
@@ -68,7 +68,7 @@ type PostTableRowsResult struct {
 
 // Rows ...
 func (da *TableTypePost) Rows(queryable mingru.Queryable) ([]PostTableRowsResult, error) {
-	rows, err := queryable.Query("SELECT `join_1`.`url_name` AS `user_url_name`, `db_post`.`id` AS `id` FROM `db_post` AS `db_post` FULL JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`")
+	rows, err := queryable.Query("SELECT `join_1`.`url_name`, `db_post`.`id` FROM `db_post` AS `db_post` FULL JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`")
 	if err != nil {
 		return nil, err
 	}

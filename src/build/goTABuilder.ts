@@ -350,7 +350,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
       // Column property name to model property name.
       // Check if model name has been explicitly set.
       const userModelName = col.column?.__getData().modelName;
-      const fieldName = userModelName ?? stringUtils.toPascalCase(col.varName);
+      const fieldName = userModelName ?? stringUtils.toPascalCase(col.modelName);
       const originalTypeInfo = this.dialect.colTypeToGoType(col.getResultType());
       const typeInfo = col.nullable ? typeInfoToPointer(originalTypeInfo) : originalTypeInfo;
       const varInfo = new VarInfo(fieldName, typeInfo);

@@ -436,7 +436,11 @@ it('Column aliases', async () => {
           .join(post)
           .user_id.join(user)
           .url_name.toInput()}`,
-      );
+      )
+      .groupBy(cmt.votes).having`${cmt.votes} ${cmt.votes.join(post).time}`
+      .orderByAsc(cmt.votes)
+      .orderByDesc(cmt.votes.join(post).time)
+      .orderByDesc(cmt.votes.join(post).time.as('alias_in_join'));
   }
   const ta = mm.tableActions(cmt, CmtTA);
   await testBuildAsync(ta, 'select/aliases');
@@ -464,7 +468,7 @@ it('No column aliases', async () => {
       .orderByDesc(cmt.votes.join(post).time.as('alias_in_join'));
   }
   const ta = mm.tableActions(cmt, CmtTA);
-  await testBuildAsync(ta, 'select/noAliases', { noColumnAlias: true, fileHeader: '' });
+  await testBuildAsync(ta, 'select/noAliases');
 });
 
 it('Argument stubs', async () => {

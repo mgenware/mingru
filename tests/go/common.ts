@@ -16,12 +16,8 @@ function defaultOptions() {
   return defOpts;
 }
 
-function getTAIOOption(buildOpt: mr.BuildOptions | undefined): mr.ActionToIOOptions {
+function getTAIOOption(_: mr.BuildOptions | undefined): mr.ActionToIOOptions {
   const ioOpt = { ...commonIOOptions };
-  // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-  if (buildOpt?.noColumnAlias) {
-    ioOpt.noColumnAlias = true;
-  }
   return ioOpt;
 }
 

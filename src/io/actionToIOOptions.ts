@@ -24,6 +24,4 @@ export interface ActionToIOOptions {
   actionName?: string;
 
   unsafeTableInput?: boolean;
-
-  noColumnAlias?: boolean;
 }
