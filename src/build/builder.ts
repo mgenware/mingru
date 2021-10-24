@@ -66,7 +66,9 @@ export default class Builder {
     // Generate migration down file.
     const migDownSQLFile = nodepath.join(this.outDir, migSQLDir, 'down.sql');
     let downSQL = this.opts.sqlFileHeader ?? defs.fileHeader;
-    for (const table of tables) {
+    // Drop tables in reverse order.
+    for (var i = tables.length - 1; i >= 0; i--) {
+      const table = tables[i]!;
       downSQL += `DROP TABLE IF EXISTS ${table.__getDBName()};\n`;
     }
     await mfs.writeFileAsync(migDownSQLFile, downSQL);
