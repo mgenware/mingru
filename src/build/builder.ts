@@ -13,7 +13,7 @@ import { toSnakeCase } from '../lib/stringUtils.js';
 export default class Builder {
   opts: BuildOptions;
   private buildStarted = false;
-  
+
   constructor(public dialect: Dialect, public outDir: string, opts?: BuildOptions) {
     throwIfFalsy(dialect, 'dialect');
     throwIfFalsy(outDir, 'outDir');
