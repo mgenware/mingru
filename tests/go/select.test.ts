@@ -522,7 +522,7 @@ it('snake_case keys', async () => {
   }
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/snakeCaseKeys', {
-    fileHeader: '',
+    goFileHeader: '',
     jsonEncoding: { encodingStyle: mr.JSONEncodingStyle.snakeCase },
   });
 });
@@ -537,7 +537,7 @@ it('camelCase keys', async () => {
   }
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/camelCaseKeys', {
-    fileHeader: '',
+    goFileHeader: '',
     jsonEncoding: { encodingStyle: mr.JSONEncodingStyle.camelCase },
   });
 });
@@ -552,7 +552,7 @@ it('Private columns', async () => {
   }
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/ignoredKeys', {
-    fileHeader: '',
+    goFileHeader: '',
     jsonEncoding: { encodingStyle: mr.JSONEncodingStyle.camelCase },
   });
 });
@@ -566,7 +566,7 @@ it('Private columns (raw columns)', async () => {
   }
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/ignoredKeysRawCols', {
-    fileHeader: '',
+    goFileHeader: '',
     jsonEncoding: { encodingStyle: mr.JSONEncodingStyle.camelCase },
   });
 });
@@ -583,7 +583,7 @@ it('Forced public columns', async () => {
   }
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/forcedPublicColumns', {
-    fileHeader: '',
+    goFileHeader: '',
     jsonEncoding: { encodingStyle: mr.JSONEncodingStyle.camelCase, excludeEmptyValues: true },
   });
 });
@@ -601,7 +601,7 @@ it('Exclude empty properties', async () => {
   }
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/excludedEmptyProps', {
-    fileHeader: '',
+    goFileHeader: '',
     jsonEncoding: { encodingStyle: mr.JSONEncodingStyle.camelCase },
   });
 });
@@ -616,7 +616,7 @@ it('Exclude all empty properties', async () => {
   }
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/excludedEmptyProps', {
-    fileHeader: '',
+    goFileHeader: '',
     jsonEncoding: {
       encodingStyle: mr.JSONEncodingStyle.camelCase,
       excludeEmptyValues: true,

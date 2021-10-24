@@ -12,7 +12,7 @@ const DestDataDir = 'tests/go/dest';
 
 function defaultOptions() {
   const defOpts: mr.BuildOptions = {};
-  defOpts.fileHeader = '';
+  defOpts.goFileHeader = '';
   return defOpts;
 }
 
@@ -82,7 +82,8 @@ export async function testBuildToDirAsync(
   buildCSQL = false,
 ) {
   opts = opts ?? {};
-  opts.fileHeader = '';
+  opts.goFileHeader = '';
+  opts.sqlFileHeader = '';
   opts.noOutput = true;
   const tmpDir = tempy.directory();
 

@@ -13,11 +13,12 @@ import { toSnakeCase } from '../lib/stringUtils.js';
 export default class Builder {
   opts: BuildOptions;
   private buildStarted = false;
+  
   constructor(public dialect: Dialect, public outDir: string, opts?: BuildOptions) {
     throwIfFalsy(dialect, 'dialect');
     throwIfFalsy(outDir, 'outDir');
     // eslint-disable-next-line no-param-reassign
-    opts = opts || {};
+    opts = opts ?? {};
     logger.enabled = !opts.noOutput;
     this.opts = opts;
   }
@@ -65,7 +66,7 @@ export default class Builder {
     const builder = new CSQLBuilder(table, dialect);
     const fileName = toSnakeCase(table.__getData().name);
     const outFile = nodepath.join(outDir, fileName + '.sql');
-    const sql = builder.build(this.opts.fileHeader);
+    const sql = builder.build(this.opts.sqlFileHeader);
     await mfs.writeFileAsync(outFile, sql, 'utf8');
   }
 }

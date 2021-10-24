@@ -11,7 +11,8 @@ export interface JSONEncodingOptions {
 
 export interface BuildOptions {
   packageName?: string;
-  fileHeader?: string;
+  goFileHeader?: string;
+  sqlFileHeader?: string;
   cleanBuild?: boolean;
   noOutput?: boolean;
   jsonEncoding?: JSONEncodingOptions;
