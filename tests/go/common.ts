@@ -8,7 +8,12 @@ import { commonIOOptions } from '../io/common.js';
 import { eq } from '../assert-aliases.js';
 
 const dialect = mr.mysql;
-const DestDataDir = 'tests/go/dest';
+const destDataDir = 'tests/go/dest';
+const buildDir = 'build';
+const tableSQLFile = 'table_sql';
+const migrationSQLFile = 'migration_sql';
+export const migrationUpFile = '__mig_up__.sql';
+export const migrationDownFile = '__mig_down__.sql';
 
 function defaultOptions() {
   const defOpts: mr.BuildOptions = {};
@@ -29,7 +34,7 @@ export async function testBuildAsync(
 ) {
   let content = '';
   if (path) {
-    path = nodepath.resolve(nodepath.join(DestDataDir, `${path}.go`));
+    path = nodepath.resolve(nodepath.join(destDataDir, `${path}.go`));
     content = await mfs.readFileAsync(path, 'utf8');
   }
   mr.logger.enabled = false;
@@ -53,7 +58,7 @@ export async function testBuildFullAsync(
 ) {
   let content = '';
   if (path) {
-    path = nodepath.resolve(nodepath.join(DestDataDir, `${path}.go`));
+    path = nodepath.resolve(nodepath.join(destDataDir, `${path}.go`));
     content = await mfs.readFileAsync(path, 'utf8');
   }
   mr.logger.enabled = false;
@@ -77,7 +82,7 @@ export async function testFilesAsync(a: string, b: string) {
 export async function testBuildToDirAsync(
   actions: mm.TableActions[],
   files: string[],
-  expectedDir: string,
+  expectedDirName: string,
   opts?: mr.BuildOptions,
   buildCSQL = false,
 ) {
@@ -96,30 +101,29 @@ export async function testBuildToDirAsync(
   });
 
   const promises: Promise<void>[] = [];
+  const expectedDirPath = nodepath.resolve(nodepath.join(destDataDir, buildDir, expectedDirName));
   for (let file of files) {
     let actual = '';
     let expected = '';
+    expected = nodepath.join(expectedDirPath, file);
     if (file.startsWith('#')) {
       file = file.substr(1);
       actual = nodepath.join(tmpDir, file);
-      expected = nodepath.join(
-        nodepath.resolve(nodepath.join(DestDataDir, 'build', expectedDir)),
-        file,
-      );
+      // `file` has changed here, we need to re-generate the expected file.
+      expected = nodepath.join(expectedDirPath, file);
+    } else if (file === migrationUpFile) {
+      actual = nodepath.join(tmpDir, migrationSQLFile, 'up.sql');
+      expected = nodepath.join(expectedDirPath, migrationUpFile);
+    } else if (file === migrationDownFile) {
+      actual = nodepath.join(tmpDir, migrationSQLFile, 'down.sql');
+      expected = nodepath.join(expectedDirPath, migrationDownFile);
     } else if (nodepath.extname(file)) {
       // An SQL file
-      actual = nodepath.join(tmpDir, 'create_sql', file);
-      expected = nodepath.join(
-        nodepath.resolve(nodepath.join(DestDataDir, 'build', expectedDir)),
-        file,
-      );
+      actual = nodepath.join(tmpDir, tableSQLFile, file);
     } else {
       // A go file
       actual = nodepath.join(tmpDir, `${file}_ta.go`);
-      expected = nodepath.join(
-        nodepath.resolve(nodepath.join(DestDataDir, 'build', expectedDir)),
-        `${file}_ta.go`,
-      );
+      expected = nodepath.join(expectedDirPath, `${file}_ta.go`);
     }
     promises.push(testFilesAsync(actual, expected));
   }

@@ -7,6 +7,7 @@ import { extractStringContentFromSegments } from './goCode.js';
 
 export default class CSQLBuilder {
   tableData: mm.TableData;
+  sql = '';
 
   constructor(public table: mm.Table, public dialect: Dialect) {
     this.tableData = table.__getData();
@@ -50,13 +51,13 @@ export default class CSQLBuilder {
     if (indicesLines.length) {
       body.push(...indicesLines);
     }
-    let code = header ?? defs.fileHeader;
-    code += `CREATE TABLE ${dialect.encodeTableName(table)} (\n`;
-    code += this.increaseIndent(body, ',\n');
-    code += '\n)\n';
-    code += 'CHARACTER SET=utf8mb4\nCOLLATE=utf8mb4_unicode_ci\n';
-    code += ';\n';
-    return code;
+    let sql = `CREATE TABLE ${dialect.encodeTableName(table)} (\n`;
+    sql += this.increaseIndent(body, ',\n');
+    sql += '\n)\n';
+    sql += 'CHARACTER SET=utf8mb4\nCOLLATE=utf8mb4_unicode_ci\n';
+    sql += ';\n';
+    this.sql = sql;
+    return (header ?? defs.fileHeader) + sql;
   }
 
   private groupNames(names: string[]): string {

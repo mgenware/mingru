@@ -2,7 +2,7 @@ import * as mm from 'mingru-models';
 import user from '../models/user.js';
 import post from '../models/post.js';
 import postReply from '../models/postReply.js';
-import { testBuildToDirAsync } from './common.js';
+import { testBuildToDirAsync, migrationUpFile, migrationDownFile } from './common.js';
 
 it('Single table', async () => {
   class PostTA extends mm.TableActions {
@@ -79,7 +79,7 @@ it('Multiple tables + CSQL', async () => {
   const actions = [userTA, postTA];
   await testBuildToDirAsync(
     actions,
-    ['post', 'user', 'post.sql', 'user.sql'],
+    ['post', 'user', 'post.sql', 'user.sql', migrationUpFile, migrationDownFile],
     'multipleTablesCSQL',
     undefined,
     true,

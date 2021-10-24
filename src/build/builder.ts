@@ -3,12 +3,16 @@ import { throwIfFalsy } from 'throw-if-arg-empty';
 import * as mfs from 'm-fs';
 import * as nodepath from 'path';
 import del from 'del';
+import * as defs from '../defs.js';
 import { Dialect } from '../dialect.js';
 import GoBuilder from './goBuilder.js';
 import logger from '../logger.js';
 import CSQLBuilder from './csqlBuilder.js';
 import { BuildOptions } from './buildOptions.js';
 import { toSnakeCase } from '../lib/stringUtils.js';
+
+const tableSQLDir = 'table_sql';
+const migSQLDir = 'migration_sql';
 
 export default class Builder {
   opts: BuildOptions;
@@ -49,8 +53,25 @@ export default class Builder {
     // Remove duplicate values.
     // eslint-disable-next-line no-param-reassign
     tables = [...new Set(tables)];
-    await Promise.all(tables.map((t) => this.buildCSQL(t)));
-    logger.debug('🎉  Table build succeeded');
+    const csqlBuilders = await Promise.all(tables.map((t) => this.buildCSQL(t)));
+
+    // Generate migration up file.
+    const migUpSQLFile = nodepath.join(this.outDir, migSQLDir, 'up.sql');
+    let upSQL = this.opts.sqlFileHeader ?? defs.fileHeader;
+    for (const builder of csqlBuilders) {
+      upSQL += `${builder.sql}\n`;
+    }
+    await mfs.writeFileAsync(migUpSQLFile, upSQL);
+
+    // Generate migration down file.
+    const migDownSQLFile = nodepath.join(this.outDir, migSQLDir, 'down.sql');
+    let downSQL = this.opts.sqlFileHeader ?? defs.fileHeader;
+    for (const table of tables) {
+      downSQL += `DROP TABLE IF EXISTS ${table.__getDBName()};\n`;
+    }
+    await mfs.writeFileAsync(migDownSQLFile, downSQL);
+
+    logger.debug('🎉  SQL generation succeeded');
   }
 
   private checkBuildStatus() {
@@ -59,14 +80,15 @@ export default class Builder {
     }
   }
 
-  private async buildCSQL(table: mm.Table): Promise<void> {
+  private async buildCSQL(table: mm.Table): Promise<CSQLBuilder> {
     const { dialect } = this;
     let { outDir } = this;
-    outDir = nodepath.join(outDir, 'create_sql');
+    outDir = nodepath.join(outDir, tableSQLDir);
     const builder = new CSQLBuilder(table, dialect);
     const fileName = toSnakeCase(table.__getData().name);
     const outFile = nodepath.join(outDir, fileName + '.sql');
     const sql = builder.build(this.opts.sqlFileHeader);
-    await mfs.writeFileAsync(outFile, sql, 'utf8');
+    await mfs.writeFileAsync(outFile, sql);
+    return builder;
   }
 }
