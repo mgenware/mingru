@@ -67,7 +67,8 @@ export default class Builder {
     const migDownSQLFile = nodepath.join(this.outDir, migSQLDir, 'down.sql');
     let downSQL = this.opts.sqlFileHeader ?? defs.fileHeader;
     // Drop tables in reverse order.
-    for (var i = tables.length - 1; i >= 0; i--) {
+    for (let i = tables.length - 1; i >= 0; i--) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const table = tables[i]!;
       downSQL += `DROP TABLE IF EXISTS ${table.__getDBName()};\n`;
     }
