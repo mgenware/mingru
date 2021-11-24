@@ -57,7 +57,7 @@ export default class GoBuilder {
         resultTypesCode += go.struct(
           resultType.typeName,
           resultTypeMembers,
-          resultType.nameStyle,
+          resultType.jsonKeyStyle,
           resultType.ignoredMembers,
           resultType.omitEmptyMembers,
         );

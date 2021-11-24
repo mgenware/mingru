@@ -1,11 +1,10 @@
-export enum JSONEncodingStyle {
-  none,
+export enum JSONKeyStyle {
   camelCase,
   snakeCase,
 }
 
-export interface JSONEncodingOptions {
-  encodingStyle?: JSONEncodingStyle;
+export interface JSONTagsOptions {
+  keyStyle: JSONKeyStyle;
   excludeEmptyValues?: boolean;
 }
 
@@ -15,5 +14,5 @@ export interface BuildOptions {
   sqlFileHeader?: string;
   cleanBuild?: boolean;
   noOutput?: boolean;
-  jsonEncoding?: JSONEncodingOptions;
+  jsonTags?: JSONTagsOptions;
 }

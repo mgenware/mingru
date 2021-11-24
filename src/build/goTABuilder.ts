@@ -22,7 +22,7 @@ import { WrapIO } from '../io/wrapIO.js';
 import { TransactIO } from '../io/transactIO.js';
 import LinesBuilder from './linesBuilder.js';
 import * as stringUtils from '../lib/stringUtils.js';
-import { BuildOptions, JSONEncodingStyle } from './buildOptions.js';
+import { BuildOptions } from './buildOptions.js';
 import GoBuilderContext from './goBuilderContext.js';
 
 function joinParams(arr: string[]): string {
@@ -237,7 +237,7 @@ export default class GoTABuilder {
     let code = go.struct(
       className,
       [],
-      JSONEncodingStyle.none,
+      undefined, // JSONKeyStyle
       new Set<string>(),
       new Set<string>(),
     );
@@ -344,7 +344,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
     const selectedFields = new Map<string, VarInfo>();
     const jsonIgnoreFields = new Set<string>();
     const omitEmptyFields = new Set<string>();
-    const omitAllEmptyFields = options.jsonEncoding?.excludeEmptyValues || false;
+    const omitAllEmptyFields = options.jsonTags?.excludeEmptyValues || false;
 
     for (const col of io.cols) {
       // Column property name to model property name.
@@ -377,7 +377,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
     }
 
     // Generate result type definition.
-    const resultMemberJSONStyle = options.jsonEncoding?.encodingStyle || JSONEncodingStyle.none;
+    const resultMemberJSONStyle = options.jsonTags?.keyStyle;
     if (
       selMode !== mm.SelectActionMode.field &&
       selMode !== mm.SelectActionMode.exists &&

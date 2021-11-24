@@ -1,4 +1,4 @@
-import { JSONEncodingStyle } from './buildOptions.js';
+import { JSONKeyStyle } from './buildOptions.js';
 import { VarInfo, getAtomicTypeInfo } from '../lib/varInfo.js';
 import { StringSegment } from '../dialect.js';
 import CodeStringBuilder from '../lib/codeStringBuilder.js';
@@ -37,7 +37,7 @@ export class MutableStructInfo {
     public typeName: string,
     // K: Name of `VarInfo`.
     public members: Map<string, VarInfo>,
-    public nameStyle: JSONEncodingStyle,
+    public jsonKeyStyle: JSONKeyStyle | undefined,
     // K: Name of `VarInfo`.
     public ignoredMembers: Set<string>,
     // K: Name of `VarInfo`.
@@ -73,7 +73,7 @@ type ${typeName} interface {
 export function struct(
   typeName: string,
   members: VarInfo[],
-  nameStyle: JSONEncodingStyle,
+  jsonKeyStyle: JSONKeyStyle | undefined,
   ignoredMembers: Set<string>,
   omitEmptyMembers: Set<string>,
 ): string {
@@ -85,7 +85,7 @@ type ${typeName} struct {
   // Find the max length of all field names.
   const nameMaxLen = Math.max(...sortedMems.map((m) => m.pascalName.length));
   let typeMaxLen = 0;
-  if (nameStyle !== JSONEncodingStyle.none) {
+  if (jsonKeyStyle) {
     typeMaxLen = Math.max(...sortedMems.map((m) => m.type.typeString.length));
   }
   for (const mem of sortedMems) {
@@ -95,9 +95,9 @@ type ${typeName} struct {
     const omitEmpty = omitEmptyMembers.has(memName) || false;
     if (ignoredMembers.has(memName)) {
       tag = MemberTagUtil.getIgnoreJSONTag();
-    } else if (nameStyle === JSONEncodingStyle.camelCase) {
+    } else if (jsonKeyStyle === JSONKeyStyle.camelCase) {
       tag = MemberTagUtil.getCamelCaseJSONTag(memName, omitEmpty);
-    } else if (nameStyle === JSONEncodingStyle.snakeCase) {
+    } else if (jsonKeyStyle === JSONKeyStyle.snakeCase) {
       tag = MemberTagUtil.getSnakeCaseJSONTag(memName, omitEmpty);
     }
     if (tag) {

@@ -523,7 +523,7 @@ it('snake_case keys', async () => {
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/snakeCaseKeys', {
     goFileHeader: '',
-    jsonEncoding: { encodingStyle: mr.JSONEncodingStyle.snakeCase },
+    jsonTags: { keyStyle: mr.JSONKeyStyle.snakeCase },
   });
 });
 
@@ -538,7 +538,7 @@ it('camelCase keys', async () => {
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/camelCaseKeys', {
     goFileHeader: '',
-    jsonEncoding: { encodingStyle: mr.JSONEncodingStyle.camelCase },
+    jsonTags: { keyStyle: mr.JSONKeyStyle.camelCase },
   });
 });
 
@@ -553,7 +553,7 @@ it('Private columns', async () => {
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/ignoredKeys', {
     goFileHeader: '',
-    jsonEncoding: { encodingStyle: mr.JSONEncodingStyle.camelCase },
+    jsonTags: { keyStyle: mr.JSONKeyStyle.camelCase },
   });
 });
 
@@ -567,7 +567,7 @@ it('Private columns (raw columns)', async () => {
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/ignoredKeysRawCols', {
     goFileHeader: '',
-    jsonEncoding: { encodingStyle: mr.JSONEncodingStyle.camelCase },
+    jsonTags: { keyStyle: mr.JSONKeyStyle.camelCase },
   });
 });
 
@@ -584,7 +584,7 @@ it('Forced public columns', async () => {
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/forcedPublicColumns', {
     goFileHeader: '',
-    jsonEncoding: { encodingStyle: mr.JSONEncodingStyle.camelCase, excludeEmptyValues: true },
+    jsonTags: { keyStyle: mr.JSONKeyStyle.camelCase, excludeEmptyValues: true },
   });
 });
 
@@ -602,7 +602,7 @@ it('Exclude empty properties', async () => {
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/excludedEmptyProps', {
     goFileHeader: '',
-    jsonEncoding: { encodingStyle: mr.JSONEncodingStyle.camelCase },
+    jsonTags: { keyStyle: mr.JSONKeyStyle.camelCase },
   });
 });
 
@@ -617,8 +617,8 @@ it('Exclude all empty properties', async () => {
   const ta = mm.tableActions(rpl, RplTA);
   await testBuildAsync(ta, 'select/excludedEmptyProps', {
     goFileHeader: '',
-    jsonEncoding: {
-      encodingStyle: mr.JSONEncodingStyle.camelCase,
+    jsonTags: {
+      keyStyle: mr.JSONKeyStyle.camelCase,
       excludeEmptyValues: true,
     },
   });
