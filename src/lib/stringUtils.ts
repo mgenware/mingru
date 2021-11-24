@@ -15,7 +15,11 @@ export function toSnakeCase(s: string): string {
 }
 
 export function toCamelCase(s: string): string {
-  return forceAllCapsTrailingID(camelCase(s, { preserveConsecutiveUppercase: true }));
+  const res = forceAllCapsTrailingID(camelCase(s, { preserveConsecutiveUppercase: true }));
+  if (res === 'ID') {
+    return 'id';
+  }
+  return res;
 }
 
 export function lowercaseFirstChar(s: string): string {
@@ -29,9 +33,6 @@ export function toPascalCase(s: string): string {
   const res = forceAllCapsTrailingID(
     camelCase(s, { preserveConsecutiveUppercase: true, pascalCase: true }),
   );
-  if (res === 'Id') {
-    return 'ID';
-  }
   return res;
 }
 

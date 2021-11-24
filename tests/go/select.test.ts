@@ -515,6 +515,7 @@ it('HAVING and JOIN', async () => {
 it('snake_case keys', async () => {
   class RplTA extends mm.TableActions {
     selectT = mm.selectRow(
+      rpl.id,
       rpl.user_id.join(user).url_name,
       rpl.user_id.join(user).id,
       rpl.to_user_id.join(user).url_name,
@@ -530,6 +531,7 @@ it('snake_case keys', async () => {
 it('camelCase keys', async () => {
   class RplTA extends mm.TableActions {
     selectT = mm.selectRow(
+      rpl.id,
       rpl.user_id.join(user).url_name,
       rpl.user_id.join(user).id,
       rpl.to_user_id.join(user).url_name,
