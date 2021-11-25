@@ -519,6 +519,7 @@ it('snake_case keys', async () => {
       rpl.user_id.join(user).url_name,
       rpl.user_id.join(user).id,
       rpl.to_user_id.join(user).url_name,
+      rpl.created,
     );
   }
   const ta = mm.tableActions(rpl, RplTA);
@@ -535,6 +536,7 @@ it('camelCase keys', async () => {
       rpl.user_id.join(user).url_name,
       rpl.user_id.join(user).id,
       rpl.to_user_id.join(user).url_name,
+      rpl.created,
     );
   }
   const ta = mm.tableActions(rpl, RplTA);
@@ -550,6 +552,7 @@ it('Private columns', async () => {
       rpl.user_id.join(user).url_name.attr(mm.ColumnAttribute.isPrivate, true),
       rpl.user_id.join(user).id.privateAttr(),
       rpl.to_user_id.join(user).url_name,
+      rpl.created,
     );
   }
   const ta = mm.tableActions(rpl, RplTA);
@@ -580,6 +583,7 @@ it('Forced public columns', async () => {
         rpl.user_id.join(user).url_name.attr(mm.ColumnAttribute.isPrivate, true),
         rpl.user_id.join(user).id.privateAttr(),
         rpl.to_user_id.join(user).url_name,
+        rpl.created,
       )
       .attr(mm.ActionAttribute.ignorePrivateColumns, true);
   }
@@ -590,30 +594,13 @@ it('Forced public columns', async () => {
   });
 });
 
-it('Exclude empty properties', async () => {
-  class RplTA extends mm.TableActions {
-    selectT = mm.selectRow(
-      rpl.user_id
-        .join(user)
-        .url_name.attr(mm.ColumnAttribute.excludeEmptyValue, true)
-        .privateAttr(),
-      rpl.user_id.join(user).id.attr(mm.ColumnAttribute.excludeEmptyValue, true),
-      rpl.to_user_id.join(user).url_name.attr(mm.ColumnAttribute.excludeEmptyValue, true),
-    );
-  }
-  const ta = mm.tableActions(rpl, RplTA);
-  await testBuildAsync(ta, 'select/excludedEmptyProps', {
-    goFileHeader: '',
-    jsonTags: { keyStyle: mr.JSONKeyStyle.camelCase },
-  });
-});
-
 it('Exclude all empty properties', async () => {
   class RplTA extends mm.TableActions {
     selectT = mm.selectRow(
       rpl.user_id.join(user).url_name.attr(mm.ColumnAttribute.isPrivate, true),
       rpl.user_id.join(user).id.attr(mm.ColumnAttribute.excludeEmptyValue, true),
       rpl.to_user_id.join(user).url_name,
+      rpl.created,
     );
   }
   const ta = mm.tableActions(rpl, RplTA);
