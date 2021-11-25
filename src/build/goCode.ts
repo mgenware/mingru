@@ -82,16 +82,18 @@ export function struct(
   let code = `// ${typeName} ...
 type ${typeName} struct {
 `;
-  // Find the max length of all field names.
-  const nameMaxLen = Math.max(...sortedMems.map((m) => m.pascalName.length));
-  let typeMaxLen = 0;
-  if (jsonKeyStyle) {
-    typeMaxLen = Math.max(...sortedMems.map((m) => m.type.typeString.length));
-  }
+  // Use 3 string array to save string value of each column in a line
+  // to property display indent.
+  const nameColumns: string[] = [];
+  const typeColumns: string[] = [];
+  const tagColumns: string[] = [];
   for (const mem of sortedMems) {
     const memName = mem.pascalName;
-    let tag: string | null = null;
-    code += `\t${memName.padEnd(nameMaxLen)} ${mem.type.typeString.padEnd(typeMaxLen)}`;
+    const memType = mem.type.typeString;
+    let tag = '';
+    nameColumns.push(memName);
+    typeColumns.push(memType);
+
     const omitEmpty = omitEmptyMembers.has(memName) || false;
     if (ignoredMembers.has(memName)) {
       tag = MemberTagUtil.getIgnoreJSONTag();
@@ -100,6 +102,20 @@ type ${typeName} struct {
     } else if (jsonKeyStyle === JSONKeyStyle.snakeCase) {
       tag = MemberTagUtil.getSnakeCaseJSONTag(memName, omitEmpty);
     }
+    tagColumns.push(tag);
+  }
+
+  const maxNameLen = Math.max(...nameColumns.map((s) => s.length));
+  const maxTypeLen = Math.max(...typeColumns.map((s) => s.length));
+  for (let i = 0; i < nameColumns.length; i++) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const name = nameColumns[i]!;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const type = typeColumns[i]!;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const tag = tagColumns[i]!;
+
+    code += `\t${name.padEnd(maxNameLen)} ${tag ? type.padEnd(maxTypeLen) : type}`;
     if (tag) {
       code += ` ${tag}`;
     }
