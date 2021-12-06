@@ -8,40 +8,49 @@ export interface CodeSegment {
   code: string;
 }
 
+// Base class for a dialect implementation.
 export class Dialect {
-  encodeName(_: string): string {
+  // Encodes the given name to SQL.
+  encodeName(_name: string): string {
     throw new Error('Not implemented yet');
   }
 
   // Translates a JavaScript object to SQL equivalent
-  objToSQL(_: unknown, __: mm.Table | null): mm.SQL {
+  objToSQL(_obj: unknown, _table: mm.Table | null): mm.SQL {
     throw new Error('Not implemented yet');
   }
 
-  colTypeToGoType(_: mm.ColumnType): TypeInfo {
+  // Converts the specified column to `TypeInfo`.
+  colTypeToGoType(_colType: mm.ColumnType): TypeInfo {
     throw new Error('Not implemented yet');
   }
 
-  colToSQLType(_: mm.Column): mm.SQL {
+  // Converts the specified column to SQL type.
+  colToSQLType(_col: mm.Column): mm.SQL {
     throw new Error('Not implemented yet');
   }
 
-  as(_: mm.SQL, __: string): mm.SQL {
+  // Wraps the given SQL expression in a AS SQL clause with the given name.
+  as(_sql: mm.SQL, _name: string): mm.SQL {
     throw new Error('Not implemented yet');
   }
 
+  // A helper to encode the name of the specified column.
   encodeColumnName(column: mm.Column): string {
     return this.encodeName(column.__getDBName());
   }
 
+  // A helper to encode the name of the specified table.
   encodeTableName(table: mm.Table): string {
     return this.encodeName(table.__getDBName());
   }
 
+  // Returns the SQL expression of an input placeholder.
   inputPlaceholder(): StringSegment[] {
     return ['?'];
   }
 
+  // Returns the SQL function name of the given `SQLCallType`.
   sqlCall(_: mm.SQLCallType): string {
     throw new Error('Not implemented yet');
   }

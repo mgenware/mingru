@@ -9,12 +9,12 @@ import escapeSQLString from './sqlEscapeString.js';
 const TimeType = new AtomicTypeInfo('Time', 'time.Time{}', 'time');
 
 export class MySQL extends Dialect {
-  encodeName(name: string): string {
+  override encodeName(name: string): string {
     throwIfFalsy(name, 'name');
     return '`' + name + '`';
   }
 
-  objToSQL(value: unknown, _table: mm.Table | null): mm.SQL {
+  override objToSQL(value: unknown, _table: mm.Table | null): mm.SQL {
     if (value === undefined) {
       throw new Error('Value is undefined');
     }
@@ -34,7 +34,7 @@ export class MySQL extends Dialect {
     throw new Error(`Unsupported type of object "${toTypeString(value)}"`);
   }
 
-  colTypeToGoType(colType: mm.ColumnType): TypeInfo {
+  override colTypeToGoType(colType: mm.ColumnType): TypeInfo {
     throwIfFalsy(colType, 'colType');
     const typeInfo = this.goTypeNonNull(colType);
     if (colType.nullable) {
@@ -43,7 +43,7 @@ export class MySQL extends Dialect {
     return typeInfo;
   }
 
-  colToSQLType(col: mm.Column): mm.SQL {
+  override colToSQLType(col: mm.Column): mm.SQL {
     throwIfFalsy(col, 'col');
     const colType = col.__type();
     const colData = col.__getData();
@@ -79,11 +79,11 @@ export class MySQL extends Dialect {
     return builder.toSQL();
   }
 
-  as(sql: mm.SQL, name: string): mm.SQL {
+  override as(sql: mm.SQL, name: string): mm.SQL {
     return mm.sql`${sql} AS ${this.encodeName(name)}`;
   }
 
-  sqlCall(type: mm.SQLCallType): string {
+  override sqlCall(type: mm.SQLCallType): string {
     switch (type) {
       case mm.SQLCallType.localDatetimeNow:
         return 'NOW';
