@@ -8,6 +8,13 @@ export interface CodeSegment {
   code: string;
 }
 
+export enum SQLTypeMode {
+  // Standard type string in CREATE TABLE.
+  standard,
+  // Type string used for column aliases(Available in MySQL).
+  alias,
+}
+
 // Base class for a dialect implementation.
 export class Dialect {
   // Encodes the given name to SQL.
@@ -26,7 +33,7 @@ export class Dialect {
   }
 
   // Converts the specified column to SQL type.
-  colToSQLType(_col: mm.Column): mm.SQL {
+  colToSQLType(_col: mm.Column, _mode?: SQLTypeMode): mm.SQL {
     throw new Error('Not implemented yet');
   }
 

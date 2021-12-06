@@ -107,3 +107,13 @@ it('Default empty values', async () => {
   const t = mm.table(Post, 'db_post');
   await testBuildAsync(t, 'defaultZero/post');
 });
+
+it('Column aliases', async () => {
+  class T extends mm.Table {
+    id = mm.pk().colAttr(mm.ColumnAttribute.alias, 'id_alias');
+    user_id = mm.fk(user.id).colAttr(mm.ColumnAttribute.alias, 'user_id_alias');
+    sig = mm.text().nullable.default('def').colAttr(mm.ColumnAttribute.alias, 'sig_alias');
+  }
+  const t = mm.table(T);
+  await testBuildAsync(t, 'colAliases/t');
+});

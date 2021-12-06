@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 import * as mm from 'mingru-models';
 import * as defs from '../defs.js';
-import { Dialect } from '../dialect.js';
+import { Dialect, SQLTypeMode } from '../dialect.js';
 import { sqlIO } from '../io/sqlIO.js';
 import { extractStringContentFromSegments } from './goCode.js';
 
@@ -49,7 +49,10 @@ export default class CSQLBuilder {
           throw new Error(`Column alias "${colAlias}" has been defined.`);
         }
         colAliases.add(colAlias);
-        body.push(`${dialect.encodeName(colAlias)}`);
+        const code = extractStringContentFromSegments(
+          sqlIO(dialect.colToSQLType(col, SQLTypeMode.alias), dialect, null).code,
+        );
+        body.push(`${dialect.encodeName(colAlias)} ${code}`);
       }
     }
     if (pks.length) {

@@ -2,7 +2,7 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import toTypeString from 'to-type-string';
-import { Dialect } from '../dialect.js';
+import { Dialect, SQLTypeMode } from '../dialect.js';
 import { AtomicTypeInfo, CompoundTypeInfo, TypeInfo } from '../lib/varInfo.js';
 import escapeSQLString from './sqlEscapeString.js';
 
@@ -43,7 +43,7 @@ export class MySQL extends Dialect {
     return typeInfo;
   }
 
-  override colToSQLType(col: mm.Column): mm.SQL {
+  override colToSQLType(col: mm.Column, mode?: SQLTypeMode): mm.SQL {
     throwIfFalsy(col, 'col');
     const colType = col.__type();
     const colData = col.__getData();
@@ -57,24 +57,29 @@ export class MySQL extends Dialect {
     if (colType.unsigned) {
       builder.pushWithSpace('UNSIGNED');
     }
-    builder.pushWithSpace(colType.nullable ? 'NULL' : 'NOT NULL');
-    if (!colData.noDefaultValueOnCSQL) {
-      const defValue = colData.defaultValue;
-      if (defValue !== undefined && defValue instanceof mm.SQL === false) {
-        builder.pushWithSpace('DEFAULT');
 
-        // MySQL doesn't allow dynamic value as default value, we simply ignore SQL expr here.
-        builder.pushWithSpace(this.objToSQL(defValue, col.__getSourceTable()));
-      } else if (colType.nullable) {
-        builder.pushWithSpace('DEFAULT');
-        builder.pushWithSpace('NULL');
+    if (mode === SQLTypeMode.alias) {
+      builder.pushWithSpace(`GENERATED ALWAYS AS (${this.encodeName(col.__getDBName())}) VIRTUAL`);
+    } else {
+      builder.pushWithSpace(colType.nullable ? 'NULL' : 'NOT NULL');
+      if (!colData.noDefaultValueOnCSQL) {
+        const defValue = colData.defaultValue;
+        if (defValue !== undefined && defValue instanceof mm.SQL === false) {
+          builder.pushWithSpace('DEFAULT');
+
+          // MySQL doesn't allow dynamic value as default value, we simply ignore SQL expr here.
+          builder.pushWithSpace(this.objToSQL(defValue, col.__getSourceTable()));
+        } else if (colType.nullable) {
+          builder.pushWithSpace('DEFAULT');
+          builder.pushWithSpace('NULL');
+        }
       }
-    }
-    if (colData.uniqueConstraint) {
-      builder.pushWithSpace('UNIQUE');
-    }
-    if (colType.autoIncrement) {
-      builder.pushWithSpace('AUTO_INCREMENT');
+      if (colData.uniqueConstraint) {
+        builder.pushWithSpace('UNIQUE');
+      }
+      if (colType.autoIncrement) {
+        builder.pushWithSpace('AUTO_INCREMENT');
+      }
     }
     return builder.toSQL();
   }
