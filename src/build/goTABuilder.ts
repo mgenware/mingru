@@ -360,12 +360,15 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
       // Checking explicitly set attributes.
       const ignorePrivateColumns =
         actionData.attrs?.get(mm.ActionAttribute.ignorePrivateColumns) === true;
-      if (col.selectedColumn instanceof mm.RawColumn) {
+      if (col.selectedColumn instanceof mm.SelectedColumn) {
         const { attrs } = col.selectedColumn.__getData();
-        if (!ignorePrivateColumns && attrs?.get(mm.ColumnAttribute.isPrivate) === true) {
+        if (!ignorePrivateColumns && attrs?.get(mm.SelectedColumnAttribute.isPrivate) === true) {
           jsonIgnoreFields.add(varInfo.name);
         }
-        if (omitAllEmptyFields || attrs?.get(mm.ColumnAttribute.excludeEmptyValue) === true) {
+        if (
+          omitAllEmptyFields ||
+          attrs?.get(mm.SelectedColumnAttribute.excludeEmptyValue) === true
+        ) {
           omitEmptyFields.add(varInfo.name);
         }
       }

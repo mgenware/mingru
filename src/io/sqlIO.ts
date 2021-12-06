@@ -139,7 +139,7 @@ function handleElement(
     }
 
     case mm.SQLElementType.rawColumn: {
-      const rawCol = element.toRawColumn();
+      const rawCol = element.toSelectedColumn();
       const { selectedName, core } = rawCol.__getData();
       if (!core) {
         throw new Error(`Unexpected undefined core at raw column "${rawCol}"`);

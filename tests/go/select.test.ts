@@ -333,16 +333,16 @@ it('Raw columns', async () => {
   class PostTA extends mm.TableActions {
     selectT = mm.selectRow(
       // User specified types
-      new mm.RawColumn(mm.sql`raw expr`, 'a', new mm.ColumnType(mm.dt.bigInt)),
-      new mm.RawColumn(mm.sql`xyz(${post.n_date})`, 'b', new mm.ColumnType(mm.dt.smallInt)),
-      new mm.RawColumn(
+      new mm.SelectedColumn(mm.sql`raw expr`, 'a', new mm.ColumnType(mm.dt.bigInt)),
+      new mm.SelectedColumn(mm.sql`xyz(${post.n_date})`, 'b', new mm.ColumnType(mm.dt.smallInt)),
+      new mm.SelectedColumn(
         mm.sql`xyz(${post.user_id.join(user).display_name})`,
         'c',
         new mm.ColumnType(mm.dt.int),
       ),
       // Auto detected types
-      new mm.RawColumn(post.user_id.join(user).display_name, 'snake_name'),
-      new mm.RawColumn(mm.sql`${mm.count(post.n_datetime)}`, 'nDatetime'),
+      new mm.SelectedColumn(post.user_id.join(user).display_name, 'snake_name'),
+      new mm.SelectedColumn(mm.sql`${mm.count(post.n_datetime)}`, 'nDatetime'),
     );
   }
   const ta = mm.tableActions(post, PostTA);
@@ -549,7 +549,7 @@ it('camelCase keys', async () => {
 it('Private columns', async () => {
   class RplTA extends mm.TableActions {
     selectT = mm.selectRow(
-      rpl.user_id.join(user).url_name.attr(mm.ColumnAttribute.isPrivate, true),
+      rpl.user_id.join(user).url_name.attr(mm.SelectedColumnAttribute.isPrivate, true),
       rpl.user_id.join(user).id.privateAttr(),
       rpl.to_user_id.join(user).url_name,
       rpl.created,
@@ -580,7 +580,7 @@ it('Forced public columns', async () => {
   class RplTA extends mm.TableActions {
     selectT = mm
       .selectRow(
-        rpl.user_id.join(user).url_name.attr(mm.ColumnAttribute.isPrivate, true),
+        rpl.user_id.join(user).url_name.attr(mm.SelectedColumnAttribute.isPrivate, true),
         rpl.user_id.join(user).id.privateAttr(),
         rpl.to_user_id.join(user).url_name,
         rpl.created,
@@ -597,8 +597,8 @@ it('Forced public columns', async () => {
 it('Exclude all empty properties', async () => {
   class RplTA extends mm.TableActions {
     selectT = mm.selectRow(
-      rpl.user_id.join(user).url_name.attr(mm.ColumnAttribute.isPrivate, true),
-      rpl.user_id.join(user).id.attr(mm.ColumnAttribute.excludeEmptyValue, true),
+      rpl.user_id.join(user).url_name.attr(mm.SelectedColumnAttribute.isPrivate, true),
+      rpl.user_id.join(user).id.attr(mm.SelectedColumnAttribute.excludeEmptyValue, true),
       rpl.to_user_id.join(user).url_name,
       rpl.created,
     );

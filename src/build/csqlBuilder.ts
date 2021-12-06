@@ -21,6 +21,7 @@ export default class CSQLBuilder {
     const pks: string[] = [];
     const fks: string[] = [];
     const indicesLines: string[] = [];
+    const colAliases = new Set<string>();
     for (const col of columns) {
       if (!col) {
         continue;
@@ -41,6 +42,15 @@ export default class CSQLBuilder {
       }
       const io = sqlIO(dialect.colToSQLType(col), dialect, null);
       body.push(`${dialect.encodeColumnName(col)} ${extractStringContentFromSegments(io.code)}`);
+
+      const colAlias = colData.attrs?.get(mm.ColumnAttribute.alias);
+      if (typeof colAlias === 'string') {
+        if (colAliases.has(colAlias)) {
+          throw new Error(`Column alias "${colAlias}" has been defined.`);
+        }
+        colAliases.add(colAlias);
+        body.push(`${dialect.encodeName(colAlias)}`);
+      }
     }
     if (pks.length) {
       body.push(`PRIMARY KEY ${this.groupNames(pks)}`);

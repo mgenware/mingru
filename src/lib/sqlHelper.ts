@@ -38,7 +38,7 @@ export function sniffSQLType(sql: mm.SQL): mm.ColumnType | null {
       );
     }
     if (type === mm.SQLElementType.rawColumn) {
-      const raw = element.toRawColumn();
+      const raw = element.toSelectedColumn();
       const { type: rawType, core: rawCore } = raw.__getData();
       if (rawType) {
         return rawType;
@@ -57,7 +57,7 @@ export function visitElements(sql: mm.SQL, fn: (element: mm.SQLElement) => boole
       return false;
     }
     if (element.type === mm.SQLElementType.rawColumn) {
-      const rawCol = element.toRawColumn();
+      const rawCol = element.toSelectedColumn();
       const { core: rawCore } = rawCol.__getData();
       if (rawCore instanceof mm.SQL) {
         if (!visitElements(rawCore, fn)) {
@@ -83,7 +83,7 @@ export function visitColumns(sql: mm.SQL, fn: (column: mm.Column) => boolean): b
       if (!fn(value)) {
         return false;
       }
-    } else if (value instanceof mm.RawColumn) {
+    } else if (value instanceof mm.SelectedColumn) {
       const { core } = value.__getData();
       if (core instanceof mm.Column) {
         if (!fn(core)) {
@@ -96,7 +96,7 @@ export function visitColumns(sql: mm.SQL, fn: (column: mm.Column) => boolean): b
 }
 
 export function visitColumnsFromSelectedColumn(
-  sc: mm.SelectedColumn,
+  sc: mm.SelectedColumnTypes,
   fn: (column: mm.Column) => boolean,
 ): boolean {
   if (sc instanceof mm.Column) {

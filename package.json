@@ -38,7 +38,7 @@
     "eslint-plugin-import": "^2.25.3",
     "it-throws": "^4.1.0",
     "mgenware-tsconfig-node": "^14.0.2",
-    "mingru-models": "^0.57.2",
+    "mingru-models": "^0.58.0",
     "mocha": "^9.1.3",
     "source-map-support": "^0.5.21",
     "tempy": "^2.0.0",

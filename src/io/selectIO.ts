@@ -99,7 +99,7 @@ export class OrderByInputIO {
 export class SelectedColumnIO {
   constructor(
     public id: StringSegment,
-    public selectedColumn: mm.SelectedColumn,
+    public selectedColumn: mm.SelectedColumnTypes,
     public valueSQL: StringSegment[],
     // `modelName` is alias if present. Otherwise, alias is auto generated from column model name.
     // Snake case.
@@ -323,7 +323,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     }
 
     if (!isUnionMode) {
-      let selectedColumns: mm.SelectedColumn[];
+      let selectedColumns: mm.SelectedColumnTypes[];
       if (selMode === mm.SelectActionMode.exists) {
         if (actionColumns?.length) {
           throw new Error('You cannot have selected columns in `selectExists`');
@@ -332,7 +332,9 @@ export class SelectIOProcessor extends BaseIOProcessor {
       } else {
         selectedColumns = actionColumns?.length
           ? actionColumns
-          : (Object.values(sqlTable.__getData().columns).filter((v) => v) as mm.SelectedColumn[]);
+          : (Object.values(sqlTable.__getData().columns).filter(
+              (v) => v,
+            ) as mm.SelectedColumnTypes[]);
       }
 
       // Checks if there are any joins in this query.
@@ -614,7 +616,9 @@ export class SelectIOProcessor extends BaseIOProcessor {
 
   // Gets ORDER BY value of the specified column. Returns an array of string segments
   // along with a column display name which is used in ORDER BY inputs.
-  private getOrderByNonInputColumnSQL(col: mm.SelectedColumnAndName): [string, StringSegment[]] {
+  private getOrderByNonInputColumnSQL(
+    col: mm.SelectedColumnTypesOrName,
+  ): [string, StringSegment[]] {
     const { dialect } = this.opt;
 
     if (typeof col === 'string') {
@@ -624,7 +628,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
       const io = this.columnPathToIOMap.get(col.__getPath());
       return [col.__mustGetPropertyName(), io ? [io.id] : this.getColumnSQLFromExistingData(col)];
     }
-    if (col instanceof mm.RawColumn) {
+    if (col instanceof mm.SelectedColumn) {
       const colData = col.__getData();
       if (colData.selectedName) {
         return [colData.selectedName, [dialect.encodeName(colData.selectedName)]];
@@ -747,7 +751,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
    * `mm.SQL` is not meant to be expressive, we have raw columns for columns with
    * an alias, we should use raw SQL aliases in `mm.SQL`.
    */
-  private handleSelectedColumn(sCol: mm.SelectedColumn): SelectedColumnIO {
+  private handleSelectedColumn(sCol: mm.SelectedColumnTypes): SelectedColumnIO {
     const sqlTable = this.mustGetAvailableSQLTable();
     const { dialect } = this.opt;
     // Plain columns like `post.id`.
@@ -944,7 +948,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
   // Called at the beginning of the `convert` function. It runs through all selected
   // columns, and returns the join type of the home table if there's a join.
   private scanJoins(
-    selectedCols: mm.SelectedColumn[],
+    selectedCols: mm.SelectedColumnTypes[],
     whereSQL: mm.SQL | undefined,
     havingSQL: mm.SQL | undefined,
   ) {
