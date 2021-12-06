@@ -213,9 +213,11 @@ export function sqlIO(
   }
   for (const element of sql.elements) {
     if (element.type === mm.SQLElementType.input) {
+      // There's no unsafe calls here. It's probably an ESLint TypeScript bug.
       // eslint-disable-next-line max-len
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
       const sqlVar = element.toInput();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       const varInfo = VarInfoBuilder.fromSQLVar(sqlVar, dialect);
       vars.add(varInfo);
     }
