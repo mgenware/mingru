@@ -1,4 +1,5 @@
 import * as mm from 'mingru-models';
+import { itRejects } from 'it-throws';
 import { testBuildAsync } from './common.js';
 import user from '../models/user.js';
 import post from '../models/post.js';
@@ -116,4 +117,17 @@ it('Column aliases', async () => {
   }
   const t = mm.table(T);
   await testBuildAsync(t, 'colAliases/t');
+});
+
+it('Column aliases (duplicate aliases)', async () => {
+  class T extends mm.Table {
+    id = mm.pk().colAttr(mm.ColumnAttribute.alias, 'id_alias');
+    user_id = mm.fk(user.id).colAttr(mm.ColumnAttribute.alias, 'sig_alias');
+    sig = mm.text().nullable.default('def').colAttr(mm.ColumnAttribute.alias, 'sig_alias');
+  }
+  const t = mm.table(T);
+  await itRejects(
+    () => testBuildAsync(t, 'colAliases/t'),
+    'Column alias "sig_alias" has been defined.',
+  );
 });
