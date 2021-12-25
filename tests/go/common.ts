@@ -43,7 +43,7 @@ export async function testBuildAsync(
     opts ?? defaultOptions(),
     ctx ?? new mr.CoreBuilderContext(),
   );
-  const actual = builder.build();
+  const [actual] = builder.build();
   if (path) {
     eq(actual, content);
   }
@@ -67,7 +67,7 @@ export async function testBuildFullAsync(
     opts ?? defaultOptions(),
     ctx ?? new mr.CoreBuilderContext(),
   );
-  const actual = builder.build();
+  const [actual] = builder.build();
   if (path) {
     eq(actual, content);
   }

@@ -130,3 +130,42 @@ it('Result type merging', async () => {
   const actions = [userTA];
   await testBuildToDirAsync(actions, ['#types.go', 'user'], 'resultTypeMerging');
 });
+
+it('TS interfaces', async () => {
+  class UserTA extends mm.TableActions {
+    selectByID = mm
+      .selectRow(user.id)
+      .by(user.id)
+      .attr(mm.ActionAttribute.groupTypeName, 'Type1')
+      .resultTypeNameAttr('Res1')
+      .attr(mm.ActionAttribute.tsTypeName, 'FooInterface');
+
+    selectProfile = mm.selectRow(user.display_name, user.sig).resultTypeNameAttr('Res2');
+    selectProfile2 = mm
+      .selectRow(user.display_name, user.sig)
+      .resultTypeNameAttr('Res3')
+      .attr(mm.ActionAttribute.tsTypeName, 'FooInterface2');
+
+    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
+  }
+  const userTA = mm.tableActions(user, UserTA);
+
+  class PostTA extends mm.TableActions {
+    selectByID = mm
+      .selectRow(post.id)
+      .by(post.id)
+      .attr(mm.ActionAttribute.groupTypeName, 'Type1')
+      .resultTypeNameAttr('Res1')
+      .attr(mm.ActionAttribute.tsTypeName, 'BarInterface');
+
+    selectPostInfo = mm
+      .selectRow(post.n_datetime, post.user_id.join(user).url_name)
+      .attr(mm.ActionAttribute.groupTypeName, 'Type2')
+      .attr(mm.ActionAttribute.tsTypeName, 'BarInterface2');
+
+    selectTime = mm.selectRow(post.n_datetime).resultTypeNameAttr('Res3');
+  }
+  const postTA = mm.tableActions(post, PostTA);
+  const actions = [userTA, postTA];
+  await testBuildToDirAsync(actions, ['#types.go', 'post', 'user'], 'types');
+});

@@ -16,7 +16,7 @@ function testType(col: mm.Column, type: string, pkg?: string) {
   eq(typeInfo.fullTypeName, type);
 
   const atomicInfo = mr.getAtomicTypeInfo(typeInfo);
-  eq(atomicInfo.moduleName ?? '', pkg ?? '');
+  eq(atomicInfo.moduleName, pkg ?? '');
 }
 
 it('encodeName', () => {

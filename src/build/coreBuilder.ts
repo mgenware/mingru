@@ -30,6 +30,18 @@ function joinParams(arr: string[]): string {
   return arr.join(', ');
 }
 
+// TypeScript interface code. Only applicable to SELECT actions.
+export interface TSInterfaceCode {
+  fileName: string;
+  code: string;
+}
+
+// The result type returned in an action builder.
+export interface ActionCode {
+  goCode: string;
+  tsCode?: TSInterfaceCode;
+}
+
 // Some actions (like SELECT), use `CodeMap` to return multiple code blocks.
 /**
  * <CodeMap.head>
@@ -39,10 +51,7 @@ function joinParams(arr: string[]): string {
  * <CodeMap.tail>
  */
 class CodeMap {
-  // TypeScript interface file name. Applicable to SELECT actions.
-  tsInterfaceFileName?: string;
-  // TypeScript interface code. Applicable to SELECT actions.
-  tsInterfaceCode?: string;
+  tsCode?: TSInterfaceCode;
   constructor(public body: LinesBuilder, public head?: string, public tail?: string) {}
 }
 
@@ -59,29 +68,38 @@ export default class CoreBuilder {
     this.options = opts;
   }
 
-  build(): string {
+  build(): [string, TSInterfaceCode[]] {
     const { options } = this;
     let code = options.goFileHeader ?? defs.fileHeader;
     code += `package ${options.packageName || defs.defaultPackageName}\n\n`;
 
     // `this.buildActions` will set `this.systemImports` and `this.userImports`.
     let body = '';
+    const tsInterfaces: TSInterfaceCode[] = [];
+    const [bCode, bInterfaces] = this.buildActions();
     body += this.buildTableObject();
     body += go.sep('Actions');
-    body += this.buildActions();
+    body += bCode;
+    if (bInterfaces.length) {
+      tsInterfaces.push(...bInterfaces);
+    }
 
     // Add imports.
     code = code + this.imports.code() + body;
-    return code;
+    return [code, tsInterfaces];
   }
 
-  private buildActions(): string {
+  private buildActions(): [string, TSInterfaceCode[]] {
     let code = '';
+    const tsInterfaces: TSInterfaceCode[] = [];
     for (const actionIO of this.taIO.actionIOs) {
-      code += '\n';
-      code += this.buildActionIO(actionIO, undefined);
+      const res = this.buildActionIO(actionIO, undefined);
+      code += `\n${res.goCode}`;
+      if (res.tsCode) {
+        tsInterfaces.push(res.tsCode);
+      }
     }
-    return code;
+    return [code, tsInterfaces];
   }
 
   // `fallbackActionName` is used by TRANSACT members as they don't have a `__name`.
@@ -89,7 +107,7 @@ export default class CoreBuilder {
     io: ActionIO,
     fallbackActionName: string | undefined,
     pri?: boolean,
-  ): string {
+  ): ActionCode {
     logger.debug(`Building action "${io.action}"`);
     const { action } = io;
     const actionData = action.__getData();
@@ -236,7 +254,10 @@ export default class CoreBuilder {
     if (bodyMap.tail) {
       code = `${code}\n${bodyMap.tail}`;
     }
-    return code;
+    return {
+      goCode: code,
+      tsCode: bodyMap.tsCode,
+    };
   }
 
   private buildTableObject(): string {
@@ -538,8 +559,12 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
     builder.push(successReturnCode);
 
     const codeMap = new CodeMap(builder, headerCode);
-    codeMap.tsInterfaceFileName = tsInterfaceFileName;
-    codeMap.tsInterfaceCode = tsInterfaceCode;
+    if (tsInterfaceFileName && tsInterfaceCode) {
+      codeMap.tsCode = {
+        fileName: tsInterfaceFileName,
+        code: tsInterfaceCode,
+      };
+    }
     return codeMap;
   }
 

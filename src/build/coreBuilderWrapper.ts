@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 import * as mm from 'mingru-models';
 import { throwIfEmpty } from 'throw-if-arg-empty';
-import * as nodepath from 'path';
+import * as nodePath from 'path';
 import * as mfs from 'm-fs';
 import CoreBuilder from './coreBuilder.js';
 import CoreBuilderContext from './coreBuilderContext.js';
@@ -27,14 +27,25 @@ export default class CoreBuilderWrapper {
 
     const context = new CoreBuilderContext();
     await Promise.all(
-      tas.map((ta) => {
+      tas.map(async (ta) => {
         const taTable = ta.__getData().table;
         const taIO = new TAIO(ta, ioOpts);
         const builder = new CoreBuilder(taIO, opts, context);
-        const code = builder.build();
+        const [code, tsInterfaces] = builder.build();
         const fileName = toSnakeCase(taTable.__getData().name) + '_ta'; // Add a "_ta" suffix to table actions file.
-        const outFile = nodepath.join(outDir, fileName + '.go');
-        return mfs.writeFileAsync(outFile, code);
+        const outFile = nodePath.join(outDir, fileName + '.go');
+        await mfs.writeFileAsync(outFile, code);
+        if (tsInterfaces.length) {
+          const { tsOutDir } = opts;
+          if (!tsOutDir) {
+            throw new Error('`Options.tsOut` is required if TypeScript interfaces are used');
+          }
+          await Promise.all(
+            tsInterfaces.map((type) =>
+              mfs.writeFileAsync(nodePath.join(tsOutDir, type.fileName), type.code),
+            ),
+          );
+        }
       }),
     );
 
@@ -94,7 +105,7 @@ export default class CoreBuilderWrapper {
       if (code.endsWith('\n\n')) {
         code = code.substr(0, code.length - 1);
       }
-      const outFile = nodepath.join(outDir, 'types.go');
+      const outFile = nodePath.join(outDir, 'types.go');
       await mfs.writeFileAsync(outFile, (opts.goFileHeader ?? '') + code);
     }
   }
