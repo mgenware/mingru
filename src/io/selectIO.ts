@@ -297,6 +297,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
           unionIdx++;
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
+          // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
           err.message += ` [UNION index ${unionIdx}]`;
           throw err;
         }

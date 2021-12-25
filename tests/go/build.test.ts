@@ -82,7 +82,7 @@ it('Multiple tables + CSQL', async () => {
     ['post', 'user', 'post.sql', 'user.sql', migrationUpFile, migrationDownFile],
     'multipleTablesCSQL',
     undefined,
-    true,
+    { buildCSQL: true },
   );
 });
 
@@ -159,7 +159,7 @@ it('TS interfaces', async () => {
       .attr(mm.ActionAttribute.tsTypeName, 'BarInterface');
 
     selectPostInfo = mm
-      .selectRow(post.n_datetime, post.user_id.join(user).url_name)
+      .selectRow(post.content, post.user_id.join(user).url_name)
       .attr(mm.ActionAttribute.groupTypeName, 'Type2')
       .attr(mm.ActionAttribute.tsTypeName, 'BarInterface2');
 
@@ -167,5 +167,7 @@ it('TS interfaces', async () => {
   }
   const postTA = mm.tableActions(post, PostTA);
   const actions = [userTA, postTA];
-  await testBuildToDirAsync(actions, ['#types.go', 'post', 'user'], 'types');
+  await testBuildToDirAsync(actions, ['#types.go', 'post', 'user'], 'tsInterfaces', undefined, {
+    testTSTypes: true,
+  });
 });

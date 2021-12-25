@@ -18,13 +18,13 @@ function goTypeToTSType(type: string): string {
 }
 
 export function buildTSInterface(structData: GoStructData, typeName?: string) {
-  let code = `export interface ${typeName || structData.typeName} {`;
+  let code = `export interface ${typeName || structData.typeName} {\n`;
   for (const mem of structData.members) {
     if (structData.ignoredMembers.has(mem.name)) {
       continue;
     }
     const tsType = goTypeToTSType(getAtomicTypeInfo(mem.type).fullTypeName);
-    code += `  ${mem.camelCaseName()}?: ${tsType};`;
+    code += `  ${mem.camelCaseName()}?: ${tsType};\n`;
   }
   code += '}\n';
   return code;

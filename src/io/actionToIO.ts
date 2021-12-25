@@ -43,7 +43,8 @@ export function actionToIO(
     return result;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
-    if (err.message !== undefined) {
+    if (err.message) {
+      // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
       err.message += ` [${descMsg}]`;
     }
     throw err;

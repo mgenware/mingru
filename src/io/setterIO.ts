@@ -82,39 +82,44 @@ export class SetterIO {
     sourceTable: mm.Table | null,
     opt?: SQLIOBuilderOption,
   ): SetterIO {
-    if (autoSetter === mm.AutoSetterType.input) {
-      return new SetterIO(col, sqlIO(mm.sql`${col.toInput()}`, dialect, sourceTable, opt));
-    }
-    if (autoSetter === mm.AutoSetterType.default) {
-      let value: mm.SQL;
-      const colData = col.__getData();
-      const colType = col.__type();
-      const defValue = colData.defaultValue;
-      if (defValue !== undefined && defValue !== null) {
-        if (defValue instanceof mm.SQL) {
-          value = defValue;
-        } else {
-          value = dialect.objToSQL(defValue, table);
-        }
-      } else if (colType.nullable) {
-        value = mm.sql`NULL`;
-      } else {
-        const type = colType.types[0];
-        if (!type) {
-          throw new Error('Unexpected empty column types');
-        }
-        const def = dtDefault(type);
-        if (def === null) {
-          throw new Error(
-            `Cannot determine the default value of type "${type}" at column "${col}"`,
-          );
-        }
-        value = dialect.objToSQL(def, table);
+    switch (autoSetter) {
+      case mm.AutoSetterType.input: {
+        return new SetterIO(col, sqlIO(mm.sql`${col.toInput()}`, dialect, sourceTable, opt));
       }
 
-      return new SetterIO(col, sqlIO(value, dialect, sourceTable, opt));
+      case mm.AutoSetterType.default: {
+        let value: mm.SQL;
+        const colData = col.__getData();
+        const colType = col.__type();
+        const defValue = colData.defaultValue;
+        if (defValue !== undefined && defValue !== null) {
+          if (defValue instanceof mm.SQL) {
+            value = defValue;
+          } else {
+            value = dialect.objToSQL(defValue, table);
+          }
+        } else if (colType.nullable) {
+          value = mm.sql`NULL`;
+        } else {
+          const type = colType.types[0];
+          if (!type) {
+            throw new Error('Unexpected empty column types');
+          }
+          const def = dtDefault(type);
+          if (def === null) {
+            throw new Error(
+              `Cannot determine the default value of type "${type}" at column "${col}"`,
+            );
+          }
+          value = dialect.objToSQL(def, table);
+        }
+
+        return new SetterIO(col, sqlIO(value, dialect, sourceTable, opt));
+      }
+
+      default:
+        throw new Error(`Unsupported auto setter type "${autoSetter}"`);
     }
-    throw new Error(`Unsupported auto setter type "${autoSetter}"`);
   }
 
   constructor(public col: mm.Column, public sql: SQLIO) {

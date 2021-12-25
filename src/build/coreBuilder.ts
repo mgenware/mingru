@@ -30,16 +30,26 @@ function joinParams(arr: string[]): string {
   return arr.join(', ');
 }
 
-// TypeScript interface code. Only applicable to SELECT actions.
-export interface TSInterfaceCode {
-  fileName: string;
+// TypeScript type code. Only applicable to SELECT actions.
+export interface TSTypeCode {
+  name: string;
   code: string;
 }
 
-// The result type returned in an action builder.
-export interface ActionCode {
-  goCode: string;
-  tsCode?: TSInterfaceCode;
+export class TSTypeCollector {
+  types = new Map<string, TSTypeCode>();
+
+  get count(): number {
+    return this.types.size;
+  }
+
+  add(type: TSTypeCode) {
+    this.types.set(type.name, type);
+  }
+
+  values(): TSTypeCode[] {
+    return [...this.types.values()];
+  }
 }
 
 // Some actions (like SELECT), use `CodeMap` to return multiple code blocks.
@@ -51,13 +61,15 @@ export interface ActionCode {
  * <CodeMap.tail>
  */
 class CodeMap {
-  tsCode?: TSInterfaceCode;
   constructor(public body: LinesBuilder, public head?: string, public tail?: string) {}
 }
 
 // Generates code (Go and TypeScript interfaces if configured)
 // from a table action IO object(`TAIO`).
 export default class CoreBuilder {
+  // Set when `Option.tsOut` is present.
+  tsTypeCollector?: TSTypeCollector;
+
   private options: BuildOptions;
   private imports = new go.ImportList();
   private dialect: Dialect;
@@ -66,40 +78,33 @@ export default class CoreBuilder {
     throwIfFalsy(taIO, 'taIO');
     this.dialect = taIO.opt.dialect;
     this.options = opts;
+    if (opts.tsOutDir) {
+      this.tsTypeCollector = new TSTypeCollector();
+    }
   }
 
-  build(): [string, TSInterfaceCode[]] {
+  build(): string {
     const { options } = this;
     let code = options.goFileHeader ?? defs.fileHeader;
     code += `package ${options.packageName || defs.defaultPackageName}\n\n`;
 
     // `this.buildActions` will set `this.systemImports` and `this.userImports`.
     let body = '';
-    const tsInterfaces: TSInterfaceCode[] = [];
-    const [bCode, bInterfaces] = this.buildActions();
     body += this.buildTableObject();
     body += go.sep('Actions');
-    body += bCode;
-    if (bInterfaces.length) {
-      tsInterfaces.push(...bInterfaces);
-    }
+    body += this.buildActions();
 
     // Add imports.
     code = code + this.imports.code() + body;
-    return [code, tsInterfaces];
+    return code;
   }
 
-  private buildActions(): [string, TSInterfaceCode[]] {
+  private buildActions(): string {
     let code = '';
-    const tsInterfaces: TSInterfaceCode[] = [];
     for (const actionIO of this.taIO.actionIOs) {
-      const res = this.buildActionIO(actionIO, undefined);
-      code += `\n${res.goCode}`;
-      if (res.tsCode) {
-        tsInterfaces.push(res.tsCode);
-      }
+      code += `\n${this.buildActionIO(actionIO, undefined)}`;
     }
-    return [code, tsInterfaces];
+    return code;
   }
 
   // `fallbackActionName` is used by TRANSACT members as they don't have a `__name`.
@@ -107,7 +112,7 @@ export default class CoreBuilder {
     io: ActionIO,
     fallbackActionName: string | undefined,
     pri?: boolean,
-  ): ActionCode {
+  ): string {
     logger.debug(`Building action "${io.action}"`);
     const { action } = io;
     const actionData = action.__getData();
@@ -254,10 +259,7 @@ export default class CoreBuilder {
     if (bodyMap.tail) {
       code = `${code}\n${bodyMap.tail}`;
     }
-    return {
-      goCode: code,
-      tsCode: bodyMap.tsCode,
-    };
+    return code;
   }
 
   private buildTableObject(): string {
@@ -410,7 +412,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
     }
 
     const resultMemberJSONStyle = options.jsonTags?.keyStyle ?? null;
-    let tsInterfaceFileName: string | undefined;
+    let tsInterfaceName: string | undefined;
     let tsInterfaceCode: string | undefined;
     if (
       selMode !== mm.SelectActionMode.field &&
@@ -442,7 +444,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
       // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
       if (action.__getData().attrs?.get(mm.ActionAttribute.tsTypeName)) {
         const tsTypeName = `${action.__getData().attrs?.get(mm.ActionAttribute.tsTypeName)}`;
-        tsInterfaceFileName = stringUtils.toCamelCase(resultTypeString);
+        tsInterfaceName = tsTypeName;
         tsInterfaceCode = buildTSInterface(structData, tsTypeName);
       }
     }
@@ -559,11 +561,12 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
     builder.push(successReturnCode);
 
     const codeMap = new CodeMap(builder, headerCode);
-    if (tsInterfaceFileName && tsInterfaceCode) {
-      codeMap.tsCode = {
-        fileName: tsInterfaceFileName,
+    if (tsInterfaceName && tsInterfaceCode) {
+      const type = {
+        name: tsInterfaceName,
         code: tsInterfaceCode,
       };
+      this.tsTypeCollector?.add(type);
     }
     return codeMap;
   }

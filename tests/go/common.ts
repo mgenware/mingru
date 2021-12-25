@@ -12,6 +12,8 @@ const destDataDir = 'tests/go/dest';
 const buildDir = 'build';
 const tableSQLFile = 'table_sql';
 const migrationSQLFile = 'migration_sql';
+const tsOutDirName = '__ts';
+
 export const migrationUpFile = '__mig_up__.sql';
 export const migrationDownFile = '__mig_down__.sql';
 
@@ -43,7 +45,7 @@ export async function testBuildAsync(
     opts ?? defaultOptions(),
     ctx ?? new mr.CoreBuilderContext(),
   );
-  const [actual] = builder.build();
+  const actual = builder.build();
   if (path) {
     eq(actual, content);
   }
@@ -67,35 +69,42 @@ export async function testBuildFullAsync(
     opts ?? defaultOptions(),
     ctx ?? new mr.CoreBuilderContext(),
   );
-  const [actual] = builder.build();
+  const actual = builder.build();
   if (path) {
     eq(actual, content);
   }
 }
 
-export async function testFilesAsync(a: string, b: string) {
-  const aContent = await mfs.readFileAsync(a, 'utf8');
-  const bContent = await mfs.readFileAsync(b, 'utf8');
-  eq(aContent, bContent);
+export async function testFilesAsync(actualFile: string, expectedFile: string) {
+  const actualContent = await mfs.readFileAsync(actualFile, 'utf8');
+  const expectedContent = await mfs.readFileAsync(expectedFile, 'utf8');
+  eq(actualContent, expectedContent);
+}
+
+export interface TestOptions {
+  buildCSQL?: boolean;
+  testTSTypes?: boolean;
 }
 
 export async function testBuildToDirAsync(
   actions: mm.TableActions[],
   files: string[],
   expectedDirName: string,
-  opts?: mr.BuildOptions,
-  buildCSQL = false,
+  buildOpts?: mr.BuildOptions,
+  testOpts?: TestOptions,
 ) {
-  opts = opts ?? {};
-  opts.goFileHeader = '';
-  opts.sqlFileHeader = '';
-  opts.noOutput = true;
+  buildOpts ??= {};
+  buildOpts.goFileHeader = '';
+  buildOpts.sqlFileHeader = '';
+  buildOpts.noOutput = true;
   const tmpDir = tempy.directory();
+  const tsOutDir = np.join(tmpDir, tsOutDirName);
+  buildOpts.tsOutDir = tsOutDir;
 
-  const builder = new mr.Builder(dialect, tmpDir, opts);
+  const builder = new mr.Builder(dialect, tmpDir, buildOpts);
   await builder.buildAsync(async () => {
     await builder.buildActionsAsync(actions);
-    if (buildCSQL) {
+    if (testOpts?.buildCSQL) {
       await builder.buildCreateTableSQLFilesAsync(actions.map((a) => a.__getData().table));
     }
   });
@@ -118,7 +127,6 @@ export async function testBuildToDirAsync(
       actual = np.join(tmpDir, migrationSQLFile, 'down.sql');
       expected = np.join(expectedDirPath, migrationDownFile);
     } else if (np.extname(file)) {
-      // An SQL file
       actual = np.join(tmpDir, tableSQLFile, file);
     } else {
       // A go file
@@ -127,5 +135,16 @@ export async function testBuildToDirAsync(
     }
     promises.push(testFilesAsync(actual, expected));
   }
+
+  // Test TS interfaces.
+  if (testOpts?.testTSTypes) {
+    const tsFiles = await mfs.subFiles(tsOutDir);
+    for (const tsFile of tsFiles) {
+      promises.push(
+        testFilesAsync(np.join(tsOutDir, tsFile), np.join(expectedDirPath, tsOutDirName, tsFile)),
+      );
+    }
+  }
+
   await Promise.all(promises);
 }

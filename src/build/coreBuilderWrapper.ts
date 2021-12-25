@@ -10,7 +10,7 @@ import { BuildOptions } from './buildOptions.js';
 import * as go from './goCodeUtil.js';
 import * as defs from '../defs.js';
 import { ActionToIOOptions } from '../io/actionToIOOptions.js';
-import { toSnakeCase } from '../lib/stringUtils.js';
+import * as stringUtil from '../lib/stringUtils.js';
 
 // Wraps a `CoreBuilder` and handles input options and file operations.
 export default class CoreBuilderWrapper {
@@ -31,19 +31,24 @@ export default class CoreBuilderWrapper {
         const taTable = ta.__getData().table;
         const taIO = new TAIO(ta, ioOpts);
         const builder = new CoreBuilder(taIO, opts, context);
-        const [code, tsInterfaces] = builder.build();
-        const fileName = toSnakeCase(taTable.__getData().name) + '_ta'; // Add a "_ta" suffix to table actions file.
+        const code = builder.build();
+        const fileName = stringUtil.toSnakeCase(taTable.__getData().name) + '_ta'; // Add a "_ta" suffix to table actions file.
         const outFile = np.join(outDir, fileName + '.go');
         await mfs.writeFileAsync(outFile, code);
-        if (tsInterfaces.length) {
+        if (builder.tsTypeCollector?.count) {
           const { tsOutDir } = opts;
           if (!tsOutDir) {
             throw new Error('`Options.tsOut` is required if TypeScript interfaces are used');
           }
           await Promise.all(
-            tsInterfaces.map((type) =>
-              mfs.writeFileAsync(np.join(tsOutDir, type.fileName), type.code),
-            ),
+            builder.tsTypeCollector
+              .values()
+              .map((type) =>
+                mfs.writeFileAsync(
+                  np.join(tsOutDir, stringUtil.toCamelCase(type.name) + '.ts'),
+                  (opts.goFileHeader ?? defs.fileHeader) + type.code,
+                ),
+              ),
           );
         }
       }),

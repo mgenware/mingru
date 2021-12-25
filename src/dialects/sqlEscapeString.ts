@@ -45,9 +45,6 @@ export interface Options {
  * @returns {String} the original string escaped wrapped in single quotes, i.e. `'mystring'`
  */
 export default function escapeSQLString(val: string, opts?: Options) {
-  if (val == null) {
-    throw new Error('Need to pass a valid string');
-  }
   // eslint-disable-next-line no-param-reassign
   opts = opts ?? {};
   const backslashSupported = !!opts.backslashSupported;
