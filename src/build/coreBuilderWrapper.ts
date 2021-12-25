@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 import * as mm from 'mingru-models';
 import { throwIfEmpty } from 'throw-if-arg-empty';
-import * as nodePath from 'path';
+import * as np from 'path';
 import * as mfs from 'm-fs';
 import CoreBuilder from './coreBuilder.js';
 import CoreBuilderContext from './coreBuilderContext.js';
@@ -33,7 +33,7 @@ export default class CoreBuilderWrapper {
         const builder = new CoreBuilder(taIO, opts, context);
         const [code, tsInterfaces] = builder.build();
         const fileName = toSnakeCase(taTable.__getData().name) + '_ta'; // Add a "_ta" suffix to table actions file.
-        const outFile = nodePath.join(outDir, fileName + '.go');
+        const outFile = np.join(outDir, fileName + '.go');
         await mfs.writeFileAsync(outFile, code);
         if (tsInterfaces.length) {
           const { tsOutDir } = opts;
@@ -42,7 +42,7 @@ export default class CoreBuilderWrapper {
           }
           await Promise.all(
             tsInterfaces.map((type) =>
-              mfs.writeFileAsync(nodePath.join(tsOutDir, type.fileName), type.code),
+              mfs.writeFileAsync(np.join(tsOutDir, type.fileName), type.code),
             ),
           );
         }
@@ -105,7 +105,7 @@ export default class CoreBuilderWrapper {
       if (code.endsWith('\n\n')) {
         code = code.substr(0, code.length - 1);
       }
-      const outFile = nodePath.join(outDir, 'types.go');
+      const outFile = np.join(outDir, 'types.go');
       await mfs.writeFileAsync(outFile, (opts.goFileHeader ?? '') + code);
     }
   }

@@ -1,7 +1,7 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import * as mfs from 'm-fs';
-import * as nodepath from 'path';
+import * as np from 'path';
 import del from 'del';
 import * as defs from '../defs.js';
 import { Dialect } from '../dialect.js';
@@ -56,7 +56,7 @@ export default class Builder {
     const csqlBuilders = await Promise.all(tables.map((t) => this.buildCSQL(t)));
 
     // Generate migration up file.
-    const migUpSQLFile = nodepath.join(this.outDir, migSQLDir, 'up.sql');
+    const migUpSQLFile = np.join(this.outDir, migSQLDir, 'up.sql');
     let upSQL = this.opts.sqlFileHeader ?? defs.fileHeader;
     for (const builder of csqlBuilders) {
       upSQL += `${builder.sql}\n`;
@@ -64,7 +64,7 @@ export default class Builder {
     await mfs.writeFileAsync(migUpSQLFile, upSQL);
 
     // Generate migration down file.
-    const migDownSQLFile = nodepath.join(this.outDir, migSQLDir, 'down.sql');
+    const migDownSQLFile = np.join(this.outDir, migSQLDir, 'down.sql');
     let downSQL = this.opts.sqlFileHeader ?? defs.fileHeader;
     // Drop tables in reverse order.
     for (let i = tables.length - 1; i >= 0; i--) {
@@ -86,10 +86,10 @@ export default class Builder {
   private async buildCSQL(table: mm.Table): Promise<CSQLBuilder> {
     const { dialect } = this;
     let { outDir } = this;
-    outDir = nodepath.join(outDir, tableSQLDir);
+    outDir = np.join(outDir, tableSQLDir);
     const builder = new CSQLBuilder(table, dialect);
     const fileName = toSnakeCase(table.__getData().name);
-    const outFile = nodepath.join(outDir, fileName + '.sql');
+    const outFile = np.join(outDir, fileName + '.sql');
     const sql = builder.build(this.opts.sqlFileHeader);
     await mfs.writeFileAsync(outFile, sql);
     return builder;

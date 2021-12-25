@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import * as nodepath from 'path';
+import * as np from 'path';
 import * as mm from 'mingru-models';
 import tempy from 'tempy';
 import * as mfs from 'm-fs';
@@ -34,7 +34,7 @@ export async function testBuildAsync(
 ) {
   let content = '';
   if (path) {
-    path = nodepath.resolve(nodepath.join(destDataDir, `${path}.go`));
+    path = np.resolve(np.join(destDataDir, `${path}.go`));
     content = await mfs.readFileAsync(path, 'utf8');
   }
   mr.logger.enabled = false;
@@ -58,7 +58,7 @@ export async function testBuildFullAsync(
 ) {
   let content = '';
   if (path) {
-    path = nodepath.resolve(nodepath.join(destDataDir, `${path}.go`));
+    path = np.resolve(np.join(destDataDir, `${path}.go`));
     content = await mfs.readFileAsync(path, 'utf8');
   }
   mr.logger.enabled = false;
@@ -101,29 +101,29 @@ export async function testBuildToDirAsync(
   });
 
   const promises: Promise<void>[] = [];
-  const expectedDirPath = nodepath.resolve(nodepath.join(destDataDir, buildDir, expectedDirName));
+  const expectedDirPath = np.resolve(np.join(destDataDir, buildDir, expectedDirName));
   for (let file of files) {
     let actual = '';
     let expected = '';
-    expected = nodepath.join(expectedDirPath, file);
+    expected = np.join(expectedDirPath, file);
     if (file.startsWith('#')) {
       file = file.substr(1);
-      actual = nodepath.join(tmpDir, file);
+      actual = np.join(tmpDir, file);
       // `file` has changed here, we need to re-generate the expected file.
-      expected = nodepath.join(expectedDirPath, file);
+      expected = np.join(expectedDirPath, file);
     } else if (file === migrationUpFile) {
-      actual = nodepath.join(tmpDir, migrationSQLFile, 'up.sql');
-      expected = nodepath.join(expectedDirPath, migrationUpFile);
+      actual = np.join(tmpDir, migrationSQLFile, 'up.sql');
+      expected = np.join(expectedDirPath, migrationUpFile);
     } else if (file === migrationDownFile) {
-      actual = nodepath.join(tmpDir, migrationSQLFile, 'down.sql');
-      expected = nodepath.join(expectedDirPath, migrationDownFile);
-    } else if (nodepath.extname(file)) {
+      actual = np.join(tmpDir, migrationSQLFile, 'down.sql');
+      expected = np.join(expectedDirPath, migrationDownFile);
+    } else if (np.extname(file)) {
       // An SQL file
-      actual = nodepath.join(tmpDir, tableSQLFile, file);
+      actual = np.join(tmpDir, tableSQLFile, file);
     } else {
       // A go file
-      actual = nodepath.join(tmpDir, `${file}_ta.go`);
-      expected = nodepath.join(expectedDirPath, `${file}_ta.go`);
+      actual = np.join(tmpDir, `${file}_ta.go`);
+      expected = np.join(expectedDirPath, `${file}_ta.go`);
     }
     promises.push(testFilesAsync(actual, expected));
   }
