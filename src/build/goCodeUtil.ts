@@ -32,30 +32,49 @@ export class MemberTagUtil {
   }
 }
 
-export class MutableStructInfo {
+export class GoStructData {
+  members: VarInfo[];
+
   constructor(
     public typeName: string,
-    // K: Name of `VarInfo`.
-    public members: Map<string, VarInfo>,
-    public jsonKeyStyle: JSONKeyStyle | undefined,
-    // K: Name of `VarInfo`.
+    // Members will be re-sorted.
+    members: Iterable<VarInfo>,
+    public jsonKeyStyle: JSONKeyStyle | null,
+    // Key: variable name.
     public ignoredMembers: Set<string>,
-    // K: Name of `VarInfo`.
+    // Key: variable name.
     public omitEmptyMembers: Set<string>,
-  ) {}
+  ) {
+    this.members = [...members].sort((a, b) => a.name.localeCompare(b.name));
+  }
 
-  merge(oth: MutableStructInfo) {
-    for (const v of oth.members.values()) {
-      if (!this.members.has(v.name)) {
-        this.members.set(v.name, v);
+  merge(oth: GoStructData): GoStructData {
+    // Do a shallow copy of current members.
+    const members = new Map<string, VarInfo>();
+    for (const mem of this.members) {
+      members.set(mem.name, mem);
+    }
+    // Merge two member arrays.
+    for (const v of oth.members) {
+      if (!members.has(v.name)) {
+        members.set(v.name, v);
       }
     }
+    const ignoredMembers = new Set<string>(this.ignoredMembers);
     for (const name of oth.ignoredMembers) {
-      this.ignoredMembers.add(name);
+      ignoredMembers.add(name);
     }
+    const omitEmptyMembers = new Set<string>(this.omitEmptyMembers);
     for (const name of oth.omitEmptyMembers) {
-      this.omitEmptyMembers.add(name);
+      omitEmptyMembers.add(name);
     }
+    return new GoStructData(
+      this.typeName,
+      members.values(),
+      this.jsonKeyStyle,
+      ignoredMembers,
+      omitEmptyMembers,
+    );
   }
 }
 
@@ -70,36 +89,28 @@ type ${typeName} interface {
   return code;
 }
 
-export function struct(
-  typeName: string,
-  members: VarInfo[],
-  jsonKeyStyle: JSONKeyStyle | undefined,
-  ignoredMembers: Set<string>,
-  omitEmptyMembers: Set<string>,
-): string {
-  // Sort members alphabetically.
-  const sortedMems = [...members].sort((a, b) => a.name.localeCompare(b.name));
-  let code = `// ${typeName} ...
-type ${typeName} struct {
+export function struct(data: GoStructData): string {
+  let code = `// ${data.typeName} ...
+type ${data.typeName} struct {
 `;
-  // Use 3 string array to save string value of each column in a line
-  // to property display indent.
+  // Use 3 string arrays to store each column (name|type|tag) in order to
+  // properly handle indentation.
   const nameColumns: string[] = [];
   const typeColumns: string[] = [];
   const tagColumns: string[] = [];
-  for (const mem of sortedMems) {
+  for (const mem of data.members) {
     const memName = mem.pascalName;
-    const memType = mem.type.typeString;
+    const memType = mem.type.fullTypeName;
     let tag = '';
     nameColumns.push(memName);
     typeColumns.push(memType);
 
-    const omitEmpty = omitEmptyMembers.has(memName) || false;
-    if (ignoredMembers.has(memName)) {
+    const omitEmpty = data.omitEmptyMembers.has(memName) || false;
+    if (data.ignoredMembers.has(memName)) {
       tag = MemberTagUtil.getIgnoreJSONTag();
-    } else if (jsonKeyStyle === JSONKeyStyle.camelCase) {
+    } else if (data.jsonKeyStyle === JSONKeyStyle.camelCase) {
       tag = MemberTagUtil.getCamelCaseJSONTag(memName, omitEmpty);
-    } else if (jsonKeyStyle === JSONKeyStyle.snakeCase) {
+    } else if (data.jsonKeyStyle === JSONKeyStyle.snakeCase) {
       tag = MemberTagUtil.getSnakeCaseJSONTag(memName, omitEmpty);
     }
     tagColumns.push(tag);
@@ -234,7 +245,7 @@ export function extractStringContentFromSegments(list: StringSegment[]): string 
 export class ImportList {
   private imports = new Set<string>();
 
-  addVars(vars: VarInfo[]) {
+  addVars(vars: Iterable<VarInfo>) {
     for (const info of vars) {
       const atomicInfo = getAtomicTypeInfo(info.type);
       if (atomicInfo.importPath) {

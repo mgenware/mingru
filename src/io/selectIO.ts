@@ -525,7 +525,8 @@ export class SelectIOProcessor extends BaseIOProcessor {
         // `selMode` == `.rowList` or `.row` or `.union`.
         let resultType: string;
         // Check if result type was renamed.
-        if (actionAttrs?.get(mm.ActionAttribute.resultTypeName) !== undefined) {
+        // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+        if (actionAttrs?.get(mm.ActionAttribute.resultTypeName)) {
           resultType = `${actionAttrs.get(mm.ActionAttribute.resultTypeName)}`;
         } else {
           resultType = `${this.actionUniqueTypeName}Result`;

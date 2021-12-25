@@ -6,7 +6,7 @@ import { Dialect, StringSegment } from '../dialect.js';
 import VarList from '../lib/varList.js';
 import { VarInfo } from '../lib/varInfo.js';
 import { VarInfoBuilder } from '../lib/varInfoHelper.js';
-import { makeStringFromSegments } from '../build/goCode.js';
+import { makeStringFromSegments } from '../build/goCodeUtil.js';
 import { join2DArrays } from '../lib/arrayUtils.js';
 import { actionToIO } from './actionToIO.js';
 import { ActionIO } from './actionIO.js';

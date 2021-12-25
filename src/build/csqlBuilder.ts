@@ -3,7 +3,7 @@ import * as mm from 'mingru-models';
 import * as defs from '../defs.js';
 import { Dialect, SQLTypeMode } from '../dialect.js';
 import { sqlIO } from '../io/sqlIO.js';
-import { extractStringContentFromSegments } from './goCode.js';
+import { extractStringContentFromSegments } from './goCodeUtil.js';
 
 export default class CSQLBuilder {
   tableData: mm.TableData;

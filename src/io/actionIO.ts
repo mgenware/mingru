@@ -4,7 +4,7 @@ import VarList from '../lib/varList.js';
 import { VarInfo } from '../lib/varInfo.js';
 import { Dialect, StringSegment } from '../dialect.js';
 import { VarInfoBuilder } from '../lib/varInfoHelper.js';
-import { makeStringFromSegments } from '../build/goCode.js';
+import { makeStringFromSegments } from '../build/goCodeUtil.js';
 
 export class ActionIO {
   funcStubs: VarInfo[];

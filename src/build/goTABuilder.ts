@@ -13,7 +13,7 @@ import {
   typeInfoWithoutArray,
   typeInfoToPointer,
 } from '../lib/varInfo.js';
-import * as go from './goCode.js';
+import * as go from './goCodeUtil.js';
 import * as defs from '../defs.js';
 import logger from '../logger.js';
 import { TAIO } from '../io/taIO.js';
@@ -24,12 +24,13 @@ import LinesBuilder from './linesBuilder.js';
 import * as stringUtils from '../lib/stringUtils.js';
 import { BuildOptions } from './buildOptions.js';
 import GoBuilderContext from './goBuilderContext.js';
+import { buildTSInterface } from './tsCodeBuilder.js';
 
 function joinParams(arr: string[]): string {
   return arr.join(', ');
 }
 
-// For some actions, like SELECT, it uses CodeMap type to return multiple code blocks.
+// Some actions (like SELECT), use `CodeMap` to return multiple code blocks.
 /**
  * <CodeMap.head>
  * func foo(...) { // generated in outer scope.
@@ -38,6 +39,10 @@ function joinParams(arr: string[]): string {
  * <CodeMap.tail>
  */
 class CodeMap {
+  // TypeScript interface file name. Applicable to SELECT actions.
+  tsInterfaceFileName?: string;
+  // TypeScript interface code. Applicable to SELECT actions.
+  tsInterfaceCode?: string;
   constructor(public body: LinesBuilder, public head?: string, public tail?: string) {}
 }
 
@@ -113,7 +118,7 @@ export default class GoTABuilder {
     const allFuncArgs = [...funcArgs, ...io.funcStubs];
     this.imports.addVars(allFuncArgs);
     const funcParamsCode = allFuncArgs
-      .map((p) => `${p.camelCaseName()} ${p.type.typeString}`)
+      .map((p) => `${p.camelCaseName()} ${p.type.fullTypeName}`)
       .join(', ');
     // Wrap all params with parentheses.
     funcSigString += `(${funcParamsCode})`;
@@ -121,7 +126,7 @@ export default class GoTABuilder {
     // Build return values.
     this.imports.addVars(returnValues);
     const returnValuesWithError = this.appendErrorType(returnValues);
-    let returnCode = returnValuesWithError.map((v) => v.type.typeString).join(', ');
+    let returnCode = returnValuesWithError.map((v) => v.type.fullTypeName).join(', ');
     if (returnValuesWithError.length > 1) {
       returnCode = `(${returnCode})`;
     }
@@ -142,7 +147,7 @@ export default class GoTABuilder {
         returnValuesWithError,
       );
 
-      this.context.handleInterfaceMember(
+      this.context.addSharedInterface(
         // Convert group type name to string.
         `${actionAttr.get(mm.ActionAttribute.groupTypeName)}`,
         funcSig,
@@ -235,11 +240,13 @@ export default class GoTABuilder {
   private buildTableObject(): string {
     const { className, instanceName } = this.taIO;
     let code = go.struct(
-      className,
-      [],
-      undefined, // JSONKeyStyle
-      new Set<string>(),
-      new Set<string>(),
+      new go.GoStructData(
+        className,
+        [], // Members
+        null, // JSONKeyStyle
+        new Set<string>(),
+        new Set<string>(),
+      ),
     );
     code += `\n// ${instanceName} ...
 var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
@@ -262,12 +269,12 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
     if (!firstReturnParam) {
       throw new Error(`No return types defined in action "${action}"`);
     }
-    const resultTypeString = firstReturnParam.type.typeString;
+    const resultTypeString = firstReturnParam.type.fullTypeName;
 
     // `atomicResultType` is used to generate additional type definition,
     // e.g. if `resultType` is `[]Person`, `atomicResultType` is `Person`.
     const atomicResultType =
-      getAtomicTypeInfo(firstReturnParam.type).typeString || resultTypeString;
+      getAtomicTypeInfo(firstReturnParam.type).fullTypeName || resultTypeString;
     // Additional type definitions for result type or ORDER BY inputs.
     let headerCode = '';
 
@@ -379,43 +386,47 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
       }
     }
 
-    // Generate result type definition.
-    const resultMemberJSONStyle = options.jsonTags?.keyStyle;
+    const resultMemberJSONStyle = options.jsonTags?.keyStyle ?? null;
+    let tsInterfaceFileName: string | undefined;
+    let tsInterfaceCode: string | undefined;
     if (
       selMode !== mm.SelectActionMode.field &&
       selMode !== mm.SelectActionMode.exists &&
       selMode !== mm.SelectActionMode.fieldList
     ) {
-      if (action.__getData().attrs?.get(mm.ActionAttribute.resultTypeName) !== undefined) {
-        this.context.handleResultType(
-          atomicResultType,
-          new go.MutableStructInfo(
-            atomicResultType,
-            selectedFields,
-            resultMemberJSONStyle,
-            jsonIgnoreFields,
-            omitEmptyFields,
-          ),
-        );
-      } else {
-        headerCode = go.appendWithSeparator(
-          headerCode,
-          go.struct(
-            atomicResultType,
-            [...selectedFields.values()],
-            resultMemberJSONStyle,
-            jsonIgnoreFields,
-            omitEmptyFields,
-          ),
-        );
+      const selectedFieldArray = [...selectedFields.values()];
+      const structData = new go.GoStructData(
+        atomicResultType,
+        selectedFieldArray,
+        resultMemberJSONStyle,
+        jsonIgnoreFields,
+        omitEmptyFields,
+      );
 
-        this.imports.addVars([...selectedFields.values()]);
+      // Generate result type.
+      // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+      if (action.__getData().attrs?.get(mm.ActionAttribute.resultTypeName)) {
+        // A custom result type name can be reused. Thus we add it to the context.
+        this.context.addSharedResultType(atomicResultType, structData);
+      } else {
+        // The result type is not shared.
+        headerCode = go.appendWithSeparator(headerCode, go.struct(structData));
+
+        this.imports.addVars(selectedFieldArray);
+      }
+
+      // Check if TypeScript type generation is needed.
+      // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+      if (action.__getData().attrs?.get(mm.ActionAttribute.tsTypeName)) {
+        const tsTypeName = `${action.__getData().attrs?.get(mm.ActionAttribute.tsTypeName)}`;
+        tsInterfaceFileName = stringUtils.toCamelCase(resultTypeString);
+        tsInterfaceCode = buildTSInterface(structData, tsTypeName);
       }
     }
 
     const sqlLiteral = go.makeStringFromSegments(io.sql || []);
     if (selMode === mm.SelectActionMode.rowList || selMode === mm.SelectActionMode.fieldList) {
-      const itemVarType = typeInfoWithoutArray(firstReturnParam.type).typeString;
+      const itemVarType = typeInfoWithoutArray(firstReturnParam.type).fullTypeName;
       const scanParams =
         selMode === mm.SelectActionMode.fieldList
           ? `&${defs.itemVarName}`
@@ -524,7 +535,10 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
     // Return the result.
     builder.push(successReturnCode);
 
-    return new CodeMap(builder, headerCode);
+    const codeMap = new CodeMap(builder, headerCode);
+    codeMap.tsInterfaceFileName = tsInterfaceFileName;
+    codeMap.tsInterfaceCode = tsInterfaceCode;
+    return codeMap;
   }
 
   private update(io: UpdateIO, variadicParams: boolean): CodeMap {
@@ -689,7 +703,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
     if (returnValues.length) {
       this.imports.addVars(returnValues.list);
       for (const v of returnValues.list) {
-        builder.push(`var ${this.txExportedVar(v.name)} ${v.type.typeString}`);
+        builder.push(`var ${this.txExportedVar(v.name)} ${v.type.fullTypeName}`);
       }
     }
     builder.push('txErr := mingru.Transact(db, func(tx *sql.Tx) error {');

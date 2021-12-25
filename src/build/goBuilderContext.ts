@@ -1,10 +1,13 @@
-import { FuncSignature, MutableStructInfo } from './goCode.js';
+import { FuncSignature, GoStructData } from './goCodeUtil.js';
 
+// Carries shared information during building.
 export default class GoBuilderContext {
+  // Shared interfaces.
   interfaces: Record<string, Map<string, FuncSignature>> = {};
-  resultTypes: Record<string, MutableStructInfo> = {};
+  // Shared result types.
+  resultTypes: Record<string, GoStructData> = {};
 
-  handleInterfaceMember(name: string, funcSig: FuncSignature) {
+  addSharedInterface(name: string, funcSig: FuncSignature) {
     const { interfaces } = this;
     if (interfaces[name] === undefined) {
       interfaces[name] = new Map<string, FuncSignature>();
@@ -12,12 +15,9 @@ export default class GoBuilderContext {
     interfaces[name]?.set(funcSig.sig, funcSig);
   }
 
-  handleResultType(name: string, info: MutableStructInfo) {
+  addSharedResultType(name: string, info: GoStructData) {
     const { resultTypes } = this;
-    if (resultTypes[name] !== undefined) {
-      resultTypes[name]?.merge(info);
-    } else {
-      resultTypes[name] = info;
-    }
+    const prev = resultTypes[name];
+    resultTypes[name] = prev ? prev.merge(info) : info;
   }
 }

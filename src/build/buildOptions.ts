@@ -15,4 +15,5 @@ export interface BuildOptions {
   cleanBuild?: boolean;
   noOutput?: boolean;
   jsonTags?: JSONTagsOptions;
+  tsOutDir?: string;
 }

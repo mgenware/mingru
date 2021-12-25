@@ -13,7 +13,7 @@ function sqlEq(sql: mm.SQL, value: string) {
 
 function testType(col: mm.Column, type: string, pkg?: string) {
   const typeInfo = dialect.colTypeToGoType(col.__type());
-  eq(typeInfo.typeString, type);
+  eq(typeInfo.fullTypeName, type);
 
   const atomicInfo = mr.getAtomicTypeInfo(typeInfo);
   eq(atomicInfo.moduleName ?? '', pkg ?? '');

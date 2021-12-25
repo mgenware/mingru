@@ -6,7 +6,7 @@ import { toCamelCase, toPascalCase } from './stringUtils.js';
 export class AtomicTypeInfo {
   moduleName = '';
   importPath?: string;
-  typeString: string;
+  fullTypeName: string;
   defaultValueString: string;
 
   constructor(
@@ -25,20 +25,20 @@ export class AtomicTypeInfo {
         this.importPath = parts[0];
       }
     }
-    this.typeString = this.getTypeString();
+    this.fullTypeName = this.getFullTypeName();
     this.defaultValueString = `${this.defaultValue}`;
   }
 
   toString(): string {
     // `this.moduleName` is already included in `this.typeString`.
-    let s = this.typeString;
+    let s = this.fullTypeName;
     if (this.importPath) {
       s += `|${this.importPath}`;
     }
     return s;
   }
 
-  private getTypeString(): string {
+  private getFullTypeName(): string {
     const { typeName } = this;
     if (this.moduleName) {
       return `${this.moduleName}.${typeName}`;
@@ -48,22 +48,22 @@ export class AtomicTypeInfo {
 }
 
 export class CompoundTypeInfo {
-  typeString: string;
+  fullTypeName: string;
   defaultValueString: string;
 
   constructor(public core: AtomicTypeInfo, public isPointer: boolean, public isArray: boolean) {
-    this.typeString = this.getTypeString(false);
+    this.fullTypeName = this.getFullTypeName(false);
     this.defaultValueString = this.isPointer || this.isArray ? 'nil' : this.core.defaultValueString;
     Object.freeze(this);
   }
 
   toString(): string {
-    return this.getTypeString(true);
+    return this.getFullTypeName(true);
   }
 
   // `verbose` is used in `toString` for debugging purposes.
-  private getTypeString(verbose: boolean): string {
-    let s = verbose ? this.core.toString() : this.core.typeString;
+  private getFullTypeName(verbose: boolean): string {
+    let s = verbose ? this.core.toString() : this.core.fullTypeName;
     if (this.isPointer) {
       s = `*${s}`;
     }

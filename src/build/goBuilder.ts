@@ -7,7 +7,7 @@ import GoTABuilder from './goTABuilder.js';
 import GoBuilderContext from './goBuilderContext.js';
 import { TAIO } from '../io/taIO.js';
 import { BuildOptions } from './buildOptions.js';
-import * as go from './goCode.js';
+import * as go from './goCodeUtil.js';
 import * as defs from '../defs.js';
 import { ActionToIOOptions } from '../io/actionToIOOptions.js';
 import { toSnakeCase } from '../lib/stringUtils.js';
@@ -41,26 +41,19 @@ export default class GoBuilder {
     const imports = new go.ImportList();
     let resultTypesCode = '';
 
-    // Generating renamed result types.
+    // Generate shared result types.
     const resultTypes = Object.keys(context.resultTypes);
     if (resultTypes.length) {
       resultTypesCode += go.sep('Result types') + '\n';
-      // Sort types alphabetically.
+      // Sort type names alphabetically.
       resultTypes.sort((a, b) => a.localeCompare(b));
       for (const name of resultTypes) {
-        const resultType = context.resultTypes[name];
-        if (!resultType) {
+        const resultTypeStructData = context.resultTypes[name];
+        if (!resultTypeStructData) {
           throw new Error('Unexpected undefined context value');
         }
-        const resultTypeMembers = [...resultType.members.values()];
-        imports.addVars(resultTypeMembers);
-        resultTypesCode += go.struct(
-          resultType.typeName,
-          resultTypeMembers,
-          resultType.jsonKeyStyle,
-          resultType.ignoredMembers,
-          resultType.omitEmptyMembers,
-        );
+        imports.addVars(resultTypeStructData.members);
+        resultTypesCode += go.struct(resultTypeStructData);
         resultTypesCode += '\n';
       }
     }
