@@ -3,8 +3,8 @@ import * as mm from 'mingru-models';
 import { throwIfEmpty } from 'throw-if-arg-empty';
 import * as nodepath from 'path';
 import * as mfs from 'm-fs';
-import GoTABuilder from './goTABuilder.js';
-import GoBuilderContext from './goBuilderContext.js';
+import CoreBuilder from './coreBuilder.js';
+import CoreBuilderContext from './coreBuilderContext.js';
 import { TAIO } from '../io/taIO.js';
 import { BuildOptions } from './buildOptions.js';
 import * as go from './goCodeUtil.js';
@@ -12,7 +12,8 @@ import * as defs from '../defs.js';
 import { ActionToIOOptions } from '../io/actionToIOOptions.js';
 import { toSnakeCase } from '../lib/stringUtils.js';
 
-export default class GoBuilder {
+// Wraps a `CoreBuilder` and handles input options and file operations.
+export default class CoreBuilderWrapper {
   async buildAsync(
     tas: mm.TableActions[],
     outDir: string,
@@ -24,12 +25,12 @@ export default class GoBuilder {
     // eslint-disable-next-line no-param-reassign
     tas = [...new Set(tas)];
 
-    const context = new GoBuilderContext();
+    const context = new CoreBuilderContext();
     await Promise.all(
       tas.map((ta) => {
         const taTable = ta.__getData().table;
         const taIO = new TAIO(ta, ioOpts);
-        const builder = new GoTABuilder(taIO, opts, context);
+        const builder = new CoreBuilder(taIO, opts, context);
         const code = builder.build();
         const fileName = toSnakeCase(taTable.__getData().name) + '_ta'; // Add a "_ta" suffix to table actions file.
         const outFile = nodepath.join(outDir, fileName + '.go');

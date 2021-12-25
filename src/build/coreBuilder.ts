@@ -23,7 +23,7 @@ import { TransactIO } from '../io/transactIO.js';
 import LinesBuilder from './linesBuilder.js';
 import * as stringUtils from '../lib/stringUtils.js';
 import { BuildOptions } from './buildOptions.js';
-import GoBuilderContext from './goBuilderContext.js';
+import CoreBuilderContext from './coreBuilderContext.js';
 import { buildTSInterface } from './tsCodeBuilder.js';
 
 function joinParams(arr: string[]): string {
@@ -46,12 +46,14 @@ class CodeMap {
   constructor(public body: LinesBuilder, public head?: string, public tail?: string) {}
 }
 
-export default class GoTABuilder {
+// Generates code (Go and TypeScript interfaces if configured)
+// from a table action IO object(`TAIO`).
+export default class CoreBuilder {
   private options: BuildOptions;
   private imports = new go.ImportList();
   private dialect: Dialect;
 
-  constructor(public taIO: TAIO, public opts: BuildOptions, public context: GoBuilderContext) {
+  constructor(public taIO: TAIO, public opts: BuildOptions, public context: CoreBuilderContext) {
     throwIfFalsy(taIO, 'taIO');
     this.dialect = taIO.opt.dialect;
     this.options = opts;

@@ -5,7 +5,7 @@ import * as nodepath from 'path';
 import del from 'del';
 import * as defs from '../defs.js';
 import { Dialect } from '../dialect.js';
-import GoBuilder from './goBuilder.js';
+import CoreBuilderWrapper from './coreBuilderWrapper.js';
 import logger from '../logger.js';
 import CSQLBuilder from './csqlBuilder.js';
 import { BuildOptions } from './buildOptions.js';
@@ -42,8 +42,8 @@ export default class Builder {
   async buildActionsAsync(actions: mm.TableActions[]): Promise<void> {
     throwIfFalsy(actions, 'actions');
     this.checkBuildStatus();
-    const goBuilder = new GoBuilder();
-    await goBuilder.buildAsync(actions, this.outDir, { dialect: this.dialect }, this.opts);
+    const coreBuilderWrapper = new CoreBuilderWrapper();
+    await coreBuilderWrapper.buildAsync(actions, this.outDir, { dialect: this.dialect }, this.opts);
     logger.debug('🎉  Action build succeeded');
   }
 

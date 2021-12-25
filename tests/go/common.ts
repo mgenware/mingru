@@ -30,7 +30,7 @@ export async function testBuildAsync(
   ta: mm.TableActions,
   path: string,
   opts?: mr.BuildOptions,
-  ctx?: mr.GoBuilderContext,
+  ctx?: mr.CoreBuilderContext,
 ) {
   let content = '';
   if (path) {
@@ -38,10 +38,10 @@ export async function testBuildAsync(
     content = await mfs.readFileAsync(path, 'utf8');
   }
   mr.logger.enabled = false;
-  const builder = new mr.GoTABuilder(
+  const builder = new mr.CoreBuilder(
     new mr.TAIO(ta, getTAIOOption(opts)),
     opts ?? defaultOptions(),
-    ctx ?? new mr.GoBuilderContext(),
+    ctx ?? new mr.CoreBuilderContext(),
   );
   const actual = builder.build();
   if (path) {
@@ -54,7 +54,7 @@ export async function testBuildFullAsync(
   ta: mm.TableActions,
   path: string,
   opts?: mr.BuildOptions,
-  ctx?: mr.GoBuilderContext,
+  ctx?: mr.CoreBuilderContext,
 ) {
   let content = '';
   if (path) {
@@ -62,10 +62,10 @@ export async function testBuildFullAsync(
     content = await mfs.readFileAsync(path, 'utf8');
   }
   mr.logger.enabled = false;
-  const builder = new mr.GoTABuilder(
+  const builder = new mr.CoreBuilder(
     new mr.TAIO(ta, getTAIOOption(opts)),
     opts ?? defaultOptions(),
-    ctx ?? new mr.GoBuilderContext(),
+    ctx ?? new mr.CoreBuilderContext(),
   );
   const actual = builder.build();
   if (path) {

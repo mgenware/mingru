@@ -1,7 +1,7 @@
 import { FuncSignature, GoStructData } from './goCodeUtil.js';
 
-// Carries shared information during building.
-export default class GoBuilderContext {
+// Carries shared information during building. Used in `CoreBuilder`.
+export default class CoreBuilderContext {
   // Shared interfaces.
   interfaces: Record<string, Map<string, FuncSignature>> = {};
   // Shared result types.
