@@ -296,7 +296,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
           }
           sql.push(')');
           unionIdx++;
-        } catch (err: any) {
+        } catch (err) {
           mustBeErr(err);
           err.message += ` [UNION index ${unionIdx}]`;
           throw err;
