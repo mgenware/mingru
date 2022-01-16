@@ -1,5 +1,6 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
+import mustBeErr from 'must-be-err';
 import { ActionIO } from './actionIO.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
 
@@ -41,12 +42,9 @@ export function actionToIO(
     const result = handler(action, opt);
     actionToIOMap.set(action, result);
     return result;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (err: any) {
-    if (err.message) {
-      // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-      err.message += ` [${descMsg}]`;
-    }
+  } catch (err) {
+    mustBeErr(err);
+    err.message += ` [${descMsg}]`;
     throw err;
   }
 }

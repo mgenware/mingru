@@ -2,6 +2,7 @@
 import * as mm from 'mingru-models';
 import toTypeString from 'to-type-string';
 import { throwIfFalsy } from 'throw-if-arg-empty';
+import mustBeErr from 'must-be-err';
 import { Dialect, StringSegment } from '../dialect.js';
 import { SQLIO, sqlIO, SQLIOBuilderOption } from './sqlIO.js';
 import { ActionIO } from './actionIO.js';
@@ -295,9 +296,8 @@ export class SelectIOProcessor extends BaseIOProcessor {
           }
           sql.push(')');
           unionIdx++;
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
-          // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+          mustBeErr(err);
           err.message += ` [UNION index ${unionIdx}]`;
           throw err;
         }
