@@ -446,12 +446,30 @@ export class SelectIOProcessor extends BaseIOProcessor {
       }
     }
 
+    // Add closing parenthesis if needed.
     if (selMode === mm.SelectActionMode.exists) {
       sql.push(')');
     }
 
-    // ******** END OF operating on SQL string of this action ********
-    // Handle ending parenthesis.
+    // SELECT FOR UPDATE.
+    if (actionData.lockMode !== undefined) {
+      switch (actionData.lockMode) {
+        case mm.SelectActionLockMode.forUpdate: {
+          sql.push(' FOR UPDATE');
+          break;
+        }
+
+        case mm.SelectActionLockMode.inShareMode: {
+          sql.push(' LOCK IN SHARE MODE');
+          break;
+        }
+
+        default:
+          throw new Error(`Unsupported lock mode "${actionData.lockMode}"`);
+      }
+    }
+
+    // ******** END OF changing the SQL code ********
 
     // Merge inputs.
     for (const io of this.subqueryIOs) {

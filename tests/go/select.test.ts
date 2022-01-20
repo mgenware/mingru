@@ -772,3 +772,12 @@ it('Full join', async () => {
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'select/fullJoin');
 });
+
+it('Lock mode', async () => {
+  class PostTA extends mm.TableActions {
+    t1 = mm.selectRow(post.id, post.title).lock(mm.SelectActionLockMode.forUpdate);
+    t2 = mm.selectRow(post.id, post.title).lock(mm.SelectActionLockMode.inShareMode);
+  }
+  const ta = mm.tableActions(post, PostTA);
+  await testBuildAsync(ta, 'select/lockMode');
+});
