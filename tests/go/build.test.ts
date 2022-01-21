@@ -1,5 +1,5 @@
 import * as mm from 'mingru-models';
-import user from '../models/user.js';
+import user, { User } from '../models/user.js';
 import post from '../models/post.js';
 import postReply from '../models/postReply.js';
 import { testBuildToDirAsync, migrationUpFile, migrationDownFile } from './common.js';
@@ -172,7 +172,7 @@ it('TS interfaces', async () => {
   });
 });
 
-it('Multiple tables + Configurable table', async () => {
+it('Multiple tables + Configurable table + virtual table', async () => {
   class UserTA extends mm.TableActions {
     selectProfile = mm.selectRow(user.display_name, user.sig);
     updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
@@ -186,6 +186,18 @@ it('Multiple tables + Configurable table', async () => {
     deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
   }
   const postTA = mm.tableActions(post, PostTA, { configurableTable: true });
-  const actions = [userTA, postTA];
-  await testBuildToDirAsync(actions, ['post', 'user'], 'multipleTablesConfTable');
+
+  // Mirror of the user table.
+  class VUser extends User {}
+  const vUser = mm.table(VUser);
+
+  class VUserTA extends mm.TableActions {
+    selectProfile = mm.selectRow(vUser.display_name, vUser.sig);
+    updateProfile = mm.unsafeUpdateAll().setInputs(vUser.sig);
+    deleteByID = mm.deleteOne().whereSQL(vUser.id.isEqualToInput());
+  }
+  const vUserTA = mm.tableActions(vUser, VUserTA, { configurableTable: true });
+
+  const actions = [userTA, postTA, vUserTA];
+  await testBuildToDirAsync(actions, ['post', 'user', 'v_user'], 'multipleTablesConfTable');
 });

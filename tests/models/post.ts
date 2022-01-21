@@ -1,7 +1,7 @@
 import * as mm from 'mingru-models';
 import user from './user.js';
 
-class Post extends mm.Table {
+export class Post extends mm.Table {
   id = mm.pk();
   title = mm.varChar(100);
   content = mm.varChar(100);

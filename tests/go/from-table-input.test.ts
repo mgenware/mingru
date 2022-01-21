@@ -4,7 +4,7 @@ import post from '../models/post.js';
 import user from '../models/user.js';
 import { testBuildAsync } from './common.js';
 
-it('FROM table as input', async () => {
+it('configurableTable', async () => {
   class UserTA extends mm.TableActions {
     selectT = mm.selectRow(user.id, user.age);
     insertT = mm.insertOne().setInputs();
@@ -16,7 +16,7 @@ it('FROM table as input', async () => {
   await testBuildAsync(ta, 'from-table-input/from/user');
 });
 
-it('WRAP action', async () => {
+it('configurableTable with WRAP action', async () => {
   // Two tables with almost same structure.
   class UserT extends mm.Table {
     id = mm.pk();

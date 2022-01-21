@@ -1,6 +1,6 @@
 import * as mm from 'mingru-models';
 
-class User extends mm.Table {
+export class User extends mm.Table {
   id = mm.pk();
   url_name = mm.varChar(100);
   display_name = mm.varChar(100);
