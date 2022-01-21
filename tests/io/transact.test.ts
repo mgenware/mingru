@@ -136,11 +136,11 @@ it('TX member IOs', () => {
   const members = io.memberIOs;
   eq(
     members[0]!.toString(),
-    'TransactMemberIO(InsertAction(insert, Table(employee|employees)), da.Insert)',
+    'TransactMemberIO(InsertAction(insert, Table(employee|employees)), mrTable.Insert)',
   );
   eq(
     members[1]!.toString(),
-    'TransactMemberIO(InsertAction(insert, Table(employee|employees)), da.Insert)',
+    'TransactMemberIO(InsertAction(insert, Table(employee|employees)), mrTable.Insert)',
   );
   eq(members[0]!.actionIO.returnValues.toString(), '__insertedID: uint64');
   eq(members[1]!.actionIO.returnValues.toString(), '__insertedID: uint64');

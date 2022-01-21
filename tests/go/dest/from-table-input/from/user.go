@@ -58,11 +58,11 @@ func (mrTable *TableTypeUser) transactTChild2(queryable mingru.Queryable, mrFrom
 func (mrTable *TableTypeUser) TransactT(db *sql.DB, mrFromTable mingru.Table, urlName string, displayName string, sig *string, age int, followerCount *string, title string, content string, userID uint64, reviewerID uint64, cmtCount uint, datetime time.Time, date time.Time, time time.Time, nDatetime *time.Time, nDate *time.Time, nTime *time.Time, mUserID uint64) error {
 	txErr := mingru.Transact(db, func(tx *sql.Tx) error {
 		var err error
-		_, err = da.InsertT(tx, mrFromTable, urlName, displayName, sig, age, followerCount)
+		_, err = mrTable.InsertT(tx, mrFromTable, urlName, displayName, sig, age, followerCount)
 		if err != nil {
 			return err
 		}
-		_, err = da.transactTChild2(tx, mrFromTable, title, content, userID, reviewerID, cmtCount, datetime, date, time, nDatetime, nDate, nTime, mUserID)
+		_, err = mrTable.transactTChild2(tx, mrFromTable, title, content, userID, reviewerID, cmtCount, datetime, date, time, nDatetime, nDate, nTime, mUserID)
 		if err != nil {
 			return err
 		}

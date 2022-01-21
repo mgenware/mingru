@@ -45,11 +45,11 @@ func (mrTable *TableTypeEmployee) insert1Child2(queryable mingru.Queryable, firs
 func (mrTable *TableTypeEmployee) Insert1(db *sql.DB, id int) error {
 	txErr := mingru.Transact(db, func(tx *sql.Tx) error {
 		var err error
-		firstName, err := da.GetFirstName(tx, id)
+		firstName, err := mrTable.GetFirstName(tx, id)
 		if err != nil {
 			return err
 		}
-		_, err = da.insert1Child2(tx, firstName)
+		_, err = mrTable.insert1Child2(tx, firstName)
 		if err != nil {
 			return err
 		}

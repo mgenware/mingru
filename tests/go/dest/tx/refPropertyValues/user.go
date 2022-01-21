@@ -44,11 +44,11 @@ func (mrTable *TableTypeUser) tChild2(queryable mingru.Queryable, age int, score
 func (mrTable *TableTypeUser) T(db *sql.DB, score int) error {
 	txErr := mingru.Transact(db, func(tx *sql.Tx) error {
 		var err error
-		res, err := da.tChild1(tx)
+		res, err := mrTable.tChild1(tx)
 		if err != nil {
 			return err
 		}
-		_, err = da.tChild2(tx, res.Age, score)
+		_, err = mrTable.tChild2(tx, res.Age, score)
 		if err != nil {
 			return err
 		}

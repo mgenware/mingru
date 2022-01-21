@@ -31,11 +31,11 @@ func (mrTable *TableTypeEmployee) Insert2(db *sql.DB, firstName string) (uint64,
 	var id2Exported uint64
 	txErr := mingru.Transact(db, func(tx *sql.Tx) error {
 		var err error
-		_, err = da.Insert(tx, firstName)
+		_, err = mrTable.Insert(tx, firstName)
 		if err != nil {
 			return err
 		}
-		id2, err := da.Insert(tx, firstName)
+		id2, err := mrTable.Insert(tx, firstName)
 		if err != nil {
 			return err
 		}

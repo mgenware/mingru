@@ -35,30 +35,30 @@ func (mrTable *TableTypePost) insertChild4(queryable mingru.Queryable, id uint64
 }
 
 func (mrTable *TableTypePost) insertChild5(queryable mingru.Queryable) (uint64, error) {
-	return da.InsertCore(queryable, "abc")
+	return mrTable.InsertCore(queryable, "abc")
 }
 
 // Insert ...
 func (mrTable *TableTypePost) Insert(db *sql.DB, id uint64, title string) error {
 	txErr := mingru.Transact(db, func(tx *sql.Tx) error {
 		var err error
-		err = da.insertChild1(tx, id)
+		err = mrTable.insertChild1(tx, id)
 		if err != nil {
 			return err
 		}
-		_, err = da.InsertCore(tx, title)
+		_, err = mrTable.InsertCore(tx, title)
 		if err != nil {
 			return err
 		}
-		err = da.insertChild3(tx, id, title)
+		err = mrTable.insertChild3(tx, id, title)
 		if err != nil {
 			return err
 		}
-		err = da.insertChild4(tx, id)
+		err = mrTable.insertChild4(tx, id)
 		if err != nil {
 			return err
 		}
-		_, err = da.insertChild5(tx)
+		_, err = mrTable.insertChild5(tx)
 		if err != nil {
 			return err
 		}

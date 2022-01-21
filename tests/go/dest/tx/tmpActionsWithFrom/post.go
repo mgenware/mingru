@@ -35,11 +35,11 @@ func (mrTable *TableTypePost) tChild2(queryable mingru.Queryable, postID uint64,
 func (mrTable *TableTypePost) T(db *sql.DB, content string, userID uint64, createdAt time.Time, modifiedAt time.Time, rplCount uint, postID uint64, cmtID uint64) error {
 	txErr := mingru.Transact(db, func(tx *sql.Tx) error {
 		var err error
-		_, err = da.tChild1(tx, content, userID, createdAt, modifiedAt, rplCount)
+		_, err = mrTable.tChild1(tx, content, userID, createdAt, modifiedAt, rplCount)
 		if err != nil {
 			return err
 		}
-		err = da.tChild2(tx, postID, cmtID)
+		err = mrTable.tChild2(tx, postID, cmtID)
 		if err != nil {
 			return err
 		}

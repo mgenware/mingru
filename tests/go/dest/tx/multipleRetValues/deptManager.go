@@ -22,7 +22,7 @@ func (mrTable *TableTypeDeptManager) MingruSQLName() string {
 // ------------ Actions ------------
 
 func (mrTable *TableTypeDeptManager) insertChild3(queryable mingru.Queryable, empNo int, deptNo uint64, fromDate time.Time, toDate time.Time) error {
-	return da.InsertCore(queryable, empNo, deptNo, fromDate, toDate)
+	return mrTable.InsertCore(queryable, empNo, deptNo, fromDate, toDate)
 }
 
 // Insert ...
@@ -39,7 +39,7 @@ func (mrTable *TableTypeDeptManager) Insert(db *sql.DB, firstName string, lastNa
 		if err != nil {
 			return err
 		}
-		err = da.insertChild3(tx, empNo, deptNo, fromDate, toDate)
+		err = mrTable.insertChild3(tx, empNo, deptNo, fromDate, toDate)
 		if err != nil {
 			return err
 		}

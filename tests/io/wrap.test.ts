@@ -49,7 +49,7 @@ it('getInputs (wrapSelf and innerIO)', () => {
     io.execArgs.toString(),
     'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, id: uint64, sig: *string="haha", followerCount: *string',
   );
-  eq(io.funcPath, 'da.S');
+  eq(io.funcPath, 'mrTable.S');
 });
 
 it('getInputs (wrapOther)', () => {

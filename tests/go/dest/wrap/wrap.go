@@ -28,7 +28,7 @@ func (mrTable *TableTypePost) S(queryable mingru.Queryable, urlName string, id u
 
 // T1 ...
 func (mrTable *TableTypePost) T1(queryable mingru.Queryable, urlName string, id uint64, followerCount *string) (int, error) {
-	return da.S(queryable, urlName, id, "haha", followerCount)
+	return mrTable.S(queryable, urlName, id, "haha", followerCount)
 }
 
 // T2 ...
