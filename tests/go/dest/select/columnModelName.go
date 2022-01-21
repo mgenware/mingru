@@ -9,6 +9,11 @@ type TableTypeMyTable struct {
 // MyTable ...
 var MyTable = &TableTypeMyTable{}
 
+// MingruSQLName returns the name of this table.
+func (da *TableTypeMyTable) MingruSQLName() string {
+	return "my_table"
+}
+
 // ------------ Actions ------------
 
 // MyTableTableSelectTResult ...

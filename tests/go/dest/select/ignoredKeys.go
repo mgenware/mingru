@@ -13,6 +13,11 @@ type TableTypePostReply struct {
 // PostReply ...
 var PostReply = &TableTypePostReply{}
 
+// MingruSQLName returns the name of this table.
+func (da *TableTypePostReply) MingruSQLName() string {
+	return "post_cmt_rpl"
+}
+
 // ------------ Actions ------------
 
 // PostReplyTableSelectTResult ...

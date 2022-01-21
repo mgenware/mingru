@@ -43,3 +43,5 @@ export const fmtImport = 'fmt';
 export const queryParamsVarName = 'queryParams';
 export const tableInputName = 'table';
 export const tableInputVar = new VarInfo(tableInputName, stringTypeInfo);
+export const tableObjSelf = 'mrTable';
+export const tableMemSQLName = 'MingruSQLName';

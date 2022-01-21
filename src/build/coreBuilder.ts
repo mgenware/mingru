@@ -129,14 +129,13 @@ export default class CoreBuilder {
     // Use `funcArgs.distinctList` cuz duplicate vars are not allowed.
     const funcArgs = io.funcArgs.distinctList;
     const returnValues = io.returnValues.list;
-    const { className: tableClassName } = this.taIO;
     const builder = new LinesBuilder();
 
     // Build func head.
     if (!pri) {
       builder.push(`// ${funcName} ...`);
     }
-    funcSigString += `func (da *${tableClassName}) ${funcName}`;
+    funcSigString += `${this.getFuncSigHead()}${funcName}`;
 
     // Build func params.
     // allFuncArgs = original func args + arg stubs.
@@ -263,7 +262,7 @@ export default class CoreBuilder {
   }
 
   private buildTableObject(): string {
-    const { className, instanceName } = this.taIO;
+    const { className, instanceName, tableDBName } = this.taIO;
     let code = go.struct(
       new go.GoStructData(
         className,
@@ -273,9 +272,23 @@ export default class CoreBuilder {
         new Set<string>(),
       ),
     );
+
+    // Generate table instance.
     code += `\n// ${instanceName} ...
-var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n\n`;
+var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n`;
+
+    // Generate mingru member functions.
+    code += '\n// MingruSQLName returns the name of this table.\n';
+    code += `${this.getFuncSigHead()}${defs.tableMemSQLName}() string {\n`;
+    code += `\treturn ${JSON.stringify(tableDBName)}\n`;
+    code += '}\n\n';
     return code;
+  }
+
+  // Gets the member function signature head.
+  private getFuncSigHead() {
+    const { className } = this.taIO;
+    return `func (da *${className}) `;
   }
 
   private select(io: SelectIO, variadicQueryParams: boolean): CodeMap {

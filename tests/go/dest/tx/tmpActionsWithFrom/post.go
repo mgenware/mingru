@@ -14,6 +14,11 @@ type TableTypePost struct {
 // Post ...
 var Post = &TableTypePost{}
 
+// MingruSQLName returns the name of this table.
+func (da *TableTypePost) MingruSQLName() string {
+	return "db_post"
+}
+
 // ------------ Actions ------------
 
 func (da *TableTypePost) tChild1(queryable mingru.Queryable, content string, userID uint64, createdAt time.Time, modifiedAt time.Time, rplCount uint) (uint64, error) {

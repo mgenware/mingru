@@ -13,6 +13,11 @@ type TableTypePost struct {
 // Post ...
 var Post = &TableTypePost{}
 
+// MingruSQLName returns the name of this table.
+func (da *TableTypePost) MingruSQLName() string {
+	return "db_post"
+}
+
 // ------------ Actions ------------
 
 // UpdateNullableTimes ...

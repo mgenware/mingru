@@ -9,6 +9,11 @@ type TableTypeCols struct {
 // Cols ...
 var Cols = &TableTypeCols{}
 
+// MingruSQLName returns the name of this table.
+func (da *TableTypeCols) MingruSQLName() string {
+	return "cols"
+}
+
 // ------------ Actions ------------
 
 // InsertT ...
