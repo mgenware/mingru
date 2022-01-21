@@ -14,7 +14,7 @@ type TableTypePost struct {
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
-func (da *TableTypePost) MingruSQLName() string {
+func (mrTable *TableTypePost) MingruSQLName() string {
 	return "db_post"
 }
 
@@ -27,7 +27,7 @@ type PostTableSelectTResult struct {
 }
 
 // SelectT ...
-func (da *TableTypePost) SelectT(queryable mingru.Queryable, id uint64, page int, pageSize int) ([]PostTableSelectTResult, bool, error) {
+func (mrTable *TableTypePost) SelectT(queryable mingru.Queryable, id uint64, page int, pageSize int) ([]PostTableSelectTResult, bool, error) {
 	if page <= 0 {
 		err := fmt.Errorf("Invalid page %v", page)
 		return nil, false, err

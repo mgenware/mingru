@@ -14,32 +14,32 @@ type TableTypePost struct {
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
-func (da *TableTypePost) MingruSQLName() string {
+func (mrTable *TableTypePost) MingruSQLName() string {
 	return "db_post"
 }
 
 // ------------ Actions ------------
 
-func (da *TableTypePost) insertChild1(queryable mingru.Queryable, id uint64) error {
+func (mrTable *TableTypePost) insertChild1(queryable mingru.Queryable, id uint64) error {
 	return User.UpdatePostCount(queryable, id, 1)
 }
 
-func (da *TableTypePost) insertChild3(queryable mingru.Queryable, id uint64, title string) error {
+func (mrTable *TableTypePost) insertChild3(queryable mingru.Queryable, id uint64, title string) error {
 	result, err := queryable.Exec("UPDATE `db_post` SET `title` = ? WHERE `id` = ?", title, id)
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }
 
-func (da *TableTypePost) insertChild4(queryable mingru.Queryable, id uint64) error {
+func (mrTable *TableTypePost) insertChild4(queryable mingru.Queryable, id uint64) error {
 	result, err := queryable.Exec("UPDATE `db_post` SET `title` = ? WHERE `id` = ?", "TITLE", id)
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }
 
-func (da *TableTypePost) insertChild5(queryable mingru.Queryable) (uint64, error) {
+func (mrTable *TableTypePost) insertChild5(queryable mingru.Queryable) (uint64, error) {
 	return da.InsertCore(queryable, "abc")
 }
 
 // Insert ...
-func (da *TableTypePost) Insert(db *sql.DB, id uint64, title string) error {
+func (mrTable *TableTypePost) Insert(db *sql.DB, id uint64, title string) error {
 	txErr := mingru.Transact(db, func(tx *sql.Tx) error {
 		var err error
 		err = da.insertChild1(tx, id)
@@ -68,7 +68,7 @@ func (da *TableTypePost) Insert(db *sql.DB, id uint64, title string) error {
 }
 
 // InsertCore ...
-func (da *TableTypePost) InsertCore(queryable mingru.Queryable, title string) (uint64, error) {
+func (mrTable *TableTypePost) InsertCore(queryable mingru.Queryable, title string) (uint64, error) {
 	result, err := queryable.Exec("INSERT INTO `db_post` (`title`) VALUES (?)", title)
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }

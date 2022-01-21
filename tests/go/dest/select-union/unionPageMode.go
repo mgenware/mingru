@@ -14,7 +14,7 @@ type TableTypeActivity struct {
 var Activity = &TableTypeActivity{}
 
 // MingruSQLName returns the name of this table.
-func (da *TableTypeActivity) MingruSQLName() string {
+func (mrTable *TableTypeActivity) MingruSQLName() string {
 	return "activity"
 }
 
@@ -28,7 +28,7 @@ type ActivityTableTResult struct {
 }
 
 // T ...
-func (da *TableTypeActivity) T(queryable mingru.Queryable, id uint64, page int, pageSize int) ([]ActivityTableTResult, bool, error) {
+func (mrTable *TableTypeActivity) T(queryable mingru.Queryable, id uint64, page int, pageSize int) ([]ActivityTableTResult, bool, error) {
 	if page <= 0 {
 		err := fmt.Errorf("Invalid page %v", page)
 		return nil, false, err
@@ -73,7 +73,7 @@ type ActivityTableT1Result struct {
 }
 
 // T1 ...
-func (da *TableTypeActivity) T1(queryable mingru.Queryable, id uint64, page int, pageSize int) ([]ActivityTableT1Result, bool, error) {
+func (mrTable *TableTypeActivity) T1(queryable mingru.Queryable, id uint64, page int, pageSize int) ([]ActivityTableT1Result, bool, error) {
 	if page <= 0 {
 		err := fmt.Errorf("Invalid page %v", page)
 		return nil, false, err
@@ -116,7 +116,7 @@ type ActivityTableT2Result struct {
 }
 
 // T2 ...
-func (da *TableTypeActivity) T2(queryable mingru.Queryable, id uint64) ([]ActivityTableT2Result, error) {
+func (mrTable *TableTypeActivity) T2(queryable mingru.Queryable, id uint64) ([]ActivityTableT2Result, error) {
 	rows, err := queryable.Query("SELECT `title` FROM `db_post` WHERE `id` = ? ORDER BY `id`", id)
 	if err != nil {
 		return nil, err

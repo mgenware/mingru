@@ -15,18 +15,18 @@ type TableTypeDeptManager struct {
 var DeptManager = &TableTypeDeptManager{}
 
 // MingruSQLName returns the name of this table.
-func (da *TableTypeDeptManager) MingruSQLName() string {
+func (mrTable *TableTypeDeptManager) MingruSQLName() string {
 	return "dept_manager"
 }
 
 // ------------ Actions ------------
 
-func (da *TableTypeDeptManager) insertChild3(queryable mingru.Queryable, empNo int, deptNo uint64, fromDate time.Time, toDate time.Time) error {
+func (mrTable *TableTypeDeptManager) insertChild3(queryable mingru.Queryable, empNo int, deptNo uint64, fromDate time.Time, toDate time.Time) error {
 	return da.InsertCore(queryable, empNo, deptNo, fromDate, toDate)
 }
 
 // Insert ...
-func (da *TableTypeDeptManager) Insert(db *sql.DB, firstName string, lastName string, gender string, birthDate time.Time, hireDate time.Time, name string, fromDate time.Time, toDate time.Time) (uint64, uint64, error) {
+func (mrTable *TableTypeDeptManager) Insert(db *sql.DB, firstName string, lastName string, gender string, birthDate time.Time, hireDate time.Time, name string, fromDate time.Time, toDate time.Time) (uint64, uint64, error) {
 	var deptNoExported uint64
 	var empNoExported uint64
 	txErr := mingru.Transact(db, func(tx *sql.Tx) error {
@@ -51,7 +51,7 @@ func (da *TableTypeDeptManager) Insert(db *sql.DB, firstName string, lastName st
 }
 
 // InsertCore ...
-func (da *TableTypeDeptManager) InsertCore(queryable mingru.Queryable, empNo int, deptNo uint64, fromDate time.Time, toDate time.Time) error {
+func (mrTable *TableTypeDeptManager) InsertCore(queryable mingru.Queryable, empNo int, deptNo uint64, fromDate time.Time, toDate time.Time) error {
 	_, err := queryable.Exec("INSERT INTO `dept_manager` (`emp_no`, `dept_no`, `from_date`, `to_date`) VALUES (?, ?, ?, ?)", empNo, deptNo, fromDate, toDate)
 	return err
 }

@@ -10,7 +10,7 @@ type TableTypePost struct {
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
-func (da *TableTypePost) MingruSQLName() string {
+func (mrTable *TableTypePost) MingruSQLName() string {
 	return "db_post"
 }
 
@@ -22,7 +22,7 @@ type PostTableTResult struct {
 }
 
 // T ...
-func (da *TableTypePost) T(queryable mingru.Queryable) (PostTableTResult, error) {
+func (mrTable *TableTypePost) T(queryable mingru.Queryable) (PostTableTResult, error) {
 	var result PostTableTResult
 	err := queryable.QueryRow("SELECT `title` FROM `db_post` WHERE `user_id` = SELECT MAX(`id`) AS `max_id` FROM `user`").Scan(&result.Title)
 	if err != nil {

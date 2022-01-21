@@ -14,7 +14,7 @@ type TableTypePost struct {
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
-func (da *TableTypePost) MingruSQLName() string {
+func (mrTable *TableTypePost) MingruSQLName() string {
 	return "db_post"
 }
 
@@ -27,7 +27,7 @@ type PostTableSelectTimesResult struct {
 }
 
 // SelectTimes ...
-func (da *TableTypePost) SelectTimes(queryable mingru.Queryable, nDatetime *time.Time, nDate *time.Time) ([]PostTableSelectTimesResult, error) {
+func (mrTable *TableTypePost) SelectTimes(queryable mingru.Queryable, nDatetime *time.Time, nDate *time.Time) ([]PostTableSelectTimesResult, error) {
 	rows, err := queryable.Query("SELECT `datetime`, `date` FROM `db_post` WHERE `n_datetime` = ? OR `n_date` = ? ORDER BY `id`", nDatetime, nDate)
 	if err != nil {
 		return nil, err

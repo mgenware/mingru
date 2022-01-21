@@ -10,7 +10,7 @@ type TableTypeMyTable struct {
 var MyTable = &TableTypeMyTable{}
 
 // MingruSQLName returns the name of this table.
-func (da *TableTypeMyTable) MingruSQLName() string {
+func (mrTable *TableTypeMyTable) MingruSQLName() string {
 	return "my_table"
 }
 
@@ -23,7 +23,7 @@ type MyTableTableSelectTResult struct {
 }
 
 // SelectT ...
-func (da *TableTypeMyTable) SelectT(queryable mingru.Queryable) ([]MyTableTableSelectTResult, error) {
+func (mrTable *TableTypeMyTable) SelectT(queryable mingru.Queryable) ([]MyTableTableSelectTResult, error) {
 	rows, err := queryable.Query("SELECT `my_id`, `my_name` FROM `my_table` ORDER BY `id`")
 	if err != nil {
 		return nil, err

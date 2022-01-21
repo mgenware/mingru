@@ -10,14 +10,14 @@ type TableTypePost struct {
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
-func (da *TableTypePost) MingruSQLName() string {
+func (mrTable *TableTypePost) MingruSQLName() string {
 	return "db_post"
 }
 
 // ------------ Actions ------------
 
 // SelectT ...
-func (da *TableTypePost) SelectT(queryable mingru.Queryable) (string, error) {
+func (mrTable *TableTypePost) SelectT(queryable mingru.Queryable) (string, error) {
 	var result string
 	err := queryable.QueryRow("SELECT `title` FROM `db_post`").Scan(&result)
 	if err != nil {

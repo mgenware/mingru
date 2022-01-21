@@ -10,14 +10,14 @@ type TableTypePost struct {
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
-func (da *TableTypePost) MingruSQLName() string {
+func (mrTable *TableTypePost) MingruSQLName() string {
 	return "db_post"
 }
 
 // ------------ Actions ------------
 
 // UpdateT ...
-func (da *TableTypePost) UpdateT(queryable mingru.Queryable, title string, content string, mUserID uint64) (int, error) {
+func (mrTable *TableTypePost) UpdateT(queryable mingru.Queryable, title string, content string, mUserID uint64) (int, error) {
 	result, err := queryable.Exec("UPDATE `db_post` SET `content` = ?, `title` = \"haha\", `my_user_id` = ? WHERE `title` = ? `title` = ? AND `content` = ?", content, mUserID, title, title, content)
 	return mingru.GetRowsAffectedIntWithError(result, err)
 }

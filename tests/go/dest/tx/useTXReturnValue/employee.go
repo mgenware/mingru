@@ -14,20 +14,20 @@ type TableTypeEmployee struct {
 var Employee = &TableTypeEmployee{}
 
 // MingruSQLName returns the name of this table.
-func (da *TableTypeEmployee) MingruSQLName() string {
+func (mrTable *TableTypeEmployee) MingruSQLName() string {
 	return "employees"
 }
 
 // ------------ Actions ------------
 
 // Insert ...
-func (da *TableTypeEmployee) Insert(queryable mingru.Queryable, firstName string) (uint64, error) {
+func (mrTable *TableTypeEmployee) Insert(queryable mingru.Queryable, firstName string) (uint64, error) {
 	result, err := queryable.Exec("INSERT INTO `employees` (`first_name`) VALUES (?)", firstName)
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }
 
 // Insert2 ...
-func (da *TableTypeEmployee) Insert2(db *sql.DB, firstName string) (uint64, error) {
+func (mrTable *TableTypeEmployee) Insert2(db *sql.DB, firstName string) (uint64, error) {
 	var id2Exported uint64
 	txErr := mingru.Transact(db, func(tx *sql.Tx) error {
 		var err error
@@ -46,7 +46,7 @@ func (da *TableTypeEmployee) Insert2(db *sql.DB, firstName string) (uint64, erro
 }
 
 // Insert3 ...
-func (da *TableTypeEmployee) Insert3(db *sql.DB, firstName string) (uint64, error) {
+func (mrTable *TableTypeEmployee) Insert3(db *sql.DB, firstName string) (uint64, error) {
 	var id3Exported uint64
 	txErr := mingru.Transact(db, func(tx *sql.Tx) error {
 		var err error

@@ -288,7 +288,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n`;
   // Gets the member function signature head.
   private getFuncSigHead() {
     const { className } = this.taIO;
-    return `func (da *${className}) `;
+    return `func (${defs.tableObjSelf} *${className}) `;
   }
 
   private select(io: SelectIO, variadicQueryParams: boolean): CodeMap {

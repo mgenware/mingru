@@ -14,14 +14,14 @@ type TableTypePost struct {
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
-func (da *TableTypePost) MingruSQLName() string {
+func (mrTable *TableTypePost) MingruSQLName() string {
 	return "db_post"
 }
 
 // ------------ Actions ------------
 
 // DeleteTimes ...
-func (da *TableTypePost) DeleteTimes(queryable mingru.Queryable, nDatetime *time.Time, nDate *time.Time) error {
+func (mrTable *TableTypePost) DeleteTimes(queryable mingru.Queryable, nDatetime *time.Time, nDate *time.Time) error {
 	result, err := queryable.Exec("DELETE FROM `db_post` WHERE `n_datetime` = ? OR `n_date` = ?", nDatetime, nDate)
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }

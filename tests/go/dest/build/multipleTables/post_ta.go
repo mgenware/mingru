@@ -10,14 +10,14 @@ type TableTypePost struct {
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
-func (da *TableTypePost) MingruSQLName() string {
+func (mrTable *TableTypePost) MingruSQLName() string {
 	return "db_post"
 }
 
 // ------------ Actions ------------
 
 // DeleteByID ...
-func (da *TableTypePost) DeleteByID(queryable mingru.Queryable, id uint64) error {
+func (mrTable *TableTypePost) DeleteByID(queryable mingru.Queryable, id uint64) error {
 	result, err := queryable.Exec("DELETE FROM `db_post` WHERE `id` = ?", id)
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }
@@ -30,7 +30,7 @@ type PostTableSelectPostInfoResult struct {
 }
 
 // SelectPostInfo ...
-func (da *TableTypePost) SelectPostInfo(queryable mingru.Queryable) (PostTableSelectPostInfoResult, error) {
+func (mrTable *TableTypePost) SelectPostInfo(queryable mingru.Queryable) (PostTableSelectPostInfoResult, error) {
 	var result PostTableSelectPostInfoResult
 	err := queryable.QueryRow("SELECT `db_post`.`id`, `db_post`.`content`, `join_1`.`url_name` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`").Scan(&result.ID, &result.Content, &result.UserUrlName)
 	if err != nil {
@@ -40,7 +40,7 @@ func (da *TableTypePost) SelectPostInfo(queryable mingru.Queryable) (PostTableSe
 }
 
 // UpdateContent ...
-func (da *TableTypePost) UpdateContent(queryable mingru.Queryable, content string) (int, error) {
+func (mrTable *TableTypePost) UpdateContent(queryable mingru.Queryable, content string) (int, error) {
 	result, err := queryable.Exec("UPDATE `db_post` SET `content` = `content` = ?", content)
 	return mingru.GetRowsAffectedIntWithError(result, err)
 }

@@ -10,7 +10,7 @@ type TableTypeActivity struct {
 var Activity = &TableTypeActivity{}
 
 // MingruSQLName returns the name of this table.
-func (da *TableTypeActivity) MingruSQLName() string {
+func (mrTable *TableTypeActivity) MingruSQLName() string {
 	return "activity"
 }
 
@@ -24,7 +24,7 @@ type ActivityTableTResult struct {
 }
 
 // T ...
-func (da *TableTypeActivity) T(queryable mingru.Queryable, id uint64, limit int, offset int, max int) ([]ActivityTableTResult, int, error) {
+func (mrTable *TableTypeActivity) T(queryable mingru.Queryable, id uint64, limit int, offset int, max int) ([]ActivityTableTResult, int, error) {
 	rows, err := queryable.Query("(SELECT `id`, `sig` AS `generic_sig`, `url_name` AS `generic_name` FROM `user` WHERE `id` = ? LIMIT ? OFFSET ?) UNION ALL (SELECT `user_id`, `value` FROM `like`) UNION (SELECT `title` FROM `db_post` WHERE `id` = ?) ORDER BY `id` LIMIT ? OFFSET ?", id, limit, offset, id, limit, offset)
 	if err != nil {
 		return nil, 0, err
@@ -58,7 +58,7 @@ type ActivityTableT1Result struct {
 }
 
 // T1 ...
-func (da *TableTypeActivity) T1(queryable mingru.Queryable, id uint64, limit int, offset int, max int) ([]ActivityTableT1Result, int, error) {
+func (mrTable *TableTypeActivity) T1(queryable mingru.Queryable, id uint64, limit int, offset int, max int) ([]ActivityTableT1Result, int, error) {
 	rows, err := queryable.Query("SELECT `id`, `sig` AS `generic_sig`, `url_name` AS `generic_name` FROM `user` WHERE `id` = ? ORDER BY `id` LIMIT ? OFFSET ?", id, limit, offset)
 	if err != nil {
 		return nil, 0, err
@@ -90,7 +90,7 @@ type ActivityTableT2Result struct {
 }
 
 // T2 ...
-func (da *TableTypeActivity) T2(queryable mingru.Queryable, id uint64) ([]ActivityTableT2Result, error) {
+func (mrTable *TableTypeActivity) T2(queryable mingru.Queryable, id uint64) ([]ActivityTableT2Result, error) {
 	rows, err := queryable.Query("SELECT `title` FROM `db_post` WHERE `id` = ? ORDER BY `id`", id)
 	if err != nil {
 		return nil, err

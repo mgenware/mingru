@@ -10,14 +10,14 @@ type TableTypeUser struct {
 var User = &TableTypeUser{}
 
 // MingruSQLName returns the name of this table.
-func (da *TableTypeUser) MingruSQLName() string {
+func (mrTable *TableTypeUser) MingruSQLName() string {
 	return "user"
 }
 
 // ------------ Actions ------------
 
 // DeleteByID ...
-func (da *TableTypeUser) DeleteByID(queryable mingru.Queryable, id uint64) error {
+func (mrTable *TableTypeUser) DeleteByID(queryable mingru.Queryable, id uint64) error {
 	result, err := queryable.Exec("DELETE FROM `user` WHERE `id` = ?", id)
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }
@@ -29,7 +29,7 @@ type UserTableSelectProfileResult struct {
 }
 
 // SelectProfile ...
-func (da *TableTypeUser) SelectProfile(queryable mingru.Queryable) (UserTableSelectProfileResult, error) {
+func (mrTable *TableTypeUser) SelectProfile(queryable mingru.Queryable) (UserTableSelectProfileResult, error) {
 	var result UserTableSelectProfileResult
 	err := queryable.QueryRow("SELECT `display_name`, `sig` FROM `user`").Scan(&result.DisplayName, &result.Sig)
 	if err != nil {
@@ -39,7 +39,7 @@ func (da *TableTypeUser) SelectProfile(queryable mingru.Queryable) (UserTableSel
 }
 
 // UpdateProfile ...
-func (da *TableTypeUser) UpdateProfile(queryable mingru.Queryable, sig *string) (int, error) {
+func (mrTable *TableTypeUser) UpdateProfile(queryable mingru.Queryable, sig *string) (int, error) {
 	result, err := queryable.Exec("UPDATE `user` SET `sig` = ?", sig)
 	return mingru.GetRowsAffectedIntWithError(result, err)
 }

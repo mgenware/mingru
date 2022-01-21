@@ -10,14 +10,14 @@ type TableTypePost struct {
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
-func (da *TableTypePost) MingruSQLName() string {
+func (mrTable *TableTypePost) MingruSQLName() string {
 	return "post"
 }
 
 // ------------ Actions ------------
 
 // InsertT ...
-func (da *TableTypePost) InsertT(queryable mingru.Queryable, userID *uint64) (uint64, error) {
+func (mrTable *TableTypePost) InsertT(queryable mingru.Queryable, userID *uint64) (uint64, error) {
 	result, err := queryable.Exec("INSERT INTO `post` (`user_id`) VALUES (?)", userID)
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }

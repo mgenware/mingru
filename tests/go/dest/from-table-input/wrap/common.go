@@ -10,14 +10,14 @@ type TableTypeUserT struct {
 var UserT = &TableTypeUserT{}
 
 // MingruSQLName returns the name of this table.
-func (da *TableTypeUserT) MingruSQLName() string {
+func (mrTable *TableTypeUserT) MingruSQLName() string {
 	return "user_t"
 }
 
 // ------------ Actions ------------
 
 // Insert ...
-func (da *TableTypeUserT) Insert(queryable mingru.Queryable, table string, tID uint64) (uint64, error) {
+func (mrTable *TableTypeUserT) Insert(queryable mingru.Queryable, table string, tID uint64) (uint64, error) {
 	result, err := queryable.Exec("INSERT INTO "+table+" (`t_id`) VALUES (?)", table, tID)
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }

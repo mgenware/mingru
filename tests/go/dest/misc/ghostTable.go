@@ -10,14 +10,14 @@ type TableTypeGhost struct {
 var Ghost = &TableTypeGhost{}
 
 // MingruSQLName returns the name of this table.
-func (da *TableTypeGhost) MingruSQLName() string {
+func (mrTable *TableTypeGhost) MingruSQLName() string {
 	return "ghost"
 }
 
 // ------------ Actions ------------
 
 // InsertT ...
-func (da *TableTypeGhost) InsertT(queryable mingru.Queryable, fk uint64) error {
+func (mrTable *TableTypeGhost) InsertT(queryable mingru.Queryable, fk uint64) error {
 	_, err := queryable.Exec("INSERT INTO `cols` (`fk`, `text`, `int`, `nullable`, `def_int`, `def_var_char`, `def_time`) VALUES (?, '', 0, NULL, -3, '一二', CURTIME())", fk)
 	return err
 }
@@ -29,7 +29,7 @@ type GhostTableSelectTResult struct {
 }
 
 // SelectT ...
-func (da *TableTypeGhost) SelectT(queryable mingru.Queryable) ([]GhostTableSelectTResult, error) {
+func (mrTable *TableTypeGhost) SelectT(queryable mingru.Queryable) ([]GhostTableSelectTResult, error) {
 	rows, err := queryable.Query("SELECT `id`, `title` FROM `db_post` ORDER BY `id`")
 	if err != nil {
 		return nil, err

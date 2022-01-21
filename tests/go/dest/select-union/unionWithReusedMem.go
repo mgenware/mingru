@@ -10,7 +10,7 @@ type TableTypeActivity struct {
 var Activity = &TableTypeActivity{}
 
 // MingruSQLName returns the name of this table.
-func (da *TableTypeActivity) MingruSQLName() string {
+func (mrTable *TableTypeActivity) MingruSQLName() string {
 	return "activity"
 }
 
@@ -24,7 +24,7 @@ type ActivityTablePrivateTResult struct {
 }
 
 // PrivateT ...
-func (da *TableTypeActivity) PrivateT(queryable mingru.Queryable, id uint64) (ActivityTablePrivateTResult, error) {
+func (mrTable *TableTypeActivity) PrivateT(queryable mingru.Queryable, id uint64) (ActivityTablePrivateTResult, error) {
 	var result ActivityTablePrivateTResult
 	err := queryable.QueryRow("SELECT `id`, `sig` AS `generic_sig`, `url_name` AS `generic_name` FROM `user` WHERE `id` = ?", id).Scan(&result.ID, &result.GenericSig, &result.GenericName)
 	if err != nil {
@@ -41,7 +41,7 @@ type ActivityTableTResult struct {
 }
 
 // T ...
-func (da *TableTypeActivity) T(queryable mingru.Queryable, id uint64, postID uint64) ([]ActivityTableTResult, error) {
+func (mrTable *TableTypeActivity) T(queryable mingru.Queryable, id uint64, postID uint64) ([]ActivityTableTResult, error) {
 	rows, err := queryable.Query("(SELECT `id`, `sig` AS `generic_sig`, `url_name` AS `generic_name` FROM `user` WHERE `id` = ?) UNION (SELECT `id`, `title` FROM `db_post` WHERE `id` = ?) UNION ALL (SELECT `user_id`, `value` FROM `like`) ORDER BY `generic_sig`", id, postID)
 	if err != nil {
 		return nil, err

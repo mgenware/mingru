@@ -10,7 +10,7 @@ type TableTypePost struct {
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
-func (da *TableTypePost) MingruSQLName() string {
+func (mrTable *TableTypePost) MingruSQLName() string {
 	return "db_post"
 }
 
@@ -22,7 +22,7 @@ type PostTableTResult struct {
 }
 
 // T ...
-func (da *TableTypePost) T(queryable mingru.Queryable, idInput uint64) (PostTableTResult, error) {
+func (mrTable *TableTypePost) T(queryable mingru.Queryable, idInput uint64) (PostTableTResult, error) {
 	var result PostTableTResult
 	err := queryable.QueryRow("SELECT YEAR(YEAR(`id`)) AS `name1` FROM `db_post` WHERE YEAR(YEAR(`id`)) == ?", idInput).Scan(&result.Name1)
 	if err != nil {

@@ -10,7 +10,7 @@ type TableTypePost struct {
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
-func (da *TableTypePost) MingruSQLName() string {
+func (mrTable *TableTypePost) MingruSQLName() string {
 	return "db_post"
 }
 
@@ -23,7 +23,7 @@ type PostTableT1Result struct {
 }
 
 // T1 ...
-func (da *TableTypePost) T1(queryable mingru.Queryable) (PostTableT1Result, error) {
+func (mrTable *TableTypePost) T1(queryable mingru.Queryable) (PostTableT1Result, error) {
 	var result PostTableT1Result
 	err := queryable.QueryRow("SELECT `id`, `title` FROM `db_post` FOR UPDATE").Scan(&result.ID, &result.Title)
 	if err != nil {
@@ -39,7 +39,7 @@ type PostTableT2Result struct {
 }
 
 // T2 ...
-func (da *TableTypePost) T2(queryable mingru.Queryable) (PostTableT2Result, error) {
+func (mrTable *TableTypePost) T2(queryable mingru.Queryable) (PostTableT2Result, error) {
 	var result PostTableT2Result
 	err := queryable.QueryRow("SELECT `id`, `title` FROM `db_post` LOCK IN SHARE MODE").Scan(&result.ID, &result.Title)
 	if err != nil {

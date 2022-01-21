@@ -10,7 +10,7 @@ type TableTypePost struct {
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
-func (da *TableTypePost) MingruSQLName() string {
+func (mrTable *TableTypePost) MingruSQLName() string {
 	return "db_post"
 }
 
@@ -24,7 +24,7 @@ type PostTableSelectTResult struct {
 }
 
 // SelectT ...
-func (da *TableTypePost) SelectT(queryable mingru.Queryable, id uint64) ([]PostTableSelectTResult, error) {
+func (mrTable *TableTypePost) SelectT(queryable mingru.Queryable, id uint64) ([]PostTableSelectTResult, error) {
 	rows, err := queryable.Query("SELECT `id`, RAND() AS `n`, `title` FROM `db_post` WHERE `id` = ? ORDER BY `title`, `n`, `title` DESC, `cmt_c`", id)
 	if err != nil {
 		return nil, err
