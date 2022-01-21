@@ -10,13 +10,10 @@ export const uint64TypeInfo = new AtomicTypeInfo('uint64', 0, null);
 export const boolTypeInfo = new AtomicTypeInfo('bool', false, null);
 export const stringTypeInfo = new AtomicTypeInfo('string', '', null);
 
+const dbxNamespace = 'mingru|github.com/mgenware/mingru-go-lib';
 export const sqlDBType = typeInfoToPointer(new AtomicTypeInfo('DB', null, 'sql|database/sql'));
 export const sqlTxType = typeInfoToPointer(new AtomicTypeInfo('Tx', null, 'sql|database/sql'));
-export const dbxQueryableType = new AtomicTypeInfo(
-  'Queryable',
-  null,
-  'mingru|github.com/mgenware/mingru-go-lib',
-);
+export const dbxQueryableType = new AtomicTypeInfo('Queryable', null, dbxNamespace);
 export const dbxQueryableVar = new VarInfo(queryableParam, dbxQueryableType);
 export const sqlDBVar = new VarInfo(dbParam, sqlDBType);
 export const insertedIDVar = new VarInfo(mm.ReturnValues.insertedID, uint64TypeInfo);
@@ -38,10 +35,19 @@ export const fileHeader = `/${'*'.repeat(90)}
 
 `;
 
+export const dbxTableType = new AtomicTypeInfo('Table', null, dbxNamespace);
+
 export const defaultPackageName = 'da';
 export const fmtImport = 'fmt';
 export const queryParamsVarName = 'queryParams';
-export const tableInputName = 'table';
-export const tableInputVar = new VarInfo(tableInputName, stringTypeInfo);
-export const tableObjSelf = 'mrTable';
+
+// The function name of `mingru.Table` used to get the table name.
 export const tableMemSQLName = 'MingruSQLName';
+// The param name of table when "FROM as input" is enabled.
+const fromTableVarName = 'mrFromTable';
+// The param type of "FROM as input" table param.
+export const fromTableVarInfo = new VarInfo(fromTableVarName, dbxTableType);
+// The generated Go code used to get the table name from "FROM as input" table param.
+export const getFromTableCode = `${fromTableVarName}.${tableMemSQLName}()`;
+// The current instance name of a generated table member function.
+export const tableObjSelf = 'mrTable';

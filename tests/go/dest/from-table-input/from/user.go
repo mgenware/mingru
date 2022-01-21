@@ -22,14 +22,14 @@ func (mrTable *TableTypeUser) MingruSQLName() string {
 // ------------ Actions ------------
 
 // DeleteT ...
-func (mrTable *TableTypeUser) DeleteT(queryable mingru.Queryable, table string, id uint64) error {
-	result, err := queryable.Exec("DELETE FROM "+table+" WHERE `id` = ?", id)
+func (mrTable *TableTypeUser) DeleteT(queryable mingru.Queryable, mrFromTable mingru.Table, id uint64) error {
+	result, err := queryable.Exec("DELETE FROM "+mrFromTable.MingruSQLName()+" WHERE `id` = ?", id)
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }
 
 // InsertT ...
-func (mrTable *TableTypeUser) InsertT(queryable mingru.Queryable, table string, urlName string, displayName string, sig *string, age int, followerCount *string) (uint64, error) {
-	result, err := queryable.Exec("INSERT INTO "+table+" (`url_name`, `display_name`, `sig`, `age`, `follower_c`) VALUES (?, ?, ?, ?, ?)", table, urlName, displayName, sig, age, followerCount)
+func (mrTable *TableTypeUser) InsertT(queryable mingru.Queryable, mrFromTable mingru.Table, urlName string, displayName string, sig *string, age int, followerCount *string) (uint64, error) {
+	result, err := queryable.Exec("INSERT INTO "+mrFromTable.MingruSQLName()+" (`url_name`, `display_name`, `sig`, `age`, `follower_c`) VALUES (?, ?, ?, ?, ?)", table, urlName, displayName, sig, age, followerCount)
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }
 
@@ -40,9 +40,9 @@ type UserTableSelectTResult struct {
 }
 
 // SelectT ...
-func (mrTable *TableTypeUser) SelectT(queryable mingru.Queryable, table string) (UserTableSelectTResult, error) {
+func (mrTable *TableTypeUser) SelectT(queryable mingru.Queryable, mrFromTable mingru.Table) (UserTableSelectTResult, error) {
 	var result UserTableSelectTResult
-	err := queryable.QueryRow("SELECT `id`, `age` FROM "+table).Scan(&result.ID, &result.Age)
+	err := queryable.QueryRow("SELECT `id`, `age` FROM "+mrFromTable.MingruSQLName()).Scan(&result.ID, &result.Age)
 	if err != nil {
 		return result, err
 	}
@@ -55,10 +55,10 @@ func (mrTable *TableTypeUser) transactTChild2(queryable mingru.Queryable, title 
 }
 
 // TransactT ...
-func (mrTable *TableTypeUser) TransactT(db *sql.DB, table string, urlName string, displayName string, sig *string, age int, followerCount *string, title string, content string, userID uint64, reviewerID uint64, cmtCount uint, datetime time.Time, date time.Time, time time.Time, nDatetime *time.Time, nDate *time.Time, nTime *time.Time, mUserID uint64) error {
+func (mrTable *TableTypeUser) TransactT(db *sql.DB, mrFromTable mingru.Table, urlName string, displayName string, sig *string, age int, followerCount *string, title string, content string, userID uint64, reviewerID uint64, cmtCount uint, datetime time.Time, date time.Time, time time.Time, nDatetime *time.Time, nDate *time.Time, nTime *time.Time, mUserID uint64) error {
 	txErr := mingru.Transact(db, func(tx *sql.Tx) error {
 		var err error
-		_, err = da.InsertT(tx, table, urlName, displayName, sig, age, followerCount)
+		_, err = da.InsertT(tx, mrFromTable, urlName, displayName, sig, age, followerCount)
 		if err != nil {
 			return err
 		}
@@ -72,7 +72,7 @@ func (mrTable *TableTypeUser) TransactT(db *sql.DB, table string, urlName string
 }
 
 // UpdateT ...
-func (mrTable *TableTypeUser) UpdateT(queryable mingru.Queryable, table string, id uint64, urlName string, displayName string, sig *string, age int, followerCount *string) error {
-	result, err := queryable.Exec("UPDATE "+table+" SET `url_name` = ?, `display_name` = ?, `sig` = ?, `age` = ?, `follower_c` = ? WHERE `id` = ?", urlName, displayName, sig, age, followerCount, id)
+func (mrTable *TableTypeUser) UpdateT(queryable mingru.Queryable, mrFromTable mingru.Table, id uint64, urlName string, displayName string, sig *string, age int, followerCount *string) error {
+	result, err := queryable.Exec("UPDATE "+mrFromTable.MingruSQLName()+" SET `url_name` = ?, `display_name` = ?, `sig` = ?, `age` = ?, `follower_c` = ? WHERE `id` = ?", urlName, displayName, sig, age, followerCount, id)
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }

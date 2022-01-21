@@ -34,10 +34,10 @@ export async function testBuildAsync(
   opts?: mr.BuildOptions,
   ctx?: mr.CoreBuilderContext,
 ) {
-  let content = '';
+  let expected = '';
   if (path) {
     path = np.resolve(np.join(destDataDir, `${path}.go`));
-    content = await mfs.readFileAsync(path, 'utf8');
+    expected = await mfs.readFileAsync(path, 'utf8');
   }
   mr.logger.enabled = false;
   const builder = new mr.CoreBuilder(
@@ -47,7 +47,7 @@ export async function testBuildAsync(
   );
   const actual = builder.build();
   if (path) {
-    eq(actual, content);
+    eq(actual, expected);
   }
   return builder;
 }

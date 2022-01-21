@@ -17,7 +17,7 @@ func (mrTable *TableTypeUserT) MingruSQLName() string {
 // ------------ Actions ------------
 
 // Insert ...
-func (mrTable *TableTypeUserT) Insert(queryable mingru.Queryable, table string, tID uint64) (uint64, error) {
-	result, err := queryable.Exec("INSERT INTO "+table+" (`t_id`) VALUES (?)", table, tID)
+func (mrTable *TableTypeUserT) Insert(queryable mingru.Queryable, mrFromTable mingru.Table, tID uint64) (uint64, error) {
+	result, err := queryable.Exec("INSERT INTO "+mrFromTable.MingruSQLName()+" (`t_id`) VALUES (?)", tID)
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }

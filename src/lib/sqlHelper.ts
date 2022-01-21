@@ -138,7 +138,7 @@ export function handleNonSelectSQLFrom(
 ): StringSegment[] {
   const e = processor.opt.dialect.encodeName;
   return processor.isFromTableInput()
-    ? [{ code: defs.tableInputName }]
+    ? [{ code: defs.getFromTableCode }]
     : [`${e(table.__getDBName())}`];
 }
 

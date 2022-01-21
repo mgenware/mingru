@@ -62,7 +62,7 @@ class DeleteIOProcessor extends BaseIOProcessor {
     const funcArgs = new VarList(`Func args of action "${action}"`, true);
     funcArgs.add(defs.dbxQueryableVar);
     if (this.isFromTableInput()) {
-      funcArgs.add(defs.tableInputVar);
+      funcArgs.add(defs.fromTableVarInfo);
     }
     const execArgs = new VarList(`Exec args of action "${action}"`, true);
     if (whereIO) {
