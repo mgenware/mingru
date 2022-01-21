@@ -4,7 +4,6 @@ import { Dialect } from '../dialect.js';
 import { ActionIO } from './actionIO.js';
 import VarList from '../lib/varList.js';
 import { VarInfo } from '../lib/varInfo.js';
-import * as utils from '../lib/stringUtils.js';
 import { registerHandler, actionToIO } from './actionToIO.js';
 import * as defs from '../def/defs.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
@@ -120,7 +119,7 @@ class WrapIOProcessor extends BaseIOProcessor {
     if (!innerActionGroupTable) {
       throw new Error(`Unexpected uninitialized WRAP action "${innerActionData.name}"`);
     }
-    const funcPath = utils.actionCallPath(
+    const funcPath = defs.actionCallPath(
       innerActionGroupTable === groupTable ? null : innerActionGroupTable.__getData().name,
       innerActionData.name || actionName,
       false,

@@ -318,8 +318,8 @@ export class SelectIOProcessor extends BaseIOProcessor {
       // NOTE: not the table defined by FROM, it's the root table defined in table actions.
       // Those fields are used to generate result type definition.
       // This process call be skipped if we don't need a result type.
-      this.tablePascalName = stringUtils.tablePascalName(this.mustGetGroupTable().__getData().name);
-      this.actionPascalName = stringUtils.actionPascalName(actionName);
+      this.tablePascalName = defs.tablePascalName(this.mustGetGroupTable().__getData().name);
+      this.actionPascalName = defs.actionPascalName(actionName);
       this.actionUniqueTypeName = `${this.tablePascalName}Table${this.actionPascalName}`;
     }
 

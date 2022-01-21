@@ -36,32 +36,6 @@ export function toPascalCase(s: string): string {
   return res;
 }
 
-export function tablePascalName(tableName: string): string {
-  return toPascalCase(tableName);
-}
-
-export function actionPascalName(actionName: string): string {
-  return toPascalCase(actionName);
-}
-
-export function tableTypeName(tableName: string): string {
-  return `TableType${tablePascalName(tableName)}`;
-}
-
-export function actionCallPath(
-  className: string | null,
-  actionName: string,
-  isPrivate: boolean,
-): string {
-  const funcName = actionPascalName(actionName);
-  const resolvedTableName = className ? tablePascalName(className) : 'da';
-  return resolvedTableName + '.' + (isPrivate ? lowercaseFirstChar(funcName) : funcName);
-}
-
-export function paginateCoreFuncName(name: string): string {
-  return `${name}Core`;
-}
-
 export function validateSetters(setters: ReadonlyMap<mm.Column, unknown>, table: mm.Table) {
   for (const setter of setters.keys()) {
     setter.__checkSourceTable(table);

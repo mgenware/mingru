@@ -120,7 +120,7 @@ export default class CoreBuilder {
     if (!actionName) {
       throw new Error(`Unexpected empty action name, action "${action}"`);
     }
-    const ioFuncName = stringUtils.actionPascalName(actionName);
+    const ioFuncName = defs.actionPascalName(actionName);
 
     // Prepare variables.
     const funcName = pri ? stringUtils.lowercaseFirstChar(ioFuncName) : ioFuncName;

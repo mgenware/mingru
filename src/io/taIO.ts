@@ -1,6 +1,6 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
-import * as utils from '../lib/stringUtils.js';
+import * as defs from '../def/defs.js';
 import { ActionIO } from './actionIO.js';
 import { actionToIO } from './actionToIO.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
@@ -41,8 +41,8 @@ export class TAIO {
         );
       });
 
-    this.className = utils.tableTypeName(taTableName);
-    this.instanceName = utils.tablePascalName(taTableName);
+    this.className = defs.tableTypeName(taTableName);
+    this.instanceName = defs.tablePascalName(taTableName);
     this.tableDBName = taTable.__getDBName();
   }
 }
