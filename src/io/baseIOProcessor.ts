@@ -29,12 +29,8 @@ export default class BaseIOProcessor {
     return name;
   }
 
-  isFromTableInput(): boolean {
-    const { action, opt } = this;
-    return !!(
-      opt.configurableTable &&
-      action.__getData().groupTable &&
-      !action.__getData().sqlTable
-    );
+  configurableTable(): boolean {
+    const { opt } = this;
+    return !!opt.configurableTable;
   }
 }

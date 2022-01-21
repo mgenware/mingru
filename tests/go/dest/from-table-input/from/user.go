@@ -49,8 +49,8 @@ func (mrTable *TableTypeUser) SelectT(queryable mingru.Queryable, mrFromTable mi
 	return result, nil
 }
 
-func (mrTable *TableTypeUser) transactTChild2(queryable mingru.Queryable, title string, content string, userID uint64, reviewerID uint64, cmtCount uint, datetime time.Time, date time.Time, time time.Time, nDatetime *time.Time, nDate *time.Time, nTime *time.Time, mUserID uint64) (uint64, error) {
-	result, err := queryable.Exec("INSERT INTO `db_post` (`title`, `content`, `user_id`, `reviewer_id`, `cmt_c`, `datetime`, `date`, `time`, `n_datetime`, `n_date`, `n_time`, `my_user_id`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", title, content, userID, reviewerID, cmtCount, datetime, date, time, nDatetime, nDate, nTime, mUserID)
+func (mrTable *TableTypeUser) transactTChild2(queryable mingru.Queryable, mrFromTable mingru.Table, title string, content string, userID uint64, reviewerID uint64, cmtCount uint, datetime time.Time, date time.Time, time time.Time, nDatetime *time.Time, nDate *time.Time, nTime *time.Time, mUserID uint64) (uint64, error) {
+	result, err := queryable.Exec("INSERT INTO "+mrFromTable.MingruSQLName()+" (`title`, `content`, `user_id`, `reviewer_id`, `cmt_c`, `datetime`, `date`, `time`, `n_datetime`, `n_date`, `n_time`, `my_user_id`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", title, content, userID, reviewerID, cmtCount, datetime, date, time, nDatetime, nDate, nTime, mUserID)
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }
 
@@ -62,7 +62,7 @@ func (mrTable *TableTypeUser) TransactT(db *sql.DB, mrFromTable mingru.Table, ur
 		if err != nil {
 			return err
 		}
-		_, err = da.transactTChild2(tx, title, content, userID, reviewerID, cmtCount, datetime, date, time, nDatetime, nDate, nTime, mUserID)
+		_, err = da.transactTChild2(tx, mrFromTable, title, content, userID, reviewerID, cmtCount, datetime, date, time, nDatetime, nDate, nTime, mUserID)
 		if err != nil {
 			return err
 		}

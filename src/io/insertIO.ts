@@ -77,7 +77,7 @@ export class InsertIOProcessor extends BaseIOProcessor {
 
     // funcArgs
     const precedingElements = [defs.dbxQueryableVar];
-    if (this.isFromTableInput()) {
+    if (this.configurableTable()) {
       precedingElements.push(defs.fromTableVarInfo);
     }
     const funcArgs = settersToVarList(
@@ -88,8 +88,8 @@ export class InsertIOProcessor extends BaseIOProcessor {
 
     const execArgs = new VarList(`Exec args of action ${action}`);
     // Skip the first param, which is queryable.
-    // Skip the second param if `isFromTableInput` is true.
-    execArgs.merge(funcArgs.list.slice(this.isFromTableInput() ? 2 : 1));
+    // Skip the second param if `configurableTable` is true.
+    execArgs.merge(funcArgs.list.slice(this.configurableTable() ? 2 : 1));
 
     // Return values.
     const returnValue = new VarList(`Return values of action ${action}`);
