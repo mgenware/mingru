@@ -1,5 +1,6 @@
 import * as mm from 'mingru-models';
 import { VarInfo, AtomicTypeInfo, typeInfoToPointer } from './lib/varInfo.js';
+import { fromTableParamName } from './pubDefs.js';
 
 export const queryableParam = 'queryable';
 export const dbParam = 'db';
@@ -43,11 +44,9 @@ export const queryParamsVarName = 'queryParams';
 
 // The function name of `mingru.Table` used to get the table name.
 export const tableMemSQLName = 'MingruSQLName';
-// The param name of table when "FROM as input" is enabled.
-const fromTableVarName = 'mrFromTable';
 // The param type of "FROM as input" table param.
-export const fromTableVarInfo = new VarInfo(fromTableVarName, dbxTableType);
+export const fromTableVarInfo = new VarInfo(fromTableParamName, dbxTableType);
 // The generated Go code used to get the table name from "FROM as input" table param.
-export const getFromTableCode = `${fromTableVarName}.${tableMemSQLName}()`;
+export const getFromTableCode = `${fromTableParamName}.${tableMemSQLName}()`;
 // The current instance name of a generated table member function.
 export const tableObjSelf = 'mrTable';
