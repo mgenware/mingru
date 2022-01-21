@@ -1,6 +1,6 @@
 /* eslint-disable class-methods-use-this */
 import * as mm from 'mingru-models';
-import * as defs from '../defs.js';
+import * as defs from '../def/defs.js';
 import { Dialect, SQLTypeMode } from '../dialect.js';
 import { sqlIO } from '../io/sqlIO.js';
 import { extractStringContentFromSegments } from './goCodeUtil.js';

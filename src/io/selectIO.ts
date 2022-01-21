@@ -16,7 +16,7 @@ import {
 } from '../lib/varInfo.js';
 import VarList from '../lib/varList.js';
 import { registerHandler } from './actionToIO.js';
-import * as defs from '../defs.js';
+import * as defs from '../def/defs.js';
 import { VarInfoBuilder } from '../lib/varInfoHelper.js';
 import { forEachWithSlots } from '../lib/arrayUtils.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';

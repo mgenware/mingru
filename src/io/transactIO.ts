@@ -5,7 +5,7 @@ import { ActionIO } from './actionIO.js';
 import VarList from '../lib/varList.js';
 import { actionToIO, registerHandler } from './actionToIO.js';
 import * as utils from '../lib/stringUtils.js';
-import * as defs from '../defs.js';
+import * as defs from '../def/defs.js';
 import { VarInfo } from '../lib/varInfo.js';
 import BaseIOProcessor from './baseIOProcessor.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';

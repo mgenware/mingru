@@ -3,7 +3,7 @@ import { throwIfFalsy } from 'throw-if-arg-empty';
 import * as mfs from 'm-fs';
 import * as np from 'path';
 import del from 'del';
-import * as defs from '../defs.js';
+import * as defs from '../def/defs.js';
 import { Dialect } from '../dialect.js';
 import CoreBuilderWrapper from './coreBuilderWrapper.js';
 import logger from '../logger.js';

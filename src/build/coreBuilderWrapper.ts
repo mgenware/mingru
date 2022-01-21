@@ -8,7 +8,7 @@ import CoreBuilderContext from './coreBuilderContext.js';
 import { TAIO } from '../io/taIO.js';
 import { BuildOptions } from './buildOptions.js';
 import * as go from './goCodeUtil.js';
-import * as defs from '../defs.js';
+import * as defs from '../def/defs.js';
 import { ActionToIOOptions } from '../io/actionToIOOptions.js';
 import * as stringUtil from '../lib/stringUtils.js';
 

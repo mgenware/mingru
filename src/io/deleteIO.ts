@@ -6,7 +6,7 @@ import { SQLIO, sqlIO } from './sqlIO.js';
 import VarList from '../lib/varList.js';
 import { VarInfo } from '../lib/varInfo.js';
 import { registerHandler } from './actionToIO.js';
-import * as defs from '../defs.js';
+import * as defs from '../def/defs.js';
 import BaseIOProcessor from './baseIOProcessor.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
 import { handleNonSelectSQLFrom } from '../lib/sqlHelper.js';

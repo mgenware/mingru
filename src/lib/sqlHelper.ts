@@ -3,7 +3,7 @@ import toTypeString from 'to-type-string';
 import { ActionIO } from '../io/actionIO.js';
 import { SQLIO } from '../io/sqlIO.js';
 import VarList from './varList.js';
-import * as defs from '../defs.js';
+import * as defs from '../def/defs.js';
 import { StringSegment } from '../dialect.js';
 import BaseIOProcessor from '../io/baseIOProcessor.js';
 

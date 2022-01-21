@@ -14,7 +14,7 @@ import {
   typeInfoToPointer,
 } from '../lib/varInfo.js';
 import * as go from './goCodeUtil.js';
-import * as defs from '../defs.js';
+import * as defs from '../def/defs.js';
 import logger from '../logger.js';
 import { TAIO } from '../io/taIO.js';
 import { ActionIO } from '../io/actionIO.js';

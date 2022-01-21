@@ -5,7 +5,7 @@ import { settersToVarList, SetterIO } from './setterIO.js';
 import { ActionIO } from './actionIO.js';
 import VarList from '../lib/varList.js';
 import { registerHandler } from './actionToIO.js';
-import * as defs from '../defs.js';
+import * as defs from '../def/defs.js';
 import * as utils from '../lib/stringUtils.js';
 import { forEachWithSlots } from '../lib/arrayUtils.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';

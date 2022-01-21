@@ -6,7 +6,7 @@ import VarList from '../lib/varList.js';
 import { VarInfo } from '../lib/varInfo.js';
 import * as utils from '../lib/stringUtils.js';
 import { registerHandler, actionToIO } from './actionToIO.js';
-import * as defs from '../defs.js';
+import * as defs from '../def/defs.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
 import BaseIOProcessor from './baseIOProcessor.js';
 
