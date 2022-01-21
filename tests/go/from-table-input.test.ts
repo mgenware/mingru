@@ -1,4 +1,5 @@
 import * as mm from 'mingru-models';
+import * as mr from '../../dist/main.js';
 import post from '../models/post.js';
 import user from '../models/user.js';
 import { testBuildAsync } from './common.js';
@@ -11,7 +12,7 @@ it('FROM table as input', async () => {
     deleteT = mm.deleteOne().by(user.id);
     transactT = mm.transact(this.insertT, mm.insertOne().from(post).setInputs());
   }
-  const ta = mm.tableActions(user, UserTA, { unsafeTableInput: true });
+  const ta = mm.tableActions(user, UserTA, { configurableTable: true });
   await testBuildAsync(ta, 'from-table-input/from/user');
 });
 
@@ -30,11 +31,11 @@ it('WRAP action', async () => {
   class CommonTA extends mm.TableActions {
     insert = mm.insertOne().setInputs();
   }
-  const commonTA = mm.tableActions(userT, CommonTA, { unsafeTableInput: true });
+  const commonTA = mm.tableActions(userT, CommonTA, { configurableTable: true });
 
   class ConsumerTA extends mm.TableActions {
-    addUser = commonTA.insert.wrap({ table: userT });
-    addPost = commonTA.insert.wrap({ table: postT });
+    addUser = commonTA.insert.wrap({ [mr.fromTableParamName]: userT });
+    addPost = commonTA.insert.wrap({ [mr.fromTableParamName]: postT });
   }
   const consumerTA = mm.tableActions(post, ConsumerTA);
   await testBuildAsync(commonTA, 'from-table-input/wrap/common');

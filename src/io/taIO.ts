@@ -35,7 +35,7 @@ export class TAIO {
           action,
           {
             ...opt,
-            unsafeTableInput: taOpt.unsafeTableInput,
+            configurableTable: taOpt.configurableTable,
           },
           `action "${taTableName}.${actionName}"`,
         );

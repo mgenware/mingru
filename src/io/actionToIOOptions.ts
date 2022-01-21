@@ -23,5 +23,6 @@ export interface ActionToIOOptions {
   // TRANSACT members.
   actionName?: string;
 
-  unsafeTableInput?: boolean;
+  // Mirror of `mingru-models.tableActions`'s `configurableTable` option.
+  configurableTable?: boolean;
 }

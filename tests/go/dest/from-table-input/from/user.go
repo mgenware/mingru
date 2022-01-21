@@ -29,7 +29,7 @@ func (mrTable *TableTypeUser) DeleteT(queryable mingru.Queryable, mrFromTable mi
 
 // InsertT ...
 func (mrTable *TableTypeUser) InsertT(queryable mingru.Queryable, mrFromTable mingru.Table, urlName string, displayName string, sig *string, age int, followerCount *string) (uint64, error) {
-	result, err := queryable.Exec("INSERT INTO "+mrFromTable.MingruSQLName()+" (`url_name`, `display_name`, `sig`, `age`, `follower_c`) VALUES (?, ?, ?, ?, ?)", table, urlName, displayName, sig, age, followerCount)
+	result, err := queryable.Exec("INSERT INTO "+mrFromTable.MingruSQLName()+" (`url_name`, `display_name`, `sig`, `age`, `follower_c`) VALUES (?, ?, ?, ?, ?)", urlName, displayName, sig, age, followerCount)
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }
 

@@ -171,3 +171,21 @@ it('TS interfaces', async () => {
     testTSTypes: true,
   });
 });
+
+it('Multiple tables + Configurable table', async () => {
+  class UserTA extends mm.TableActions {
+    selectProfile = mm.selectRow(user.display_name, user.sig);
+    updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
+    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
+  }
+  const userTA = mm.tableActions(user, UserTA);
+
+  class PostTA extends mm.TableActions {
+    selectPostInfo = mm.selectRow(post.id, post.content, post.user_id.join(user).url_name);
+    updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToInput());
+    deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
+  }
+  const postTA = mm.tableActions(post, PostTA, { configurableTable: true });
+  const actions = [userTA, postTA];
+  await testBuildToDirAsync(actions, ['post', 'user'], 'multipleTablesConfTable');
+});

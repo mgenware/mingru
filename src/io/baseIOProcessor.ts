@@ -32,7 +32,7 @@ export default class BaseIOProcessor {
   isFromTableInput(): boolean {
     const { action, opt } = this;
     return !!(
-      opt.unsafeTableInput &&
+      opt.configurableTable &&
       action.__getData().groupTable &&
       !action.__getData().sqlTable
     );
