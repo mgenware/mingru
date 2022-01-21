@@ -9,6 +9,11 @@ type TableTypeGhost struct {
 // Ghost ...
 var Ghost = &TableTypeGhost{}
 
+// MingruSQLName returns the name of this table.
+func (da *TableTypeGhost) MingruSQLName() string {
+	return "ghost"
+}
+
 // ------------ Actions ------------
 
 // InsertT ...

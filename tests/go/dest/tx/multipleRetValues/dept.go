@@ -9,6 +9,11 @@ type TableTypeDept struct {
 // Dept ...
 var Dept = &TableTypeDept{}
 
+// MingruSQLName returns the name of this table.
+func (da *TableTypeDept) MingruSQLName() string {
+	return "departments"
+}
+
 // ------------ Actions ------------
 
 // InsertDept ...

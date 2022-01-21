@@ -13,6 +13,11 @@ type TableTypeEmployee struct {
 // Employee ...
 var Employee = &TableTypeEmployee{}
 
+// MingruSQLName returns the name of this table.
+func (da *TableTypeEmployee) MingruSQLName() string {
+	return "employees"
+}
+
 // ------------ Actions ------------
 
 // InsertT ...

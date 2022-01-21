@@ -8,8 +8,15 @@ import { ActionToIOOptions } from './actionToIOOptions.js';
 // IO object for TA(Tabla actions)
 export class TAIO {
   actionIOs: ActionIO[];
+
+  // The name of generated table type.
   className: string;
+
+  // The name of generated table instance.
   instanceName: string;
+
+  // Table name in database.
+  tableDBName: string;
 
   constructor(public ta: mm.TableActions, public opt: ActionToIOOptions) {
     throwIfFalsy(ta, 'ta');
@@ -36,5 +43,6 @@ export class TAIO {
 
     this.className = utils.tableTypeName(taTableName);
     this.instanceName = utils.tablePascalName(taTableName);
+    this.tableDBName = taTable.__getDBName();
   }
 }

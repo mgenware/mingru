@@ -14,6 +14,11 @@ type TableTypeUser struct {
 // User ...
 var User = &TableTypeUser{}
 
+// MingruSQLName returns the name of this table.
+func (da *TableTypeUser) MingruSQLName() string {
+	return "user"
+}
+
 // ------------ Actions ------------
 
 // DeleteT ...
