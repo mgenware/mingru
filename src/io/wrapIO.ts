@@ -3,7 +3,7 @@ import { throwIfFalsy } from 'throw-if-arg-empty';
 import { Dialect } from '../dialect.js';
 import { ActionIO } from './actionIO.js';
 import VarList from '../lib/varList.js';
-import { VarInfo } from '../lib/varInfo.js';
+import { VarInfo, VarValue } from '../lib/varInfo.js';
 import { registerHandler, actionToIO } from './actionToIO.js';
 import * as defs from '../def/defs.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
@@ -101,7 +101,7 @@ class WrapIOProcessor extends BaseIOProcessor {
         const input = args[arg.name];
         // If argument is a constant, update the `innerExecArgs`.
         if (input instanceof mm.ValueRef === false && input !== undefined) {
-          innerExecArgs.list[i] = VarInfo.withValue(arg, input);
+          innerExecArgs.list[i] = VarInfo.withValue(arg, this.constantToVarValue(input));
         }
       });
 
@@ -130,13 +130,27 @@ class WrapIOProcessor extends BaseIOProcessor {
       const input = args[arg.name];
       // Update all arguments in `execArgs` that have been overwritten as constant.
       if (input instanceof mm.ValueRef === false && input !== undefined) {
-        execArgs.add(VarInfo.withValue(arg, input));
+        execArgs.add(VarInfo.withValue(arg, this.constantToVarValue(input)));
       } else {
         execArgs.add(arg);
       }
     }
 
     return new WrapIO(dialect, action, funcArgs, execArgs, innerIO.returnValues, funcPath, innerIO);
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private constantToVarValue(value: unknown): VarValue {
+    if (value instanceof mm.ValueRef) {
+      return value;
+    }
+    if (value instanceof mm.Table) {
+      return value;
+    }
+    if (value === null) {
+      return mm.constants.NULL;
+    }
+    return `${value}`;
   }
 }
 

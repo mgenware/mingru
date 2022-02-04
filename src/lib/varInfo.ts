@@ -111,7 +111,7 @@ export function typeInfoWithoutPointer(typeInfo: TypeInfo): TypeInfo {
   return typeInfo;
 }
 
-export type VarValue = string | mm.ValueRef | mm.Table | number;
+export type VarValue = string | mm.ValueRef | mm.Table;
 
 export class VarInfo {
   static withValue(v: VarInfo, value: VarValue): VarInfo {
@@ -139,9 +139,6 @@ export class VarInfo {
     if (value !== undefined) {
       if (typeof value === 'string') {
         return value;
-      }
-      if (typeof value === 'number') {
-        return value.toString();
       }
       if (value instanceof mm.ValueRef) {
         return value.path;
