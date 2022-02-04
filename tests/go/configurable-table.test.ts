@@ -41,3 +41,31 @@ it('configurableTable with WRAP action', async () => {
   await testBuildAsync(commonTA, 'configurable-table/wrap/common');
   await testBuildAsync(consumerTA, 'configurable-table/wrap/consumer');
 });
+
+// Based on test `configurableTable with WRAP action`.
+// Changes: use `wrapActionWithFromTableParam` instead.
+it('wrapActionWithFromTableParam', async () => {
+  // Two tables with almost same structure.
+  class UserT extends mm.Table {
+    id = mm.pk();
+    t_id = user.id;
+  }
+  const userT = mm.table(UserT);
+  class PostT extends mm.Table {
+    id = mm.pk();
+    t_id = user.id;
+  }
+  const postT = mm.table(PostT);
+  class CommonTA extends mm.TableActions {
+    insert = mm.insertOne().setInputs();
+  }
+  const commonTA = mm.tableActions(userT, CommonTA, { configurableTable: true });
+
+  class ConsumerTA extends mm.TableActions {
+    addUser = commonTA.insert.wrap({ [mr.fromTableParamName]: userT });
+    addPost = mr.wrapActionWithFromTableParam(commonTA.insert, postT);
+  }
+  const consumerTA = mm.tableActions(post, ConsumerTA);
+  await testBuildAsync(commonTA, 'configurable-table/wrap/common');
+  await testBuildAsync(consumerTA, 'configurable-table/wrap/consumer');
+});

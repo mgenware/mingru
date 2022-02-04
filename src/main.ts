@@ -8,7 +8,9 @@ export { default as CoreBuilderContext } from './build/coreBuilderContext.js';
 export { default as CSQLBuilder } from './build/csqlBuilder.js';
 export * from './def/pub.js';
 export * from './build/buildOptions.js';
+export * from './helper.js';
 
+// IO types.
 export * from './io/selectIO.js';
 export * from './io/updateIO.js';
 export * from './io/insertIO.js';
