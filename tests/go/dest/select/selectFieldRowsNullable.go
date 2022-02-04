@@ -21,8 +21,8 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 // ------------ Actions ------------
 
 // SelectT ...
-func (mrTable *TableTypePost) SelectT(queryable mingru.Queryable) ([]*time.Time, error) {
-	rows, err := queryable.Query("SELECT `n_datetime` FROM `db_post` ORDER BY `id`")
+func (mrTable *TableTypePost) SelectT(mrQueryable mingru.Queryable) ([]*time.Time, error) {
+	rows, err := mrQueryable.Query("SELECT `n_datetime` FROM `db_post` ORDER BY `id`")
 	if err != nil {
 		return nil, err
 	}

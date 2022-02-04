@@ -22,9 +22,9 @@ type PostTableSelectTResult struct {
 }
 
 // SelectT ...
-func (mrTable *TableTypePost) SelectT(queryable mingru.Queryable, titleAge int, id uint64) (PostTableSelectTResult, error) {
+func (mrTable *TableTypePost) SelectT(mrQueryable mingru.Queryable, titleAge int, id uint64) (PostTableSelectTResult, error) {
 	var result PostTableSelectTResult
-	err := queryable.QueryRow("SELECT `join_1`.`age` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`url_name` = `db_post`.`title` AND `join_1`.`my_user_id` = `db_post`.`id` AND `join_1`.`age` = ? AND `db_post`.`id` = ?", titleAge, id).Scan(&result.TitleAge)
+	err := mrQueryable.QueryRow("SELECT `join_1`.`age` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`url_name` = `db_post`.`title` AND `join_1`.`my_user_id` = `db_post`.`id` AND `join_1`.`age` = ? AND `db_post`.`id` = ?", titleAge, id).Scan(&result.TitleAge)
 	if err != nil {
 		return result, err
 	}

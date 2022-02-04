@@ -26,9 +26,9 @@ type PostTableSelectTResult struct {
 }
 
 // SelectT ...
-func (mrTable *TableTypePost) SelectT(queryable mingru.Queryable) (PostTableSelectTResult, error) {
+func (mrTable *TableTypePost) SelectT(mrQueryable mingru.Queryable) (PostTableSelectTResult, error) {
 	var result PostTableSelectTResult
-	err := queryable.QueryRow("SELECT `db_post`.`cmt_c`, `db_post`.`my_user_id`, `db_post`.`my_user_id` AS `a`, `join_1`.`follower_c`, `join_1`.`follower_c` AS `fc` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`my_user_id`").Scan(&result.CmtCount, &result.MUserID, &result.A, &result.MUserFollowerCount, &result.Fc)
+	err := mrQueryable.QueryRow("SELECT `db_post`.`cmt_c`, `db_post`.`my_user_id`, `db_post`.`my_user_id` AS `a`, `join_1`.`follower_c`, `join_1`.`follower_c` AS `fc` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`my_user_id`").Scan(&result.CmtCount, &result.MUserID, &result.A, &result.MUserFollowerCount, &result.Fc)
 	if err != nil {
 		return result, err
 	}

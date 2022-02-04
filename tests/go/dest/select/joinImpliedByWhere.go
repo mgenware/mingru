@@ -22,9 +22,9 @@ type PostCmtTableSelectTResult struct {
 }
 
 // SelectT ...
-func (mrTable *TableTypePostCmt) SelectT(queryable mingru.Queryable, targetUserUrlName string) (PostCmtTableSelectTResult, error) {
+func (mrTable *TableTypePostCmt) SelectT(mrQueryable mingru.Queryable, targetUserUrlName string) (PostCmtTableSelectTResult, error) {
 	var result PostCmtTableSelectTResult
-	err := queryable.QueryRow("SELECT `post_cmt`.`id` FROM `post_cmt` AS `post_cmt` INNER JOIN `db_post` AS `join_1` ON `join_1`.`id` = `post_cmt`.`target_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `join_1`.`user_id` WHERE `join_2`.`url_name` = ?", targetUserUrlName).Scan(&result.ID)
+	err := mrQueryable.QueryRow("SELECT `post_cmt`.`id` FROM `post_cmt` AS `post_cmt` INNER JOIN `db_post` AS `join_1` ON `join_1`.`id` = `post_cmt`.`target_id` INNER JOIN `user` AS `join_2` ON `join_2`.`id` = `join_1`.`user_id` WHERE `join_2`.`url_name` = ?", targetUserUrlName).Scan(&result.ID)
 	if err != nil {
 		return result, err
 	}

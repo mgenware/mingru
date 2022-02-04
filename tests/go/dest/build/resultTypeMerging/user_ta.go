@@ -17,9 +17,9 @@ func (mrTable *TableTypeUser) MingruSQLName() string {
 // ------------ Actions ------------
 
 // T1 ...
-func (mrTable *TableTypeUser) T1(queryable mingru.Queryable, id uint64) (Res, error) {
+func (mrTable *TableTypeUser) T1(mrQueryable mingru.Queryable, id uint64) (Res, error) {
 	var result Res
-	err := queryable.QueryRow("SELECT `id`, `age` FROM `user` WHERE `id` = ?", id).Scan(&result.ID, &result.Age)
+	err := mrQueryable.QueryRow("SELECT `id`, `age` FROM `user` WHERE `id` = ?", id).Scan(&result.ID, &result.Age)
 	if err != nil {
 		return result, err
 	}
@@ -27,9 +27,9 @@ func (mrTable *TableTypeUser) T1(queryable mingru.Queryable, id uint64) (Res, er
 }
 
 // T2 ...
-func (mrTable *TableTypeUser) T2(queryable mingru.Queryable, id uint64) (Res, error) {
+func (mrTable *TableTypeUser) T2(mrQueryable mingru.Queryable, id uint64) (Res, error) {
 	var result Res
-	err := queryable.QueryRow("SELECT `display_name`, `age`, `follower_c` FROM `user` WHERE `id` = ?", id).Scan(&result.DisplayName, &result.Age, &result.FollowerCount)
+	err := mrQueryable.QueryRow("SELECT `display_name`, `age`, `follower_c` FROM `user` WHERE `id` = ?", id).Scan(&result.DisplayName, &result.Age, &result.FollowerCount)
 	if err != nil {
 		return result, err
 	}

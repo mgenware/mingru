@@ -489,7 +489,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n`;
       // Call the `Query` method.
       this.injectQueryPreparationCode(builder, io.execArgs.list, variadicQueryParams);
       builder.push(
-        `rows, err := ${defs.queryableParam}.Query(${this.getQueryParamsCode(
+        `rows, err := ${defs.mrQueryableParam}.Query(${this.getQueryParamsCode(
           sqlLiteral,
           io.execArgs.list,
           variadicQueryParams,
@@ -558,7 +558,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n`;
       // Call the `Query` func.
       this.injectQueryPreparationCode(builder, io.execArgs.list, variadicQueryParams);
       builder.push(
-        `err := ${defs.queryableParam}.QueryRow(${this.getQueryParamsCode(
+        `err := ${defs.mrQueryableParam}.QueryRow(${this.getQueryParamsCode(
           sqlLiteral,
           io.execArgs.list,
           variadicQueryParams,
@@ -592,7 +592,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n`;
     const sqlLiteral = io.getSQLCode();
     this.injectQueryPreparationCode(builder, queryArgs, variadicParams);
     builder.push(
-      `${defs.resultVarName}, err := ${defs.queryableParam}.Exec(${this.getQueryParamsCode(
+      `${defs.resultVarName}, err := ${defs.mrQueryableParam}.Exec(${this.getQueryParamsCode(
         sqlLiteral,
         queryArgs,
         variadicParams,
@@ -617,7 +617,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n`;
     this.injectQueryPreparationCode(builder, queryArgs, variadicParams);
     builder.push(
       `${fetchInsertedID ? defs.resultVarName : '_'}, err := ${
-        defs.queryableParam
+        defs.mrQueryableParam
       }.Exec(${this.getQueryParamsCode(sqlLiteral, queryArgs, variadicParams)})`,
     );
 
@@ -638,7 +638,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n`;
     const sqlLiteral = io.getSQLCode();
     this.injectQueryPreparationCode(builder, queryArgs, variadicParams);
     builder.push(
-      `${defs.resultVarName}, err := ${defs.queryableParam}.Exec(${this.getQueryParamsCode(
+      `${defs.resultVarName}, err := ${defs.mrQueryableParam}.Exec(${this.getQueryParamsCode(
         sqlLiteral,
         queryArgs,
         variadicParams,
@@ -672,7 +672,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n`;
     const innerBuilder = new LinesBuilder();
     const { memberIOs, returnValues } = io;
 
-    // We don't use queryable in transaction arguments but we still need to
+    // We don't use mrQueryable in transaction arguments but we still need to
     // import the dbx namespace as we're calling mingru.transact.
     this.imports.addVars([defs.dbxQueryableVar]);
 
@@ -704,7 +704,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n`;
       returnValuesCode += memberIO.callPath;
       // Generating the calling code of this member
       const queryParamsCode = mActionIO.funcArgs.list
-        .slice(1) // Strip the first queryable param
+        .slice(1) // Strip the first mrQueryable param
         .map((p) => p.valueOrName('camelCase'))
         .join(', ');
 

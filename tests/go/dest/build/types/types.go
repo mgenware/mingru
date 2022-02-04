@@ -28,10 +28,10 @@ type Res3 struct {
 
 // Type1 ...
 type Type1 interface {
-	SelectByID(queryable mingru.Queryable, id uint64) (Res1, error)
+	SelectByID(mrQueryable mingru.Queryable, id uint64) (Res1, error)
 }
 
 // Type2 ...
 type Type2 interface {
-	SelectPostInfo(queryable mingru.Queryable) (PostTableSelectPostInfoResult, error)
+	SelectPostInfo(mrQueryable mingru.Queryable) (PostTableSelectPostInfoResult, error)
 }

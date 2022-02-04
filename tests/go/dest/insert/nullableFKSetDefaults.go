@@ -17,7 +17,7 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 // ------------ Actions ------------
 
 // InsertT ...
-func (mrTable *TableTypePost) InsertT(queryable mingru.Queryable) (uint64, error) {
-	result, err := queryable.Exec("INSERT INTO `post` (`user_id`) VALUES (NULL)")
+func (mrTable *TableTypePost) InsertT(mrQueryable mingru.Queryable) (uint64, error) {
+	result, err := mrQueryable.Exec("INSERT INTO `post` (`user_id`) VALUES (NULL)")
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }

@@ -17,9 +17,9 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 // ------------ Actions ------------
 
 // SelectT ...
-func (mrTable *TableTypePost) SelectT(queryable mingru.Queryable, id uint64) (uint64, error) {
+func (mrTable *TableTypePost) SelectT(mrQueryable mingru.Queryable, id uint64) (uint64, error) {
 	var result uint64
-	err := queryable.QueryRow("SELECT `user_id` FROM `db_post` WHERE `id` = ?", id).Scan(&result)
+	err := mrQueryable.QueryRow("SELECT `user_id` FROM `db_post` WHERE `id` = ?", id).Scan(&result)
 	if err != nil {
 		return result, err
 	}

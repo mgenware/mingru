@@ -23,9 +23,9 @@ type PostTableTResult struct {
 }
 
 // T ...
-func (mrTable *TableTypePost) T(queryable mingru.Queryable, id uint64, year int, total int) (PostTableTResult, error) {
+func (mrTable *TableTypePost) T(mrQueryable mingru.Queryable, id uint64, year int, total int) (PostTableTResult, error) {
 	var result PostTableTResult
-	err := queryable.QueryRow("SELECT YEAR(`datetime`) AS `year`, SUM(`cmt_c`) AS `total` FROM `db_post` WHERE `id` = ? GROUP BY `year`, `total` HAVING (`year` > ? AND `total` > ?)", id, year, total).Scan(&result.Year, &result.Total)
+	err := mrQueryable.QueryRow("SELECT YEAR(`datetime`) AS `year`, SUM(`cmt_c`) AS `total` FROM `db_post` WHERE `id` = ? GROUP BY `year`, `total` HAVING (`year` > ? AND `total` > ?)", id, year, total).Scan(&result.Year, &result.Total)
 	if err != nil {
 		return result, err
 	}

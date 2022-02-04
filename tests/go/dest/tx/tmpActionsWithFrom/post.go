@@ -21,13 +21,13 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-func (mrTable *TableTypePost) tChild1(queryable mingru.Queryable, content string, userID uint64, createdAt time.Time, modifiedAt time.Time, rplCount uint) (uint64, error) {
-	result, err := queryable.Exec("INSERT INTO `cmt` (`content`, `user_id`, `created_at`, `modified_at`, `rpl_count`) VALUES (?, ?, ?, ?, ?)", content, userID, createdAt, modifiedAt, rplCount)
+func (mrTable *TableTypePost) tChild1(mrQueryable mingru.Queryable, content string, userID uint64, createdAt time.Time, modifiedAt time.Time, rplCount uint) (uint64, error) {
+	result, err := mrQueryable.Exec("INSERT INTO `cmt` (`content`, `user_id`, `created_at`, `modified_at`, `rpl_count`) VALUES (?, ?, ?, ?, ?)", content, userID, createdAt, modifiedAt, rplCount)
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }
 
-func (mrTable *TableTypePost) tChild2(queryable mingru.Queryable, postID uint64, cmtID uint64) error {
-	_, err := queryable.Exec("INSERT INTO `post_cmt` (`post_id`, `cmt_id`) VALUES (?, ?)", postID, cmtID)
+func (mrTable *TableTypePost) tChild2(mrQueryable mingru.Queryable, postID uint64, cmtID uint64) error {
+	_, err := mrQueryable.Exec("INSERT INTO `post_cmt` (`post_id`, `cmt_id`) VALUES (?, ?)", postID, cmtID)
 	return err
 }
 

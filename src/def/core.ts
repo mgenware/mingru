@@ -1,6 +1,6 @@
 import { fromTableParamName } from './pub.js';
 
-export const queryableParam = 'queryable';
+export const mrQueryableParam = 'mrQueryable';
 export const dbParam = 'db';
 export const limitVarName = 'limit';
 

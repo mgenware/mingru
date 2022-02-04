@@ -17,9 +17,9 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 // ------------ Actions ------------
 
 // SelectT ...
-func (mrTable *TableTypePost) SelectT(queryable mingru.Queryable) (string, error) {
+func (mrTable *TableTypePost) SelectT(mrQueryable mingru.Queryable) (string, error) {
 	var result string
-	err := queryable.QueryRow("SELECT `title` FROM `db_post`").Scan(&result)
+	err := mrQueryable.QueryRow("SELECT `title` FROM `db_post`").Scan(&result)
 	if err != nil {
 		return result, err
 	}

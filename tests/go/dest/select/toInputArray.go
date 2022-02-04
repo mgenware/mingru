@@ -27,7 +27,7 @@ type PostTableTResult struct {
 }
 
 // T ...
-func (mrTable *TableTypePost) T(queryable mingru.Queryable, ids []uint64, idInput uint64, id []uint64) ([]PostTableTResult, error) {
+func (mrTable *TableTypePost) T(mrQueryable mingru.Queryable, ids []uint64, idInput uint64, id []uint64) ([]PostTableTResult, error) {
 	if len(ids) == 0 {
 		return nil, fmt.Errorf("The array argument `ids` cannot be empty")
 	}
@@ -42,7 +42,7 @@ func (mrTable *TableTypePost) T(queryable mingru.Queryable, ids []uint64, idInpu
 	for _, item := range id {
 		queryParams = append(queryParams, item)
 	}
-	rows, err := queryable.Query("SELECT `id`, `title` FROM `db_post` WHERE `id` IN "+mingru.InputPlaceholders(len(ids))+" OR `id` <> ? OR `id` IN "+mingru.InputPlaceholders(len(id))+" ORDER BY `id`", queryParams...)
+	rows, err := mrQueryable.Query("SELECT `id`, `title` FROM `db_post` WHERE `id` IN "+mingru.InputPlaceholders(len(ids))+" OR `id` <> ? OR `id` IN "+mingru.InputPlaceholders(len(id))+" ORDER BY `id`", queryParams...)
 	if err != nil {
 		return nil, err
 	}

@@ -41,7 +41,7 @@ type PostTableSelectTResult struct {
 }
 
 // SelectT ...
-func (mrTable *TableTypePost) SelectT(queryable mingru.Queryable, id uint64, orderBy1 int, orderBy1Desc bool, orderBy2 int, orderBy2Desc bool) ([]PostTableSelectTResult, error) {
+func (mrTable *TableTypePost) SelectT(mrQueryable mingru.Queryable, id uint64, orderBy1 int, orderBy1Desc bool, orderBy2 int, orderBy2Desc bool) ([]PostTableSelectTResult, error) {
 	var orderBy1SQL string
 	switch orderBy1 {
 	case PostTableSelectTOrderBy1N:
@@ -72,7 +72,7 @@ func (mrTable *TableTypePost) SelectT(queryable mingru.Queryable, id uint64, ord
 		orderBy2SQL += " DESC"
 	}
 
-	rows, err := queryable.Query("SELECT `id`, RAND() AS `n`, `title` FROM `db_post` WHERE `id` = ? ORDER BY `title`, "+orderBy1SQL+", "+orderBy2SQL, id)
+	rows, err := mrQueryable.Query("SELECT `id`, RAND() AS `n`, `title` FROM `db_post` WHERE `id` = ? ORDER BY `title`, "+orderBy1SQL+", "+orderBy2SQL, id)
 	if err != nil {
 		return nil, err
 	}

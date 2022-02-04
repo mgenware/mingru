@@ -27,8 +27,8 @@ type PostTableSelectNullableTimesResult struct {
 }
 
 // SelectNullableTimes ...
-func (mrTable *TableTypePost) SelectNullableTimes(queryable mingru.Queryable) ([]PostTableSelectNullableTimesResult, error) {
-	rows, err := queryable.Query("SELECT `n_datetime`, `n_date` FROM `db_post` ORDER BY `id`")
+func (mrTable *TableTypePost) SelectNullableTimes(mrQueryable mingru.Queryable) ([]PostTableSelectNullableTimesResult, error) {
+	rows, err := mrQueryable.Query("SELECT `n_datetime`, `n_date` FROM `db_post` ORDER BY `id`")
 	if err != nil {
 		return nil, err
 	}
@@ -56,8 +56,8 @@ type PostTableSelectTimesResult struct {
 }
 
 // SelectTimes ...
-func (mrTable *TableTypePost) SelectTimes(queryable mingru.Queryable) ([]PostTableSelectTimesResult, error) {
-	rows, err := queryable.Query("SELECT `datetime`, `date` FROM `db_post` ORDER BY `id`")
+func (mrTable *TableTypePost) SelectTimes(mrQueryable mingru.Queryable) ([]PostTableSelectTimesResult, error) {
+	rows, err := mrQueryable.Query("SELECT `datetime`, `date` FROM `db_post` ORDER BY `id`")
 	if err != nil {
 		return nil, err
 	}

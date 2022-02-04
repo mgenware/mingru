@@ -17,7 +17,7 @@ func (mrTable *TableTypeDept) MingruSQLName() string {
 // ------------ Actions ------------
 
 // InsertDept ...
-func (mrTable *TableTypeDept) InsertDept(queryable mingru.Queryable, name string) (uint64, error) {
-	result, err := queryable.Exec("INSERT INTO `departments` (`dept_name`) VALUES (?)", name)
+func (mrTable *TableTypeDept) InsertDept(mrQueryable mingru.Queryable, name string) (uint64, error) {
+	result, err := mrQueryable.Exec("INSERT INTO `departments` (`dept_name`) VALUES (?)", name)
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }

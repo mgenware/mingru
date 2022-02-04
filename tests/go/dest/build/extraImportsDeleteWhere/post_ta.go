@@ -21,7 +21,7 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 // ------------ Actions ------------
 
 // DeleteTimes ...
-func (mrTable *TableTypePost) DeleteTimes(queryable mingru.Queryable, nDatetime *time.Time, nDate *time.Time) error {
-	result, err := queryable.Exec("DELETE FROM `db_post` WHERE `n_datetime` = ? OR `n_date` = ?", nDatetime, nDate)
+func (mrTable *TableTypePost) DeleteTimes(mrQueryable mingru.Queryable, nDatetime *time.Time, nDate *time.Time) error {
+	result, err := mrQueryable.Exec("DELETE FROM `db_post` WHERE `n_datetime` = ? OR `n_date` = ?", nDatetime, nDate)
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }

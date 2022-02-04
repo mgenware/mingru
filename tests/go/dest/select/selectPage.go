@@ -27,7 +27,7 @@ type PostTableSelectTResult struct {
 }
 
 // SelectT ...
-func (mrTable *TableTypePost) SelectT(queryable mingru.Queryable, id uint64, page int, pageSize int) ([]PostTableSelectTResult, bool, error) {
+func (mrTable *TableTypePost) SelectT(mrQueryable mingru.Queryable, id uint64, page int, pageSize int) ([]PostTableSelectTResult, bool, error) {
 	if page <= 0 {
 		err := fmt.Errorf("Invalid page %v", page)
 		return nil, false, err
@@ -39,7 +39,7 @@ func (mrTable *TableTypePost) SelectT(queryable mingru.Queryable, id uint64, pag
 	limit := pageSize + 1
 	offset := (page - 1) * pageSize
 	max := pageSize
-	rows, err := queryable.Query("SELECT `id`, `title` FROM `db_post` WHERE `id` = ? ORDER BY `id` LIMIT ? OFFSET ?", id, limit, offset)
+	rows, err := mrQueryable.Query("SELECT `id`, `title` FROM `db_post` WHERE `id` = ? ORDER BY `id` LIMIT ? OFFSET ?", id, limit, offset)
 	if err != nil {
 		return nil, false, err
 	}

@@ -17,8 +17,8 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 // ------------ Actions ------------
 
 // DeleteByID ...
-func (mrTable *TableTypePost) DeleteByID(queryable mingru.Queryable, id uint64) (int, error) {
-	result, err := queryable.Exec("DELETE FROM `db_post` WHERE `id` = ?", id)
+func (mrTable *TableTypePost) DeleteByID(mrQueryable mingru.Queryable, id uint64) (int, error) {
+	result, err := mrQueryable.Exec("DELETE FROM `db_post` WHERE `id` = ?", id)
 	return mingru.GetRowsAffectedIntWithError(result, err)
 }
 
@@ -31,9 +31,9 @@ type PostTableSelectPostInfoResult struct {
 }
 
 // SelectPostInfo ...
-func (mrTable *TableTypePost) SelectPostInfo(queryable mingru.Queryable) (PostTableSelectPostInfoResult, error) {
+func (mrTable *TableTypePost) SelectPostInfo(mrQueryable mingru.Queryable) (PostTableSelectPostInfoResult, error) {
 	var result PostTableSelectPostInfoResult
-	err := queryable.QueryRow("SELECT `db_post`.`id`, `db_post`.`title`, `db_post`.`user_id`, `join_1`.`url_name` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`").Scan(&result.ID, &result.Title, &result.UserID, &result.UserUrlName)
+	err := mrQueryable.QueryRow("SELECT `db_post`.`id`, `db_post`.`title`, `db_post`.`user_id`, `join_1`.`url_name` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`").Scan(&result.ID, &result.Title, &result.UserID, &result.UserUrlName)
 	if err != nil {
 		return result, err
 	}
@@ -47,9 +47,9 @@ type PostTableSelectPostTitleResult struct {
 }
 
 // SelectPostTitle ...
-func (mrTable *TableTypePost) SelectPostTitle(queryable mingru.Queryable) (PostTableSelectPostTitleResult, error) {
+func (mrTable *TableTypePost) SelectPostTitle(mrQueryable mingru.Queryable) (PostTableSelectPostTitleResult, error) {
 	var result PostTableSelectPostTitleResult
-	err := queryable.QueryRow("SELECT `id`, `title` FROM `db_post`").Scan(&result.ID, &result.Title)
+	err := mrQueryable.QueryRow("SELECT `id`, `title` FROM `db_post`").Scan(&result.ID, &result.Title)
 	if err != nil {
 		return result, err
 	}
@@ -57,7 +57,7 @@ func (mrTable *TableTypePost) SelectPostTitle(queryable mingru.Queryable) (PostT
 }
 
 // UpdatePostTitle ...
-func (mrTable *TableTypePost) UpdatePostTitle(queryable mingru.Queryable, title string) (int, error) {
-	result, err := queryable.Exec("UPDATE `db_post` SET `title` = ?", title)
+func (mrTable *TableTypePost) UpdatePostTitle(mrQueryable mingru.Queryable, title string) (int, error) {
+	result, err := mrQueryable.Exec("UPDATE `db_post` SET `title` = ?", title)
 	return mingru.GetRowsAffectedIntWithError(result, err)
 }

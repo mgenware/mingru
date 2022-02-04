@@ -23,8 +23,8 @@ type PostTableSelectTResult struct {
 }
 
 // SelectT ...
-func (mrTable *TableTypePost) SelectT(queryable mingru.Queryable) ([]PostTableSelectTResult, error) {
-	rows, err := queryable.Query("SELECT `title`, `user_id` FROM `db_post` ORDER BY `title`, `user_id`, `my_user_id`")
+func (mrTable *TableTypePost) SelectT(mrQueryable mingru.Queryable) ([]PostTableSelectTResult, error) {
+	rows, err := mrQueryable.Query("SELECT `title`, `user_id` FROM `db_post` ORDER BY `title`, `user_id`, `my_user_id`")
 	if err != nil {
 		return nil, err
 	}

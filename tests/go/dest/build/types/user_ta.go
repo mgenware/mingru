@@ -17,15 +17,15 @@ func (mrTable *TableTypeUser) MingruSQLName() string {
 // ------------ Actions ------------
 
 // DeleteByID ...
-func (mrTable *TableTypeUser) DeleteByID(queryable mingru.Queryable, id uint64) error {
-	result, err := queryable.Exec("DELETE FROM `user` WHERE `id` = ?", id)
+func (mrTable *TableTypeUser) DeleteByID(mrQueryable mingru.Queryable, id uint64) error {
+	result, err := mrQueryable.Exec("DELETE FROM `user` WHERE `id` = ?", id)
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }
 
 // SelectByID ...
-func (mrTable *TableTypeUser) SelectByID(queryable mingru.Queryable, id uint64) (Res1, error) {
+func (mrTable *TableTypeUser) SelectByID(mrQueryable mingru.Queryable, id uint64) (Res1, error) {
 	var result Res1
-	err := queryable.QueryRow("SELECT `id` FROM `user` WHERE `id` = ?", id).Scan(&result.ID)
+	err := mrQueryable.QueryRow("SELECT `id` FROM `user` WHERE `id` = ?", id).Scan(&result.ID)
 	if err != nil {
 		return result, err
 	}
@@ -33,9 +33,9 @@ func (mrTable *TableTypeUser) SelectByID(queryable mingru.Queryable, id uint64) 
 }
 
 // SelectProfile ...
-func (mrTable *TableTypeUser) SelectProfile(queryable mingru.Queryable) (Res2, error) {
+func (mrTable *TableTypeUser) SelectProfile(mrQueryable mingru.Queryable) (Res2, error) {
 	var result Res2
-	err := queryable.QueryRow("SELECT `display_name`, `sig` FROM `user`").Scan(&result.DisplayName, &result.Sig)
+	err := mrQueryable.QueryRow("SELECT `display_name`, `sig` FROM `user`").Scan(&result.DisplayName, &result.Sig)
 	if err != nil {
 		return result, err
 	}

@@ -21,8 +21,8 @@ func (mrTable *TableTypeEmployee) MingruSQLName() string {
 // ------------ Actions ------------
 
 // Insert ...
-func (mrTable *TableTypeEmployee) Insert(queryable mingru.Queryable, firstName string) (uint64, error) {
-	result, err := queryable.Exec("INSERT INTO `employees` (`first_name`) VALUES (?)", firstName)
+func (mrTable *TableTypeEmployee) Insert(mrQueryable mingru.Queryable, firstName string) (uint64, error) {
+	result, err := mrQueryable.Exec("INSERT INTO `employees` (`first_name`) VALUES (?)", firstName)
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }
 

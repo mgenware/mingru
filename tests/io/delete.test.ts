@@ -37,7 +37,7 @@ it('getInputs', () => {
   const io = mr.deleteIO(v, commonIOOptions);
   eq(
     io.funcArgs.toString(),
-    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, urlName: string',
+    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, urlName: string',
   );
   eq(io.execArgs.toString(), 'id: uint64, urlName: string');
 });

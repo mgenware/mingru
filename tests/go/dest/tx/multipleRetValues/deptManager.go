@@ -21,8 +21,8 @@ func (mrTable *TableTypeDeptManager) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-func (mrTable *TableTypeDeptManager) insertChild3(queryable mingru.Queryable, empNo int, deptNo uint64, fromDate time.Time, toDate time.Time) error {
-	return mrTable.InsertCore(queryable, empNo, deptNo, fromDate, toDate)
+func (mrTable *TableTypeDeptManager) insertChild3(mrQueryable mingru.Queryable, empNo int, deptNo uint64, fromDate time.Time, toDate time.Time) error {
+	return mrTable.InsertCore(mrQueryable, empNo, deptNo, fromDate, toDate)
 }
 
 // Insert ...
@@ -51,7 +51,7 @@ func (mrTable *TableTypeDeptManager) Insert(db *sql.DB, firstName string, lastNa
 }
 
 // InsertCore ...
-func (mrTable *TableTypeDeptManager) InsertCore(queryable mingru.Queryable, empNo int, deptNo uint64, fromDate time.Time, toDate time.Time) error {
-	_, err := queryable.Exec("INSERT INTO `dept_manager` (`emp_no`, `dept_no`, `from_date`, `to_date`) VALUES (?, ?, ?, ?)", empNo, deptNo, fromDate, toDate)
+func (mrTable *TableTypeDeptManager) InsertCore(mrQueryable mingru.Queryable, empNo int, deptNo uint64, fromDate time.Time, toDate time.Time) error {
+	_, err := mrQueryable.Exec("INSERT INTO `dept_manager` (`emp_no`, `dept_no`, `from_date`, `to_date`) VALUES (?, ?, ?, ?)", empNo, deptNo, fromDate, toDate)
 	return err
 }

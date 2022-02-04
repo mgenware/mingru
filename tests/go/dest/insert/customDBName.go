@@ -17,7 +17,7 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 // ------------ Actions ------------
 
 // InsertT ...
-func (mrTable *TableTypePost) InsertT(queryable mingru.Queryable, title string, cmtCount uint) error {
-	_, err := queryable.Exec("INSERT INTO `db_post` (`title`, `cmt_c`) VALUES (?, ?)", title, cmtCount)
+func (mrTable *TableTypePost) InsertT(mrQueryable mingru.Queryable, title string, cmtCount uint) error {
+	_, err := mrQueryable.Exec("INSERT INTO `db_post` (`title`, `cmt_c`) VALUES (?, ?)", title, cmtCount)
 	return err
 }

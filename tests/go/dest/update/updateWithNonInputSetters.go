@@ -17,7 +17,7 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 // ------------ Actions ------------
 
 // UpdateT ...
-func (mrTable *TableTypePost) UpdateT(queryable mingru.Queryable, content string) (int, error) {
-	result, err := queryable.Exec("UPDATE `db_post` SET `title` = \"haha\", `content` = ?", content)
+func (mrTable *TableTypePost) UpdateT(mrQueryable mingru.Queryable, content string) (int, error) {
+	result, err := mrQueryable.Exec("UPDATE `db_post` SET `title` = \"haha\", `content` = ?", content)
 	return mingru.GetRowsAffectedIntWithError(result, err)
 }

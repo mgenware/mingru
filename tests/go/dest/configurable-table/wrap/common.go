@@ -17,7 +17,7 @@ func (mrTable *TableTypeUserUtil) MingruSQLName() string {
 // ------------ Actions ------------
 
 // Insert ...
-func (mrTable *TableTypeUserUtil) Insert(queryable mingru.Queryable, mrFromTable mingru.Table, urlName string, displayName string, sig *string, age int, followerCount *string) (uint64, error) {
-	result, err := queryable.Exec("INSERT INTO "+mrFromTable.MingruSQLName()+" (`url_name`, `display_name`, `sig`, `age`, `follower_c`) VALUES (?, ?, ?, ?, ?)", urlName, displayName, sig, age, followerCount)
+func (mrTable *TableTypeUserUtil) Insert(mrQueryable mingru.Queryable, mrFromTable mingru.Table, urlName string, displayName string, sig *string, age int, followerCount *string) (uint64, error) {
+	result, err := mrQueryable.Exec("INSERT INTO "+mrFromTable.MingruSQLName()+" (`url_name`, `display_name`, `sig`, `age`, `follower_c`) VALUES (?, ?, ?, ?, ?)", urlName, displayName, sig, age, followerCount)
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }

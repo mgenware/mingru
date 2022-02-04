@@ -87,7 +87,7 @@ export class InsertIOProcessor extends BaseIOProcessor {
     );
 
     const execArgs = new VarList(`Exec args of action ${action}`);
-    // Skip the first param, which is queryable.
+    // Skip the first param, which is mrQueryable.
     // Skip the second param if `configurableTable` is true.
     execArgs.merge(funcArgs.list.slice(this.configurableTable() ? 2 : 1));
 

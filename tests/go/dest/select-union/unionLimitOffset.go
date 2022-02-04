@@ -24,8 +24,8 @@ type ActivityTableTResult struct {
 }
 
 // T ...
-func (mrTable *TableTypeActivity) T(queryable mingru.Queryable, id uint64, limit int, offset int, max int) ([]ActivityTableTResult, int, error) {
-	rows, err := queryable.Query("(SELECT `id`, `sig` AS `generic_sig`, `url_name` AS `generic_name` FROM `user` WHERE `id` = ? LIMIT ? OFFSET ?) UNION ALL (SELECT `user_id`, `value` FROM `like`) UNION (SELECT `title` FROM `db_post` WHERE `id` = ?) ORDER BY `id` LIMIT ? OFFSET ?", id, limit, offset, id, limit, offset)
+func (mrTable *TableTypeActivity) T(mrQueryable mingru.Queryable, id uint64, limit int, offset int, max int) ([]ActivityTableTResult, int, error) {
+	rows, err := mrQueryable.Query("(SELECT `id`, `sig` AS `generic_sig`, `url_name` AS `generic_name` FROM `user` WHERE `id` = ? LIMIT ? OFFSET ?) UNION ALL (SELECT `user_id`, `value` FROM `like`) UNION (SELECT `title` FROM `db_post` WHERE `id` = ?) ORDER BY `id` LIMIT ? OFFSET ?", id, limit, offset, id, limit, offset)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -58,8 +58,8 @@ type ActivityTableT1Result struct {
 }
 
 // T1 ...
-func (mrTable *TableTypeActivity) T1(queryable mingru.Queryable, id uint64, limit int, offset int, max int) ([]ActivityTableT1Result, int, error) {
-	rows, err := queryable.Query("SELECT `id`, `sig` AS `generic_sig`, `url_name` AS `generic_name` FROM `user` WHERE `id` = ? ORDER BY `id` LIMIT ? OFFSET ?", id, limit, offset)
+func (mrTable *TableTypeActivity) T1(mrQueryable mingru.Queryable, id uint64, limit int, offset int, max int) ([]ActivityTableT1Result, int, error) {
+	rows, err := mrQueryable.Query("SELECT `id`, `sig` AS `generic_sig`, `url_name` AS `generic_name` FROM `user` WHERE `id` = ? ORDER BY `id` LIMIT ? OFFSET ?", id, limit, offset)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -90,8 +90,8 @@ type ActivityTableT2Result struct {
 }
 
 // T2 ...
-func (mrTable *TableTypeActivity) T2(queryable mingru.Queryable, id uint64) ([]ActivityTableT2Result, error) {
-	rows, err := queryable.Query("SELECT `title` FROM `db_post` WHERE `id` = ? ORDER BY `id`", id)
+func (mrTable *TableTypeActivity) T2(mrQueryable mingru.Queryable, id uint64) ([]ActivityTableT2Result, error) {
+	rows, err := mrQueryable.Query("SELECT `title` FROM `db_post` WHERE `id` = ? ORDER BY `id`", id)
 	if err != nil {
 		return nil, err
 	}

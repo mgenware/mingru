@@ -21,7 +21,7 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 // ------------ Actions ------------
 
 // InsertTimes ...
-func (mrTable *TableTypePost) InsertTimes(queryable mingru.Queryable, datetime time.Time, nDatetime *time.Time) (uint64, error) {
-	result, err := queryable.Exec("INSERT INTO `db_post` (`datetime`, `n_datetime`) VALUES (?, ?)", datetime, nDatetime)
+func (mrTable *TableTypePost) InsertTimes(mrQueryable mingru.Queryable, datetime time.Time, nDatetime *time.Time) (uint64, error) {
+	result, err := mrQueryable.Exec("INSERT INTO `db_post` (`datetime`, `n_datetime`) VALUES (?, ?)", datetime, nDatetime)
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }

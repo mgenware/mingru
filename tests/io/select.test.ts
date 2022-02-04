@@ -224,7 +224,7 @@ it('getInputs', () => {
   const io = mr.selectIO(v, commonIOOptions);
   eq(
     io.funcArgs.toString(),
-    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, urlName: string',
+    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, urlName: string',
   );
 });
 

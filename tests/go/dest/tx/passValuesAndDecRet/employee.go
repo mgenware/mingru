@@ -21,17 +21,17 @@ func (mrTable *TableTypeEmployee) MingruSQLName() string {
 // ------------ Actions ------------
 
 // GetFirstName ...
-func (mrTable *TableTypeEmployee) GetFirstName(queryable mingru.Queryable, id int) (string, error) {
+func (mrTable *TableTypeEmployee) GetFirstName(mrQueryable mingru.Queryable, id int) (string, error) {
 	var result string
-	err := queryable.QueryRow("SELECT `first_name` FROM `employees` WHERE `emp_no` = ?", id).Scan(&result)
+	err := mrQueryable.QueryRow("SELECT `first_name` FROM `employees` WHERE `emp_no` = ?", id).Scan(&result)
 	if err != nil {
 		return result, err
 	}
 	return result, nil
 }
 
-func (mrTable *TableTypeEmployee) insert1Child2(queryable mingru.Queryable, firstName string) (uint64, error) {
-	result, err := queryable.Exec("INSERT INTO `employees` (`first_name`) VALUES (?)", firstName)
+func (mrTable *TableTypeEmployee) insert1Child2(mrQueryable mingru.Queryable, firstName string) (uint64, error) {
+	result, err := mrQueryable.Exec("INSERT INTO `employees` (`first_name`) VALUES (?)", firstName)
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }
 

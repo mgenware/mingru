@@ -20,22 +20,22 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-func (mrTable *TableTypePost) insertChild1(queryable mingru.Queryable, id uint64) error {
-	return User.UpdatePostCount(queryable, id, 1)
+func (mrTable *TableTypePost) insertChild1(mrQueryable mingru.Queryable, id uint64) error {
+	return User.UpdatePostCount(mrQueryable, id, 1)
 }
 
-func (mrTable *TableTypePost) insertChild3(queryable mingru.Queryable, id uint64, title string) error {
-	result, err := queryable.Exec("UPDATE `db_post` SET `title` = ? WHERE `id` = ?", title, id)
+func (mrTable *TableTypePost) insertChild3(mrQueryable mingru.Queryable, id uint64, title string) error {
+	result, err := mrQueryable.Exec("UPDATE `db_post` SET `title` = ? WHERE `id` = ?", title, id)
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }
 
-func (mrTable *TableTypePost) insertChild4(queryable mingru.Queryable, id uint64) error {
-	result, err := queryable.Exec("UPDATE `db_post` SET `title` = ? WHERE `id` = ?", "TITLE", id)
+func (mrTable *TableTypePost) insertChild4(mrQueryable mingru.Queryable, id uint64) error {
+	result, err := mrQueryable.Exec("UPDATE `db_post` SET `title` = ? WHERE `id` = ?", "TITLE", id)
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }
 
-func (mrTable *TableTypePost) insertChild5(queryable mingru.Queryable) (uint64, error) {
-	return mrTable.InsertCore(queryable, "abc")
+func (mrTable *TableTypePost) insertChild5(mrQueryable mingru.Queryable) (uint64, error) {
+	return mrTable.InsertCore(mrQueryable, "abc")
 }
 
 // Insert ...
@@ -68,7 +68,7 @@ func (mrTable *TableTypePost) Insert(db *sql.DB, id uint64, title string) error 
 }
 
 // InsertCore ...
-func (mrTable *TableTypePost) InsertCore(queryable mingru.Queryable, title string) (uint64, error) {
-	result, err := queryable.Exec("INSERT INTO `db_post` (`title`) VALUES (?)", title)
+func (mrTable *TableTypePost) InsertCore(mrQueryable mingru.Queryable, title string) (uint64, error) {
+	result, err := mrQueryable.Exec("INSERT INTO `db_post` (`title`) VALUES (?)", title)
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }

@@ -23,9 +23,9 @@ type PostTableSelectTResult struct {
 }
 
 // SelectT ...
-func (mrTable *TableTypePost) SelectT(queryable mingru.Queryable, id uint64, title string) (PostTableSelectTResult, error) {
+func (mrTable *TableTypePost) SelectT(mrQueryable mingru.Queryable, id uint64, title string) (PostTableSelectTResult, error) {
 	var result PostTableSelectTResult
-	err := queryable.QueryRow("SELECT `id`, `title` FROM `db_post` WHERE `id` = ? && `title` != ?", id, title).Scan(&result.ID, &result.Title)
+	err := mrQueryable.QueryRow("SELECT `id`, `title` FROM `db_post` WHERE `id` = ? && `title` != ?", id, title).Scan(&result.ID, &result.Title)
 	if err != nil {
 		return result, err
 	}

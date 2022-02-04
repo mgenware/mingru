@@ -27,7 +27,7 @@ type PostTableTResult struct {
 }
 
 // T ...
-func (mrTable *TableTypePost) T(queryable mingru.Queryable, nDatetime []*time.Time, p2 time.Time, p3 *time.Time, p4 uint64, p5 *uint64) (PostTableTResult, error) {
+func (mrTable *TableTypePost) T(mrQueryable mingru.Queryable, nDatetime []*time.Time, p2 time.Time, p3 *time.Time, p4 uint64, p5 *uint64) (PostTableTResult, error) {
 	if len(nDatetime) == 0 {
 		return PostTableTResult{}, fmt.Errorf("The array argument `nDatetime` cannot be empty")
 	}
@@ -40,7 +40,7 @@ func (mrTable *TableTypePost) T(queryable mingru.Queryable, nDatetime []*time.Ti
 	queryParams = append(queryParams, p3)
 	queryParams = append(queryParams, p4)
 	queryParams = append(queryParams, p5)
-	err := queryable.QueryRow("SELECT `id` FROM `db_post` WHERE "+mingru.InputPlaceholders(len(nDatetime))+" ? ? ? ?", queryParams...).Scan(&result.ID)
+	err := mrQueryable.QueryRow("SELECT `id` FROM `db_post` WHERE "+mingru.InputPlaceholders(len(nDatetime))+" ? ? ? ?", queryParams...).Scan(&result.ID)
 	if err != nil {
 		return result, err
 	}

@@ -17,8 +17,8 @@ func (mrTable *TableTypeGhost) MingruSQLName() string {
 // ------------ Actions ------------
 
 // InsertT ...
-func (mrTable *TableTypeGhost) InsertT(queryable mingru.Queryable, fk uint64) error {
-	_, err := queryable.Exec("INSERT INTO `cols` (`fk`, `text`, `int`, `nullable`, `def_int`, `def_var_char`, `def_time`) VALUES (?, '', 0, NULL, -3, '一二', CURTIME())", fk)
+func (mrTable *TableTypeGhost) InsertT(mrQueryable mingru.Queryable, fk uint64) error {
+	_, err := mrQueryable.Exec("INSERT INTO `cols` (`fk`, `text`, `int`, `nullable`, `def_int`, `def_var_char`, `def_time`) VALUES (?, '', 0, NULL, -3, '一二', CURTIME())", fk)
 	return err
 }
 
@@ -29,8 +29,8 @@ type GhostTableSelectTResult struct {
 }
 
 // SelectT ...
-func (mrTable *TableTypeGhost) SelectT(queryable mingru.Queryable) ([]GhostTableSelectTResult, error) {
-	rows, err := queryable.Query("SELECT `id`, `title` FROM `db_post` ORDER BY `id`")
+func (mrTable *TableTypeGhost) SelectT(mrQueryable mingru.Queryable) ([]GhostTableSelectTResult, error) {
+	rows, err := mrQueryable.Query("SELECT `id`, `title` FROM `db_post` ORDER BY `id`")
 	if err != nil {
 		return nil, err
 	}

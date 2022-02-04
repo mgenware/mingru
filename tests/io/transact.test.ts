@@ -58,11 +58,11 @@ it('Members with WRAP actions', () => {
   const m1 = io.memberIOs[0]!.actionIO;
   eq(
     m1.funcArgs.toString(),
-    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, followerCount: *string',
+    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, followerCount: *string',
   );
   eq(
     m1.execArgs.toString(),
-    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, sig: *string="haha", followerCount: *string',
+    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, sig: *string="haha", followerCount: *string',
   );
 
   const io2 = mr.transactIO(wrapTA.t2, commonIOOptions);
@@ -74,11 +74,11 @@ it('Members with WRAP actions', () => {
   const m2 = io2.memberIOs[0]!.actionIO;
   eq(
     m2.funcArgs.toString(),
-    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, followerCount: *string',
+    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, followerCount: *string',
   );
   eq(
     m2.execArgs.toString(),
-    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, sig: *string="haha", followerCount: *string',
+    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, sig: *string="haha", followerCount: *string',
   );
 
   const io3 = mr.transactIO(wrapTA.t3, commonIOOptions);
@@ -93,7 +93,7 @@ it('Members with WRAP actions', () => {
   const m3 = io3.memberIOs[0]!.actionIO;
   eq(
     m3.funcArgs.toString(),
-    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, sig: *string, followerCount: *string',
+    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, sig: *string, followerCount: *string',
   );
   eq(m3.execArgs.toString(), 'sig: *string, followerCount: *string, id: uint64');
 
@@ -109,7 +109,7 @@ it('Members with WRAP actions', () => {
   const m4 = io4.memberIOs[0]!.actionIO;
   eq(
     m4.funcArgs.toString(),
-    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, sig: *string, followerCount: *string',
+    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, sig: *string, followerCount: *string',
   );
   eq(m4.execArgs.toString(), 'sig: *string, followerCount: *string, id: uint64');
 });

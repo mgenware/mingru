@@ -23,8 +23,8 @@ type PostTableSelectTResult struct {
 }
 
 // SelectT ...
-func (mrTable *TableTypePost) SelectT(queryable mingru.Queryable, offsetVar int) ([]PostTableSelectTResult, error) {
-	rows, err := queryable.Query("SELECT `id`, `title` FROM `db_post` ORDER BY `id` LIMIT 10 OFFSET ?", offsetVar)
+func (mrTable *TableTypePost) SelectT(mrQueryable mingru.Queryable, offsetVar int) ([]PostTableSelectTResult, error) {
+	rows, err := mrQueryable.Query("SELECT `id`, `title` FROM `db_post` ORDER BY `id` LIMIT 10 OFFSET ?", offsetVar)
 	if err != nil {
 		return nil, err
 	}

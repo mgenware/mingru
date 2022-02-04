@@ -48,7 +48,7 @@ it('getInputs', () => {
   const io = mr.insertIO(v, commonIOOptions);
   eq(
     io.funcArgs.toString(),
-    'queryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, sig: *string, id: uint64, b: string',
+    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, sig: *string, id: uint64, b: string',
   );
   eq(io.execArgs.toString(), 'sig: *string, id: uint64, b: string');
 });

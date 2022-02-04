@@ -28,7 +28,7 @@ type ActivityTableTResult struct {
 }
 
 // T ...
-func (mrTable *TableTypeActivity) T(queryable mingru.Queryable, id uint64, page int, pageSize int) ([]ActivityTableTResult, bool, error) {
+func (mrTable *TableTypeActivity) T(mrQueryable mingru.Queryable, id uint64, page int, pageSize int) ([]ActivityTableTResult, bool, error) {
 	if page <= 0 {
 		err := fmt.Errorf("Invalid page %v", page)
 		return nil, false, err
@@ -40,7 +40,7 @@ func (mrTable *TableTypeActivity) T(queryable mingru.Queryable, id uint64, page 
 	limit := pageSize + 1
 	offset := (page - 1) * pageSize
 	max := pageSize
-	rows, err := queryable.Query("(SELECT `id`, `sig` AS `generic_sig`, `url_name` AS `generic_name` FROM `user` WHERE `id` = ? LIMIT ? OFFSET ?) UNION ALL (SELECT `user_id`, `value` FROM `like`) UNION (SELECT `title` FROM `db_post` WHERE `id` = ?) ORDER BY `id` LIMIT ? OFFSET ?", id, limit, offset, id, limit, offset)
+	rows, err := mrQueryable.Query("(SELECT `id`, `sig` AS `generic_sig`, `url_name` AS `generic_name` FROM `user` WHERE `id` = ? LIMIT ? OFFSET ?) UNION ALL (SELECT `user_id`, `value` FROM `like`) UNION (SELECT `title` FROM `db_post` WHERE `id` = ?) ORDER BY `id` LIMIT ? OFFSET ?", id, limit, offset, id, limit, offset)
 	if err != nil {
 		return nil, false, err
 	}
@@ -73,7 +73,7 @@ type ActivityTableT1Result struct {
 }
 
 // T1 ...
-func (mrTable *TableTypeActivity) T1(queryable mingru.Queryable, id uint64, page int, pageSize int) ([]ActivityTableT1Result, bool, error) {
+func (mrTable *TableTypeActivity) T1(mrQueryable mingru.Queryable, id uint64, page int, pageSize int) ([]ActivityTableT1Result, bool, error) {
 	if page <= 0 {
 		err := fmt.Errorf("Invalid page %v", page)
 		return nil, false, err
@@ -85,7 +85,7 @@ func (mrTable *TableTypeActivity) T1(queryable mingru.Queryable, id uint64, page
 	limit := pageSize + 1
 	offset := (page - 1) * pageSize
 	max := pageSize
-	rows, err := queryable.Query("SELECT `id`, `sig` AS `generic_sig`, `url_name` AS `generic_name` FROM `user` WHERE `id` = ? ORDER BY `id` LIMIT ? OFFSET ?", id, limit, offset)
+	rows, err := mrQueryable.Query("SELECT `id`, `sig` AS `generic_sig`, `url_name` AS `generic_name` FROM `user` WHERE `id` = ? ORDER BY `id` LIMIT ? OFFSET ?", id, limit, offset)
 	if err != nil {
 		return nil, false, err
 	}
@@ -116,8 +116,8 @@ type ActivityTableT2Result struct {
 }
 
 // T2 ...
-func (mrTable *TableTypeActivity) T2(queryable mingru.Queryable, id uint64) ([]ActivityTableT2Result, error) {
-	rows, err := queryable.Query("SELECT `title` FROM `db_post` WHERE `id` = ? ORDER BY `id`", id)
+func (mrTable *TableTypeActivity) T2(mrQueryable mingru.Queryable, id uint64) ([]ActivityTableT2Result, error) {
+	rows, err := mrQueryable.Query("SELECT `title` FROM `db_post` WHERE `id` = ? ORDER BY `id`", id)
 	if err != nil {
 		return nil, err
 	}

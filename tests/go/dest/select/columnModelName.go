@@ -23,8 +23,8 @@ type MyTableTableSelectTResult struct {
 }
 
 // SelectT ...
-func (mrTable *TableTypeMyTable) SelectT(queryable mingru.Queryable) ([]MyTableTableSelectTResult, error) {
-	rows, err := queryable.Query("SELECT `my_id`, `my_name` FROM `my_table` ORDER BY `id`")
+func (mrTable *TableTypeMyTable) SelectT(mrQueryable mingru.Queryable) ([]MyTableTableSelectTResult, error) {
+	rows, err := mrQueryable.Query("SELECT `my_id`, `my_name` FROM `my_table` ORDER BY `id`")
 	if err != nil {
 		return nil, err
 	}
