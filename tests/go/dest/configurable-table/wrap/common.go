@@ -2,22 +2,22 @@ package da
 
 import "github.com/mgenware/mingru-go-lib"
 
-// TableTypeUserT ...
-type TableTypeUserT struct {
+// TableTypeUserUtil ...
+type TableTypeUserUtil struct {
 }
 
-// UserT ...
-var UserT = &TableTypeUserT{}
+// UserUtil ...
+var UserUtil = &TableTypeUserUtil{}
 
 // MingruSQLName returns the name of this table.
-func (mrTable *TableTypeUserT) MingruSQLName() string {
-	return "user_t"
+func (mrTable *TableTypeUserUtil) MingruSQLName() string {
+	return "user_util"
 }
 
 // ------------ Actions ------------
 
 // Insert ...
-func (mrTable *TableTypeUserT) Insert(queryable mingru.Queryable, mrFromTable mingru.Table, tID uint64) (uint64, error) {
-	result, err := queryable.Exec("INSERT INTO "+mrFromTable.MingruSQLName()+" (`t_id`) VALUES (?)", tID)
+func (mrTable *TableTypeUserUtil) Insert(queryable mingru.Queryable, mrFromTable mingru.Table, urlName string, displayName string, sig *string, age int, followerCount *string) (uint64, error) {
+	result, err := queryable.Exec("INSERT INTO "+mrFromTable.MingruSQLName()+" (`url_name`, `display_name`, `sig`, `age`, `follower_c`) VALUES (?, ?, ?, ?, ?)", urlName, displayName, sig, age, followerCount)
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }

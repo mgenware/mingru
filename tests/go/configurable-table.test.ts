@@ -1,7 +1,7 @@
 import * as mm from 'mingru-models';
 import * as mr from '../../dist/main.js';
 import post from '../models/post.js';
-import user from '../models/user.js';
+import user, { User } from '../models/user.js';
 import { testBuildAsync } from './common.js';
 
 it('configurableTable', async () => {
@@ -17,25 +17,17 @@ it('configurableTable', async () => {
 });
 
 it('configurableTable with WRAP action', async () => {
-  // Two tables with almost same structure.
-  class UserT extends mm.Table {
-    id = mm.pk();
-    t_id = user.id;
-  }
-  const userT = mm.table(UserT);
-  class PostT extends mm.Table {
-    id = mm.pk();
-    t_id = user.id;
-  }
-  const postT = mm.table(PostT);
+  // Two tables with the almost same structure.
+  class UserUtil extends User {}
+  const userUtil = mm.table(UserUtil);
   class CommonTA extends mm.TableActions {
     insert = mm.insertOne().setInputs();
   }
-  const commonTA = mm.tableActions(userT, CommonTA, { configurableTable: true });
+  const commonTA = mm.tableActions(userUtil, CommonTA, { configurableTable: true });
 
   class ConsumerTA extends mm.TableActions {
-    addUser = commonTA.insert.wrap({ [mr.fromTableParamName]: userT });
-    addPost = commonTA.insert.wrap({ [mr.fromTableParamName]: postT });
+    addUser = commonTA.insert.wrap({ [mr.fromTableParamName]: user });
+    addPost = commonTA.insert.wrap({ [mr.fromTableParamName]: post });
   }
   const consumerTA = mm.tableActions(post, ConsumerTA);
   await testBuildAsync(commonTA, 'configurable-table/wrap/common');
@@ -45,25 +37,17 @@ it('configurableTable with WRAP action', async () => {
 // Based on test `configurableTable with WRAP action`.
 // Changes: use `wrapActionWithFromTableParam` instead.
 it('wrapActionWithFromTableParam', async () => {
-  // Two tables with almost same structure.
-  class UserT extends mm.Table {
-    id = mm.pk();
-    t_id = user.id;
-  }
-  const userT = mm.table(UserT);
-  class PostT extends mm.Table {
-    id = mm.pk();
-    t_id = user.id;
-  }
-  const postT = mm.table(PostT);
+  // Two tables with the almost same structure.
+  class UserUtil extends User {}
+  const userUtil = mm.table(UserUtil);
   class CommonTA extends mm.TableActions {
     insert = mm.insertOne().setInputs();
   }
-  const commonTA = mm.tableActions(userT, CommonTA, { configurableTable: true });
+  const commonTA = mm.tableActions(userUtil, CommonTA, { configurableTable: true });
 
   class ConsumerTA extends mm.TableActions {
-    addUser = commonTA.insert.wrap({ [mr.fromTableParamName]: userT });
-    addPost = mr.wrapActionWithFromTableParam(commonTA.insert, postT);
+    addUser = commonTA.insert.wrap({ [mr.fromTableParamName]: user });
+    addPost = mr.wrapActionWithFromTableParam(commonTA.insert, post);
   }
   const consumerTA = mm.tableActions(post, ConsumerTA);
   await testBuildAsync(commonTA, 'configurable-table/wrap/common');

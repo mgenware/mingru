@@ -56,7 +56,7 @@ class WrapIOProcessor extends BaseIOProcessor {
     for (const key of Object.keys(args)) {
       if (!innerFuncArgs.getByName(key)) {
         throw new Error(
-          `The argument "${key}" doesn't exist in action "${action}". Defined arguments: "${innerFuncArgs.getKeysString()}", your arguments: "${Object.keys(
+          `The argument "${key}" doesn't exist in action "${action}". Available arguments: "${innerFuncArgs.getKeysString()}", your arguments: "${Object.keys(
             args,
           )}"`,
         );
