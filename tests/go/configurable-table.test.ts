@@ -13,7 +13,7 @@ it('configurableTable', async () => {
     transactT = mm.transact(this.insertT, mm.insertOne().from(post).setInputs());
   }
   const ta = mm.tableActions(user, UserTA, { configurableTable: true });
-  await testBuildAsync(ta, 'from-table-input/from/user');
+  await testBuildAsync(ta, 'configurable-table/from/user');
 });
 
 it('configurableTable with WRAP action', async () => {
@@ -38,6 +38,6 @@ it('configurableTable with WRAP action', async () => {
     addPost = commonTA.insert.wrap({ [mr.fromTableParamName]: postT });
   }
   const consumerTA = mm.tableActions(post, ConsumerTA);
-  await testBuildAsync(commonTA, 'from-table-input/wrap/common');
-  await testBuildAsync(consumerTA, 'from-table-input/wrap/consumer');
+  await testBuildAsync(commonTA, 'configurable-table/wrap/common');
+  await testBuildAsync(consumerTA, 'configurable-table/wrap/consumer');
 });
