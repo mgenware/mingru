@@ -84,6 +84,8 @@ export async function testFilesAsync(actualFile: string, expectedFile: string) {
 export interface TestOptions {
   buildCSQL?: boolean;
   testTSTypes?: boolean;
+  runOnly?: boolean;
+  outDir?: string;
 }
 
 export async function testBuildToDirAsync(
@@ -97,17 +99,21 @@ export async function testBuildToDirAsync(
   buildOpts.goFileHeader = '';
   buildOpts.sqlFileHeader = '';
   buildOpts.noOutput = true;
-  const tmpDir = tempy.directory();
-  const tsOutDir = np.join(tmpDir, tsOutDirName);
+  const outDir = testOpts?.outDir ?? tempy.directory();
+  const tsOutDir = np.join(outDir, tsOutDirName);
   buildOpts.tsOutDir = tsOutDir;
 
-  const builder = new mr.Builder(dialect, tmpDir, buildOpts);
+  const builder = new mr.Builder(dialect, outDir, buildOpts);
   await builder.buildAsync(async () => {
     await builder.buildActionsAsync(actions);
     if (testOpts?.buildCSQL) {
       await builder.buildCreateTableSQLFilesAsync(actions.map((a) => a.__getData().table));
     }
   });
+
+  if (testOpts?.runOnly) {
+    return builder;
+  }
 
   const promises: Promise<void>[] = [];
   const expectedDirPath = np.resolve(np.join(destDataDir, buildDir, expectedDirName));
@@ -117,20 +123,20 @@ export async function testBuildToDirAsync(
     expected = np.join(expectedDirPath, file);
     if (file.startsWith('#')) {
       file = file.substr(1);
-      actual = np.join(tmpDir, file);
+      actual = np.join(outDir, file);
       // `file` has changed here, we need to re-generate the expected file.
       expected = np.join(expectedDirPath, file);
     } else if (file === migrationUpFile) {
-      actual = np.join(tmpDir, migrationSQLFile, 'up.sql');
+      actual = np.join(outDir, migrationSQLFile, 'up.sql');
       expected = np.join(expectedDirPath, migrationUpFile);
     } else if (file === migrationDownFile) {
-      actual = np.join(tmpDir, migrationSQLFile, 'down.sql');
+      actual = np.join(outDir, migrationSQLFile, 'down.sql');
       expected = np.join(expectedDirPath, migrationDownFile);
     } else if (np.extname(file)) {
-      actual = np.join(tmpDir, tableSQLFile, file);
+      actual = np.join(outDir, tableSQLFile, file);
     } else {
       // A go file
-      actual = np.join(tmpDir, `${file}_ta.go`);
+      actual = np.join(outDir, `${file}_ta.go`);
       expected = np.join(expectedDirPath, `${file}_ta.go`);
     }
     promises.push(testFilesAsync(actual, expected));
@@ -147,4 +153,5 @@ export async function testBuildToDirAsync(
   }
 
   await Promise.all(promises);
+  return builder;
 }

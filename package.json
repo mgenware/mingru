@@ -21,7 +21,7 @@
     "r": "daizong"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=16.7.0"
   },
   "files": [
     "/dist/**/*.js",
@@ -41,7 +41,6 @@
     "mingru-models": "^0.59.3",
     "mocha": "^9.1.4",
     "source-map-support": "^0.5.21",
-    "tempy": "^2.0.0",
     "typescript": "^4.5.4"
   },
   "dependencies": {
@@ -53,6 +52,7 @@
     "m-fs": "^5.1.0",
     "must-be-err": "^0.1.1",
     "throw-if-arg-empty": "^3.1.0",
+    "tempy": "^2.0.0",
     "to-type-string": "^2.0.0"
   }
 }

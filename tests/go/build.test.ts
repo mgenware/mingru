@@ -1,4 +1,5 @@
 import * as mm from 'mingru-models';
+import { itRejects } from 'it-throws';
 import user, { User } from '../models/user.js';
 import post from '../models/post.js';
 import postReply from '../models/postReply.js';
@@ -15,7 +16,6 @@ it('Single table', async () => {
     );
 
     updatePostTitle = mm.unsafeUpdateAll().set(post.title, mm.sql`${mm.input(post.title)}`);
-
     deleteByID = mm.deleteOne().whereSQL(mm.sql`${post.id} = ${mm.input(post.id)}`);
   }
   const ta = mm.tableActions(post, PostTA);
@@ -200,4 +200,73 @@ it('Multiple tables + Configurable table + virtual table', async () => {
 
   const actions = [userTA, postTA, vUserTA];
   await testBuildToDirAsync(actions, ['post', 'user', 'v_user'], 'multipleTablesConfTable');
+});
+
+it('cleanOutDir = false', async () => {
+  class UserTA extends mm.TableActions {
+    selectProfile = mm.selectRow(user.display_name, user.sig);
+    updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
+    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
+  }
+  const userTA = mm.tableActions(user, UserTA);
+
+  class PostTA extends mm.TableActions {
+    selectPostInfo = mm.selectRow(post.id, post.content, post.user_id.join(user).url_name);
+
+    updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToInput());
+
+    deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
+  }
+  const postTA = mm.tableActions(post, PostTA);
+  const testName = 'cleanOutDir';
+  // First build.
+  const builder = await testBuildToDirAsync([userTA], [], testName, undefined, { runOnly: true });
+  // Second build.
+  await testBuildToDirAsync([postTA], ['post', 'user'], testName, undefined, {
+    outDir: builder.outDir,
+  });
+});
+
+it('cleanOutDir = true', async () => {
+  class UserTA extends mm.TableActions {
+    selectProfile = mm.selectRow(user.display_name, user.sig);
+    updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
+    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
+  }
+  const userTA = mm.tableActions(user, UserTA);
+
+  class PostTA extends mm.TableActions {
+    selectPostInfo = mm.selectRow(post.id, post.content, post.user_id.join(user).url_name);
+
+    updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToInput());
+
+    deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
+  }
+  const postTA = mm.tableActions(post, PostTA);
+  const testName = 'cleanOutDir';
+  // First build.
+  const builder = await testBuildToDirAsync([userTA], [], testName, undefined, { runOnly: true });
+  // Second build.
+  await testBuildToDirAsync(
+    [postTA],
+    ['post'],
+    testName,
+    { cleanOutDir: true },
+    {
+      outDir: builder.outDir,
+    },
+  );
+  await itRejects(
+    () =>
+      testBuildToDirAsync(
+        [postTA],
+        ['user'],
+        testName,
+        { cleanOutDir: true },
+        {
+          outDir: builder.outDir,
+        },
+      ),
+    /no such file or directory/,
+  );
 });
