@@ -99,7 +99,7 @@ export class SetterIO {
             value = dialect.objToSQL(defValue, table);
           }
         } else if (colType.nullable) {
-          value = mm.sql`NULL`;
+          value = mm.sql`${mm.constants.NULL}`;
         } else {
           const type = colType.types[0];
           if (!type) {

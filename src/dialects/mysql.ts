@@ -19,7 +19,7 @@ export class MySQL extends Dialect {
       throw new Error('Value is undefined');
     }
     if (value === null) {
-      return mm.sql`NULL`;
+      return mm.sql`${mm.constants.NULL}`;
     }
     if (typeof value === 'boolean' || typeof value === 'number') {
       const valueString = `${+(value as number)}`;
@@ -61,7 +61,7 @@ export class MySQL extends Dialect {
     if (mode === SQLTypeMode.alias) {
       builder.pushWithSpace(`GENERATED ALWAYS AS (${this.encodeName(col.__getDBName())}) VIRTUAL`);
     } else {
-      builder.pushWithSpace(colType.nullable ? 'NULL' : 'NOT NULL');
+      builder.pushWithSpace(colType.nullable ? mm.constants.NULL : `NOT ${mm.constants.NULL}`);
       if (!colData.noDefaultValueOnCSQL) {
         const defValue = colData.defaultValue;
         if (defValue !== undefined && defValue instanceof mm.SQL === false) {
@@ -71,7 +71,7 @@ export class MySQL extends Dialect {
           builder.pushWithSpace(this.objToSQL(defValue, col.__getSourceTable()));
         } else if (colType.nullable) {
           builder.pushWithSpace('DEFAULT');
-          builder.pushWithSpace('NULL');
+          builder.pushWithSpace(mm.constants.NULL);
         }
       }
       if (colData.uniqueConstraint) {
