@@ -278,7 +278,7 @@ export default class CoreBuilder {
 var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n`;
 
     // Generate mingru member functions.
-    code += '\n// MingruSQLName returns the name of this table.\n';
+    code += `\n// ${defs.tableMemSQLName} returns the name of this table.\n`;
     code += `${this.getFuncSigHead()}${defs.tableMemSQLName}() string {\n`;
     code += `\treturn ${JSON.stringify(tableDBName)}\n`;
     code += '}\n\n';

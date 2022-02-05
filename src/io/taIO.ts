@@ -42,7 +42,7 @@ export class TAIO {
       });
 
     this.className = defs.tableTypeName(taTableName);
-    this.instanceName = defs.tablePascalName(taTableName);
+    this.instanceName = defs.tableInstanceName(taTableName);
     this.tableDBName = taTable.__getDBName();
   }
 }

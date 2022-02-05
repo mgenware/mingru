@@ -18,10 +18,10 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 
 // AddPost ...
 func (mrTable *TableTypePost) AddPost(mrQueryable mingru.Queryable, urlName string, displayName string, sig *string, age int, followerCount *string) (uint64, error) {
-	return UserUtil.Insert(mrQueryable, "db_post", urlName, displayName, sig, age, followerCount)
+	return UserUtil.Insert(mrQueryable, Post, urlName, displayName, sig, age, followerCount)
 }
 
 // AddUser ...
 func (mrTable *TableTypePost) AddUser(mrQueryable mingru.Queryable, urlName string, displayName string, sig *string, age int, followerCount *string) (uint64, error) {
-	return UserUtil.Insert(mrQueryable, "user", urlName, displayName, sig, age, followerCount)
+	return UserUtil.Insert(mrQueryable, User, urlName, displayName, sig, age, followerCount)
 }
