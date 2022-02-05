@@ -101,6 +101,7 @@ export default class CoreBuilder {
 
   private buildActions(): string {
     let code = '';
+    logger.debug(`🏁 Building actions [${this.taIO.tableDBName}]`);
     for (const actionIO of this.taIO.actionIOs) {
       code += `\n${this.buildActionIO(actionIO, undefined)}`;
     }
@@ -113,7 +114,6 @@ export default class CoreBuilder {
     fallbackActionName: string | undefined,
     pri?: boolean,
   ): string {
-    logger.debug(`Building action "${io.action}"`);
     const { action } = io;
     const actionData = action.__getData();
     const actionName = actionData.name || fallbackActionName;
@@ -454,9 +454,8 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n`;
       }
 
       // Check if TypeScript type generation is needed.
-      // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-      if (action.__getData().attrs?.get(mm.ActionAttribute.tsTypeName)) {
-        const tsTypeName = `${action.__getData().attrs?.get(mm.ActionAttribute.tsTypeName)}`;
+      const tsTypeName = action.__getData().attrs?.get(mm.ActionAttribute.tsTypeName);
+      if (tsTypeName && typeof tsTypeName === 'string') {
         tsInterfaceName = tsTypeName;
         tsInterfaceCode = buildTSInterface(structData, tsTypeName);
       }

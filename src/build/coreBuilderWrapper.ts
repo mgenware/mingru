@@ -3,6 +3,7 @@ import * as mm from 'mingru-models';
 import { throwIfEmpty } from 'throw-if-arg-empty';
 import * as np from 'path';
 import * as mfs from 'm-fs';
+import logger from '../logger.js';
 import CoreBuilder from './coreBuilder.js';
 import CoreBuilderContext from './coreBuilderContext.js';
 import { TAIO } from '../io/taIO.js';
@@ -41,14 +42,13 @@ export default class CoreBuilderWrapper {
             throw new Error('`Options.tsOut` is required if TypeScript interfaces are used');
           }
           await Promise.all(
-            builder.tsTypeCollector
-              .values()
-              .map((type) =>
-                mfs.writeFileAsync(
-                  np.join(tsOutDir, stringUtil.toCamelCase(type.name) + '.ts'),
-                  (opts.goFileHeader ?? defs.fileHeader) + type.code,
-                ),
-              ),
+            builder.tsTypeCollector.values().map(async (type) => {
+              logger.debug(`⛱ Building TypeScript definition "${type.name}"`);
+              await mfs.writeFileAsync(
+                np.join(tsOutDir, stringUtil.toCamelCase(type.name) + '.ts'),
+                (opts.goFileHeader ?? defs.fileHeader) + type.code,
+              );
+            }),
           );
         }
       }),

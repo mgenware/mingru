@@ -58,7 +58,6 @@ export default class Builder {
       { dialect: this.dialect },
       this.opts,
     );
-    logger.debug('🎉  Action build succeeded');
   }
 
   async buildCreateTableSQLFilesAsync(tables: mm.Table[]): Promise<void> {
@@ -84,11 +83,10 @@ export default class Builder {
     for (let i = tables.length - 1; i >= 0; i--) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const table = tables[i]!;
+      logger.debug(`🏗 Building table SQL [${table.__getDBName()}]`);
       downSQL += `DROP TABLE IF EXISTS ${table.__getDBName()};\n`;
     }
     await mfs.writeFileAsync(migDownSQLFile, downSQL);
-
-    logger.debug('🎉  SQL generation succeeded');
   }
 
   private checkBuildStatus() {
