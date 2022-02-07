@@ -450,7 +450,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n`;
         this.context.addSharedResultType(
           atomicResultType,
           structData,
-          actionAttrs?.get(mm.ActionAttribute.enableTSResultType) === true,
+          actionAttrs.get(mm.ActionAttribute.enableTSResultType) === true,
         );
       } else {
         // The result type is not shared.
