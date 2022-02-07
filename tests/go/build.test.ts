@@ -138,13 +138,13 @@ it('TS interfaces', async () => {
       .by(user.id)
       .attr(mm.ActionAttribute.groupTypeName, 'Type1')
       .resultTypeNameAttr('Res1')
-      .attr(mm.ActionAttribute.tsTypeName, 'FooInterface');
+      .attr(mm.ActionAttribute.enableTSResultType, true);
 
     selectProfile = mm.selectRow(user.display_name, user.sig).resultTypeNameAttr('Res2');
     selectProfile2 = mm
       .selectRow(user.display_name, user.sig)
       .resultTypeNameAttr('Res3')
-      .attr(mm.ActionAttribute.tsTypeName, 'FooInterface2');
+      .attr(mm.ActionAttribute.enableTSResultType, true);
 
     deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
   }
@@ -156,12 +156,12 @@ it('TS interfaces', async () => {
       .by(post.id)
       .attr(mm.ActionAttribute.groupTypeName, 'Type1')
       .resultTypeNameAttr('Res1')
-      .attr(mm.ActionAttribute.tsTypeName, 'BarInterface');
+      .attr(mm.ActionAttribute.enableTSResultType, true);
 
     selectPostInfo = mm
       .selectRow(post.content, post.user_id.join(user).url_name)
       .attr(mm.ActionAttribute.groupTypeName, 'Type2')
-      .attr(mm.ActionAttribute.tsTypeName, 'BarInterface2');
+      .attr(mm.ActionAttribute.enableTSResultType, true);
 
     selectTime = mm.selectRow(post.n_datetime).resultTypeNameAttr('Res3');
   }

@@ -24,7 +24,6 @@ import LinesBuilder from './linesBuilder.js';
 import * as stringUtils from '../lib/stringUtils.js';
 import { BuildOptions } from './buildOptions.js';
 import CoreBuilderContext from './coreBuilderContext.js';
-import { buildTSInterface } from './tsCodeBuilder.js';
 
 function joinParams(arr: string[]): string {
   return arr.join(', ');
@@ -442,22 +441,20 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n`;
       );
 
       // Generate result type.
+      const actionAttrs = action.__getData().attrs;
       // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-      if (action.__getData().attrs?.get(mm.ActionAttribute.resultTypeName)) {
+      if (actionAttrs?.get(mm.ActionAttribute.resultTypeName)) {
         // A custom result type name can be reused. Thus we add it to the context.
-        this.context.addSharedResultType(atomicResultType, structData);
+        this.context.addSharedResultType(
+          atomicResultType,
+          structData,
+          actionAttrs?.get(mm.ActionAttribute.enableTSResultType) === true,
+        );
       } else {
         // The result type is not shared.
         headerCode = go.appendWithSeparator(headerCode, go.struct(structData));
 
         this.imports.addVars(selectedFieldArray);
-      }
-
-      // Check if TypeScript type generation is needed.
-      const tsTypeName = action.__getData().attrs?.get(mm.ActionAttribute.tsTypeName);
-      if (tsTypeName && typeof tsTypeName === 'string') {
-        tsInterfaceName = tsTypeName;
-        tsInterfaceCode = buildTSInterface(structData, tsTypeName);
       }
     }
 

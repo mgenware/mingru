@@ -1,20 +1,35 @@
+import mustBeErr from 'must-be-err';
 import { GoStructData } from './goCodeUtil.js';
-import { getAtomicTypeInfo } from '../lib/varInfo.js';
+import { getAtomicTypeInfo, TypeInfo, CompoundTypeInfo } from '../lib/varInfo.js';
 
-function goTypeToTSType(type: string): string {
-  switch (type) {
+function goTypeToTSType(type: TypeInfo): { type: string; optional: boolean } {
+  const typeString = getAtomicTypeInfo(type).fullTypeName;
+  const isArray = type instanceof CompoundTypeInfo && type.isArray;
+  const optional = type instanceof CompoundTypeInfo && type.isPointer;
+
+  let tsTypeString;
+  switch (typeString) {
     case 'bool':
-      return 'boolean';
+      tsTypeString = 'boolean';
+      break;
     case 'int':
     case 'uint':
     case 'uint64':
     case 'double':
-      return 'number';
+      tsTypeString = 'number';
+      break;
     case 'string':
-      return 'string';
+    case 'time.Time':
+      tsTypeString = 'string';
+      break;
     default:
       throw new Error(`Unsupported Go type "${type}"`);
   }
+
+  if (isArray) {
+    return { type: `${tsTypeString}[]`, optional };
+  }
+  return { type: tsTypeString, optional };
 }
 
 export function buildTSInterface(structData: GoStructData, typeName?: string) {
@@ -23,8 +38,15 @@ export function buildTSInterface(structData: GoStructData, typeName?: string) {
     if (structData.ignoredMembers.has(mem.name)) {
       continue;
     }
-    const tsType = goTypeToTSType(getAtomicTypeInfo(mem.type).fullTypeName);
-    code += `  ${mem.camelCaseName()}?: ${tsType};\n`;
+    try {
+      const tsType = goTypeToTSType(mem.type);
+      code += `  ${mem.camelCaseName()}?: ${tsType.type};\n`;
+    } catch (err) {
+      mustBeErr(err);
+      throw new Error(
+        `Error generating TS property ${mem.name} in ${structData.typeName}, ${err.message}`,
+      );
+    }
   }
   code += '}\n';
   return code;

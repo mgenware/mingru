@@ -12,6 +12,7 @@ import * as go from './goCodeUtil.js';
 import * as defs from '../def/defs.js';
 import { ActionToIOOptions } from '../io/actionToIOOptions.js';
 import * as stringUtil from '../lib/stringUtils.js';
+import { buildTSInterface } from './tsCodeBuilder.js';
 
 // Wraps a `CoreBuilder` and handles input options and file operations.
 export default class CoreBuilderWrapper {
@@ -64,6 +65,9 @@ export default class CoreBuilderWrapper {
       resultTypesCode += go.sep('Result types') + '\n';
       // Sort type names alphabetically.
       resultTypes.sort((a, b) => a.localeCompare(b));
+
+      let tsCode = '';
+      let firstTsMember = true;
       for (const name of resultTypes) {
         const resultTypeStructData = context.resultTypes[name];
         if (!resultTypeStructData) {
@@ -72,6 +76,20 @@ export default class CoreBuilderWrapper {
         imports.addVars(resultTypeStructData.members);
         resultTypesCode += go.struct(resultTypeStructData);
         resultTypesCode += '\n';
+
+        if (opts.tsOutDir && context.tsResultTypes.has(name)) {
+          if (firstTsMember) {
+            firstTsMember = false;
+          } else {
+            tsCode += '\n';
+          }
+          tsCode += buildTSInterface(resultTypeStructData);
+        }
+      }
+
+      if (opts.tsOutDir) {
+        const outFile = np.join(opts.tsOutDir, 'types.ts');
+        await mfs.writeFileAsync(outFile, (opts.goFileHeader ?? '') + tsCode);
       }
     }
 
