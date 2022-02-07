@@ -6,9 +6,7 @@ export { default as CoreBuilder } from './build/coreBuilder.js';
 export { default as CoreBuilderWrapper } from './build/coreBuilderWrapper.js';
 export { default as CoreBuilderContext } from './build/coreBuilderContext.js';
 export { default as CSQLBuilder } from './build/csqlBuilder.js';
-export * from './def/pub.js';
 export * from './build/buildOptions.js';
-export * from './helper.js';
 
 // IO types.
 export * from './io/selectIO.js';

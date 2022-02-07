@@ -23,6 +23,6 @@ export interface ActionToIOOptions {
   // TRANSACT members.
   actionName?: string;
 
-  // Mirror of `mingru-models.tableActions`'s `configurableTable` option.
-  configurableTable?: boolean;
+  // Mirror of `mingru-models.tableActions`'s `configurableTableName` option.
+  configurableTableName?: string;
 }

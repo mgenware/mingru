@@ -246,8 +246,8 @@ export class SelectIOProcessor extends BaseIOProcessor {
     const offsetTypeInfo = new VarInfo('offset', defs.intTypeInfo);
     const funcArgs = new VarList(`Func args of action "${this.action}"`, true);
     funcArgs.add(defs.dbxQueryableVar);
-    if (this.configurableTable()) {
-      funcArgs.add(defs.fromTableVarInfo);
+    if (this.configurableTableName) {
+      funcArgs.add(defs.cfTableVarInfo(this.configurableTableName));
     }
     const execArgs = new VarList(`Exec args of action "${this.action}"`, true);
 
@@ -700,8 +700,8 @@ export class SelectIOProcessor extends BaseIOProcessor {
     const tableDBName = table.__getDBName();
     const encodedTableName = e(tableDBName);
     const segList: StringSegment[] = ['FROM '];
-    if (this.configurableTable()) {
-      segList.push({ code: defs.getFromTableCode });
+    if (this.configurableTableName) {
+      segList.push({ code: defs.cfTableUsageCode(this.configurableTableName) });
     } else {
       segList.push(encodedTableName);
     }

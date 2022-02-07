@@ -1,7 +1,6 @@
 import * as mm from 'mingru-models';
 import { VarInfo, AtomicTypeInfo, typeInfoToPointer } from '../lib/varInfo.js';
 import * as def from './core.js';
-import { fromTableParamName } from './pub.js';
 
 export const errorType = new AtomicTypeInfo('error', null, null);
 export const intTypeInfo = new AtomicTypeInfo('int', 0, null);
@@ -21,6 +20,3 @@ export const pageSizeVar = new VarInfo(def.pageSizeVarName, intTypeInfo);
 export const hasNextVar = new VarInfo(def.hasNextVarName, boolTypeInfo);
 
 export const dbxTableType = new AtomicTypeInfo('Table', null, def.dbxNamespace);
-
-// The param type of "FROM as input" table param.
-export const fromTableVarInfo = new VarInfo(fromTableParamName, dbxTableType);

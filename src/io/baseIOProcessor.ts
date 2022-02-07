@@ -3,6 +3,10 @@ import { throwIfFalsy } from 'throw-if-arg-empty';
 import { ActionToIOOptions } from './actionToIOOptions.js';
 
 export default class BaseIOProcessor {
+  get configurableTableName(): string | undefined {
+    return this.opt.configurableTableName;
+  }
+
   constructor(public action: mm.Action, public opt: ActionToIOOptions) {
     throwIfFalsy(action, 'action');
     throwIfFalsy(opt, 'opt');
@@ -27,10 +31,5 @@ export default class BaseIOProcessor {
       throw new Error(`Action name is empty, action "${this.action}"`);
     }
     return name;
-  }
-
-  configurableTable(): boolean {
-    const { opt } = this;
-    return !!opt.configurableTable;
   }
 }

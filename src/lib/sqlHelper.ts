@@ -137,8 +137,8 @@ export function handleNonSelectSQLFrom(
   table: mm.Table,
 ): StringSegment[] {
   const e = processor.opt.dialect.encodeName;
-  return processor.configurableTable()
-    ? [{ code: defs.getFromTableCode }]
+  return processor.configurableTableName
+    ? [{ code: defs.cfTableUsageCode(processor.configurableTableName) }]
     : [`${e(table.__getDBName())}`];
 }
 

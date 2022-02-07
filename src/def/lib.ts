@@ -1,5 +1,7 @@
 import * as su from '../lib/stringUtils.js';
 import * as core from './core.js';
+import * as types from './types.js';
+import { VarInfo } from '../lib/varInfo.js';
 
 export function tablePascalName(tableName: string): string {
   return su.toPascalCase(tableName);
@@ -29,4 +31,13 @@ export function actionCallPath(
   const funcName = actionPascalName(actionName);
   const resolvedTableName = className ? tablePascalName(className) : core.tableObjSelf;
   return resolvedTableName + '.' + (isPrivate ? su.lowercaseFirstChar(funcName) : funcName);
+}
+
+// Gets the generated Go code to get table name from configurable table param..
+export function cfTableUsageCode(tableParamName: string) {
+  return `${tableParamName}.${core.tableMemSQLName}()`;
+}
+
+export function cfTableVarInfo(tableParamName: string) {
+  return new VarInfo(tableParamName, types.dbxTableType);
 }

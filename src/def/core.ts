@@ -1,5 +1,3 @@
-import { fromTableParamName } from './pub.js';
-
 export const mrQueryableParam = 'mrQueryable';
 export const dbParam = 'db';
 export const limitVarName = 'limit';
@@ -25,7 +23,5 @@ export const queryParamsVarName = 'queryParams';
 
 // The function name of `mingru.Table` used to get the table name.
 export const tableMemSQLName = 'MingruSQLName';
-// The generated Go code used to get the table name from "FROM as input" table param.
-export const getFromTableCode = `${fromTableParamName}.${tableMemSQLName}()`;
 // The current instance name of a generated table member function.
 export const tableObjSelf = 'mrTable';

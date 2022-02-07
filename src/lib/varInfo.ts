@@ -4,7 +4,6 @@ import { throwIfFalsy } from 'throw-if-arg-empty';
 import { toCamelCase, toPascalCase } from './stringUtils.js';
 // Since `VarInfo` is used in `def/defs`, we have to reference constants from
 // individual files.
-import { fromTableParamName } from '../def/pub.js';
 import { tableInstanceName } from '../def/lib.js';
 
 export class AtomicTypeInfo {

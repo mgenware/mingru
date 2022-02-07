@@ -35,7 +35,7 @@ export class TAIO {
           action,
           {
             ...opt,
-            configurableTable: taOpt.configurableTable,
+            configurableTableName: taOpt.configurableTableName,
           },
           `action "${taTableName}.${actionName}"`,
         );
