@@ -101,7 +101,7 @@ class WrapIOProcessor extends BaseIOProcessor {
         const input = args[arg.name];
         // If argument is a constant, update the `innerExecArgs`.
         if (input instanceof mm.ValueRef === false && input !== undefined) {
-          innerExecArgs.list[i] = VarInfo.withValue(arg, this.constantToVarValue(input));
+          innerExecArgs.list[i] = VarInfo.withValue(arg, this.wrapArgValueToVarValue(input));
         }
       });
 
@@ -130,7 +130,7 @@ class WrapIOProcessor extends BaseIOProcessor {
       const input = args[arg.name];
       // Update all arguments in `execArgs` that have been overwritten as constant.
       if (input instanceof mm.ValueRef === false && input !== undefined) {
-        execArgs.add(VarInfo.withValue(arg, this.constantToVarValue(input)));
+        execArgs.add(VarInfo.withValue(arg, this.wrapArgValueToVarValue(input)));
       } else {
         execArgs.add(arg);
       }
@@ -140,7 +140,7 @@ class WrapIOProcessor extends BaseIOProcessor {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  private constantToVarValue(value: unknown): VarValue {
+  private wrapArgValueToVarValue(value: mm.WrapArgValue): VarValue {
     if (value instanceof mm.ValueRef) {
       return value;
     }
@@ -150,7 +150,8 @@ class WrapIOProcessor extends BaseIOProcessor {
     if (value === null) {
       return mm.constants.NULL;
     }
-    return `${value}`;
+    // string or number.
+    return value.toString();
   }
 }
 

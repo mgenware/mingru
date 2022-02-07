@@ -193,7 +193,9 @@ export default class CoreBuilder {
         returnValueStrings.push(
           `fmt.Errorf("The array argument \`${arrayParam.name}\` cannot be empty")`,
         );
-        inputArrayChecks.push(`if len(${arrayParam.valueOrName('camelCase')}) == 0 {`);
+        inputArrayChecks.push(
+          `if len(${go.transformVarInfo(arrayParam, go.VarInfoNameCase.camelCase)}) == 0 {`,
+        );
         inputArrayChecks.increaseIndent();
         inputArrayChecks.push(`return ${returnValueStrings.join(', ')}`);
         inputArrayChecks.decreaseIndent();
@@ -701,7 +703,7 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n`;
       // Generating the calling code of this member
       const queryParamsCode = mActionIO.funcArgs.list
         .slice(1) // Strip the first mrQueryable param
-        .map((p) => p.valueOrName('camelCase'))
+        .map((p) => go.transformVarInfo(p, go.VarInfoNameCase.camelCase))
         .join(', ');
 
       // If this is a temp member (created inside transaction),
@@ -781,15 +783,18 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n`;
       builder.push(`var ${defs.queryParamsVarName} []interface{}`);
       for (const param of args) {
         if (param.type instanceof CompoundTypeInfo && param.type.isArray) {
-          builder.push(`for _, item := range ${param.valueOrName('camelCase')} {`);
+          builder.push(
+            `for _, item := range ${go.transformVarInfo(param, go.VarInfoNameCase.camelCase)} {`,
+          );
           builder.increaseIndent();
           builder.push(`${defs.queryParamsVarName} = append(${defs.queryParamsVarName}, item)`);
           builder.decreaseIndent();
           builder.push('}');
         } else {
           builder.push(
-            `${defs.queryParamsVarName} = append(${defs.queryParamsVarName}, ${param.valueOrName(
-              'camelCase',
+            `${defs.queryParamsVarName} = append(${defs.queryParamsVarName}, ${go.transformVarInfo(
+              param,
+              go.VarInfoNameCase.camelCase,
             )})`,
           );
         }
@@ -810,10 +815,8 @@ var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n`;
         .map(
           (p) =>
             `${
-              p.type instanceof CompoundTypeInfo && p.type.isArray
-                ? `...${p.valueOrName('camelCase')}`
-                : p.valueOrName('camelCase')
-            }`,
+              p.type instanceof CompoundTypeInfo && p.type.isArray ? '...' : ''
+            }${go.transformVarInfo(p, go.VarInfoNameCase.camelCase)}`,
         )
         .join(', ');
     }

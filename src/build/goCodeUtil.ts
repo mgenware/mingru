@@ -1,9 +1,11 @@
+import * as mm from 'mingru-models';
 import { JSONKeyStyle } from './buildOptions.js';
 import { VarInfo, getAtomicTypeInfo } from '../lib/varInfo.js';
 import { StringSegment } from '../dialect.js';
 import CodeStringBuilder from '../lib/codeStringBuilder.js';
 import * as stringUtils from '../lib/stringUtils.js';
 import LinesBuilder from './linesBuilder.js';
+import { tableInstanceName } from '../def/lib.js';
 
 export class FuncSignature {
   constructor(
@@ -307,4 +309,31 @@ export function appendWithSeparator(code: string, append: string): string {
     return append;
   }
   return `${code}\n${append}`;
+}
+
+export enum VarInfoNameCase {
+  none,
+  camelCase,
+  pascalCase,
+}
+
+export function transformVarInfo(v: VarInfo, nameCase: VarInfoNameCase): string {
+  const { value } = v;
+  if (value !== undefined) {
+    if (value instanceof mm.ValueRef) {
+      return value.path;
+    }
+    if (value instanceof mm.Table) {
+      return tableInstanceName(value.__getData().name);
+    }
+    return value;
+  }
+  switch (nameCase) {
+    case VarInfoNameCase.camelCase:
+      return v.camelCaseName();
+    case VarInfoNameCase.pascalCase:
+      return v.pascalCaseName();
+    default:
+      return v.name;
+  }
 }

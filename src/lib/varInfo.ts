@@ -2,9 +2,6 @@
 import * as mm from 'mingru-models';
 import { throwIfFalsy } from 'throw-if-arg-empty';
 import { toCamelCase, toPascalCase } from './stringUtils.js';
-// Since `VarInfo` is used in `def/defs`, we have to reference constants from
-// individual files.
-import { tableInstanceName } from '../def/lib.js';
 
 export class AtomicTypeInfo {
   moduleName = '';
@@ -135,33 +132,6 @@ export class VarInfo {
 
   pascalCaseName(): string {
     return toPascalCase(this.name);
-  }
-
-  valueOrName(nameCase: 'camelCase' | 'pascalCase' | 'original'): string {
-    const { value, name } = this;
-    if (value !== undefined) {
-      if (typeof value === 'string') {
-        return value;
-      }
-      if (value instanceof mm.ValueRef) {
-        return value.path;
-      }
-      // `value` is a table.
-
-      // Check configuration from table param.
-      if (name === fromTableParamName) {
-        return tableInstanceName(value.__getData().name);
-      }
-      return JSON.stringify(value.__getDBName());
-    }
-    switch (nameCase) {
-      case 'camelCase':
-        return this.camelCaseName();
-      case 'pascalCase':
-        return this.pascalCaseName();
-      default:
-        return this.name;
-    }
   }
 
   get hasValueRef(): boolean {

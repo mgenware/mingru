@@ -185,7 +185,7 @@ it('Multiple tables + Configurable table + virtual table', async () => {
     updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToInput());
     deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
   }
-  const postTA = mm.tableActions(post, PostTA, { configurableTable: true });
+  const postTA = mm.tableActions(post, PostTA, { configurableTableName: 'mrFromTable' });
 
   // Mirror of the user table.
   class VUser extends User {}
@@ -196,7 +196,7 @@ it('Multiple tables + Configurable table + virtual table', async () => {
     updateProfile = mm.unsafeUpdateAll().setInputs(vUser.sig);
     deleteByID = mm.deleteOne().whereSQL(vUser.id.isEqualToInput());
   }
-  const vUserTA = mm.tableActions(vUser, VUserTA, { configurableTable: true });
+  const vUserTA = mm.tableActions(vUser, VUserTA, { configurableTableName: 'mrFromTable' });
 
   const actions = [userTA, postTA, vUserTA];
   await testBuildToDirAsync(actions, ['post', 'user', 'v_user'], 'multipleTablesConfTable');
