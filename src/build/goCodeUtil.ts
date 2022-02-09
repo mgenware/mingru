@@ -36,6 +36,8 @@ export class MemberTagUtil {
 
 export class GoStructData {
   members: VarInfo[];
+  ignoredMembers: Set<string>;
+  omitEmptyMembers: Set<string>;
 
   constructor(
     public typeName: string,
@@ -43,11 +45,13 @@ export class GoStructData {
     members: Iterable<VarInfo>,
     public jsonKeyStyle: JSONKeyStyle | null,
     // Key: variable name.
-    public ignoredMembers: Set<string>,
+    ignoredMembers: Set<string> | null,
     // Key: variable name.
-    public omitEmptyMembers: Set<string>,
+    omitEmptyMembers: Set<string> | null,
   ) {
     this.members = [...members].sort((a, b) => a.name.localeCompare(b.name));
+    this.ignoredMembers = ignoredMembers ?? new Set();
+    this.omitEmptyMembers = omitEmptyMembers ?? new Set();
   }
 
   merge(oth: GoStructData): GoStructData {

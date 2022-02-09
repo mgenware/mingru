@@ -48,7 +48,7 @@ export default class Builder {
     await fs.cp(workingDir, this.outDir, { recursive: true });
   }
 
-  async buildActionsAsync(actions: mm.TableActions[]): Promise<void> {
+  async buildActionsAsync(actions: Array<mm.TableActions | mm.Table>): Promise<void> {
     throwIfFalsy(actions, 'actions');
     this.checkBuildStatus();
     const coreBuilderWrapper = new CoreBuilderWrapper();

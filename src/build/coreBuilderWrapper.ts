@@ -14,22 +14,35 @@ import { ActionToIOOptions } from '../io/actionToIOOptions.js';
 import * as stringUtil from '../lib/stringUtils.js';
 import { buildTSInterface } from './tsCodeBuilder.js';
 
+function dedup<T>(arr: T[]): T[] {
+  return [...new Set(arr)];
+}
+
 // Wraps a `CoreBuilder` and handles input options and file operations.
 export default class CoreBuilderWrapper {
   async buildAsync(
-    tas: mm.TableActions[],
+    source: Array<mm.TableActions | mm.Table>,
     outDir: string,
     ioOpts: ActionToIOOptions,
     opts: BuildOptions,
   ) {
-    throwIfEmpty(tas, 'tas');
-    // Remove duplicate values.
-    // eslint-disable-next-line no-param-reassign
-    tas = [...new Set(tas)];
+    throwIfEmpty(source, 'source');
+    let actions: mm.TableActions[] = [];
+    let tables: mm.Table[] = [];
+    for (const item of source) {
+      if (item instanceof mm.TableActions) {
+        actions.push(item);
+      } else {
+        tables.push(item);
+      }
+    }
+
+    actions = dedup(actions);
+    tables = dedup(tables);
 
     const context = new CoreBuilderContext();
     await Promise.all(
-      tas.map(async (ta) => {
+      actions.map(async (ta) => {
         const taTable = ta.__getData().table;
         const taIO = new TAIO(ta, ioOpts);
         const builder = new CoreBuilder(taIO, opts, context);
@@ -55,11 +68,66 @@ export default class CoreBuilderWrapper {
       }),
     );
 
+    await Promise.all([
+      this.buildTypes(context, outDir, opts),
+      this.buildTables(tables, context, outDir, opts),
+    ]);
+  }
+
+  private async buildTables(
+    tables: mm.Table[],
+    context: CoreBuilderContext,
+    outDir: string,
+    opts: BuildOptions,
+  ) {
+    // Tables that are included in `context.tables` don't need to be built again.
+    // eslint-disable-next-line no-param-reassign
+    tables = tables.filter((t) => !context.tables.has(t));
+    if (!tables.length) {
+      return;
+    }
+
+    let code = `package ${opts.packageName || defs.defaultPackageName}\n\n`;
+    let first = true;
+    for (const t of tables) {
+      if (first) {
+        first = false;
+      } else {
+        code += '\n';
+      }
+      const tableName = t.__getData().name;
+      const className = defs.tableTypeName(tableName);
+      const instanceName = defs.tableInstanceName(tableName);
+      code += go.struct(
+        new go.GoStructData(
+          className,
+          [], // Members
+          null, // JSONKeyStyle
+          null, // ignoredMembers
+          null, // omitEmptyMembers
+        ),
+      );
+
+      // Generate table instance.
+      code += `\n// ${instanceName} ...
+var ${instanceName} = &${className}{}\n`;
+
+      // Generate mingru member functions.
+      code += `\n// ${defs.tableMemSQLName} returns the name of this table.\n`;
+      code += `func (${defs.tableObjSelf} *${className}) ${defs.tableMemSQLName}() string {\n`;
+      code += `\treturn ${JSON.stringify(t.__getDBName())}\n`;
+      code += '}\n';
+    }
+
+    const outFile = np.join(outDir, 'tables.go');
+    await mfs.writeFileAsync(outFile, (opts.goFileHeader ?? '') + code);
+  }
+
+  private async buildTypes(context: CoreBuilderContext, outDir: string, opts: BuildOptions) {
     let code = `package ${opts.packageName || defs.defaultPackageName}\n\n`;
     const imports = new go.ImportList();
     let resultTypesCode = '';
 
-    // Generate shared result types.
     const resultTypes = Object.keys(context.resultTypes);
     if (resultTypes.length) {
       resultTypesCode += go.sep('Result types') + '\n';

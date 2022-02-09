@@ -83,7 +83,11 @@ export default class CoreBuilder {
   }
 
   build(): string {
-    const { options } = this;
+    const { options, taIO } = this;
+    const action = taIO.ta;
+    this.context.actions.add(action);
+    this.context.tables.add(action.__getData().table);
+
     let code = options.goFileHeader ?? defs.fileHeader;
     code += `package ${options.packageName || defs.defaultPackageName}\n\n`;
 
@@ -269,14 +273,14 @@ export default class CoreBuilder {
         className,
         [], // Members
         null, // JSONKeyStyle
-        new Set<string>(),
-        new Set<string>(),
+        null, // ignoredMembers
+        null, // omitEmptyMembers
       ),
     );
 
     // Generate table instance.
     code += `\n// ${instanceName} ...
-var ${stringUtils.toPascalCase(instanceName)} = &${className}{}\n`;
+var ${instanceName} = &${className}{}\n`;
 
     // Generate mingru member functions.
     code += `\n// ${defs.tableMemSQLName} returns the name of this table.\n`;
