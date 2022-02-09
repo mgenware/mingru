@@ -270,3 +270,16 @@ it('cleanOutDir = true', async () => {
     /no such file or directory/,
   );
 });
+
+it('tables.go', async () => {
+  class UserTA extends mm.TableActions {
+    selectByID = mm
+      .selectRow(user.id)
+      .by(user.id)
+      .attr(mm.ActionAttribute.groupTypeName, 'Type1')
+      .resultTypeNameAttr('Res1');
+  }
+  const userTA = mm.tableActions(user, UserTA);
+  const actions = [userTA, user, post, postReply];
+  await testBuildToDirAsync(actions, ['#tables.go', 'user'], 'tablesGo');
+});

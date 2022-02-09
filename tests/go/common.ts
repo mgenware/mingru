@@ -89,7 +89,7 @@ export interface TestOptions {
 }
 
 export async function testBuildToDirAsync(
-  actions: mm.TableActions[],
+  actions: Array<mm.TableActions | mm.Table>,
   files: string[],
   expectedDirName: string,
   buildOpts?: mr.BuildOptions,
@@ -107,7 +107,9 @@ export async function testBuildToDirAsync(
   await builder.buildAsync(async () => {
     await builder.buildActionsAsync(actions);
     if (testOpts?.buildCSQL) {
-      await builder.buildCreateTableSQLFilesAsync(actions.map((a) => a.__getData().table));
+      await builder.buildCreateTableSQLFilesAsync(
+        actions.map((a) => (a instanceof mm.TableActions ? a.__getData().table : a)),
+      );
     }
   });
 
