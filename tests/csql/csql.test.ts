@@ -34,7 +34,7 @@ it('Multiple PKs', async () => {
     user2 = mm.pk(user.id);
     d = mm.uBigInt().default(12);
   }
-  const t = mm.table(Post, 'db_post');
+  const t = mm.table(Post, { dbName: 'db_post' });
   await testBuildAsync(t, 'multiplePKs/post');
 });
 
@@ -105,7 +105,7 @@ it('Default empty values', async () => {
     d = mm.uInt().nullable;
     e = mm.uInt();
   }
-  const t = mm.table(Post, 'db_post');
+  const t = mm.table(Post, { dbName: 'db_post' });
   await testBuildAsync(t, 'defaultZero/post');
 });
 

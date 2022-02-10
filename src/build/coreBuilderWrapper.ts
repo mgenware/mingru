@@ -1,6 +1,5 @@
 /* eslint-disable class-methods-use-this */
 import * as mm from 'mingru-models';
-import { throwIfEmpty } from 'throw-if-arg-empty';
 import * as np from 'path';
 import * as mfs from 'm-fs';
 import logger from '../logger.js';
@@ -19,14 +18,14 @@ function dedup<T>(arr: T[]): T[] {
 }
 
 // Wraps a `CoreBuilder` and handles input options and file operations.
+// Returns a distinct list of tables from source.
 export default class CoreBuilderWrapper {
   async buildAsync(
     source: Array<mm.TableActions | mm.Table>,
     outDir: string,
     ioOpts: ActionToIOOptions,
     opts: BuildOptions,
-  ) {
-    throwIfEmpty(source, 'source');
+  ): Promise<mm.Table[]> {
     let actions: mm.TableActions[] = [];
     let tables: mm.Table[] = [];
     for (const item of source) {
@@ -72,6 +71,8 @@ export default class CoreBuilderWrapper {
       this.buildTypes(context, outDir, opts),
       this.buildTables(tables, context, outDir, opts),
     ]);
+
+    return tables;
   }
 
   private async buildTables(

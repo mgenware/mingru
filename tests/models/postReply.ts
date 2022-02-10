@@ -9,4 +9,4 @@ class PostReply extends mm.Table {
   created = mm.datetime();
 }
 
-export default mm.table(PostReply, 'post_cmt_rpl');
+export default mm.table(PostReply, { dbName: 'post_cmt_rpl' });

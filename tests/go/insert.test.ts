@@ -29,7 +29,7 @@ it('insertOne', async () => {
     birthDate = mm.date();
     hireDate = mm.date();
   }
-  const employee = mm.table(Employee, 'employees');
+  const employee = mm.table(Employee, { dbName: 'employees' });
   class EmployeeTA extends mm.TableActions {
     insertT = mm.insertOne().setInputs();
   }
@@ -81,7 +81,7 @@ it('Set auto-increment as input', async () => {
     birthDate = mm.date();
     hireDate = mm.date();
   }
-  const employee = mm.table(Employee, 'employees');
+  const employee = mm.table(Employee, { dbName: 'employees' });
   class EmployeeTA extends mm.TableActions {
     insertT = mm.insertOne().setInputs(employee.id).setInputs();
   }

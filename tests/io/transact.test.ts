@@ -119,7 +119,7 @@ it('TX member IOs', () => {
     id = mm.pk(mm.int()).autoIncrement.setDBName('emp_no');
     firstName = mm.varChar(50);
   }
-  const employee = mm.table(Employee, 'employees');
+  const employee = mm.table(Employee, { dbName: 'employees' });
   class EmployeeTA extends mm.TableActions {
     insert = mm.insertOne().setInputs();
     insert2 = mm

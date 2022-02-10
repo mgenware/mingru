@@ -30,7 +30,7 @@ it('encodeColumnName', () => {
 
 it('encodeTableName', () => {
   class Table extends mm.Table {}
-  const t = mm.table(Table, 'haha');
+  const t = mm.table(Table, { dbName: 'haha' });
   eq(dialect.encodeTableName(user), '`user`');
   eq(dialect.encodeTableName(t), '`haha`');
 });

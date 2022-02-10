@@ -18,4 +18,4 @@ export class Post extends mm.Table {
   m_user_id = mm.fk(user.id).setDBName('my_user_id');
 }
 
-export default mm.table(Post, 'db_post');
+export default mm.table(Post, { dbName: 'db_post' });

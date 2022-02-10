@@ -9,7 +9,7 @@ it('Declare return types', async () => {
     id = mm.pk(mm.int()).autoIncrement.setDBName('emp_no');
     firstName = mm.varChar(50);
   }
-  const employee = mm.table(Employee, 'employees');
+  const employee = mm.table(Employee, { dbName: 'employees' });
   class EmployeeTA extends mm.TableActions {
     insert = mm.insertOne().setInputs();
     insert2 = mm
@@ -30,7 +30,7 @@ it('Pass values in child actions (no return value declaration)', async () => {
     id = mm.pk(mm.int()).autoIncrement.setDBName('emp_no');
     firstName = mm.varChar(50);
   }
-  const employee = mm.table(Employee, 'employees');
+  const employee = mm.table(Employee, { dbName: 'employees' });
   class EmployeeTA extends mm.TableActions {
     getFirstName = mm.selectField(employee.firstName).by(employee.id);
     insert = mm.insertOne().setInputs();
@@ -51,7 +51,7 @@ it('Pass values in child actions and declare return values', async () => {
     id = mm.pk(mm.int()).autoIncrement.setDBName('emp_no');
     firstName = mm.varChar(50);
   }
-  const employee = mm.table(Employee, 'employees');
+  const employee = mm.table(Employee, { dbName: 'employees' });
   class EmployeeTA extends mm.TableActions {
     getFirstName = mm.selectField(employee.firstName).by(employee.id);
     insert1 = mm
@@ -80,7 +80,7 @@ it('Return multiple values', async () => {
     birthDate = mm.date();
     hireDate = mm.date();
   }
-  const employee = mm.table(Employee, 'employees');
+  const employee = mm.table(Employee, { dbName: 'employees' });
   class EmployeeTA extends mm.TableActions {
     insertEmp = mm.insertOne().setInputs();
   }
@@ -90,7 +90,7 @@ it('Return multiple values', async () => {
     name = mm.varChar(40).setDBName('dept_name');
   }
 
-  const dept = mm.table(Dept, 'departments');
+  const dept = mm.table(Dept, { dbName: 'departments' });
   class DeptTA extends mm.TableActions {
     insertDept = mm.insertOne().setInputs();
   }
@@ -101,7 +101,7 @@ it('Return multiple values', async () => {
     fromDate = mm.date();
     toDate = mm.date();
   }
-  const deptManager = mm.table(DeptManager, 'dept_manager');
+  const deptManager = mm.table(DeptManager, { dbName: 'dept_manager' });
   const empNo = 'empNo';
   const deptNo = 'deptNo';
   class DeptManagerTA extends mm.TableActions {
@@ -142,7 +142,7 @@ it('Inline member actions', async () => {
     title = mm.varChar(200);
   }
 
-  const post2 = mm.table(Post, 'db_post');
+  const post2 = mm.table(Post, { dbName: 'db_post' });
   class PostTA extends mm.TableActions {
     insertCore = mm.insertOne().setInputs();
     insert = mm.transact(
@@ -198,7 +198,7 @@ it('Use the return value of a TX', async () => {
     id = mm.pk(mm.int()).autoIncrement.setDBName('emp_no');
     firstName = mm.varChar(50);
   }
-  const employee = mm.table(Employee, 'employees');
+  const employee = mm.table(Employee, { dbName: 'employees' });
   class EmployeeTA extends mm.TableActions {
     insert = mm.insertOne().setInputs();
     insert2 = mm
