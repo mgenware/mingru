@@ -84,14 +84,19 @@ export default class Builder {
   private async buildCreateTableSQL(tables: mm.Table[]): Promise<void> {
     // Remove duplicate values.
     // eslint-disable-next-line no-param-reassign
-    tables = [...new Set(tables)];
     const csqlBuilders = await Promise.all(tables.map((t) => this.buildCSQL(t)));
 
     // Generate migration up file.
     const migUpSQLFile = np.join(this.workingDir, migSQLDir, 'up.sql');
     let upSQL = this.opts.sqlFileHeader ?? defs.fileHeader;
+    let first = true;
     for (const builder of csqlBuilders) {
-      upSQL += `${builder.sql}\n`;
+      if (first) {
+        first = false;
+      } else {
+        upSQL += '\n';
+      }
+      upSQL += builder.sql;
     }
     await mfs.writeFileAsync(migUpSQLFile, upSQL);
 
