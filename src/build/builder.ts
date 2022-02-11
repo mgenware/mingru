@@ -12,13 +12,13 @@ import logger from '../logger.js';
 import CSQLBuilder from './csqlBuilder.js';
 import { BuildOptions } from './buildOptions.js';
 import { toSnakeCase } from '../lib/stringUtils.js';
+import { dedup } from '../lib/arrayUtils.js';
 
 const tableSQLDir = 'table_sql';
 const migSQLDir = 'migration_sql';
 
 export default class Builder {
   opts: BuildOptions;
-  private buildStarted = false;
 
   // This is a tmp dir. When build is done successfully.
   // `workingDir` contents get copied to `ourDir`.
@@ -35,12 +35,31 @@ export default class Builder {
     this.workingDir = tempy.directory();
   }
 
-  async buildAsync(callback: () => Promise<void>): Promise<void> {
-    throwIfFalsy(callback, 'callback');
+  async build(source: Array<mm.TableActions | mm.Table>): Promise<void> {
     const { opts, workingDir, outDir } = this;
-    this.buildStarted = true;
-    await callback();
-    this.buildStarted = false;
+
+    let tables: mm.Table[] = [];
+    let somethingBuilt = false;
+    if (!opts.noSourceBuilding) {
+      // `buildSource` returns table from the given source array (including ones from actions).
+      tables = await this.buildSource(source);
+      somethingBuilt = true;
+    }
+
+    if (this.opts.createTableSQL) {
+      if (!tables.length) {
+        tables = dedup(
+          source.map((item) => (item instanceof mm.Table ? item : item.__getData().table)),
+        );
+      }
+      await this.buildCreateTableSQL(tables);
+      somethingBuilt = true;
+    }
+
+    if (!somethingBuilt) {
+      logger.info('No actions needed');
+    }
+
     if (opts.cleanOutDir) {
       logger.info(`🛀  Cleaning directory "${outDir}"`);
       await del(outDir, { force: true });
@@ -48,21 +67,17 @@ export default class Builder {
     await fs.cp(workingDir, this.outDir, { recursive: true });
   }
 
-  async buildActionsAsync(actions: Array<mm.TableActions | mm.Table>): Promise<void> {
-    throwIfFalsy(actions, 'actions');
-    this.checkBuildStatus();
+  private async buildSource(source: Array<mm.TableActions | mm.Table>): Promise<mm.Table[]> {
     const coreBuilderWrapper = new CoreBuilderWrapper();
-    await coreBuilderWrapper.buildAsync(
-      actions,
+    return coreBuilderWrapper.buildAsync(
+      source,
       this.workingDir,
       { dialect: this.dialect },
       this.opts,
     );
   }
 
-  async buildCreateTableSQLFilesAsync(tables: mm.Table[]): Promise<void> {
-    throwIfFalsy(tables, 'tables');
-    this.checkBuildStatus();
+  private async buildCreateTableSQL(tables: mm.Table[]): Promise<void> {
     // Remove duplicate values.
     // eslint-disable-next-line no-param-reassign
     tables = [...new Set(tables)];
@@ -87,12 +102,6 @@ export default class Builder {
       downSQL += `DROP TABLE IF EXISTS ${table.__getDBName()};\n`;
     }
     await mfs.writeFileAsync(migDownSQLFile, downSQL);
-  }
-
-  private checkBuildStatus() {
-    if (!this.buildStarted) {
-      throw new Error('You should call this method inside buildAsync()');
-    }
   }
 
   private async buildCSQL(table: mm.Table): Promise<CSQLBuilder> {

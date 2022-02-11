@@ -17,4 +17,5 @@ export interface BuildOptions {
   jsonTags?: JSONTagsOptions;
   tsOutDir?: string;
   createTableSQL?: boolean;
+  noSourceBuilding?: boolean;
 }

@@ -24,3 +24,7 @@ export function join2DArrays<T>(matrix: T[][], item: T): T[] {
   );
   return res;
 }
+
+export function dedup<T>(arr: T[]): T[] {
+  return [...new Set(arr)];
+}

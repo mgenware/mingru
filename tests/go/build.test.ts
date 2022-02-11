@@ -81,8 +81,7 @@ it('Multiple tables + CSQL', async () => {
     actions,
     ['post', 'user', 'post.sql', 'user.sql', migrationUpFile, migrationDownFile],
     'multipleTablesCSQL',
-    undefined,
-    { buildCSQL: true },
+    { createTableSQL: true },
   );
 });
 

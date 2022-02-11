@@ -82,14 +82,13 @@ export async function testFilesAsync(actualFile: string, expectedFile: string) {
 }
 
 export interface TestOptions {
-  buildCSQL?: boolean;
   testTSTypes?: boolean;
   runOnly?: boolean;
   outDir?: string;
 }
 
 export async function testBuildToDirAsync(
-  actions: Array<mm.TableActions | mm.Table>,
+  source: Array<mm.TableActions | mm.Table>,
   files: string[],
   expectedDirName: string,
   buildOpts?: mr.BuildOptions,
@@ -104,14 +103,7 @@ export async function testBuildToDirAsync(
   buildOpts.tsOutDir = tsOutDir;
 
   const builder = new mr.Builder(dialect, outDir, buildOpts);
-  await builder.buildAsync(async () => {
-    await builder.buildActionsAsync(actions);
-    if (testOpts?.buildCSQL) {
-      await builder.buildCreateTableSQLFilesAsync(
-        actions.map((a) => (a instanceof mm.TableActions ? a.__getData().table : a)),
-      );
-    }
-  });
+  await builder.build(source);
 
   if (testOpts?.runOnly) {
     return builder;
