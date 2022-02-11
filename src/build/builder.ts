@@ -42,7 +42,8 @@ export default class Builder {
     let somethingBuilt = false;
     if (!opts.noSourceBuilding) {
       // `buildSource` returns table from the given source array (including ones from actions).
-      tables = await this.buildSource(source);
+      // Calling `concat` to convert it to a mutable array.
+      tables = (await this.buildSource(source)).concat();
       somethingBuilt = true;
     }
 
@@ -67,7 +68,9 @@ export default class Builder {
     await fs.cp(workingDir, this.outDir, { recursive: true });
   }
 
-  private async buildSource(source: Array<mm.TableActions | mm.Table>): Promise<mm.Table[]> {
+  private async buildSource(
+    source: Array<mm.TableActions | mm.Table>,
+  ): Promise<readonly mm.Table[]> {
     const coreBuilderWrapper = new CoreBuilderWrapper();
     return coreBuilderWrapper.buildAsync(
       source,

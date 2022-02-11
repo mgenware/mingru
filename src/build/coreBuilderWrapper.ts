@@ -22,7 +22,7 @@ export default class CoreBuilderWrapper {
     outDir: string,
     ioOpts: ActionToIOOptions,
     opts: BuildOptions,
-  ): Promise<mm.Table[]> {
+  ): Promise<readonly mm.Table[]> {
     let actions: mm.TableActions[] = [];
     let tables: mm.Table[] = [];
     for (const item of source) {
@@ -66,13 +66,13 @@ export default class CoreBuilderWrapper {
 
     await Promise.all([
       this.buildTypes(context, outDir, opts),
-      this.buildTables(tables, context, outDir, opts),
+      this.buildTablesWithNoActions(tables, context, outDir, opts),
     ]);
 
-    return tables;
+    return context.tables;
   }
 
-  private async buildTables(
+  private async buildTablesWithNoActions(
     tables: mm.Table[],
     context: CoreBuilderContext,
     outDir: string,
@@ -80,7 +80,7 @@ export default class CoreBuilderWrapper {
   ) {
     // Tables that are included in `context.tables` don't need to be built again.
     // eslint-disable-next-line no-param-reassign
-    tables = tables.filter((t) => !context.tables.has(t));
+    tables = tables.filter((t) => !context.hasTable(t));
     if (!tables.length) {
       return;
     }
@@ -143,7 +143,7 @@ var ${instanceName} = &${className}{}\n`;
         resultTypesCode += go.struct(resultTypeStructData);
         resultTypesCode += '\n';
 
-        if (opts.tsOutDir && context.tsResultTypes.has(name)) {
+        if (opts.tsOutDir && context.hasTsResultType(name)) {
           if (firstTsMember) {
             firstTsMember = false;
           } else {

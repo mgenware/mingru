@@ -42,6 +42,26 @@ it('Multiple tables', async () => {
   await testBuildToDirAsync(actions, ['post', 'user'], 'multipleTables');
 });
 
+it('Multiple tables (dedup)', async () => {
+  class UserTA extends mm.TableActions {
+    selectProfile = mm.selectRow(user.display_name, user.sig);
+    updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
+    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
+  }
+  const userTA = mm.tableActions(user, UserTA);
+
+  class PostTA extends mm.TableActions {
+    selectPostInfo = mm.selectRow(post.id, post.content, post.user_id.join(user).url_name);
+
+    updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToInput());
+
+    deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
+  }
+  const postTA = mm.tableActions(post, PostTA);
+  const actions = [userTA, postTA, postTA, user];
+  await testBuildToDirAsync(actions, ['post', 'user'], 'multipleTables');
+});
+
 it('Custom package name', async () => {
   class PostTA extends mm.TableActions {
     selectPostTitle = mm.selectRow(post.id, post.title);
@@ -60,7 +80,7 @@ it('Table DBName', async () => {
   await testBuildToDirAsync([ta], ['post_reply'], 'tableName');
 });
 
-it('Multiple tables + CSQL', async () => {
+it('Multiple tables, CSQL', async () => {
   class UserTA extends mm.TableActions {
     selectProfile = mm.selectRow(user.display_name, user.sig);
     updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
@@ -76,9 +96,32 @@ it('Multiple tables + CSQL', async () => {
     deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
   }
   const postTA = mm.tableActions(post, PostTA);
-  const actions = [userTA, postTA];
   await testBuildToDirAsync(
-    actions,
+    [userTA, postTA],
+    ['post', 'user', 'post.sql', 'user.sql', migrationUpFile, migrationDownFile],
+    'multipleTablesCSQL',
+    { createTableSQL: true },
+  );
+});
+
+it('Multiple tables, CSQL (dedup)', async () => {
+  class UserTA extends mm.TableActions {
+    selectProfile = mm.selectRow(user.display_name, user.sig);
+    updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
+    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
+  }
+  const userTA = mm.tableActions(user, UserTA);
+
+  class PostTA extends mm.TableActions {
+    selectPostInfo = mm.selectRow(post.id, post.content, post.user_id.join(user).url_name);
+
+    updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToInput());
+
+    deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
+  }
+  const postTA = mm.tableActions(post, PostTA);
+  await testBuildToDirAsync(
+    [userTA, postTA, user, userTA],
     ['post', 'user', 'post.sql', 'user.sql', migrationUpFile, migrationDownFile],
     'multipleTablesCSQL',
     { createTableSQL: true },
