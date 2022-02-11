@@ -96,9 +96,15 @@ it('Multiple tables, CSQL', async () => {
     deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
   }
   const postTA = mm.tableActions(post, PostTA);
+
+  class ExtraTable extends mm.Table {
+    id = mm.pk();
+  }
+  const et = mm.table(ExtraTable, { dbName: 'et' });
+
   await testBuildToDirAsync(
-    [userTA, postTA],
-    ['post', 'user', 'post.sql', 'user.sql', migrationUpFile, migrationDownFile],
+    [userTA, postTA, et],
+    ['post', 'user', 'post.sql', 'user.sql', 'extra_table.sql', migrationUpFile, migrationDownFile],
     'multipleTablesCSQL',
     { createTableSQL: true },
   );
@@ -120,9 +126,15 @@ it('Multiple tables, CSQL (dedup)', async () => {
     deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
   }
   const postTA = mm.tableActions(post, PostTA);
+
+  class ExtraTable extends mm.Table {
+    id = mm.pk();
+  }
+  const et = mm.table(ExtraTable, { dbName: 'et' });
+
   await testBuildToDirAsync(
-    [userTA, postTA, user, userTA],
-    ['post', 'user', 'post.sql', 'user.sql', migrationUpFile, migrationDownFile],
+    [userTA, postTA, user, userTA, et],
+    ['post', 'user', 'post.sql', 'user.sql', 'extra_table.sql', migrationUpFile, migrationDownFile],
     'multipleTablesCSQL',
     { createTableSQL: true },
   );

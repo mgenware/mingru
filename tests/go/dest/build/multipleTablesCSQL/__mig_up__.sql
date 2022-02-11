@@ -33,3 +33,11 @@ CREATE TABLE `db_post` (
 CHARACTER SET=utf8mb4
 COLLATE=utf8mb4_unicode_ci
 ;
+
+CREATE TABLE `et` (
+	`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	PRIMARY KEY (`id`)
+)
+CHARACTER SET=utf8mb4
+COLLATE=utf8mb4_unicode_ci
+;

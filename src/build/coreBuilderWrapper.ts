@@ -22,7 +22,7 @@ export default class CoreBuilderWrapper {
     outDir: string,
     ioOpts: ActionToIOOptions,
     opts: BuildOptions,
-  ): Promise<readonly mm.Table[]> {
+  ) {
     let actions: mm.TableActions[] = [];
     let tables: mm.Table[] = [];
     for (const item of source) {
@@ -68,8 +68,6 @@ export default class CoreBuilderWrapper {
       this.buildTypes(context, outDir, opts),
       this.buildTablesWithNoActions(tables, context, outDir, opts),
     ]);
-
-    return context.tables;
   }
 
   private async buildTablesWithNoActions(

@@ -38,23 +38,21 @@ export default class Builder {
   async build(source: Array<mm.TableActions | mm.Table>): Promise<void> {
     const { opts, workingDir, outDir } = this;
 
-    let tables: mm.Table[] = [];
     let somethingBuilt = false;
     if (!opts.noSourceBuilding) {
       // `buildSource` returns table from the given source array (including ones from actions).
       // Calling `concat` to convert it to a mutable array.
-      tables = (await this.buildSource(source)).concat();
+      await this.buildSource(source);
       somethingBuilt = true;
     }
 
-    if (this.opts.createTableSQL) {
-      if (!tables.length) {
-        tables = dedup(
-          source.map((item) => (item instanceof mm.Table ? item : item.__getData().table)),
-        );
-      }
-      const nonVirtualTables = tables.filter((t) => !t.__getData().virtualTable);
-      await this.buildCreateTableSQL(nonVirtualTables);
+    if (opts.createTableSQL) {
+      const tables = dedup(
+        source
+          .map((item) => (item instanceof mm.Table ? item : item.__getData().table))
+          .filter((t) => !t.__getData().virtualTable),
+      );
+      await this.buildCreateTableSQL(tables);
       somethingBuilt = true;
     }
 
@@ -69,11 +67,9 @@ export default class Builder {
     await fs.cp(workingDir, this.outDir, { recursive: true });
   }
 
-  private async buildSource(
-    source: Array<mm.TableActions | mm.Table>,
-  ): Promise<readonly mm.Table[]> {
+  private async buildSource(source: Array<mm.TableActions | mm.Table>) {
     const coreBuilderWrapper = new CoreBuilderWrapper();
-    return coreBuilderWrapper.buildAsync(
+    await coreBuilderWrapper.buildAsync(
       source,
       this.workingDir,
       { dialect: this.dialect },
@@ -83,7 +79,6 @@ export default class Builder {
 
   private async buildCreateTableSQL(tables: mm.Table[]): Promise<void> {
     // Remove duplicate values.
-    // eslint-disable-next-line no-param-reassign
     const csqlBuilders = await Promise.all(tables.map((t) => this.buildCSQL(t)));
 
     // Generate migration up file.
