@@ -128,6 +128,15 @@ it('Multiple tables, CSQL (dedup)', async () => {
   );
 });
 
+it('CSQL and virtual tables', async () => {
+  class VT extends mm.Table {}
+  const vt = mm.table(VT, { virtualTable: true });
+  await itRejects(
+    () => testBuildToDirAsync([vt], ['vt.sql'], 'csqlVirtualTable', { createTableSQL: true }),
+    /ENOENT: no such file or directory/,
+  );
+});
+
 it('Types', async () => {
   class UserTA extends mm.TableActions {
     selectByID = mm

@@ -53,7 +53,8 @@ export default class Builder {
           source.map((item) => (item instanceof mm.Table ? item : item.__getData().table)),
         );
       }
-      await this.buildCreateTableSQL(tables);
+      const nonVirtualTables = tables.filter((t) => !t.__getData().virtualTable);
+      await this.buildCreateTableSQL(nonVirtualTables);
       somethingBuilt = true;
     }
 
