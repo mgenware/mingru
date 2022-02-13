@@ -15,7 +15,6 @@ import { buildTSInterface } from './tsCodeBuilder.js';
 import { dedup } from '../lib/arrayUtils.js';
 
 // Wraps a `CoreBuilder` and handles input options and file operations.
-// Returns a distinct list of tables from source.
 export default class CoreBuilderWrapper {
   async buildAsync(
     source: Array<mm.TableActions | mm.Table>,

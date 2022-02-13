@@ -93,6 +93,8 @@ class WrapIOProcessor extends BaseIOProcessor {
         funcArgs.add(arg);
       } else if (inputArg instanceof mm.ValueRef) {
         funcArgs.add(VarInfo.withValue(arg, inputArg));
+      } else if (inputArg instanceof mm.RenameArg) {
+        funcArgs.add(VarInfo.withName(arg, inputArg.name));
       }
     }
 
@@ -153,6 +155,9 @@ class WrapIOProcessor extends BaseIOProcessor {
     }
     if (value instanceof mm.Table) {
       return value;
+    }
+    if (value instanceof mm.RenameArg) {
+      return value.name;
     }
     if (value === null) {
       return mm.constants.NULL;

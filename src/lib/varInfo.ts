@@ -119,6 +119,11 @@ export class VarInfo {
     return new VarInfo(v.name, v.type, value);
   }
 
+  static withName(v: VarInfo, name: string): VarInfo {
+    throwIfFalsy(v, 'v');
+    return new VarInfo(name, v.type, v.value);
+  }
+
   readonly pascalName: string;
 
   constructor(public name: string, public type: TypeInfo, public value?: VarValue) {

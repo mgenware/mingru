@@ -35,3 +35,17 @@ it('Wrap', async () => {
   const ta = mm.tableActions(post, PostTA);
   await testBuildAsync(ta, 'wrap/wrap');
 });
+
+it('`Wrap + RenameArg`', async () => {
+  class UserTA extends mm.TableActions {
+    t = mm.updateOne().setInputs().by(user.id);
+  }
+  const userTA = mm.tableActions(user, UserTA);
+  class PostTA extends mm.TableActions {
+    a = userTA.t;
+    b = userTA.t.wrap({ sig: mm.renameArg('renamed') });
+  }
+  const postTA = mm.tableActions(post, PostTA);
+  await testBuildAsync(userTA, 'wrap/renameArg/user_ta');
+  await testBuildAsync(postTA, 'wrap/renameArg/post_ta');
+});
