@@ -70,18 +70,25 @@ class WrapIOProcessor extends BaseIOProcessor {
     for (let i = 1; i < innerFuncArgs.list.length; i++) {
       const arg = innerFuncArgs.list[i];
       if (!arg) {
-        throw new Error('Unexpected func argument');
+        throw new Error('Unexpected empty func argument');
       }
       const inputArg = args[arg.name];
-      // This argument is still exposed if it's not overwritten or it's overwritten by a `ValueRef`.
-      // Imagine a func `func(x, y)`.
-      // If input is a constant, e.g. {x: 123}, `x` won't be exposed, this IO results in:
-      //   `func(y) { innerFunc(123, y) }
-      // If input is a `ValueRef` like {x: result.prop}, `x` will still be exposed:
-      //   `func(x, y) { innerFunc(x, y) }
-      // In this case, `x` has a `ValueRef` value and is taken care of by the caller of this func
-      // because the `ValueRef`
-      // is only valid at the caller context.
+      /**
+        `ValueRef` arguments will still be exposed.
+        Imagine a func `func(x, y)`.
+        If the argument is a constant value, e.g. {x: 123}, `x` won't be exposed:
+          `func(y) { innerFunc(123, y) }`
+        If the argument is a `ValueRef` {x: result.prop}, `x` will be exposed:
+          `func(x, y) { innerFunc(x, y) }`
+        The reason for this is `ValueRef` is like a param placeholder, indicating
+        it's being used by outer context, this comes to use when the action is
+        called in a transaction:
+        TRACTION:
+          y = ...
+          callAction(x, y(ValueRef), z)
+        The above transaction will have only `x` and `z` as its arguments. `y`
+        will be considered a value reference in caller's scope.
+       */
       if (inputArg === undefined) {
         funcArgs.add(arg);
       } else if (inputArg instanceof mm.ValueRef) {
