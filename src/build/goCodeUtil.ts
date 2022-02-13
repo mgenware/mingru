@@ -293,8 +293,7 @@ export function buildSwitch(
   builder.push('}');
 }
 
-export function buildEnum(builder: LinesBuilder, name: string, values: string[]) {
-  builder.push(`// ${name} ...`);
+export function buildEnum(builder: LinesBuilder, values: string[]) {
   builder.push('const (');
   builder.increaseIndent();
   let isFirst = true;

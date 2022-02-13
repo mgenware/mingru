@@ -135,9 +135,6 @@ export default class CoreBuilder {
     const builder = new LinesBuilder();
 
     // Build func head.
-    if (!pri) {
-      builder.push(`// ${funcName} ...`);
-    }
     funcSigString += `${this.getFuncSigHead()}${funcName}`;
 
     // Build func params.
@@ -353,7 +350,7 @@ var ${instanceName} = &${className}{}\n`;
       for (const [paramVarName, inputIO] of io.orderByInputIOs.entries()) {
         // Add ORDER BY enum type definition to header.
         const enumDefsBuilder = new LinesBuilder();
-        go.buildEnum(enumDefsBuilder, inputIO.enumTypeName, inputIO.enumNames);
+        go.buildEnum(enumDefsBuilder, inputIO.enumNames);
         headerCode = go.appendWithSeparator(headerCode, enumDefsBuilder.toString());
 
         // Add switch-case code.
