@@ -7,11 +7,9 @@ import (
 	"github.com/mgenware/mingru-go-lib"
 )
 
-// TableTypePost ...
 type TableTypePost struct {
 }
 
-// Post ...
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
@@ -31,7 +29,6 @@ func (mrTable *TableTypePost) tChild2(mrQueryable mingru.Queryable, postID uint6
 	return err
 }
 
-// T ...
 func (mrTable *TableTypePost) T(db *sql.DB, content string, userID uint64, createdAt time.Time, modifiedAt time.Time, rplCount uint, postID uint64, cmtID uint64) error {
 	txErr := mingru.Transact(db, func(tx *sql.Tx) error {
 		var err error

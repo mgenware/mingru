@@ -6,11 +6,9 @@ import (
 	"github.com/mgenware/mingru-go-lib"
 )
 
-// TableTypeEmployee ...
 type TableTypeEmployee struct {
 }
 
-// Employee ...
 var Employee = &TableTypeEmployee{}
 
 // MingruSQLName returns the name of this table.
@@ -20,7 +18,6 @@ func (mrTable *TableTypeEmployee) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-// GetFirstName ...
 func (mrTable *TableTypeEmployee) GetFirstName(mrQueryable mingru.Queryable, id int) (string, error) {
 	var result string
 	err := mrQueryable.QueryRow("SELECT `first_name` FROM `employees` WHERE `emp_no` = ?", id).Scan(&result)
@@ -35,7 +32,6 @@ func (mrTable *TableTypeEmployee) insert1Child2(mrQueryable mingru.Queryable, fi
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }
 
-// Insert1 ...
 func (mrTable *TableTypeEmployee) Insert1(db *sql.DB, id int) (string, uint64, error) {
 	var firstNameExported string
 	var id2Exported uint64

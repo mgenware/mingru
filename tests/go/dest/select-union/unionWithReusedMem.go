@@ -2,11 +2,9 @@ package da
 
 import "github.com/mgenware/mingru-go-lib"
 
-// TableTypeActivity ...
 type TableTypeActivity struct {
 }
 
-// Activity ...
 var Activity = &TableTypeActivity{}
 
 // MingruSQLName returns the name of this table.
@@ -16,14 +14,12 @@ func (mrTable *TableTypeActivity) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-// ActivityTablePrivateTResult ...
 type ActivityTablePrivateTResult struct {
 	GenericName string
 	GenericSig  *string
 	ID          uint64
 }
 
-// PrivateT ...
 func (mrTable *TableTypeActivity) PrivateT(mrQueryable mingru.Queryable, id uint64) (ActivityTablePrivateTResult, error) {
 	var result ActivityTablePrivateTResult
 	err := mrQueryable.QueryRow("SELECT `id`, `sig` AS `generic_sig`, `url_name` AS `generic_name` FROM `user` WHERE `id` = ?", id).Scan(&result.ID, &result.GenericSig, &result.GenericName)
@@ -33,14 +29,12 @@ func (mrTable *TableTypeActivity) PrivateT(mrQueryable mingru.Queryable, id uint
 	return result, nil
 }
 
-// ActivityTableTResult ...
 type ActivityTableTResult struct {
 	GenericName string
 	GenericSig  *string
 	ID          uint64
 }
 
-// T ...
 func (mrTable *TableTypeActivity) T(mrQueryable mingru.Queryable, id uint64, postID uint64) ([]ActivityTableTResult, error) {
 	rows, err := mrQueryable.Query("(SELECT `id`, `sig` AS `generic_sig`, `url_name` AS `generic_name` FROM `user` WHERE `id` = ?) UNION (SELECT `id`, `title` FROM `db_post` WHERE `id` = ?) UNION ALL (SELECT `user_id`, `value` FROM `like`) ORDER BY `generic_sig`", id, postID)
 	if err != nil {

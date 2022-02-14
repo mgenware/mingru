@@ -2,11 +2,9 @@ package da
 
 import "github.com/mgenware/mingru-go-lib"
 
-// TableTypePost ...
 type TableTypePost struct {
 }
 
-// Post ...
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
@@ -16,7 +14,6 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-// Field ...
 func (mrTable *TableTypePost) Field(mrQueryable mingru.Queryable) (*string, error) {
 	var result *string
 	err := mrQueryable.QueryRow("SELECT `join_1`.`url_name` FROM `db_post` AS `db_post` FULL JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`").Scan(&result)
@@ -26,7 +23,6 @@ func (mrTable *TableTypePost) Field(mrQueryable mingru.Queryable) (*string, erro
 	return result, nil
 }
 
-// FieldRows ...
 func (mrTable *TableTypePost) FieldRows(mrQueryable mingru.Queryable) ([]*string, error) {
 	rows, err := mrQueryable.Query("SELECT `join_1`.`url_name` FROM `db_post` AS `db_post` FULL JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`")
 	if err != nil {
@@ -49,13 +45,11 @@ func (mrTable *TableTypePost) FieldRows(mrQueryable mingru.Queryable) ([]*string
 	return result, nil
 }
 
-// PostTableRowResult ...
 type PostTableRowResult struct {
 	ID          *uint64
 	UserUrlName *string
 }
 
-// Row ...
 func (mrTable *TableTypePost) Row(mrQueryable mingru.Queryable, id uint64) (PostTableRowResult, error) {
 	var result PostTableRowResult
 	err := mrQueryable.QueryRow("SELECT `join_1`.`url_name`, `db_post`.`id` FROM `db_post` AS `db_post` FULL JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id` WHERE `db_post`.`id` = ?", id).Scan(&result.UserUrlName, &result.ID)
@@ -65,13 +59,11 @@ func (mrTable *TableTypePost) Row(mrQueryable mingru.Queryable, id uint64) (Post
 	return result, nil
 }
 
-// PostTableRowsResult ...
 type PostTableRowsResult struct {
 	ID          *uint64
 	UserUrlName *string
 }
 
-// Rows ...
 func (mrTable *TableTypePost) Rows(mrQueryable mingru.Queryable) ([]PostTableRowsResult, error) {
 	rows, err := mrQueryable.Query("SELECT `join_1`.`url_name`, `db_post`.`id` FROM `db_post` AS `db_post` FULL JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`")
 	if err != nil {

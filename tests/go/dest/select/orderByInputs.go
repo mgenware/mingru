@@ -6,11 +6,9 @@ import (
 	"github.com/mgenware/mingru-go-lib"
 )
 
-// TableTypePost ...
 type TableTypePost struct {
 }
 
-// Post ...
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
@@ -20,27 +18,23 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-// PostTableSelectTOrderBy1 ...
 const (
 	PostTableSelectTOrderBy1N = iota
 	PostTableSelectTOrderBy1Title
 	PostTableSelectTOrderBy1CmtCount
 )
 
-// PostTableSelectTOrderBy2 ...
 const (
 	PostTableSelectTOrderBy2N = iota
 	PostTableSelectTOrderBy2Title
 )
 
-// PostTableSelectTResult ...
 type PostTableSelectTResult struct {
 	ID    uint64
 	N     int
 	Title string
 }
 
-// SelectT ...
 func (mrTable *TableTypePost) SelectT(mrQueryable mingru.Queryable, id uint64, orderBy1 int, orderBy1Desc bool, orderBy2 int, orderBy2Desc bool) ([]PostTableSelectTResult, error) {
 	var orderBy1SQL string
 	switch orderBy1 {

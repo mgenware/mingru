@@ -2,11 +2,9 @@ package da
 
 import "github.com/mgenware/mingru-go-lib"
 
-// TableTypePost ...
 type TableTypePost struct {
 }
 
-// Post ...
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
@@ -16,13 +14,11 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-// PostTableT1Result ...
 type PostTableT1Result struct {
 	ID    uint64
 	Title string
 }
 
-// T1 ...
 func (mrTable *TableTypePost) T1(mrQueryable mingru.Queryable) (PostTableT1Result, error) {
 	var result PostTableT1Result
 	err := mrQueryable.QueryRow("SELECT `id`, `title` FROM `db_post` FOR UPDATE").Scan(&result.ID, &result.Title)
@@ -32,13 +28,11 @@ func (mrTable *TableTypePost) T1(mrQueryable mingru.Queryable) (PostTableT1Resul
 	return result, nil
 }
 
-// PostTableT2Result ...
 type PostTableT2Result struct {
 	ID    uint64
 	Title string
 }
 
-// T2 ...
 func (mrTable *TableTypePost) T2(mrQueryable mingru.Queryable) (PostTableT2Result, error) {
 	var result PostTableT2Result
 	err := mrQueryable.QueryRow("SELECT `id`, `title` FROM `db_post` LOCK IN SHARE MODE").Scan(&result.ID, &result.Title)

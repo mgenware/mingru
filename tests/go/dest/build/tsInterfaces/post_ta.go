@@ -2,11 +2,9 @@ package da
 
 import "github.com/mgenware/mingru-go-lib"
 
-// TableTypePost ...
 type TableTypePost struct {
 }
 
-// Post ...
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
@@ -16,7 +14,6 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-// SelectByID ...
 func (mrTable *TableTypePost) SelectByID(mrQueryable mingru.Queryable, id uint64) (Res1, error) {
 	var result Res1
 	err := mrQueryable.QueryRow("SELECT `id` FROM `db_post` WHERE `id` = ?", id).Scan(&result.ID)
@@ -26,13 +23,11 @@ func (mrTable *TableTypePost) SelectByID(mrQueryable mingru.Queryable, id uint64
 	return result, nil
 }
 
-// PostTableSelectPostInfoResult ...
 type PostTableSelectPostInfoResult struct {
 	Content     string
 	UserUrlName string
 }
 
-// SelectPostInfo ...
 func (mrTable *TableTypePost) SelectPostInfo(mrQueryable mingru.Queryable) (PostTableSelectPostInfoResult, error) {
 	var result PostTableSelectPostInfoResult
 	err := mrQueryable.QueryRow("SELECT `db_post`.`content`, `join_1`.`url_name` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`").Scan(&result.Content, &result.UserUrlName)
@@ -42,7 +37,6 @@ func (mrTable *TableTypePost) SelectPostInfo(mrQueryable mingru.Queryable) (Post
 	return result, nil
 }
 
-// SelectTime ...
 func (mrTable *TableTypePost) SelectTime(mrQueryable mingru.Queryable) (Res3, error) {
 	var result Res3
 	err := mrQueryable.QueryRow("SELECT `n_datetime` FROM `db_post`").Scan(&result.NDatetime)

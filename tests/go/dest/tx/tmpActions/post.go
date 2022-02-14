@@ -6,11 +6,9 @@ import (
 	"github.com/mgenware/mingru-go-lib"
 )
 
-// TableTypePost ...
 type TableTypePost struct {
 }
 
-// Post ...
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
@@ -38,7 +36,6 @@ func (mrTable *TableTypePost) insertChild5(mrQueryable mingru.Queryable) (uint64
 	return mrTable.InsertCore(mrQueryable, "abc")
 }
 
-// Insert ...
 func (mrTable *TableTypePost) Insert(db *sql.DB, id uint64, title string) error {
 	txErr := mingru.Transact(db, func(tx *sql.Tx) error {
 		var err error
@@ -67,7 +64,6 @@ func (mrTable *TableTypePost) Insert(db *sql.DB, id uint64, title string) error 
 	return txErr
 }
 
-// InsertCore ...
 func (mrTable *TableTypePost) InsertCore(mrQueryable mingru.Queryable, title string) (uint64, error) {
 	result, err := mrQueryable.Exec("INSERT INTO `db_post` (`title`) VALUES (?)", title)
 	return mingru.GetLastInsertIDUint64WithError(result, err)

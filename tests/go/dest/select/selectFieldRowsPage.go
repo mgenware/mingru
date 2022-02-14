@@ -7,11 +7,9 @@ import (
 	"github.com/mgenware/mingru-go-lib"
 )
 
-// TableTypePost ...
 type TableTypePost struct {
 }
 
-// Post ...
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
@@ -21,7 +19,6 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-// SelectT ...
 func (mrTable *TableTypePost) SelectT(mrQueryable mingru.Queryable, id uint64, page int, pageSize int) ([]*time.Time, bool, error) {
 	if page <= 0 {
 		err := fmt.Errorf("Invalid page %v", page)

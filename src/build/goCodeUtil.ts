@@ -85,9 +85,7 @@ export class GoStructData {
 }
 
 export function interfaceType(typeName: string, members: string[]): string {
-  let code = `// ${typeName} ...
-type ${typeName} interface {
-`;
+  let code = `type ${typeName} interface {\n`;
   for (const mem of members) {
     code += `\t${mem}\n`;
   }
@@ -96,9 +94,7 @@ type ${typeName} interface {
 }
 
 export function struct(data: GoStructData): string {
-  let code = `// ${data.typeName} ...
-type ${data.typeName} struct {
-`;
+  let code = `type ${data.typeName} struct {\n`;
   // Use 3 string arrays to store each column (name|type|tag) in order to
   // properly handle indentation.
   const nameColumns: string[] = [];

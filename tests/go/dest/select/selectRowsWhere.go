@@ -2,11 +2,9 @@ package da
 
 import "github.com/mgenware/mingru-go-lib"
 
-// TableTypePost ...
 type TableTypePost struct {
 }
 
-// Post ...
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
@@ -16,13 +14,11 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-// PostTableSelectTResult ...
 type PostTableSelectTResult struct {
 	ID    uint64
 	Title string
 }
 
-// SelectT ...
 func (mrTable *TableTypePost) SelectT(mrQueryable mingru.Queryable, id uint64) ([]PostTableSelectTResult, error) {
 	rows, err := mrQueryable.Query("SELECT `id`, `title` FROM `db_post` WHERE `id` = ? ORDER BY `id`", id)
 	if err != nil {

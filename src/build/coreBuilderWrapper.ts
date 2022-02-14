@@ -104,8 +104,7 @@ export default class CoreBuilderWrapper {
       );
 
       // Generate table instance.
-      code += `\n// ${instanceName} ...
-var ${instanceName} = &${className}{}\n`;
+      code += `\nvar ${instanceName} = &${className}{}\n`;
 
       // Generate mingru member functions.
       code += `\n// ${defs.tableMemSQLName} returns the name of this table.\n`;

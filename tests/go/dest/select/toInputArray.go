@@ -6,11 +6,9 @@ import (
 	"github.com/mgenware/mingru-go-lib"
 )
 
-// TableTypePost ...
 type TableTypePost struct {
 }
 
-// Post ...
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
@@ -20,13 +18,11 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-// PostTableTResult ...
 type PostTableTResult struct {
 	ID    uint64
 	Title string
 }
 
-// T ...
 func (mrTable *TableTypePost) T(mrQueryable mingru.Queryable, ids []uint64, idInput uint64, id []uint64) ([]PostTableTResult, error) {
 	if len(ids) == 0 {
 		return nil, fmt.Errorf("The array argument `ids` cannot be empty")

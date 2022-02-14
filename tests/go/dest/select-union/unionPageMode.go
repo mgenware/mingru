@@ -6,11 +6,9 @@ import (
 	"github.com/mgenware/mingru-go-lib"
 )
 
-// TableTypeActivity ...
 type TableTypeActivity struct {
 }
 
-// Activity ...
 var Activity = &TableTypeActivity{}
 
 // MingruSQLName returns the name of this table.
@@ -20,14 +18,12 @@ func (mrTable *TableTypeActivity) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-// ActivityTableTResult ...
 type ActivityTableTResult struct {
 	GenericName string
 	GenericSig  *string
 	ID          uint64
 }
 
-// T ...
 func (mrTable *TableTypeActivity) T(mrQueryable mingru.Queryable, id uint64, page int, pageSize int) ([]ActivityTableTResult, bool, error) {
 	if page <= 0 {
 		err := fmt.Errorf("Invalid page %v", page)
@@ -65,14 +61,12 @@ func (mrTable *TableTypeActivity) T(mrQueryable mingru.Queryable, id uint64, pag
 	return result, itemCounter > len(result), nil
 }
 
-// ActivityTableT1Result ...
 type ActivityTableT1Result struct {
 	GenericName string
 	GenericSig  *string
 	ID          uint64
 }
 
-// T1 ...
 func (mrTable *TableTypeActivity) T1(mrQueryable mingru.Queryable, id uint64, page int, pageSize int) ([]ActivityTableT1Result, bool, error) {
 	if page <= 0 {
 		err := fmt.Errorf("Invalid page %v", page)
@@ -110,12 +104,10 @@ func (mrTable *TableTypeActivity) T1(mrQueryable mingru.Queryable, id uint64, pa
 	return result, itemCounter > len(result), nil
 }
 
-// ActivityTableT2Result ...
 type ActivityTableT2Result struct {
 	Title string
 }
 
-// T2 ...
 func (mrTable *TableTypeActivity) T2(mrQueryable mingru.Queryable, id uint64) ([]ActivityTableT2Result, error) {
 	rows, err := mrQueryable.Query("SELECT `title` FROM `db_post` WHERE `id` = ? ORDER BY `id`", id)
 	if err != nil {

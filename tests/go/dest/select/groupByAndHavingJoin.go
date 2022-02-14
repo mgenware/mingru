@@ -6,11 +6,9 @@ import (
 	"github.com/mgenware/mingru-go-lib"
 )
 
-// TableTypePost ...
 type TableTypePost struct {
 }
 
-// Post ...
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
@@ -20,12 +18,10 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-// PostTableTResult ...
 type PostTableTResult struct {
 	NTime *time.Time
 }
 
-// T ...
 func (mrTable *TableTypePost) T(mrQueryable mingru.Queryable, userID uint64) ([]PostTableTResult, error) {
 	rows, err := mrQueryable.Query("SELECT `db_post`.`n_time` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id` ORDER BY `db_post`.`user_id` GROUP BY `title` HAVING `join_1`.`id` = ?", userID)
 	if err != nil {

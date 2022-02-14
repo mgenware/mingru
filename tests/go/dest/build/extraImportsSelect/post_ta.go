@@ -6,11 +6,9 @@ import (
 	"github.com/mgenware/mingru-go-lib"
 )
 
-// TableTypePost ...
 type TableTypePost struct {
 }
 
-// Post ...
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
@@ -20,13 +18,11 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-// PostTableSelectNullableTimesResult ...
 type PostTableSelectNullableTimesResult struct {
 	NDate     *time.Time
 	NDatetime *time.Time
 }
 
-// SelectNullableTimes ...
 func (mrTable *TableTypePost) SelectNullableTimes(mrQueryable mingru.Queryable) ([]PostTableSelectNullableTimesResult, error) {
 	rows, err := mrQueryable.Query("SELECT `n_datetime`, `n_date` FROM `db_post` ORDER BY `id`")
 	if err != nil {
@@ -49,13 +45,11 @@ func (mrTable *TableTypePost) SelectNullableTimes(mrQueryable mingru.Queryable) 
 	return result, nil
 }
 
-// PostTableSelectTimesResult ...
 type PostTableSelectTimesResult struct {
 	Date     time.Time
 	Datetime time.Time
 }
 
-// SelectTimes ...
 func (mrTable *TableTypePost) SelectTimes(mrQueryable mingru.Queryable) ([]PostTableSelectTimesResult, error) {
 	rows, err := mrQueryable.Query("SELECT `datetime`, `date` FROM `db_post` ORDER BY `id`")
 	if err != nil {

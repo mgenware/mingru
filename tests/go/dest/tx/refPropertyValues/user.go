@@ -6,11 +6,9 @@ import (
 	"github.com/mgenware/mingru-go-lib"
 )
 
-// TableTypeUser ...
 type TableTypeUser struct {
 }
 
-// User ...
 var User = &TableTypeUser{}
 
 // MingruSQLName returns the name of this table.
@@ -20,7 +18,6 @@ func (mrTable *TableTypeUser) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-// UserTableTChild1Result ...
 type UserTableTChild1Result struct {
 	Age  int
 	Name string
@@ -40,7 +37,6 @@ func (mrTable *TableTypeUser) tChild2(mrQueryable mingru.Queryable, age int, sco
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }
 
-// T ...
 func (mrTable *TableTypeUser) T(db *sql.DB, score int) error {
 	txErr := mingru.Transact(db, func(tx *sql.Tx) error {
 		var err error

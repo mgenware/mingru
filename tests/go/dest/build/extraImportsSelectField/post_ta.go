@@ -6,11 +6,9 @@ import (
 	"github.com/mgenware/mingru-go-lib"
 )
 
-// TableTypePost ...
 type TableTypePost struct {
 }
 
-// Post ...
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
@@ -20,7 +18,6 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-// SelectTime ...
 func (mrTable *TableTypePost) SelectTime(mrQueryable mingru.Queryable) (*time.Time, error) {
 	var result *time.Time
 	err := mrQueryable.QueryRow("SELECT `n_datetime` FROM `db_post`").Scan(&result)

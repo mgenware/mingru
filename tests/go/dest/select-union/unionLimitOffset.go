@@ -2,11 +2,9 @@ package da
 
 import "github.com/mgenware/mingru-go-lib"
 
-// TableTypeActivity ...
 type TableTypeActivity struct {
 }
 
-// Activity ...
 var Activity = &TableTypeActivity{}
 
 // MingruSQLName returns the name of this table.
@@ -16,14 +14,12 @@ func (mrTable *TableTypeActivity) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-// ActivityTableTResult ...
 type ActivityTableTResult struct {
 	GenericName string
 	GenericSig  *string
 	ID          uint64
 }
 
-// T ...
 func (mrTable *TableTypeActivity) T(mrQueryable mingru.Queryable, id uint64, limit int, offset int, max int) ([]ActivityTableTResult, int, error) {
 	rows, err := mrQueryable.Query("(SELECT `id`, `sig` AS `generic_sig`, `url_name` AS `generic_name` FROM `user` WHERE `id` = ? LIMIT ? OFFSET ?) UNION ALL (SELECT `user_id`, `value` FROM `like`) UNION (SELECT `title` FROM `db_post` WHERE `id` = ?) ORDER BY `id` LIMIT ? OFFSET ?", id, limit, offset, id, limit, offset)
 	if err != nil {
@@ -50,14 +46,12 @@ func (mrTable *TableTypeActivity) T(mrQueryable mingru.Queryable, id uint64, lim
 	return result, itemCounter, nil
 }
 
-// ActivityTableT1Result ...
 type ActivityTableT1Result struct {
 	GenericName string
 	GenericSig  *string
 	ID          uint64
 }
 
-// T1 ...
 func (mrTable *TableTypeActivity) T1(mrQueryable mingru.Queryable, id uint64, limit int, offset int, max int) ([]ActivityTableT1Result, int, error) {
 	rows, err := mrQueryable.Query("SELECT `id`, `sig` AS `generic_sig`, `url_name` AS `generic_name` FROM `user` WHERE `id` = ? ORDER BY `id` LIMIT ? OFFSET ?", id, limit, offset)
 	if err != nil {
@@ -84,12 +78,10 @@ func (mrTable *TableTypeActivity) T1(mrQueryable mingru.Queryable, id uint64, li
 	return result, itemCounter, nil
 }
 
-// ActivityTableT2Result ...
 type ActivityTableT2Result struct {
 	Title string
 }
 
-// T2 ...
 func (mrTable *TableTypeActivity) T2(mrQueryable mingru.Queryable, id uint64) ([]ActivityTableT2Result, error) {
 	rows, err := mrQueryable.Query("SELECT `title` FROM `db_post` WHERE `id` = ? ORDER BY `id`", id)
 	if err != nil {

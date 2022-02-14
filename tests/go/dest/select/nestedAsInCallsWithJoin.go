@@ -2,11 +2,9 @@ package da
 
 import "github.com/mgenware/mingru-go-lib"
 
-// TableTypePost ...
 type TableTypePost struct {
 }
 
-// Post ...
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
@@ -16,12 +14,10 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-// PostTableTResult ...
 type PostTableTResult struct {
 	Name1 int
 }
 
-// T ...
 func (mrTable *TableTypePost) T(mrQueryable mingru.Queryable, ageInput int) (PostTableTResult, error) {
 	var result PostTableTResult
 	err := mrQueryable.QueryRow("SELECT YEAR(YEAR(`join_1`.`age`)) AS `name1` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id` WHERE YEAR(YEAR(`join_1`.`age`)) == ?", ageInput).Scan(&result.Name1)

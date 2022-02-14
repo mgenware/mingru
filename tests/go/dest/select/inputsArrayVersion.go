@@ -7,11 +7,9 @@ import (
 	"github.com/mgenware/mingru-go-lib"
 )
 
-// TableTypePost ...
 type TableTypePost struct {
 }
 
-// Post ...
 var Post = &TableTypePost{}
 
 // MingruSQLName returns the name of this table.
@@ -21,12 +19,10 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-// PostTableTResult ...
 type PostTableTResult struct {
 	ID uint64
 }
 
-// T ...
 func (mrTable *TableTypePost) T(mrQueryable mingru.Queryable, nDatetime []*time.Time, p2 time.Time, p3 *time.Time, p4 uint64, p5 *uint64) (PostTableTResult, error) {
 	if len(nDatetime) == 0 {
 		return PostTableTResult{}, fmt.Errorf("The array argument `nDatetime` cannot be empty")
