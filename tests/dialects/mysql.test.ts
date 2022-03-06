@@ -145,8 +145,14 @@ it('colToSQLType', () => {
   sqlEq(dialect.colToSQLType(mm.text()), 'TEXT NOT NULL');
   // DateTime
   sqlEq(dialect.colToSQLType(mm.date()), 'DATE NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.date({ defaultToNow: 'utc' })), 'DATE NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.date({ fsp: 3 })), 'DATE(3) NOT NULL');
   sqlEq(dialect.colToSQLType(mm.datetime()), 'DATETIME NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.datetime({ defaultToNow: 'utc' })), 'DATETIME NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.datetime({ fsp: 3 })), 'DATETIME(3) NOT NULL');
   sqlEq(dialect.colToSQLType(mm.time()), 'TIME NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.time({ defaultToNow: 'utc' })), 'TIME NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.time({ fsp: 3 })), 'TIME(3) NOT NULL');
   // NULL
   sqlEq(dialect.colToSQLType(mm.int().nullable), 'INT NULL DEFAULT NULL');
   // Default value
