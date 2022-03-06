@@ -11,7 +11,7 @@ function sqlEq(sql: mm.SQL, value: string) {
   eq(mr.sqlIO(sql, dialect, null).getCodeString(), `"${value}"`);
 }
 
-function testType(col: mm.Column, type: string, pkg?: string) {
+function testDTToGoType(col: mm.Column, type: string, pkg?: string) {
   const typeInfo = dialect.colTypeToGoType(col.__type());
   eq(typeInfo.fullTypeName, type);
 
@@ -35,7 +35,7 @@ it('encodeTableName', () => {
   eq(dialect.encodeTableName(t), '`haha`');
 });
 
-it('DT', () => {
+it('DT to go type', () => {
   const tests: Array<[mm.Column, string, unknown]> = [
     // PK
     [mm.pk(), 'uint64', null],
@@ -60,10 +60,10 @@ it('DT', () => {
 
   for (const t of tests) {
     const column = t[0];
-    testType(column, t[1], t[2] as string);
+    testDTToGoType(column, t[1], t[2] as string);
     if (!column.__type().pk) {
       column.__type().nullable = true;
-      testType(column, `*${t[1]}`, t[2] as string);
+      testDTToGoType(column, `*${t[1]}`, t[2] as string);
     }
   }
 });
@@ -123,13 +123,21 @@ it('objToSQL', () => {
 it('colToSQLType', () => {
   // Integers
   sqlEq(dialect.colToSQLType(mm.int()), 'INT NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.int(3)), 'INT(3) NOT NULL');
   sqlEq(dialect.colToSQLType(mm.bigInt()), 'BIGINT NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.bigInt(3)), 'BIGINT(3) NOT NULL');
   sqlEq(dialect.colToSQLType(mm.tinyInt()), 'TINYINT NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.tinyInt(1)), 'TINYINT(1) NOT NULL');
   sqlEq(dialect.colToSQLType(mm.smallInt()), 'SMALLINT NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.smallInt(3)), 'SMALLINT(3) NOT NULL');
   sqlEq(dialect.colToSQLType(mm.uInt()), 'INT UNSIGNED NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.uInt(3)), 'INT(3) UNSIGNED NOT NULL');
   sqlEq(dialect.colToSQLType(mm.uBigInt()), 'BIGINT UNSIGNED NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.uBigInt(3)), 'BIGINT(3) UNSIGNED NOT NULL');
   sqlEq(dialect.colToSQLType(mm.uTinyInt()), 'TINYINT UNSIGNED NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.uTinyInt(1)), 'TINYINT(1) UNSIGNED NOT NULL');
   sqlEq(dialect.colToSQLType(mm.uSmallInt()), 'SMALLINT UNSIGNED NOT NULL');
+  sqlEq(dialect.colToSQLType(mm.uSmallInt(3)), 'SMALLINT(3) UNSIGNED NOT NULL');
   sqlEq(dialect.colToSQLType(mm.bool()), 'TINYINT NOT NULL');
   // Chars
   sqlEq(dialect.colToSQLType(mm.varChar(3)), 'VARCHAR(3) NOT NULL');

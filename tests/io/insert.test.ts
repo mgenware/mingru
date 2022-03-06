@@ -94,7 +94,7 @@ it('setDefaults', () => {
     id = mm.pk();
     title = mm.varChar(100);
     content = mm.varChar(100).default('');
-    datetime = mm.datetime('utc');
+    datetime = mm.datetime({ defaultToNow: 'utc' });
   }
   const post2 = mm.table(Post);
 

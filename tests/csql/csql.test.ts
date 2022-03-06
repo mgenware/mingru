@@ -55,7 +55,7 @@ it('noDefaultOnCSQL', async () => {
 it('No SQL expr as default value', async () => {
   class User extends mm.Table {
     a = mm.int().default(1);
-    b = mm.datetime('local');
+    b = mm.datetime({ defaultToNow: 'local' });
     c = mm.datetime();
     d = mm.datetime().default('2012-12-20');
   }
