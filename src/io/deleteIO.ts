@@ -1,5 +1,4 @@
 import * as mm from 'mingru-models';
-import { throwIfFalsy } from 'throw-if-arg-empty';
 import { Dialect, StringSegment } from '../dialect.js';
 import { ActionIO } from './actionIO.js';
 import { SQLIO, sqlIO } from './sqlIO.js';
@@ -22,8 +21,6 @@ export class DeleteIO extends ActionIO {
     returnValues: VarList,
   ) {
     super(dialect, deleteAction, sql, funcArgs, execArgs, returnValues);
-    throwIfFalsy(deleteAction, 'deleteAction');
-    throwIfFalsy(sql, 'sql');
   }
 }
 

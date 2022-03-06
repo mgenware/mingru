@@ -1,5 +1,4 @@
 import * as mm from 'mingru-models';
-import { throwIfFalsy } from 'throw-if-arg-empty';
 import { Dialect } from '../dialect.js';
 import { ActionIO } from './actionIO.js';
 import VarList from '../lib/varList.js';
@@ -37,7 +36,6 @@ export class TransactIO extends ActionIO {
     public childReturnValues: { [name: string]: TXMReturnValueInfo | undefined },
   ) {
     super(dialect, transactAction, null, funcArgs, execArgs, returnValues);
-    throwIfFalsy(transactAction, 'transactAction');
   }
 }
 

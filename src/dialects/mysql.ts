@@ -1,6 +1,5 @@
 /* eslint-disable class-methods-use-this */
 import * as mm from 'mingru-models';
-import { throwIfFalsy } from 'throw-if-arg-empty';
 import toTypeString from 'to-type-string';
 import { Dialect, SQLTypeMode } from '../dialect.js';
 import { AtomicTypeInfo, CompoundTypeInfo, TypeInfo } from '../lib/varInfo.js';
@@ -10,7 +9,6 @@ const TimeType = new AtomicTypeInfo('Time', 'time.Time{}', 'time');
 
 export class MySQL extends Dialect {
   override encodeName(name: string): string {
-    throwIfFalsy(name, 'name');
     return '`' + name + '`';
   }
 
@@ -35,7 +33,6 @@ export class MySQL extends Dialect {
   }
 
   override colTypeToGoType(colType: mm.ColumnType): TypeInfo {
-    throwIfFalsy(colType, 'colType');
     const typeInfo = this.goTypeNonNull(colType);
     if (colType.nullable) {
       return new CompoundTypeInfo(typeInfo, true, false);
@@ -44,7 +41,6 @@ export class MySQL extends Dialect {
   }
 
   override colToSQLType(col: mm.Column, mode?: SQLTypeMode): mm.SQL {
-    throwIfFalsy(col, 'col');
     const colType = col.__type();
     const colData = col.__getData();
     let typeString = this.absoluteSQLType(colType);

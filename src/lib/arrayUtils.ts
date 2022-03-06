@@ -28,3 +28,9 @@ export function join2DArrays<T>(matrix: T[][], item: T): T[] {
 export function dedup<T>(arr: T[]): T[] {
   return [...new Set(arr)];
 }
+
+export function throwOnEmptyArray<T>(arr: T[] | readonly T[], name: string) {
+  if (!arr.length) {
+    throw new Error(`The argument ${name} cannot be an empty array`);
+  }
+}

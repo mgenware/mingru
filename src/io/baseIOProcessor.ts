@@ -1,5 +1,4 @@
 import * as mm from 'mingru-models';
-import { throwIfFalsy } from 'throw-if-arg-empty';
 import { ActionToIOOptions } from './actionToIOOptions.js';
 
 export default class BaseIOProcessor {
@@ -7,10 +6,7 @@ export default class BaseIOProcessor {
     return this.opt.configurableTableName;
   }
 
-  constructor(public action: mm.Action, public opt: ActionToIOOptions) {
-    throwIfFalsy(action, 'action');
-    throwIfFalsy(opt, 'opt');
-  }
+  constructor(public action: mm.Action, public opt: ActionToIOOptions) {}
 
   mustGetAvailableSQLTable(): mm.Table {
     const table = this.action.__mustGetAvailableSQLTable(this.opt.groupTable);

@@ -1,5 +1,4 @@
 import * as mm from 'mingru-models';
-import { throwIfFalsy } from 'throw-if-arg-empty';
 import * as defs from '../def/defs.js';
 import { ActionIO } from './actionIO.js';
 import { actionToIO } from './actionToIO.js';
@@ -19,7 +18,6 @@ export class TAIO {
   tableDBName: string;
 
   constructor(public ta: mm.TableActions, public opt: ActionToIOOptions) {
-    throwIfFalsy(ta, 'ta');
     const taData = ta.__getData();
     const taTable = taData.table;
     const taTableName = taTable.__getData().name;

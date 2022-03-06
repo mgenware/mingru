@@ -1,5 +1,4 @@
 import * as mm from 'mingru-models';
-import { throwIfFalsy } from 'throw-if-arg-empty';
 import { Dialect, StringSegment } from '../dialect.js';
 import { settersToVarList, SetterIO } from './setterIO.js';
 import { ActionIO } from './actionIO.js';
@@ -26,8 +25,6 @@ export class InsertIO extends ActionIO {
     returnValues: VarList,
   ) {
     super(dialect, insertAction, sql, funcArgs, execArgs, returnValues);
-    throwIfFalsy(insertAction, 'insertAction');
-    throwIfFalsy(sql, 'sql');
   }
 }
 

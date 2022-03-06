@@ -1,5 +1,4 @@
 import * as mm from 'mingru-models';
-import { throwIfFalsy } from 'throw-if-arg-empty';
 import { Dialect } from '../dialect.js';
 import { ActionIO } from './actionIO.js';
 import VarList from '../lib/varList.js';
@@ -20,7 +19,6 @@ export class WrapIO extends ActionIO {
     public innerIO: ActionIO,
   ) {
     super(dialect, wrapAction, null, funcArgs, execArgs, returnValues);
-    throwIfFalsy(wrapAction, 'wrapAction');
   }
 }
 

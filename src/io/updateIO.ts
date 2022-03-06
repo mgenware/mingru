@@ -1,5 +1,4 @@
 import * as mm from 'mingru-models';
-import { throwIfFalsy } from 'throw-if-arg-empty';
 import { Dialect, StringSegment } from '../dialect.js';
 import { settersToVarList, SetterIO } from './setterIO.js';
 import { SQLIO, sqlIO } from './sqlIO.js';
@@ -9,7 +8,7 @@ import { VarInfo } from '../lib/varInfo.js';
 import { registerHandler } from './actionToIO.js';
 import * as defs from '../def/defs.js';
 import * as utils from '../lib/stringUtils.js';
-import { forEachWithSlots } from '../lib/arrayUtils.js';
+import { forEachWithSlots, throwOnEmptyArray } from '../lib/arrayUtils.js';
 import BaseIOProcessor from './baseIOProcessor.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
 import { handleNonSelectSQLFrom } from '../lib/sqlHelper.js';
@@ -27,9 +26,7 @@ export class UpdateIO extends ActionIO {
     public setterArgs: VarList,
   ) {
     super(dialect, updateAction, sql, funcArgs, execArgs, returnValues);
-    throwIfFalsy(updateAction, 'updateAction');
-    throwIfFalsy(sql, 'sql');
-    throwIfFalsy(setters, 'setters');
+    throwOnEmptyArray(setters, 'setters');
   }
 }
 

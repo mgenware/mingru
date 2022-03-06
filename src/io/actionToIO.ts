@@ -1,5 +1,4 @@
 import * as mm from 'mingru-models';
-import { throwIfFalsy } from 'throw-if-arg-empty';
 import mustBeErr from 'must-be-err';
 import { ActionIO } from './actionIO.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
@@ -9,7 +8,6 @@ export type HandlerType = (action: mm.Action, opt: ActionToIOOptions) => ActionI
 const handlers = new Map<number, HandlerType>();
 
 export function registerHandler(type: mm.ActionType, handler: HandlerType) {
-  throwIfFalsy(handler, 'handlers');
   if (handlers.has(type)) {
     throw new Error(`The type "${type}" has been registered`);
   }
@@ -24,9 +22,6 @@ export function actionToIO(
   descMsg: string, // used for debugging / logging purposes.
 ): ActionIO {
   try {
-    throwIfFalsy(action, 'action');
-    throwIfFalsy(opt, 'opt');
-
     const cached = actionToIOMap.get(action);
     if (cached) {
       return cached;

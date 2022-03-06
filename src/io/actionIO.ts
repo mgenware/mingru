@@ -1,5 +1,4 @@
 import * as mm from 'mingru-models';
-import { throwIfFalsy } from 'throw-if-arg-empty';
 import VarList from '../lib/varList.js';
 import { VarInfo } from '../lib/varInfo.js';
 import { Dialect, StringSegment } from '../dialect.js';
@@ -17,11 +16,6 @@ export class ActionIO {
     public execArgs: VarList,
     public returnValues: VarList, // `returnValues` doesn't contain the last error param.
   ) {
-    throwIfFalsy(action, 'action');
-    throwIfFalsy(funcArgs, 'funcArgs');
-    throwIfFalsy(execArgs, 'execArgs');
-    throwIfFalsy(returnValues, 'returnValues');
-
     const { argStubs } = action.__getData();
     this.funcStubs = (argStubs ?? []).map((v) => VarInfoBuilder.fromSQLVar(v, dialect));
   }

@@ -1,7 +1,6 @@
 /* eslint-disable no-param-reassign */
 import * as mm from 'mingru-models';
 import toTypeString from 'to-type-string';
-import { throwIfFalsy } from 'throw-if-arg-empty';
 import mustBeErr from 'must-be-err';
 import { Dialect, StringSegment } from '../dialect.js';
 import { SQLIO, sqlIO, SQLIOBuilderOption } from './sqlIO.js';
@@ -112,10 +111,7 @@ export class SelectedColumnIO {
     public resultType: mm.ColumnType | undefined,
     // True when this column is NULLABLE as a result of a Join, like a full join.
     public nullable: boolean,
-  ) {
-    throwIfFalsy(selectedColumn, 'selectedColumn');
-    throwIfFalsy(valueSQL, 'valueSQL');
-  }
+  ) {}
 
   getResultType(): mm.ColumnType {
     if (this.resultType) {
@@ -148,8 +144,6 @@ export class SelectIO extends ActionIO {
     public orderByInputIOs: Map<string, OrderByInputIO>,
   ) {
     super(dialect, selectAction, sql, funcArgs, execArgs, returnValues);
-    throwIfFalsy(selectAction, 'action');
-    throwIfFalsy(sql, 'sql');
   }
 }
 

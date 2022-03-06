@@ -1,6 +1,5 @@
 /* eslint-disable class-methods-use-this */
 import * as mm from 'mingru-models';
-import { throwIfFalsy } from 'throw-if-arg-empty';
 import { Dialect } from '../dialect.js';
 import { SelectIO } from '../io/selectIO.js';
 import { UpdateIO } from '../io/updateIO.js';
@@ -74,7 +73,6 @@ export default class CoreBuilder {
   private dialect: Dialect;
 
   constructor(public taIO: TAIO, public opts: BuildOptions, public context: CoreBuilderContext) {
-    throwIfFalsy(taIO, 'taIO');
     this.dialect = taIO.opt.dialect;
     this.options = opts;
     if (opts.tsOutDir) {

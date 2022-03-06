@@ -1,5 +1,4 @@
 import * as mm from 'mingru-models';
-import { throwIfFalsy } from 'throw-if-arg-empty';
 import * as mfs from 'm-fs';
 import * as np from 'path';
 import { promises as fs } from 'fs';
@@ -26,8 +25,6 @@ export default class Builder {
   workingDir: string;
 
   constructor(public dialect: Dialect, public outDir: string, opts?: BuildOptions) {
-    throwIfFalsy(dialect, 'dialect');
-    throwIfFalsy(outDir, 'outDir');
     // eslint-disable-next-line no-param-reassign
     opts = opts ?? {};
     logger.enabled = !opts.noOutput;

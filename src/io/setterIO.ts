@@ -1,5 +1,4 @@
 import * as mm from 'mingru-models';
-import { throwIfFalsy } from 'throw-if-arg-empty';
 import { SQLIO, sqlIO, SQLIOBuilderOption } from './sqlIO.js';
 import VarList from '../lib/varList.js';
 import { Dialect } from '../dialect.js';
@@ -122,10 +121,7 @@ export class SetterIO {
     }
   }
 
-  constructor(public col: mm.Column, public sql: SQLIO) {
-    throwIfFalsy(col, 'col');
-    throwIfFalsy(sql, 'sql');
-  }
+  constructor(public col: mm.Column, public sql: SQLIO) {}
 }
 
 export function settersToVarList(name: string, setters: SetterIO[], items?: VarInfo[]): VarList {

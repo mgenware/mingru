@@ -1,5 +1,4 @@
 import * as mm from 'mingru-models';
-import { throwIfFalsy } from 'throw-if-arg-empty';
 import {
   VarInfo,
   TypeInfo,
@@ -13,8 +12,6 @@ import { Dialect } from '../dialect.js';
 
 export class TypeInfoBuilder {
   static fromSQLVariable(variable: mm.SQLVariable, dialect: Dialect): TypeInfo {
-    throwIfFalsy(variable, 'variable');
-    throwIfFalsy(dialect, 'dialect');
     const { type } = variable;
 
     let typeInfo: TypeInfo;
@@ -46,8 +43,6 @@ export class VarInfoBuilder {
   }
 
   static fromSQLVar(v: mm.SQLVariable, dialect: Dialect): VarInfo {
-    throwIfFalsy(v, 'v');
-    throwIfFalsy(dialect, 'dialect');
     const typeInfo = TypeInfoBuilder.fromSQLVariable(v, dialect);
     return new VarInfo(this.getSQLVarInputName(v), typeInfo);
   }

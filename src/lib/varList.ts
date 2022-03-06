@@ -1,4 +1,3 @@
-import { throwIfFalsy, throwIfFalsyStrict } from 'throw-if-arg-empty';
 import { VarInfo } from './varInfo.js';
 
 /**
@@ -31,7 +30,6 @@ export default class VarList {
   }
 
   getByName(name: string): VarInfo | undefined {
-    throwIfFalsy(name, 'name');
     return this.map.get(name);
   }
 
@@ -40,8 +38,6 @@ export default class VarList {
   }
 
   add(varInfo: VarInfo) {
-    throwIfFalsy(varInfo, 'varInfo');
-
     const prev = this.getByName(varInfo.name);
     if (prev) {
       // Found an existing var with the same name, check if their types are identical.
@@ -66,7 +62,6 @@ export default class VarList {
   }
 
   merge(vars: VarInfo[]) {
-    throwIfFalsyStrict(vars, 'vars');
     for (const v of vars) {
       this.add(v);
     }

@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import * as mm from 'mingru-models';
-import { throwIfFalsy } from 'throw-if-arg-empty';
 import { toCamelCase, toPascalCase } from './stringUtils.js';
 
 export class AtomicTypeInfo {
@@ -115,12 +114,10 @@ export type VarValue = string | mm.ValueRef | mm.Table;
 
 export class VarInfo {
   static withValue(v: VarInfo, value: VarValue): VarInfo {
-    throwIfFalsy(v, 'v');
     return new VarInfo(v.name, v.type, value);
   }
 
   static withName(v: VarInfo, name: string): VarInfo {
-    throwIfFalsy(v, 'v');
     return new VarInfo(name, v.type, v.value);
   }
 

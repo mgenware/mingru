@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import { throwIfFalsy } from 'throw-if-arg-empty';
 import toTypeString from 'to-type-string';
 import * as mm from 'mingru-models';
 import { Dialect, StringSegment } from '../dialect.js';
@@ -25,11 +24,7 @@ export class SQLIO {
     public dialect: Dialect,
     public varList: VarList,
     public code: StringSegment[],
-  ) {
-    throwIfFalsy(sql, 'sql');
-    throwIfFalsy(varList, 'varList');
-    throwIfFalsy(code, 'code');
-  }
+  ) {}
 
   getCodeString(): string {
     return makeStringFromSegments(this.code);
