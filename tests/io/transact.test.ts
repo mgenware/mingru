@@ -3,6 +3,8 @@ import * as mm from 'mingru-models';
 import * as mr from '../../dist/main.js';
 import user from '../models/user.js';
 import post from '../models/post.js';
+import postCmt from '../models/postCmt.js';
+import cmt2 from '../models/cmt2.js';
 import { commonIOOptions } from './common.js';
 import { eq, ok } from '../assert-aliases.js';
 
@@ -144,4 +146,39 @@ it('TX member IOs', () => {
   );
   eq(members[0]!.actionIO.returnValues.toString(), '__insertedID: uint64');
   eq(members[1]!.actionIO.returnValues.toString(), '__insertedID: uint64');
+});
+
+it('Merging SQL vars', () => {
+  class PostTA extends mm.TableActions {
+    t = mm.transact(
+      mm.insertOne().from(cmt2).setInputs(),
+      mm.insertOne().from(postCmt).setInputs(),
+    );
+  }
+  const postTA = mm.tableActions(post, PostTA);
+  const io = mr.transactIO(postTA.t, commonIOOptions);
+  const mio = io.memberIOs[0]!;
+  eq(mio.toString(), 'TransactMemberIO(InsertAction(-, ft=Cmt(cmt)), mrTable.tChild1)');
+  eq(io.returnValues.toString(), '');
+  eq(
+    io.funcArgs.toString(),
+    'db: *sql.DB|database/sql, content: string, userID: uint64, createdAt: time.Time|time, modifiedAt: time.Time|time, rplCount: uint, postID: uint64, cmtID: uint64',
+  );
+  eq(io.execArgs.toString(), '');
+});
+
+it('Merging SQL vars (WRAPPED)', () => {
+  class PostTA extends mm.TableActions {
+    t = mm
+      .transact(mm.insertOne().from(cmt2).setInputs(), mm.insertOne().from(postCmt).setInputs())
+      .wrap({ rplCount: 1, cmtID: 2 });
+  }
+  const postTA = mm.tableActions(post, PostTA);
+  const io = mr.wrapIO(postTA.t, commonIOOptions);
+  eq(io.returnValues.toString(), '');
+  eq(
+    io.funcArgs.toString(),
+    'db: *sql.DB|database/sql, content: string, userID: uint64, createdAt: time.Time|time, modifiedAt: time.Time|time, rplCount: uint, postID: uint64, cmtID: uint64',
+  );
+  eq(io.execArgs.toString(), '');
 });

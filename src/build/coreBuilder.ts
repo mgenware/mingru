@@ -666,7 +666,7 @@ export default class CoreBuilder {
 
     // Lines builder for code inside DB transaction closure.
     const innerBuilder = new LinesBuilder();
-    const { memberIOs, returnValues } = io;
+    const { memberIOs, returnValues, funcArgs } = io;
 
     // We don't use mrQueryable in transaction arguments but we still need to
     // import the dbx namespace as we're calling mingru.transact.
@@ -738,6 +738,16 @@ export default class CoreBuilder {
     innerBuilder.push('return nil');
 
     const builder = new LinesBuilder();
+
+    // Declare params that have a value.
+    const funcArgsWithValues = funcArgs.list.filter((v) => v.value);
+    if (funcArgsWithValues.length) {
+      this.imports.addVars(funcArgsWithValues);
+      for (const v of funcArgsWithValues) {
+        builder.push(`${v.name} := ${go.transformVarInfo(v, go.VarInfoNameCase.camelCase)}`);
+      }
+    }
+
     // Declare return variables if needed.
     if (returnValues.length) {
       this.imports.addVars(returnValues.list);

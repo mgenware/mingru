@@ -61,7 +61,7 @@ class TransactIOProcessor extends BaseIOProcessor {
   convert(): TransactIO {
     const { action, opt } = this;
     const actionName = this.mustGetActionName();
-    const groupTable = action.__mustGetGroupTable();
+    const groupTable = this.mustGetGroupTable();
     const actionData = action.__getData();
     const { dialect } = opt;
     const { members } = actionData;
