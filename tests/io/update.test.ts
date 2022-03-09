@@ -27,7 +27,7 @@ it('Update', () => {
   );
   eq(io.setters.length, 3);
   eq(io.setters[0]!.col, post.title);
-  eq(io.setters[0]!.sql.sql.toString(), 'SQL(E("haha", type = 0))');
+  eq(io.setters[0]!.sql.sql.toString(), '`"haha"`');
   eq(io.setters[1]!.col, post.content);
   eq(io.setters[2]!.col, post.cmtCount);
 });
@@ -91,7 +91,7 @@ it('Validate setters', () => {
     }
     const ta = mm.tableActions(post, PostTA);
     mr.insertIO(ta.t, commonIOOptions);
-  }, 'Source table assertion failed, expected "Table(post|db_post)", got "Table(user)".');
+  }, 'Source table assertion failed, expected "Post(post, db=db_post)", got "User(user)".');
 });
 
 it('setDefaults', () => {

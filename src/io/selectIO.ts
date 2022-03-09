@@ -305,9 +305,6 @@ export class SelectIOProcessor extends BaseIOProcessor {
 
     if (!opt.selectionLiteMode) {
       const actionName = this.mustGetActionName();
-      if (!actionName) {
-        throw new Error(`\`actionName\` is required, action "${this.action}"`);
-      }
 
       // NOTE: not the table defined by FROM, it's the root table defined in table actions.
       // Those fields are used to generate result type definition.

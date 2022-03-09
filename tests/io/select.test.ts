@@ -277,7 +277,7 @@ it('Unrelated cols', () => {
     const ta = mm.tableActions(user, UserTA);
     const v = ta.t;
     mr.selectIO(v, commonIOOptions);
-  }, 'Source table assertion failed, expected "Table(user)", got "Table(post|db_post)".');
+  }, 'Source table assertion failed, expected "User(user)", got "Post(post, db=db_post)".');
 
   // WHERE col
   itThrows(() => {
@@ -287,7 +287,7 @@ it('Unrelated cols', () => {
     const ta = mm.tableActions(user, UserTA);
     const v = ta.t;
     mr.selectIO(v, commonIOOptions);
-  }, 'Source table assertion failed, expected "Table(user)", got "Table(post|db_post)".');
+  }, 'Source table assertion failed, expected "User(user)", got "Post(post, db=db_post)".');
 
   // Do NOT throws on inputs
   assert.doesNotThrow(() => {

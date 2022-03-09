@@ -25,13 +25,13 @@ it('toSQL(sourceTable)', () => {
     const sql = mm.sql`${post.datetime} = ${mm.localDatetimeNow()}`;
     const io = mr.sqlIO(sql, dialect, user);
     io.getCodeString();
-  }, 'Source table assertion failed, expected "Table(user)", got "Table(post|db_post)".');
+  }, 'Source table assertion failed, expected "User(user)", got "Post(post, db=db_post)".');
 
   itThrows(() => {
     const sql = mm.sql`${post.datetime} = ${mm.localDatetimeNow()} ${user.id}`;
     const io = mr.sqlIO(sql, dialect, post);
     io.getCodeString();
-  }, 'Source table assertion failed, expected "Table(post|db_post)", got "Table(user)".');
+  }, 'Source table assertion failed, expected "Post(post, db=db_post)", got "User(user)".');
 });
 
 it('Nested SQLs', () => {
@@ -63,7 +63,7 @@ it('Conflicting names', () => {
   itThrows(() => {
     const sql = mm.sql`${user.id.toInput()}${mm.input({ type: 'b', defaultValue: null }, 'id')}`;
     mr.sqlIO(sql, dialect, null);
-  }, 'Cannot handle two variables with the same name "id" but different types ("uint64" and "b") in "Expression SQL(E(SQLVar(undefined, desc = Column(id, Table(user))), type = 2), E(SQLVar(id, desc = {"type":"b","defaultValue":null}), type = 2))"');
+  }, 'Cannot handle two variables with the same name "id" but different types ("uint64" and "b") in "Expression `VAR(Column(id, t=User(user)))VAR({"type":"b","defaultValue":null}, name=id)`"');
 
   itThrows(() => {
     const sql = mm.sql`${mm.input({ type: 'a', defaultValue: null }, 'v1')}${mm.input(
@@ -71,5 +71,5 @@ it('Conflicting names', () => {
       'v1',
     )}`;
     mr.sqlIO(sql, dialect, null);
-  }, 'Cannot handle two variables with the same name "v1" but different types ("a" and "b") in "Expression SQL(E(SQLVar(v1, desc = {"type":"a","defaultValue":null}), type = 2), E(SQLVar(v1, desc = {"type":"b","defaultValue":null}), type = 2))"');
+  }, 'Cannot handle two variables with the same name "v1" but different types ("a" and "b") in "Expression `VAR({"type":"a","defaultValue":null}, name=v1)VAR({"type":"b","defaultValue":null}, name=v1)`"');
 });

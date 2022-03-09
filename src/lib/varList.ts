@@ -34,7 +34,7 @@ export default class VarList {
   }
 
   getKeysString(): string {
-    return [...this.map.keys()].join(', ');
+    return [...this.map.keys()].toString();
   }
 
   add(varInfo: VarInfo) {

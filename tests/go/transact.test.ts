@@ -218,3 +218,13 @@ it('Use the return value of a TX', async () => {
   const employeeTA = mm.tableActions(employee, EmployeeTA);
   await testBuildAsync(employeeTA, 'tx/useTXReturnValue/employee');
 });
+
+it('Call an inner TX with .wrap', async () => {
+  class PostTA extends mm.TableActions {
+    t = mm
+      .transact(mm.insertOne().from(cmt2).setInputs(), mm.insertOne().from(postCmt).setInputs())
+      .wrap({ rplCount: 1, cmtID: 2 });
+  }
+  const postTA = mm.tableActions(post, PostTA);
+  await testBuildAsync(postTA, 'tx/callTxWrap/post');
+});

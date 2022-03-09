@@ -37,5 +37,5 @@ it('Action info appended to error message', async () => {
     }
     const ta = mm.tableActions(post, PostTA);
     await testBuildAsync(ta, '');
-  }, 'Source table assertion failed, expected "Table(post|db_post)", got "Table(user)". [action "post.t"]');
+  }, 'Source table assertion failed, expected "Post(post, db=db_post)", got "User(user)". [action "post.t"]');
 });
