@@ -37,13 +37,10 @@ class WrapIOProcessor extends BaseIOProcessor {
     }
     const actionName = this.mustGetActionName();
     const groupTable = this.mustGetGroupTable();
-    if (!actionName) {
-      throw new Error(`Action name is empty, action "${action}"`);
-    }
 
     const innerIO = actionToIO(
       innerAction,
-      { ...opt, groupTable, actionName },
+      { ...opt, outerGroupTable: groupTable, outerActionName: actionName },
       `WrapAction "${actionName}"`,
     );
     const innerActionData = innerAction.__getData();
@@ -54,9 +51,9 @@ class WrapIOProcessor extends BaseIOProcessor {
     for (const key of Object.keys(args)) {
       if (!innerFuncArgs.getByName(key)) {
         throw new Error(
-          `The argument "${key}" doesn't exist in action "${action}". Available arguments: "${innerFuncArgs.getKeysString()}", your arguments: "${Object.keys(
+          `The argument "${key}" doesn't exist in action "${action}". Available arguments: ${innerFuncArgs.getKeysString()}, your arguments: ${Object.keys(
             args,
-          )}"`,
+          )}`,
         );
       }
     }
@@ -96,8 +93,8 @@ class WrapIOProcessor extends BaseIOProcessor {
       }
     }
 
-    // `isInline` means the `innerIO` is not used by any other actions. We can
-    // update it in-place and return it as the IO object for this action.
+    // If the inner action doesn't belong to any TA. We can update it
+    // in-place and return it as the IO object for this action.
     // Example:
     //   mm.update().wrap(args) -> mm.update(args)
     // NOTE that `innerIO` might be any action types.
@@ -113,7 +110,7 @@ class WrapIOProcessor extends BaseIOProcessor {
       });
 
       // IMPORTANT! Give `innerIO` a name as it doesn't have one.
-      // Calling `__configure` with another table won't inner action's
+      // Calling `__configure` with another table won't change inner action's
       // previous table.
       innerAction.__configure(groupTable, this.mustGetActionName());
       return innerIO;

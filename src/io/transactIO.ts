@@ -60,7 +60,7 @@ class TransactIOProcessor extends BaseIOProcessor {
 
   convert(): TransactIO {
     const { action, opt } = this;
-    const actionName = action.__mustGetName();
+    const actionName = this.mustGetActionName();
     const groupTable = action.__mustGetGroupTable();
     const actionData = action.__getData();
     const { dialect } = opt;
@@ -76,7 +76,7 @@ class TransactIOProcessor extends BaseIOProcessor {
 
       const io = actionToIO(
         childAction,
-        { ...opt, groupTable, actionName: childName },
+        { ...opt, outerGroupTable: groupTable, outerActionName: childName },
         `Transaction child number ${idx + 1}`,
       );
 

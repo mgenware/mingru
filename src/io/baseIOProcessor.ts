@@ -9,12 +9,12 @@ export default class BaseIOProcessor {
   constructor(public action: mm.Action, public opt: ActionToIOOptions) {}
 
   mustGetAvailableSQLTable(): mm.Table {
-    const table = this.action.__mustGetAvailableSQLTable(this.opt.groupTable);
+    const table = this.action.__mustGetAvailableSQLTable(this.opt.outerGroupTable);
     return table;
   }
 
   mustGetGroupTable(): mm.Table {
-    const table = this.action.__getData().groupTable || this.opt.groupTable;
+    const table = this.action.__getData().groupTable || this.opt.outerGroupTable;
     if (!table) {
       throw new Error(`No available group tables, action "${this.action}"`);
     }
@@ -22,7 +22,7 @@ export default class BaseIOProcessor {
   }
 
   mustGetActionName(): string {
-    const name = this.action.__getData().name || this.opt.actionName;
+    const name = this.action.__getData().name || this.opt.outerActionName;
     if (!name) {
       throw new Error(`Action name is empty, action "${this.action}"`);
     }

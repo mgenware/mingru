@@ -80,7 +80,7 @@ function handleSubquery(
 
     const io = actionToIO(
       action,
-      { dialect, selectionLiteMode: true, groupTable },
+      { dialect, selectionLiteMode: true, outerGroupTable: groupTable },
       'handleSubquery',
     );
     return io;
