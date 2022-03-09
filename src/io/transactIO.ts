@@ -35,7 +35,7 @@ export class TransactIO extends ActionIO {
     returnValues: VarList,
     public childReturnValues: { [name: string]: TXMReturnValueInfo | undefined },
   ) {
-    super(dialect, transactAction, null, funcArgs, execArgs, returnValues);
+    super(dialect, transactAction, null, funcArgs, execArgs, returnValues, true);
   }
 }
 
@@ -92,11 +92,9 @@ class TransactIOProcessor extends BaseIOProcessor {
 
     // funcArgs
     const funcArgs = new VarList(`Func args of action "${action}"`, true);
-    funcArgs.add(defs.sqlDBVar);
     for (const mem of memberIOs) {
       const mAction = mem.actionIO;
-      // Skip the first param of all member functions, which is `mingru.Queryable`.
-      for (const v of mAction.funcArgs.list.slice(1)) {
+      for (const v of mAction.funcArgs.list) {
         if (!v.hasValueRef) {
           funcArgs.add(v);
         }
@@ -164,9 +162,9 @@ class TransactIOProcessor extends BaseIOProcessor {
           throw new Error(
             `The return value named "${key}" doesn't exist in member action "${
               mem.actionIO.action
-            }", available return values "${mem.actionIO.returnValues.getKeysString()}", got "${JSON.stringify(
-              Object.keys(memReturnValues),
-            )}"`,
+            }", available return values "${mem.actionIO.returnValues
+              .keys()
+              .join(',')}", got "${JSON.stringify(Object.keys(memReturnValues))}"`,
           );
         }
 

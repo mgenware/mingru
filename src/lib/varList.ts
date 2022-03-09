@@ -33,8 +33,8 @@ export default class VarList {
     return this.map.get(name);
   }
 
-  getKeysString(): string {
-    return [...this.map.keys()].toString();
+  keys(): readonly string[] {
+    return [...this.map.keys()];
   }
 
   add(varInfo: VarInfo) {

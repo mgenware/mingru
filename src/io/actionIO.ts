@@ -14,7 +14,10 @@ export class ActionIO {
     public sql: StringSegment[] | null,
     public funcArgs: VarList,
     public execArgs: VarList,
-    public returnValues: VarList, // `returnValues` doesn't contain the last error param.
+    // NOTE: `returnValues` doesn't contain the last error param.
+    public returnValues: VarList,
+    // True if first func param is `sql.DB`. Otherwise, `mingru.Queryable`.
+    public firstParamDB: boolean,
   ) {
     const { argStubs } = action.__getData();
     this.funcStubs = (argStubs ?? []).map((v) => VarInfoBuilder.fromSQLVar(v, dialect));

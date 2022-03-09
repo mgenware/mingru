@@ -25,7 +25,7 @@ export class UpdateIO extends ActionIO {
     returnValues: VarList,
     public setterArgs: VarList,
   ) {
-    super(dialect, updateAction, sql, funcArgs, execArgs, returnValues);
+    super(dialect, updateAction, sql, funcArgs, execArgs, returnValues, false);
     throwOnEmptyArray(setters, 'setters');
   }
 }
@@ -80,7 +80,6 @@ class UpdateIOProcessor extends BaseIOProcessor {
     // funcArgs
     const setterVars = settersToVarList(`SetterInputs of action "${action}"`, setterIOs);
     const funcArgs = new VarList(`Func args of action "${action}"`, true);
-    funcArgs.add(defs.dbxQueryableVar);
     if (this.configurableTableName) {
       funcArgs.add(defs.cfTableVarInfo(this.configurableTableName));
     }

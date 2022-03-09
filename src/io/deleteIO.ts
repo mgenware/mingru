@@ -20,7 +20,7 @@ export class DeleteIO extends ActionIO {
     execArgs: VarList,
     returnValues: VarList,
   ) {
-    super(dialect, deleteAction, sql, funcArgs, execArgs, returnValues);
+    super(dialect, deleteAction, sql, funcArgs, execArgs, returnValues, false);
   }
 }
 
@@ -57,7 +57,6 @@ class DeleteIOProcessor extends BaseIOProcessor {
 
     // Inputs
     const funcArgs = new VarList(`Func args of action "${action}"`, true);
-    funcArgs.add(defs.dbxQueryableVar);
     if (this.configurableTableName) {
       funcArgs.add(defs.cfTableVarInfo(this.configurableTableName));
     }

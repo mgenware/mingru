@@ -137,7 +137,11 @@ export default class CoreBuilder {
 
     // Build func params.
     // allFuncArgs = original func args + arg stubs.
-    const allFuncArgs = [...funcArgs, ...io.funcStubs];
+    const allFuncArgs = [
+      io.firstParamDB ? defs.sqlDBVar : defs.dbxQueryableVar,
+      ...funcArgs,
+      ...io.funcStubs,
+    ];
     this.imports.addVars(allFuncArgs);
     const funcParamsCode = allFuncArgs
       .map((p) => `${p.camelCaseName()} ${p.type.fullTypeName}`)

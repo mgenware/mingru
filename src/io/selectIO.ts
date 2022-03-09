@@ -143,7 +143,7 @@ export class SelectIO extends ActionIO {
     // K: ORDER BY params name, V: IO.
     public orderByInputIOs: Map<string, OrderByInputIO>,
   ) {
-    super(dialect, selectAction, sql, funcArgs, execArgs, returnValues);
+    super(dialect, selectAction, sql, funcArgs, execArgs, returnValues, false);
   }
 }
 
@@ -239,7 +239,6 @@ export class SelectIOProcessor extends BaseIOProcessor {
     const limitTypeInfo = new VarInfo('limit', defs.intTypeInfo);
     const offsetTypeInfo = new VarInfo('offset', defs.intTypeInfo);
     const funcArgs = new VarList(`Func args of action "${this.action}"`, true);
-    funcArgs.add(defs.dbxQueryableVar);
     if (this.configurableTableName) {
       funcArgs.add(defs.cfTableVarInfo(this.configurableTableName));
     }

@@ -35,10 +35,7 @@ it('getInputs', () => {
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.deleteIO(v, commonIOOptions);
-  eq(
-    io.funcArgs.toString(),
-    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, urlName: string',
-  );
+  eq(io.funcArgs.toString(), 'id: uint64, urlName: string');
   eq(io.execArgs.toString(), 'id: uint64, urlName: string');
 });
 

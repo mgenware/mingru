@@ -46,10 +46,7 @@ it('getInputs', () => {
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, commonIOOptions);
-  eq(
-    io.funcArgs.toString(),
-    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, sig: *string, id: uint64, b: string',
-  );
+  eq(io.funcArgs.toString(), 'sig: *string, id: uint64, b: string');
   eq(io.execArgs.toString(), 'sig: *string, id: uint64, b: string');
 });
 

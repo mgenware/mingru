@@ -30,7 +30,7 @@ it('TransactIO', () => {
   ok(io instanceof mr.TransactIO);
   eq(
     io.funcArgs.toString(),
-    'db: *sql.DB|database/sql, urlName: string, id: uint64, urlName: string, sig: *string, followerCount: *string, urlName: string, id: uint64, urlName: string, followerCount: *string, urlName: string, urlName: string, sig: *string, followerCount: *string {db: *sql.DB|database/sql, urlName: string, id: uint64, sig: *string, followerCount: *string}',
+    'urlName: string, id: uint64, urlName: string, sig: *string, followerCount: *string, urlName: string, id: uint64, urlName: string, followerCount: *string, urlName: string, urlName: string, sig: *string, followerCount: *string {urlName: string, id: uint64, sig: *string, followerCount: *string}',
   );
   // No execArgs in TX actions
   eq(io.execArgs.toString(), '');
@@ -53,66 +53,42 @@ it('Members with WRAP actions', () => {
 
   const io = mr.transactIO(wrapTA.t, commonIOOptions);
   ok(io instanceof mr.TransactIO);
-  eq(io.funcArgs.toString(), 'db: *sql.DB|database/sql, id: uint64, followerCount: *string');
+  eq(io.funcArgs.toString(), 'id: uint64, followerCount: *string');
   // No execArgs in TX actions
   eq(io.execArgs.toString(), '');
 
   const m1 = io.memberIOs[0]!.actionIO;
-  eq(
-    m1.funcArgs.toString(),
-    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, followerCount: *string',
-  );
-  eq(
-    m1.execArgs.toString(),
-    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, sig: *string="haha", followerCount: *string',
-  );
+  eq(m1.funcArgs.toString(), 'id: uint64, followerCount: *string');
+  eq(m1.execArgs.toString(), 'id: uint64, sig: *string="haha", followerCount: *string');
 
   const io2 = mr.transactIO(wrapTA.t2, commonIOOptions);
   ok(io2 instanceof mr.TransactIO);
-  eq(io2.funcArgs.toString(), 'db: *sql.DB|database/sql, id: uint64, followerCount: *string');
+  eq(io2.funcArgs.toString(), 'id: uint64, followerCount: *string');
   // No execArgs in TX actions
   eq(io2.execArgs.toString(), '');
 
   const m2 = io2.memberIOs[0]!.actionIO;
-  eq(
-    m2.funcArgs.toString(),
-    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, followerCount: *string',
-  );
-  eq(
-    m2.execArgs.toString(),
-    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, sig: *string="haha", followerCount: *string',
-  );
+  eq(m2.funcArgs.toString(), 'id: uint64, followerCount: *string');
+  eq(m2.execArgs.toString(), 'id: uint64, sig: *string="haha", followerCount: *string');
 
   const io3 = mr.transactIO(wrapTA.t3, commonIOOptions);
   ok(io3 instanceof mr.TransactIO);
-  eq(
-    io3.funcArgs.toString(),
-    'db: *sql.DB|database/sql, id: uint64, sig: *string, followerCount: *string',
-  );
+  eq(io3.funcArgs.toString(), 'id: uint64, sig: *string, followerCount: *string');
   // No execArgs in TX actions
   eq(io3.execArgs.toString(), '');
 
   const m3 = io3.memberIOs[0]!.actionIO;
-  eq(
-    m3.funcArgs.toString(),
-    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, sig: *string, followerCount: *string',
-  );
+  eq(m3.funcArgs.toString(), 'id: uint64, sig: *string, followerCount: *string');
   eq(m3.execArgs.toString(), 'sig: *string, followerCount: *string, id: uint64');
 
   const io4 = mr.transactIO(wrapTA.t4, commonIOOptions);
   ok(io4 instanceof mr.TransactIO);
-  eq(
-    io4.funcArgs.toString(),
-    'db: *sql.DB|database/sql, id: uint64, sig: *string, followerCount: *string',
-  );
+  eq(io4.funcArgs.toString(), 'id: uint64, sig: *string, followerCount: *string');
   // No execArgs in TX actions
   eq(io4.execArgs.toString(), '');
 
   const m4 = io4.memberIOs[0]!.actionIO;
-  eq(
-    m4.funcArgs.toString(),
-    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, sig: *string, followerCount: *string',
-  );
+  eq(m4.funcArgs.toString(), 'id: uint64, sig: *string, followerCount: *string');
   eq(m4.execArgs.toString(), 'sig: *string, followerCount: *string, id: uint64');
 });
 
@@ -162,7 +138,7 @@ it('Merging SQL vars', () => {
   eq(io.returnValues.toString(), '');
   eq(
     io.funcArgs.toString(),
-    'db: *sql.DB|database/sql, content: string, userID: uint64, createdAt: time.Time|time, modifiedAt: time.Time|time, rplCount: uint, postID: uint64, cmtID: uint64',
+    'content: string, userID: uint64, createdAt: time.Time|time, modifiedAt: time.Time|time, rplCount: uint, postID: uint64, cmtID: uint64',
   );
   eq(io.execArgs.toString(), '');
 });
@@ -178,7 +154,7 @@ it('Merging SQL vars (WRAPPED)', () => {
   eq(io.returnValues.toString(), '');
   eq(
     io.funcArgs.toString(),
-    'db: *sql.DB|database/sql, content: string, userID: uint64, createdAt: time.Time|time, modifiedAt: time.Time|time, rplCount: uint, postID: uint64, cmtID: uint64',
+    'content: string, userID: uint64, createdAt: time.Time|time, modifiedAt: time.Time|time, postID: uint64',
   );
   eq(io.execArgs.toString(), '');
 });

@@ -222,10 +222,7 @@ it('getInputs', () => {
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.selectIO(v, commonIOOptions);
-  eq(
-    io.funcArgs.toString(),
-    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, id: uint64, urlName: string',
-  );
+  eq(io.funcArgs.toString(), 'id: uint64, urlName: string');
 });
 
 it('getInputs (no WHERE)', () => {
@@ -235,7 +232,7 @@ it('getInputs (no WHERE)', () => {
   const ta = mm.tableActions(user, UserTA);
   const v = ta.t;
   const io = mr.selectIO(v, commonIOOptions);
-  eq(io.funcArgs.list.length, 1);
+  eq(io.funcArgs.list.length, 0);
 });
 
 it('returnValues', () => {

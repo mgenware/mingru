@@ -17,8 +17,9 @@ export class WrapIO extends ActionIO {
     returnValues: VarList,
     public funcPath: string | null,
     public innerIO: ActionIO,
+    firstParamDB: boolean,
   ) {
-    super(dialect, wrapAction, null, funcArgs, execArgs, returnValues);
+    super(dialect, wrapAction, null, funcArgs, execArgs, returnValues, firstParamDB);
   }
 }
 
@@ -50,19 +51,21 @@ class WrapIOProcessor extends BaseIOProcessor {
     const innerFuncArgs = innerIO.funcArgs;
     for (const key of Object.keys(args)) {
       if (!innerFuncArgs.getByName(key)) {
+        const availableArgs = [
+          innerIO.firstParamDB ? defs.sqlDBVar.name : defs.dbxQueryableVar.name,
+        ];
+        availableArgs.push(...innerFuncArgs.keys());
         throw new Error(
-          `The argument "${key}" doesn't exist in action "${action}". Available arguments: ${innerFuncArgs.getKeysString()}, your arguments: ${Object.keys(
-            args,
-          )}`,
+          `The argument "${key}" doesn't exist in action "${action}". Available arguments: ${availableArgs.join(
+            ',',
+          )}, your arguments: ${Object.keys(args)}`,
         );
       }
     }
     // funcArgs
     const funcArgs = new VarList(`Func args of action "${action}"`, true);
-    funcArgs.add(defs.dbxQueryableVar);
 
-    // Skip the first param, which is always `mingru.Queryable` or `db.Tx`.
-    for (let i = 1; i < innerFuncArgs.list.length; i++) {
+    for (let i = 0; i < innerFuncArgs.list.length; i++) {
       const arg = innerFuncArgs.list[i];
       if (!arg) {
         throw new Error('Unexpected empty func argument');
@@ -140,7 +143,16 @@ class WrapIOProcessor extends BaseIOProcessor {
       }
     }
 
-    return new WrapIO(dialect, action, funcArgs, execArgs, innerIO.returnValues, funcPath, innerIO);
+    return new WrapIO(
+      dialect,
+      action,
+      funcArgs,
+      execArgs,
+      innerIO.returnValues,
+      funcPath,
+      innerIO,
+      innerIO.firstParamDB,
+    );
   }
 
   // eslint-disable-next-line class-methods-use-this

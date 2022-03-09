@@ -43,11 +43,11 @@ it('getInputs (wrapSelf and innerIO)', () => {
   const io = mr.wrapIO(wrapSelf.d, commonIOOptions) as mr.WrapIO;
   eq(
     io.funcArgs.toString(),
-    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, id: uint64, urlName: string, followerCount: *string {mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, id: uint64, followerCount: *string}',
+    'urlName: string, id: uint64, urlName: string, followerCount: *string {urlName: string, id: uint64, followerCount: *string}',
   );
   eq(
     io.execArgs.toString(),
-    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, id: uint64, sig: *string="haha", followerCount: *string',
+    'urlName: string, id: uint64, sig: *string="haha", followerCount: *string',
   );
   eq(io.funcPath, 'mrTable.S');
 });
@@ -56,11 +56,11 @@ it('getInputs (wrapOther)', () => {
   const io = mr.wrapIO(wrapOther.standard, commonIOOptions) as mr.WrapIO;
   eq(
     io.funcArgs.toString(),
-    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, urlName: string, sig: *string, followerCount: *string {mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, sig: *string, followerCount: *string}',
+    'urlName: string, urlName: string, sig: *string, followerCount: *string {urlName: string, sig: *string, followerCount: *string}',
   );
   eq(
     io.execArgs.toString(),
-    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, id: uint64=123, sig: *string, followerCount: *string',
+    'urlName: string, id: uint64=123, sig: *string, followerCount: *string',
   );
   eq(io.funcPath, 'User.S');
 });
@@ -69,12 +69,9 @@ it('getInputs (wrapOther, nested)', () => {
   const io = mr.wrapIO(wrapOther.nested, commonIOOptions) as mr.WrapIO;
   eq(
     io.funcArgs.toString(),
-    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, urlName: string, followerCount: *string {mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, followerCount: *string}',
+    'urlName: string, urlName: string, followerCount: *string {urlName: string, followerCount: *string}',
   );
-  eq(
-    io.execArgs.toString(),
-    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, id: uint64=123, followerCount: *string',
-  );
+  eq(io.execArgs.toString(), 'urlName: string, id: uint64=123, followerCount: *string');
   eq(io.funcPath, 'User.D');
 });
 
@@ -100,11 +97,8 @@ it('ReturnRef', () => {
   const io = mr.wrapIO(wrapOther.retValue, commonIOOptions) as mr.WrapIO;
   eq(
     io.funcArgs.toString(),
-    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, id: uint64=ValueRef(extID), urlName: string, followerCount: *string {mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, id: uint64=ValueRef(extID), followerCount: *string}',
+    'urlName: string, id: uint64=ValueRef(extID), urlName: string, followerCount: *string {urlName: string, id: uint64=ValueRef(extID), followerCount: *string}',
   );
-  eq(
-    io.execArgs.toString(),
-    'mrQueryable: mingru.Queryable|github.com/mgenware/mingru-go-lib, urlName: string, id: uint64, followerCount: *string',
-  );
+  eq(io.execArgs.toString(), 'urlName: string, id: uint64, followerCount: *string');
   eq(io.funcPath, 'User.D');
 });

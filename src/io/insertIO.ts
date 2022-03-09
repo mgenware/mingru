@@ -6,6 +6,7 @@ import VarList from '../lib/varList.js';
 import { registerHandler } from './actionToIO.js';
 import * as defs from '../def/defs.js';
 import * as utils from '../lib/stringUtils.js';
+import { VarInfo } from '../lib/varInfo.js';
 import { forEachWithSlots } from '../lib/arrayUtils.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
 import BaseIOProcessor from './baseIOProcessor.js';
@@ -24,7 +25,7 @@ export class InsertIO extends ActionIO {
     execArgs: VarList,
     returnValues: VarList,
   ) {
-    super(dialect, insertAction, sql, funcArgs, execArgs, returnValues);
+    super(dialect, insertAction, sql, funcArgs, execArgs, returnValues, false);
   }
 }
 
@@ -73,7 +74,7 @@ export class InsertIOProcessor extends BaseIOProcessor {
     sql.push(')');
 
     // funcArgs
-    const precedingElements = [defs.dbxQueryableVar];
+    const precedingElements: VarInfo[] = [];
     if (this.configurableTableName) {
       precedingElements.push(defs.cfTableVarInfo(this.configurableTableName));
     }
@@ -84,9 +85,8 @@ export class InsertIOProcessor extends BaseIOProcessor {
     );
 
     const execArgs = new VarList(`Exec args of action ${action}`);
-    // Skip the first param, which is mrQueryable.
-    // Skip the second param if `configurableTable` is true.
-    execArgs.merge(funcArgs.list.slice(this.configurableTableName ? 2 : 1));
+    // Skip the first param if `configurableTable` is true.
+    execArgs.merge(this.configurableTableName ? funcArgs.list.slice(1) : funcArgs.list);
 
     // Return values.
     const returnValue = new VarList(`Return values of action ${action}`);
