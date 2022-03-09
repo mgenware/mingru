@@ -58,7 +58,7 @@ it('getInputs (no WHERE)', () => {
   const v = ta.t;
   const io = mr.deleteIO(v, commonIOOptions);
   const inputs = io.funcArgs;
-  eq(inputs.list.length, 1);
+  eq(inputs.list.length, 0);
 });
 
 it('returnValues (no WHERE)', () => {

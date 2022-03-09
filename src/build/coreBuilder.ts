@@ -137,11 +137,7 @@ export default class CoreBuilder {
 
     // Build func params.
     // allFuncArgs = original func args + arg stubs.
-    const allFuncArgs = [
-      io.firstParamDB ? defs.sqlDBVar : defs.dbxQueryableVar,
-      ...funcArgs,
-      ...io.funcStubs,
-    ];
+    const allFuncArgs = [io.dbArgVarInfo(), ...funcArgs, ...io.funcStubs];
     this.imports.addVars(allFuncArgs);
     const funcParamsCode = allFuncArgs
       .map((p) => `${p.camelCaseName()} ${p.type.fullTypeName}`)
@@ -656,7 +652,7 @@ export default class CoreBuilder {
 
   private wrap(io: WrapIO, variadicParams: boolean): CodeMap {
     const builder = new LinesBuilder();
-    const queryArgs = io.execArgs.list;
+    const queryArgs = [io.dbArgVarInfo(), ...io.execArgs.list];
 
     this.injectQueryPreparationCode(builder, queryArgs, variadicParams);
     builder.push(
@@ -704,7 +700,6 @@ export default class CoreBuilder {
       returnValuesCode += memberIO.callPath;
       // Generating the calling code of this member
       const queryParamsCode = mActionIO.funcArgs.list
-        .slice(1) // Strip the first mrQueryable param
         .map((p) => go.transformVarInfo(p, go.VarInfoNameCase.camelCase))
         .join(', ');
 

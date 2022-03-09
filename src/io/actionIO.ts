@@ -4,6 +4,7 @@ import { VarInfo } from '../lib/varInfo.js';
 import { Dialect, StringSegment } from '../dialect.js';
 import { VarInfoBuilder } from '../lib/varInfoHelper.js';
 import { makeStringFromSegments } from '../build/goCodeUtil.js';
+import * as defs from '../def/defs.js';
 
 export class ActionIO {
   funcStubs: VarInfo[];
@@ -17,7 +18,7 @@ export class ActionIO {
     // NOTE: `returnValues` doesn't contain the last error param.
     public returnValues: VarList,
     // True if first func param is `sql.DB`. Otherwise, `mingru.Queryable`.
-    public firstParamDB: boolean,
+    public isDBArgSQLDB: boolean,
   ) {
     const { argStubs } = action.__getData();
     this.funcStubs = (argStubs ?? []).map((v) => VarInfoBuilder.fromSQLVar(v, dialect));
@@ -28,5 +29,9 @@ export class ActionIO {
       return makeStringFromSegments(this.sql);
     }
     return '';
+  }
+
+  dbArgVarInfo() {
+    return this.isDBArgSQLDB ? defs.sqlDBVar : defs.dbxQueryableVar;
   }
 }

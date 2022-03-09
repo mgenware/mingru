@@ -51,9 +51,7 @@ class WrapIOProcessor extends BaseIOProcessor {
     const innerFuncArgs = innerIO.funcArgs;
     for (const key of Object.keys(args)) {
       if (!innerFuncArgs.getByName(key)) {
-        const availableArgs = [
-          innerIO.firstParamDB ? defs.sqlDBVar.name : defs.dbxQueryableVar.name,
-        ];
+        const availableArgs = [innerIO.dbArgVarInfo().name];
         availableArgs.push(...innerFuncArgs.keys());
         throw new Error(
           `The argument "${key}" doesn't exist in action "${action}". Available arguments: ${availableArgs.join(
@@ -151,7 +149,7 @@ class WrapIOProcessor extends BaseIOProcessor {
       innerIO.returnValues,
       funcPath,
       innerIO,
-      innerIO.firstParamDB,
+      innerIO.isDBArgSQLDB,
     );
   }
 
