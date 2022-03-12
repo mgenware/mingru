@@ -710,7 +710,11 @@ export default class CoreBuilder {
       callMemCode += `err ${hasDeclaredVars ? ':' : ''}= `;
       callMemCode += memberIO.callPath;
       // Generating the calling code of this member
-      const queryParamsCode = mActionIO.funcArgs.list.map((p) => p.name).join(', ');
+      const queryParamsCode = mActionIO.funcArgs.list
+        .map((p) => mActionIO.capturedFuncArgs[p.name]?.path ?? p.name)
+        .join(', ');
+      // Check if `TXIO.execArgs` is present, which is set by tmp WRAP actions with captured vars.
+      // See details in `WrapIO.ts` (the `mm.CapturedVar` section).
 
       // If this is a temp member (created inside transaction),
       // then we also need to generate the member func body code.

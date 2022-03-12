@@ -62,6 +62,8 @@ class WrapIOProcessor extends BaseIOProcessor {
     }
     const funcArgs = new ParamList(`Func args of action "${action}"`);
     const execArgs = new ValueList(`Exec args of action "${action}"`);
+    const capturedFuncArgs: Record<string, mm.CapturedVar> = {};
+    const capturedVars: Record<string, mm.CapturedVar> = {};
 
     for (const innerArg of innerFuncArgs.list) {
       const userArgValue = userArgs[innerArg.name];
@@ -81,21 +83,29 @@ class WrapIOProcessor extends BaseIOProcessor {
          * wrapped(a, b) -> inner(a, b)
          */
       } else if (userArgValue instanceof mm.CapturedVar) {
-        // (TX only)
-        // Value set as a captured var (from outer scope), don't expose it.
-        // Update the exec args with the captured var.
-        execArgs.addValue(userArgValue);
+        // (This scenario is only supported in TX members)
+        // See the example below. Func and exec args are inherited from inner action.
+        // The captured var is added to `capturedVars`, which will be handled by
+        // `TransactIO`.
+        funcArgs.add(innerArg);
+        execArgs.addVarDef(innerArg);
+        capturedFuncArgs[innerArg.name] = userArgValue;
+        capturedVars[userArgValue.firstName] = userArgValue;
 
         /**
-         * inner(a, b) {...}
+         * .transact(
+         *    <some member declaring a var named "id">
+         *    .insert(...).wrap({ col: mm.capturedVar("id") })
+         * )
          *
-         * WRAP:
-         * inner.wrap({ a: capturedVar(outer.var) })
+         * This translates to:
          *
-         * Result:
-         * // Inside a TX.
-         *    outer := anotherTXMem()
-         *    wrapped(b) -> inner(outer.var, b)
+         * func tx_child_2(col) { ... }
+         *
+         * .transact(
+         *    res, err := tx_child_1(...)
+         *    err = tx_child_2(res)
+         * )
          */
       } else if (userArgValue instanceof mm.RenameArg) {
         // Value is renamed, expose it with the new name.
@@ -151,6 +161,8 @@ class WrapIOProcessor extends BaseIOProcessor {
       // Calling `__configure` with another table won't change inner action's
       // previous table.
       innerAction.__configure(groupTable, this.mustGetActionName());
+      innerIO.capturedFuncArgs = capturedFuncArgs;
+      innerIO.capturedVars = capturedVars;
       return innerIO;
     }
 
@@ -167,7 +179,7 @@ class WrapIOProcessor extends BaseIOProcessor {
       false,
     );
 
-    return new WrapIO(
+    const retIO = new WrapIO(
       dialect,
       action,
       funcArgs,
@@ -177,6 +189,9 @@ class WrapIOProcessor extends BaseIOProcessor {
       innerIO,
       innerIO.isDBArgSQLDB,
     );
+    retIO.capturedFuncArgs = capturedFuncArgs;
+    retIO.capturedVars = capturedVars;
+    return retIO;
   }
 
   // eslint-disable-next-line class-methods-use-this

@@ -8,6 +8,9 @@ import * as defs from '../def/defs.js';
 
 export class ActionIO {
   funcStubs: VarDef[];
+  // See details in `WrapIO.ts`.
+  capturedFuncArgs: Record<string, mm.CapturedVar> = {};
+  capturedVars: Record<string, mm.CapturedVar> = {};
 
   constructor(
     public dialect: Dialect,

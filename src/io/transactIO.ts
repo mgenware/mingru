@@ -91,18 +91,6 @@ class TransactIOProcessor extends BaseIOProcessor {
       return new TransactMemberIO(mem, childName, io, callPath);
     });
 
-    // funcArgs
-    const funcArgs = new ParamList(`Func args of action "${action}"`);
-    for (const mem of memberIOs) {
-      const mAction = mem.actionIO;
-      for (const v of mAction.funcArgs.list) {
-        funcArgs.add(v);
-      }
-    }
-    // execArgs is empty for transact io
-    const execArgs = new ValueList(`Exec args of action "${action}"`);
-    const returnValues = new ParamList(`Return values of action ${action}`);
-
     /**
      * Child return values (CRV)
      * Keeps track of information about TX member return values.
@@ -173,17 +161,13 @@ class TransactIOProcessor extends BaseIOProcessor {
           refs: [],
         };
 
-        // Check values referenced by other TX members.
-        const memAction = mem.actionIO.action;
-        if (memAction instanceof mm.WrapAction) {
-          for (const value of Object.values(memAction.__getData().args ?? {})) {
-            if (value instanceof mm.CapturedVar) {
-              const refName = value.firstName;
-              const crvRes = crv[refName];
-              if (crvRes) {
-                crvRes.refs.push(TXMReturnValueSource.reference);
-              }
-            }
+        // Check captured vars by other TX members.
+        const mActionIO = mem.actionIO;
+        for (const capVar of Object.values(mActionIO.capturedVars)) {
+          const refName = capVar.firstName;
+          const crvRes = crv[refName];
+          if (crvRes) {
+            crvRes.refs.push(TXMReturnValueSource.reference);
           }
         }
       }
@@ -204,6 +188,26 @@ class TransactIOProcessor extends BaseIOProcessor {
         }
       }
     }
+
+    // funcArgs
+    const funcArgs = new ParamList(`Func args of action "${action}"`);
+    for (const mem of memberIOs) {
+      const mIO = mem.actionIO;
+      for (const arg of mIO.funcArgs.list) {
+        // See details in `WrapIO.ts` (the `mm.CapturedVar` section).
+        // Check if this func arg has been captured in WRAP action.
+        // If it's captured, no need to add it to TXIO func args.
+        // Also, the exec args of this member needs to be updated (only
+        // tmp member can have wrapped `mm.CapturedVar`. We can safely
+        // update exec args here.)
+        if (!mIO.capturedFuncArgs[arg.name]) {
+          funcArgs.add(arg);
+        }
+      }
+    }
+    // execArgs is empty for transact io
+    const execArgs = new ValueList(`Exec args of action "${action}"`);
+    const returnValues = new ParamList(`Return values of action ${action}`);
 
     // Check TX return value refs.
     if (actionData.returnValues) {
