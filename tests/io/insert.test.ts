@@ -47,7 +47,7 @@ it('getInputs', () => {
   const v = ta.t;
   const io = mr.insertIO(v, commonIOOptions);
   eq(io.funcArgs.toString(), 'sig: *string, id: uint64, b: string');
-  eq(io.execArgs.toString(), 'sig: *string, id: uint64, b: string');
+  eq(io.execArgs.toString(), 'sig, id, b');
 });
 
 it('returnValues (insert)', () => {

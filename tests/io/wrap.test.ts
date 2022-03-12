@@ -41,37 +41,22 @@ it('WrapIO', () => {
 
 it('getInputs (wrapSelf and innerIO)', () => {
   const io = mr.wrapIO(wrapSelf.d, commonIOOptions) as mr.WrapIO;
-  eq(
-    io.funcArgs.toString(),
-    'urlName: string, id: uint64, urlName: string, followerCount: *string {urlName: string, id: uint64, followerCount: *string}',
-  );
-  eq(
-    io.execArgs.toString(),
-    'urlName: string, id: uint64, sig: *string="haha", followerCount: *string',
-  );
+  eq(io.funcArgs.toString(), 'urlName: string, id: uint64, followerCount: *string');
+  eq(io.execArgs.toString(), 'urlName, id, "haha", followerCount');
   eq(io.funcPath, 'mrTable.S');
 });
 
 it('getInputs (wrapOther)', () => {
   const io = mr.wrapIO(wrapOther.standard, commonIOOptions) as mr.WrapIO;
-  eq(
-    io.funcArgs.toString(),
-    'urlName: string, urlName: string, sig: *string, followerCount: *string {urlName: string, sig: *string, followerCount: *string}',
-  );
-  eq(
-    io.execArgs.toString(),
-    'urlName: string, id: uint64=123, sig: *string, followerCount: *string',
-  );
+  eq(io.funcArgs.toString(), 'urlName: string, sig: *string, followerCount: *string');
+  eq(io.execArgs.toString(), 'urlName, 123, sig, followerCount');
   eq(io.funcPath, 'User.S');
 });
 
 it('getInputs (wrapOther, nested)', () => {
   const io = mr.wrapIO(wrapOther.nested, commonIOOptions) as mr.WrapIO;
-  eq(
-    io.funcArgs.toString(),
-    'urlName: string, urlName: string, followerCount: *string {urlName: string, followerCount: *string}',
-  );
-  eq(io.execArgs.toString(), 'urlName: string, id: uint64=123, followerCount: *string');
+  eq(io.funcArgs.toString(), 'urlName: string, followerCount: *string');
+  eq(io.execArgs.toString(), 'urlName, 123, followerCount');
   eq(io.funcPath, 'User.D');
 });
 
@@ -95,10 +80,7 @@ it('Throws on undefined inputs', () => {
 
 it('ReturnRef', () => {
   const io = mr.wrapIO(wrapOther.retValue, commonIOOptions) as mr.WrapIO;
-  eq(
-    io.funcArgs.toString(),
-    'urlName: string, id: uint64=ValueRef(extID), urlName: string, followerCount: *string {urlName: string, id: uint64=ValueRef(extID), followerCount: *string}',
-  );
-  eq(io.execArgs.toString(), 'urlName: string, id: uint64, followerCount: *string');
+  eq(io.funcArgs.toString(), 'urlName: string, followerCount: *string');
+  eq(io.execArgs.toString(), 'urlName, CapturedVar(extID), followerCount');
   eq(io.funcPath, 'User.D');
 });

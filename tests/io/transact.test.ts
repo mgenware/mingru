@@ -28,10 +28,7 @@ it('TransactIO', () => {
   const wrapOther = mm.tableActions(post, WrapOtherTA);
   const io = mr.transactIO(wrapOther.t1, commonIOOptions);
   ok(io instanceof mr.TransactIO);
-  eq(
-    io.funcArgs.toString(),
-    'urlName: string, id: uint64, urlName: string, sig: *string, followerCount: *string, urlName: string, id: uint64, urlName: string, followerCount: *string, urlName: string, urlName: string, sig: *string, followerCount: *string {urlName: string, id: uint64, sig: *string, followerCount: *string}',
-  );
+  eq(io.funcArgs.toString(), 'urlName: string, id: uint64, sig: *string, followerCount: *string');
   // No execArgs in TX actions
   eq(io.execArgs.toString(), '');
 });
@@ -59,7 +56,7 @@ it('Members with WRAP actions', () => {
 
   const m1 = io.memberIOs[0]!.actionIO;
   eq(m1.funcArgs.toString(), 'id: uint64, followerCount: *string');
-  eq(m1.execArgs.toString(), 'id: uint64, sig: *string="haha", followerCount: *string');
+  eq(m1.execArgs.toString(), 'id, "haha", followerCount');
 
   const io2 = mr.transactIO(wrapTA.t2, commonIOOptions);
   ok(io2 instanceof mr.TransactIO);
@@ -69,7 +66,7 @@ it('Members with WRAP actions', () => {
 
   const m2 = io2.memberIOs[0]!.actionIO;
   eq(m2.funcArgs.toString(), 'id: uint64, followerCount: *string');
-  eq(m2.execArgs.toString(), 'id: uint64, sig: *string="haha", followerCount: *string');
+  eq(m2.execArgs.toString(), 'id, "haha", followerCount');
 
   const io3 = mr.transactIO(wrapTA.t3, commonIOOptions);
   ok(io3 instanceof mr.TransactIO);
@@ -79,7 +76,7 @@ it('Members with WRAP actions', () => {
 
   const m3 = io3.memberIOs[0]!.actionIO;
   eq(m3.funcArgs.toString(), 'id: uint64, sig: *string, followerCount: *string');
-  eq(m3.execArgs.toString(), 'sig: *string, followerCount: *string, id: uint64');
+  eq(m3.execArgs.toString(), 'sig, followerCount, id');
 
   const io4 = mr.transactIO(wrapTA.t4, commonIOOptions);
   ok(io4 instanceof mr.TransactIO);
@@ -89,7 +86,7 @@ it('Members with WRAP actions', () => {
 
   const m4 = io4.memberIOs[0]!.actionIO;
   eq(m4.funcArgs.toString(), 'id: uint64, sig: *string, followerCount: *string');
-  eq(m4.execArgs.toString(), 'sig: *string, followerCount: *string, id: uint64');
+  eq(m4.execArgs.toString(), 'sig, followerCount, id');
 });
 
 it('TX member IOs', () => {
@@ -145,9 +142,12 @@ it('Merging SQL vars', () => {
 
 it('Merging SQL vars (WRAPPED)', () => {
   class PostTA extends mm.TableActions {
-    t = mm
-      .transact(mm.insertOne().from(cmt2).setInputs(), mm.insertOne().from(postCmt).setInputs())
-      .wrap({ rplCount: 1, cmtID: 2 });
+    t = mm.transact(
+      mm.insertOne().from(cmt2).setInputs(),
+      mm.insertOne().from(postCmt).setInputs(),
+    );
+
+    wrapped = this.t.wrap({ rplCount: 1, cmtID: 2 });
   }
   const postTA = mm.tableActions(post, PostTA);
   const io = mr.wrapIO(postTA.t, commonIOOptions);

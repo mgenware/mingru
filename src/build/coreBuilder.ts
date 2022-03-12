@@ -546,7 +546,9 @@ export default class CoreBuilder {
         builder.push(`var ${defs.resultVarName} ${resultTypeString}`);
       } else {
         scanParams = joinParams(
-          [...selectedFields.values()].map((p) => `&${defs.resultVarName}.${p.name}`),
+          [...selectedFields.values()].map(
+            (p) => `&${defs.resultVarName}.${stringUtils.toPascalCase(p.name)}`,
+          ),
         );
         builder.push(`var ${defs.resultVarName} ${atomicResultType}`);
       }

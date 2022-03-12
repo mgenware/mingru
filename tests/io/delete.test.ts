@@ -36,7 +36,7 @@ it('getInputs', () => {
   const v = ta.t;
   const io = mr.deleteIO(v, commonIOOptions);
   eq(io.funcArgs.toString(), 'id: uint64, urlName: string');
-  eq(io.execArgs.toString(), 'id: uint64, urlName: string');
+  eq(io.execArgs.toString(), 'id, urlName');
 });
 
 it('returnValues', () => {

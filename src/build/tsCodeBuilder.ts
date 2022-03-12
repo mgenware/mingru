@@ -1,6 +1,7 @@
 import mustBeErr from 'must-be-err';
 import { GoStructData } from './goCodeUtil.js';
 import { getAtomicTypeInfo, TypeInfo, CompoundTypeInfo } from '../lib/varInfo.js';
+import * as su from '../lib/stringUtils.js';
 
 function goTypeToTSType(type: TypeInfo): { type: string; optional: boolean } {
   const typeString = getAtomicTypeInfo(type).fullTypeName;
@@ -40,7 +41,7 @@ export function buildTSInterface(structData: GoStructData, typeName?: string) {
     }
     try {
       const tsType = goTypeToTSType(mem.type);
-      code += `  ${mem.name}?: ${tsType.type};\n`;
+      code += `  ${su.toCamelCase(mem.name)}?: ${tsType.type};\n`;
     } catch (err) {
       mustBeErr(err);
       throw new Error(

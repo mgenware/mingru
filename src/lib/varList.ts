@@ -1,4 +1,4 @@
-import { VarDef, ValueType } from './varInfo.js';
+import { VarDef, ValueType, formatVarDef } from './varInfo.js';
 
 /**
  * Note that variables with same names and types are considered duplicates. Variables with same
@@ -74,10 +74,10 @@ class VarListBase<T extends VarDef> {
   }
 
   toString(): string {
-    const s = this.list.map((item) => item.toString()).join(', ');
+    const s = this.list.map((item) => formatVarDef(item)).join(', ');
     if (this.list.length !== this.map.size) {
       const mapValues = [...this.map.values()];
-      const mapStr = mapValues.map((item) => item.toString()).join(', ');
+      const mapStr = mapValues.map((item) => formatVarDef(item)).join(', ');
       return `${s} {${mapStr}}`;
     }
     return s;
@@ -125,5 +125,9 @@ export class ValueList {
     for (const v of list.values) {
       this.values.push(v);
     }
+  }
+
+  toString(): string {
+    return this.values.join(', ');
   }
 }

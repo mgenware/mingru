@@ -114,4 +114,8 @@ export interface VarDef {
   type: TypeInfo;
 }
 
+export function formatVarDef(varDef: VarDef) {
+  return `${varDef.name}: ${varDef.type}`;
+}
+
 export type ValueType = string | mm.CapturedVar | mm.Table;
