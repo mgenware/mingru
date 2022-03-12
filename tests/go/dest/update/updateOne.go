@@ -14,7 +14,7 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-func (mrTable *TableTypePost) UpdateT(mrQueryable mingru.Queryable, id uint64, content string) error {
+func (mrTable *TableTypePost) UpdateT(mrQueryable mingru.Queryable, content string, id uint64) error {
 	result, err := mrQueryable.Exec("UPDATE `db_post` SET `title` = \"haha\", `content` = ?, `cmt_c` = `cmt_c` + 1 WHERE `id` = ?", content, id)
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }

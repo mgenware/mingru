@@ -59,7 +59,7 @@ it('getInputs', () => {
   const v = ta.t;
   const io = mr.updateIO(v, commonIOOptions);
   eq(io.setterArgs.toString(), 'urlName: string, sig: *string');
-  eq(io.funcArgs.toString(), 'urlName: string, id: uint64, sig: *string');
+  eq(io.funcArgs.toString(), 'urlName: string, sig: *string, id: uint64');
   eq(io.execArgs.toString(), 'urlName, sig, urlName, id, urlName');
 });
 

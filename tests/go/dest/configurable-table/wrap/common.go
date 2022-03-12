@@ -50,7 +50,7 @@ func (mrTable *TableTypeUserUtil) Sel(mrQueryable mingru.Queryable, mrFromTable 
 	return result, nil
 }
 
-func (mrTable *TableTypeUserUtil) Upd(mrQueryable mingru.Queryable, mrFromTable mingru.Table, id uint64, urlName string, displayName string, sig *string, age int, followerCount *string) error {
+func (mrTable *TableTypeUserUtil) Upd(mrQueryable mingru.Queryable, mrFromTable mingru.Table, urlName string, displayName string, sig *string, age int, followerCount *string, id uint64) error {
 	result, err := mrQueryable.Exec("UPDATE "+mrFromTable.MingruSQLName()+" SET `url_name` = ?, `display_name` = ?, `sig` = ?, `age` = ?, `follower_c` = ? WHERE `id` = ?", urlName, displayName, sig, age, followerCount, id)
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }
