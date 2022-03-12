@@ -697,17 +697,18 @@ export default class CoreBuilder {
 
       // Iterate through return values.
       let hasDeclaredVars = false;
-      let returnValuesCode = '';
+      // The line of code to call the TX member including its return values.
+      let callMemCode = '';
       for (const ret of mActionIO.returnValues.list) {
         // Check if this value has been exported (declared).
         const varName = declaredReturnValueNames[ret.name];
         if (varName) {
           hasDeclaredVars = true;
         }
-        returnValuesCode += `${varName || '_'}, `;
+        callMemCode += `${varName || '_'}, `;
       }
-      returnValuesCode += `err ${hasDeclaredVars ? ':' : ''}= `;
-      returnValuesCode += memberIO.callPath;
+      callMemCode += `err ${hasDeclaredVars ? ':' : ''}= `;
+      callMemCode += memberIO.callPath;
       // Generating the calling code of this member
       const queryParamsCode = mActionIO.funcArgs.list.map((p) => p.name).join(', ');
 
@@ -722,12 +723,12 @@ export default class CoreBuilder {
         }
       }
 
-      returnValuesCode += '(tx';
+      callMemCode += '(tx';
       if (queryParamsCode) {
-        returnValuesCode += `, ${queryParamsCode}`;
+        callMemCode += `, ${queryParamsCode}`;
       }
-      returnValuesCode += ')';
-      innerBuilder.push(returnValuesCode);
+      callMemCode += ')';
+      innerBuilder.push(callMemCode);
       innerBuilder.push('if err != nil {');
       innerBuilder.increaseIndent();
       innerBuilder.push('return err');

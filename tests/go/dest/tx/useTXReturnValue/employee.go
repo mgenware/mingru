@@ -49,7 +49,7 @@ func (mrTable *TableTypeEmployee) Insert3(db *sql.DB, firstName string) (uint64,
 		if err != nil {
 			return err
 		}
-		id3, err := mrTable.Insert2(tx, firstName, firstName)
+		id3, err := mrTable.Insert2(tx, firstName)
 		if err != nil {
 			return err
 		}

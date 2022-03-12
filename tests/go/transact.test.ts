@@ -54,7 +54,7 @@ it('Pass values in child actions and declare return values', async () => {
   const employee = mm.table(Employee, { dbName: 'employees' });
   class EmployeeTA extends mm.TableActions {
     getFirstName = mm.selectField(employee.firstName).by(employee.id);
-    insert1 = mm
+    insert = mm
       .transact(
         this.getFirstName.declareReturnValue(mm.ReturnValues.result, 'firstName'),
         mm
@@ -221,9 +221,12 @@ it('Use the return value of a TX', async () => {
 
 it('Call an inner TX with .wrap', async () => {
   class PostTA extends mm.TableActions {
-    t = mm
-      .transact(mm.insertOne().from(cmt2).setInputs(), mm.insertOne().from(postCmt).setInputs())
-      .wrap({ rplCount: 1, cmtID: 2 });
+    t = mm.transact(
+      mm.insertOne().from(cmt2).setInputs(),
+      mm.insertOne().from(postCmt).setInputs(),
+    );
+
+    wrapped = this.t.wrap({ rplCount: 1, cmtID: 2 });
   }
   const postTA = mm.tableActions(post, PostTA);
   await testBuildAsync(postTA, 'tx/callTxWrap/post');

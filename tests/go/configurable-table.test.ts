@@ -52,14 +52,14 @@ it('configurableTable with WRAP action inside transactions', async () => {
   const commonTA = mm.tableActions(userUtil, CommonTA, { configurableTableName: 'mrFromTable' });
 
   class ConsumerTA extends mm.TableActions {
-    tx = mm
-      .transact(
-        commonTA.insert.wrap({ mrFromTable: user }),
-        commonTA.del,
-        commonTA.upd,
-        commonTA.sel,
-      )
-      .wrap({ mrFromTable: post });
+    tx = mm.transact(
+      commonTA.insert.wrap({ mrFromTable: user }),
+      commonTA.del,
+      commonTA.upd,
+      commonTA.sel,
+    );
+
+    wrapped = this.tx.wrap({ mrFromTable: post });
   }
   const consumerTA = mm.tableActions(post, ConsumerTA);
   await testBuildAsync(commonTA, 'configurable-table/wrap-tx/common');

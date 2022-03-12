@@ -150,11 +150,11 @@ it('Merging SQL vars (WRAPPED)', () => {
     wrapped = this.t.wrap({ rplCount: 1, cmtID: 2 });
   }
   const postTA = mm.tableActions(post, PostTA);
-  const io = mr.wrapIO(postTA.t, commonIOOptions);
+  const io = mr.wrapIO(postTA.wrapped, commonIOOptions);
   eq(io.returnValues.toString(), '');
   eq(
     io.funcArgs.toString(),
     'content: string, userID: uint64, createdAt: time.Time|time, modifiedAt: time.Time|time, postID: uint64',
   );
-  eq(io.execArgs.toString(), '');
+  eq(io.execArgs.toString(), 'content, userID, createdAt, modifiedAt, 1, postID, 2');
 });
