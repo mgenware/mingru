@@ -84,14 +84,13 @@ class UpdateIOProcessor extends BaseIOProcessor {
     }
 
     const execArgs = new ValueList(`Exec args of action "${action}"`);
-    // funcArgs = WHERE(distinct) + setters
-    // execArgs = setters + WHERE(all)
+    // Setters come before WHERE in SQL.
     execArgs.mergeVarDef(setterVars.list);
+    funcArgs.merge(setterVars.list);
     if (whereIO) {
       funcArgs.merge(whereIO.vars.list);
       execArgs.mergeVarDef(whereIO.vars.list);
     }
-    funcArgs.merge(setterVars.list);
 
     // Return values
     const returnValues = new ParamList(`Return values of action "${action}"`);

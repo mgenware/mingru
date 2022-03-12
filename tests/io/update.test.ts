@@ -106,3 +106,19 @@ it('setDefaults', () => {
 
   eq(io.getSQLCode(), '"UPDATE `post` SET `datetime` = UTC_TIMESTAMP()"');
 });
+
+it('Input order in funcArgs and execArgs', () => {
+  class PostTA extends mm.TableActions {
+    t = mm
+      .updateOne()
+      .setInputs(post.title, post.id)
+      .whereSQL(mm.sql`${post.id} = ${post.id.toInput()}`);
+  }
+  const postTA = mm.tableActions(post, PostTA);
+  const v = postTA.t;
+  const io = mr.updateIO(v, commonIOOptions);
+
+  eq(io.setterArgs.toString(), 'title: string, id: uint64');
+  eq(io.funcArgs.toString(), 'title: string, id: uint64');
+  eq(io.execArgs.toString(), 'title, id, id');
+});
