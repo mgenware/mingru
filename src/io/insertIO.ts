@@ -1,12 +1,12 @@
 import * as mm from 'mingru-models';
 import { Dialect, StringSegment } from '../dialect.js';
-import { settersToVarList, SetterIO } from './setterIO.js';
+import { settersToParamList, SetterIO } from './setterIO.js';
 import { ActionIO } from './actionIO.js';
-import VarList from '../lib/varList.js';
 import { registerHandler } from './actionToIO.js';
 import * as defs from '../def/defs.js';
 import * as utils from '../lib/stringUtils.js';
-import { VarInfo } from '../lib/varInfo.js';
+import { ParamList, ValueList } from '../lib/varList.js';
+import { VarDef } from '../lib/varInfo.js';
 import { forEachWithSlots } from '../lib/arrayUtils.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
 import BaseIOProcessor from './baseIOProcessor.js';
@@ -21,9 +21,9 @@ export class InsertIO extends ActionIO {
     sql: StringSegment[],
     public setters: SetterIO[],
     public fetchInsertedID: boolean,
-    funcArgs: VarList,
-    execArgs: VarList,
-    returnValues: VarList,
+    funcArgs: ParamList,
+    execArgs: ValueList,
+    returnValues: ParamList,
   ) {
     super(dialect, insertAction, sql, funcArgs, execArgs, returnValues, false);
   }
@@ -74,22 +74,22 @@ export class InsertIOProcessor extends BaseIOProcessor {
     sql.push(')');
 
     // funcArgs
-    const precedingElements: VarInfo[] = [];
+    const precedingElements: VarDef[] = [];
     if (this.configurableTableName) {
-      precedingElements.push(defs.cfTableVarInfo(this.configurableTableName));
+      precedingElements.push(defs.cfTableVarDef(this.configurableTableName));
     }
-    const funcArgs = settersToVarList(
+    const funcArgs = settersToParamList(
       `Func args of action ${action}`,
       setterIOs,
       precedingElements,
     );
 
-    const execArgs = new VarList(`Exec args of action ${action}`);
+    const execArgs = new ValueList(`Exec args of action ${action}`);
     // Skip the first param if `configurableTable` is true.
-    execArgs.merge(this.configurableTableName ? funcArgs.list.slice(1) : funcArgs.list);
+    execArgs.mergeVarDef(this.configurableTableName ? funcArgs.list.slice(1) : funcArgs.list);
 
     // Return values.
-    const returnValue = new VarList(`Return values of action ${action}`);
+    const returnValue = new ParamList(`Return values of action ${action}`);
     if (fetchInsertedID) {
       returnValue.add(defs.insertedIDVar);
     }

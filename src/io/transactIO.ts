@@ -1,10 +1,10 @@
 import * as mm from 'mingru-models';
 import { Dialect } from '../dialect.js';
 import { ActionIO } from './actionIO.js';
-import VarList from '../lib/varList.js';
+import { ParamList, ValueList } from '../lib/varList.js';
 import { actionToIO, registerHandler } from './actionToIO.js';
 import * as defs from '../def/defs.js';
-import { VarInfo } from '../lib/varInfo.js';
+import { VarDef } from '../lib/varInfo.js';
 import BaseIOProcessor from './baseIOProcessor.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
 
@@ -30,15 +30,16 @@ export class TransactIO extends ActionIO {
     dialect: Dialect,
     public transactAction: mm.TransactAction,
     public memberIOs: TransactMemberIO[],
-    funcArgs: VarList,
-    execArgs: VarList,
-    returnValues: VarList,
+    funcArgs: ParamList,
+    execArgs: ValueList,
+    returnValues: ParamList,
     public childReturnValues: { [name: string]: TXMReturnValueInfo | undefined },
   ) {
     super(dialect, transactAction, null, funcArgs, execArgs, returnValues, true);
   }
 }
 
+// How a CRV is used.
 // See "Child return values (CRV)" below for details.
 export enum TXMReturnValueSource {
   returnValue,
@@ -47,7 +48,7 @@ export enum TXMReturnValueSource {
 
 // See "Child return values (CRV)" below for details.
 export interface TXMReturnValueInfo {
-  typeInfo: VarInfo;
+  def: VarDef;
   // A variable can have no refs (unused var), or multiple refs
   // (used by both TX func return values and other TX member funcs).
   refs: TXMReturnValueSource[];
@@ -91,19 +92,16 @@ class TransactIOProcessor extends BaseIOProcessor {
     });
 
     // funcArgs
-    const funcArgs = new VarList(`Func args of action "${action}"`, true);
+    const funcArgs = new ParamList(`Func args of action "${action}"`);
     for (const mem of memberIOs) {
       const mAction = mem.actionIO;
       for (const v of mAction.funcArgs.list) {
-        if (!v.hasValueRef) {
-          funcArgs.add(v);
-        }
+        funcArgs.add(v);
       }
     }
     // execArgs is empty for transact io
-    const execArgs = new VarList(`Exec args of action "${action}"`, true);
-
-    const returnValues = new VarList(`Return values of action ${action}`, false);
+    const execArgs = new ValueList(`Exec args of action "${action}"`);
+    const returnValues = new ParamList(`Return values of action ${action}`);
 
     /**
      * Child return values (CRV)
@@ -115,9 +113,9 @@ class TransactIOProcessor extends BaseIOProcessor {
      * appropriate return type for `a`.
      *
      * # How it is used
-     * none: not used
-     * return value: used as a TX return value, like `a`, `b` in example.
-     * referenced: like `c11`, `c12` in example.
+     * - none: not used
+     * - return value: used as a TX return value, like `a`, `b` in the example below.
+     * - referenced: like `c11`, `c12` in example.
      *
      * Example:
      * func tx() (type1, type2, error) {
@@ -138,18 +136,19 @@ class TransactIOProcessor extends BaseIOProcessor {
     const crv: { [name: string]: TXMReturnValueInfo | undefined } = {};
     for (const mem of memberIOs) {
       // Return values of current TX member.
-      // NOT to be confused with `ActionIO.returnValues` which is a `VarList`.
+      // NOT to be confused with `ActionIO.returnValues` which is a `ParamList`.
       // This is a plain object (K: imported child return value, V: exported return value)
       // See mingru-models `declareReturnValues` and `setReturnValues` for details.
       // Example:
       // cmtID, err := txMember(...)
       // returnValues = { insertedID: cmtID }
+
+      // No action if TX member has no return values.
       const memReturnValues = mem.member.returnValues;
       if (!memReturnValues) {
         continue;
       }
 
-      // NOTE: `ActionIO.returnValues` K:
       for (const key of Object.keys(memReturnValues)) {
         const retValueName = memReturnValues[key];
         if (!retValueName) {
@@ -157,8 +156,8 @@ class TransactIOProcessor extends BaseIOProcessor {
         }
 
         // Check if declared return value exists in TX members.
-        const srcVarInfo = mem.actionIO.returnValues.getByName(key);
-        if (!srcVarInfo) {
+        const memReturnDef = mem.actionIO.returnValues.getByName(key);
+        if (!memReturnDef) {
           throw new Error(
             `The return value named "${key}" doesn't exist in member action "${
               mem.actionIO.action
@@ -170,7 +169,7 @@ class TransactIOProcessor extends BaseIOProcessor {
 
         // Now both value and key are valid.
         crv[retValueName] = {
-          typeInfo: new VarInfo(retValueName, srcVarInfo.type, srcVarInfo.value),
+          def: { name: retValueName, type: memReturnDef.type },
           refs: [],
         };
 
@@ -178,7 +177,7 @@ class TransactIOProcessor extends BaseIOProcessor {
         const memAction = mem.actionIO.action;
         if (memAction instanceof mm.WrapAction) {
           for (const value of Object.values(memAction.__getData().args ?? {})) {
-            if (value instanceof mm.ValueRef) {
+            if (value instanceof mm.CapturedVar) {
               const refName = value.firstName;
               const crvRes = crv[refName];
               if (crvRes) {
@@ -200,7 +199,7 @@ class TransactIOProcessor extends BaseIOProcessor {
       }
       const argValues = Object.values((memberAction as mm.WrapAction).__getData().args ?? {});
       for (const value of argValues) {
-        if (value instanceof mm.ValueRef) {
+        if (value instanceof mm.CapturedVar) {
           varRefs.add(value.firstName);
         }
       }
@@ -214,7 +213,7 @@ class TransactIOProcessor extends BaseIOProcessor {
           throw new Error(`The return value named "${name}" is not declared by any member`);
         }
         info.refs.push(TXMReturnValueSource.returnValue);
-        returnValues.add(info.typeInfo);
+        returnValues.add(info.def);
       }
     }
 

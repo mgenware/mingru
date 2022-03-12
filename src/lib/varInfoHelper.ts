@@ -1,6 +1,6 @@
 import * as mm from 'mingru-models';
 import {
-  VarInfo,
+  VarDef,
   TypeInfo,
   AtomicTypeInfo,
   typeInfoToArray,
@@ -37,14 +37,14 @@ export class TypeInfoBuilder {
   }
 }
 
-export class VarInfoBuilder {
+export class VarDefBuilder {
   static getSQLVarInputName(v: mm.SQLVariable): string {
     return stringUtils.toCamelCase(this.getInputNameFromColumn(v, v.name, v.column));
   }
 
-  static fromSQLVar(v: mm.SQLVariable, dialect: Dialect): VarInfo {
+  static fromSQLVar(v: mm.SQLVariable, dialect: Dialect): VarDef {
     const typeInfo = TypeInfoBuilder.fromSQLVariable(v, dialect);
-    return new VarInfo(this.getSQLVarInputName(v), typeInfo);
+    return { name: this.getSQLVarInputName(v), type: typeInfo };
   }
 
   private static getInputNameFromColumn(

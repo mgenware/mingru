@@ -1,6 +1,6 @@
 import * as mm from 'mingru-models';
 import { JSONKeyStyle } from './buildOptions.js';
-import { VarInfo, getAtomicTypeInfo } from '../lib/varInfo.js';
+import { VarDef, getAtomicTypeInfo, ValueType } from '../lib/varInfo.js';
 import { StringSegment } from '../dialect.js';
 import CodeStringBuilder from '../lib/codeStringBuilder.js';
 import * as stringUtils from '../lib/stringUtils.js';
@@ -11,8 +11,8 @@ export class FuncSignature {
   constructor(
     public name: string,
     public sig: string,
-    public params: VarInfo[],
-    public returnType: VarInfo[],
+    public params: VarDef[],
+    public returnType: VarDef[],
   ) {}
 }
 
@@ -35,14 +35,14 @@ export class MemberTagUtil {
 }
 
 export class GoStructData {
-  members: VarInfo[];
+  members: VarDef[];
   ignoredMembers: Set<string>;
   omitEmptyMembers: Set<string>;
 
   constructor(
     public typeName: string,
     // Members will be re-sorted.
-    members: Iterable<VarInfo>,
+    members: Iterable<VarDef>,
     public jsonKeyStyle: JSONKeyStyle | null,
     // Key: variable name.
     ignoredMembers: Set<string> | null,
@@ -56,7 +56,7 @@ export class GoStructData {
 
   merge(oth: GoStructData): GoStructData {
     // Do a shallow copy of current members.
-    const members = new Map<string, VarInfo>();
+    const members = new Map<string, VarDef>();
     for (const mem of this.members) {
       members.set(mem.name, mem);
     }
@@ -101,7 +101,7 @@ export function struct(data: GoStructData): string {
   const typeColumns: string[] = [];
   const tagColumns: string[] = [];
   for (const mem of data.members) {
-    const memName = mem.pascalName;
+    const memName = stringUtils.toPascalCase(mem.name);
     const memType = mem.type.fullTypeName;
     let tag = '';
     nameColumns.push(memName);
@@ -247,7 +247,7 @@ export function extractStringContentFromSegments(list: StringSegment[]): string 
 export class ImportList {
   private imports = new Set<string>();
 
-  addVars(vars: Iterable<VarInfo>) {
+  addVars(vars: Iterable<VarDef>) {
     for (const info of vars) {
       const atomicInfo = getAtomicTypeInfo(info.type);
       if (atomicInfo.importPath) {
@@ -310,29 +310,13 @@ export function appendWithSeparator(code: string, append: string): string {
   return `${code}\n${append}`;
 }
 
-export enum VarInfoNameCase {
-  none,
-  camelCase,
-  pascalCase,
-}
-
-export function transformVarInfo(v: VarInfo, nameCase: VarInfoNameCase): string {
-  const { value } = v;
-  if (value !== undefined) {
-    if (value instanceof mm.ValueRef) {
-      return value.path;
-    }
-    if (value instanceof mm.Table) {
-      return tableInstanceName(value.__getData().name);
-    }
-    return value;
+export function transformValue(v: ValueType): string {
+  if (typeof v === 'string') {
+    return v;
   }
-  switch (nameCase) {
-    case VarInfoNameCase.camelCase:
-      return v.camelCaseName();
-    case VarInfoNameCase.pascalCase:
-      return v.pascalCaseName();
-    default:
-      return v.name;
+  if (v instanceof mm.CapturedVar) {
+    return v.path;
   }
+  // v is a `mm.Table`.
+  return tableInstanceName(v.__getData().name);
 }

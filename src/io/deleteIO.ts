@@ -2,8 +2,7 @@ import * as mm from 'mingru-models';
 import { Dialect, StringSegment } from '../dialect.js';
 import { ActionIO } from './actionIO.js';
 import { SQLIO, sqlIO } from './sqlIO.js';
-import VarList from '../lib/varList.js';
-import { VarInfo } from '../lib/varInfo.js';
+import { ParamList, ValueList } from '../lib/varList.js';
 import { registerHandler } from './actionToIO.js';
 import * as defs from '../def/defs.js';
 import BaseIOProcessor from './baseIOProcessor.js';
@@ -16,9 +15,9 @@ export class DeleteIO extends ActionIO {
     public deleteAction: mm.DeleteAction,
     sql: StringSegment[],
     public where: SQLIO | null,
-    funcArgs: VarList,
-    execArgs: VarList,
-    returnValues: VarList,
+    funcArgs: ParamList,
+    execArgs: ValueList,
+    returnValues: ParamList,
   ) {
     super(dialect, deleteAction, sql, funcArgs, execArgs, returnValues, false);
   }
@@ -56,22 +55,23 @@ class DeleteIOProcessor extends BaseIOProcessor {
     }
 
     // Inputs
-    const funcArgs = new VarList(`Func args of action "${action}"`, true);
+    const funcArgs = new ParamList(`Func args of action "${action}"`);
     if (this.configurableTableName) {
-      funcArgs.add(defs.cfTableVarInfo(this.configurableTableName));
+      funcArgs.add(defs.cfTableVarDef(this.configurableTableName));
     }
-    const execArgs = new VarList(`Exec args of action "${action}"`, true);
+    const execArgs = new ValueList(`Exec args of action "${action}"`);
     if (whereIO) {
-      funcArgs.merge(whereIO.distinctVars);
-      execArgs.merge(whereIO.vars);
+      funcArgs.merge(whereIO.vars.list);
+      execArgs.mergeVarDef(whereIO.vars.list);
     }
 
     // Return values.
-    const returnValues = new VarList(`Return values of action ${action}`, false);
+    const returnValues = new ParamList(`Return values of action ${action}`);
     if (!actionData.ensureOneRowAffected) {
-      returnValues.add(
-        new VarInfo(mm.ReturnValues.rowsAffected, dialect.colTypeToGoType(mm.int().__type())),
-      );
+      returnValues.add({
+        name: mm.ReturnValues.rowsAffected,
+        type: dialect.colTypeToGoType(mm.int().__type()),
+      });
     }
 
     return new DeleteIO(dialect, action, sql, whereIO, funcArgs, execArgs, returnValues);

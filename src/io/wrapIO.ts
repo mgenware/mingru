@@ -1,8 +1,8 @@
 import * as mm from 'mingru-models';
 import { Dialect } from '../dialect.js';
 import { ActionIO } from './actionIO.js';
-import VarList from '../lib/varList.js';
-import { VarInfo, VarValue } from '../lib/varInfo.js';
+import { ParamList, ValueList } from '../lib/varList.js';
+import { ValueType } from '../lib/varInfo.js';
 import { registerHandler, actionToIO } from './actionToIO.js';
 import * as defs from '../def/defs.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
@@ -12,9 +12,9 @@ export class WrapIO extends ActionIO {
   constructor(
     dialect: Dialect,
     public wrapAction: mm.WrapAction,
-    funcArgs: VarList,
-    execArgs: VarList,
-    returnValues: VarList,
+    funcArgs: ParamList,
+    execArgs: ValueList,
+    returnValues: ParamList,
     public funcPath: string | null,
     public innerIO: ActionIO,
     firstParamDB: boolean,
@@ -46,51 +46,90 @@ class WrapIOProcessor extends BaseIOProcessor {
     );
     const innerActionData = innerAction.__getData();
 
-    const args = actionData.args || {};
+    const userArgs = actionData.args || {};
     // Throw on non-existing argument names.
     const innerFuncArgs = innerIO.funcArgs;
-    for (const key of Object.keys(args)) {
+    for (const key of Object.keys(userArgs)) {
       if (!innerFuncArgs.getByName(key)) {
         const availableArgs = [innerIO.dbArgVarInfo().name];
         availableArgs.push(...innerFuncArgs.keys());
         throw new Error(
           `The argument "${key}" doesn't exist in action "${action}". Available arguments: ${availableArgs.join(
             ',',
-          )}, your arguments: ${Object.keys(args)}`,
+          )}, your arguments: ${Object.keys(userArgs)}`,
         );
       }
     }
-    // funcArgs
-    const funcArgs = new VarList(`Func args of action "${action}"`, true);
+    const funcArgs = new ParamList(`Func args of action "${action}"`);
+    const execArgs = new ValueList(`Exec args of action "${action}"`);
 
-    for (let i = 0; i < innerFuncArgs.list.length; i++) {
-      const arg = innerFuncArgs.list[i];
-      if (!arg) {
-        throw new Error('Unexpected empty func argument');
-      }
-      const inputArg = args[arg.name];
-      /**
-        `ValueRef` arguments will still be exposed.
-        Imagine a func `func(x, y)`.
-        If the argument is a constant value, e.g. {x: 123}, `x` won't be exposed:
-          `func(y) { innerFunc(123, y) }`
-        If the argument is a `ValueRef` {x: result.prop}, `x` will be exposed:
-          `func(x, y) { innerFunc(x, y) }`
-        The reason for this is `ValueRef` is like a param placeholder, indicating
-        it's being used by outer context, this comes to use when the action is
-        called in a transaction:
-        TRACTION:
-          y = ...
-          callAction(x, y(ValueRef), z)
-        The above transaction will have only `x` and `z` as its arguments. `y`
-        will be considered a value reference in caller's scope.
-       */
-      if (inputArg === undefined) {
-        funcArgs.add(arg);
-      } else if (inputArg instanceof mm.ValueRef) {
-        funcArgs.add(VarInfo.withValue(arg, inputArg));
-      } else if (inputArg instanceof mm.RenameArg) {
-        funcArgs.add(VarInfo.withName(arg, inputArg.name));
+    for (const innerArg of innerFuncArgs.list) {
+      const userArgValue = userArgs[innerArg.name];
+      if (userArgValue === undefined) {
+        // Value not set by user, expose it to outer level.
+        funcArgs.add(innerArg);
+        // Add the original value to exec args since it's not updated.
+        execArgs.addVarDef(innerArg);
+
+        /**
+         * inner(a, b) {...}
+         *
+         * WRAP:
+         * inner.wrap({ c: 1 })
+         *
+         * Result:
+         * wrapped(a, b) -> inner(a, b)
+         */
+      } else if (userArgValue instanceof mm.CapturedVar) {
+        // (TX only)
+        // Value set as a captured var (from outer scope), don't expose it.
+        // Update the exec args with the captured var.
+        execArgs.addValue(userArgValue);
+
+        /**
+         * inner(a, b) {...}
+         *
+         * WRAP:
+         * inner.wrap({ a: capturedVar(outer.var) })
+         *
+         * Result:
+         * // Inside a TX.
+         *    outer := anotherTXMem()
+         *    wrapped(b) -> inner(outer.var, b)
+         */
+      } else if (userArgValue instanceof mm.RenameArg) {
+        // Value is renamed, expose it with the new name.
+        funcArgs.add({ ...innerArg, name: userArgValue.name });
+        // Add the updated value to exec args.
+        execArgs.addValue(userArgValue.name);
+
+        /**
+         * inner(a, b) {...}
+         *
+         * WRAP:
+         * inner.wrap({ a: renamedVar(mod) })
+         *
+         * Result:
+         * // Inside a TX.
+         *    outer := anotherTXMem()
+         *    wrapped(mod, b) -> inner(mod, b)
+         */
+      } else {
+        // Here value is being set as a constant.
+        // Add the updated value to exec args.
+        execArgs.addValue(this.handleConstantValue(userArgValue));
+
+        /**
+         * inner(a, b) {...}
+         *
+         * WRAP:
+         * inner.wrap({ a: 1 })
+         *
+         * Result:
+         * // Inside a TX.
+         *    outer := anotherTXMem()
+         *    wrapped(b) -> inner(1, b)
+         */
       }
     }
 
@@ -100,15 +139,13 @@ class WrapIOProcessor extends BaseIOProcessor {
     //   mm.update().wrap(args) -> mm.update(args)
     // NOTE that `innerIO` might be any action types.
     if (!innerActionData.name) {
+      if (innerAction instanceof mm.TransactAction) {
+        throw new Error(
+          'Wrapping an unnamed TRANSACT action is not supported. Wrap the TRANSACT action through a member variable instead.',
+        );
+      }
       innerIO.funcArgs = funcArgs;
-      const innerExecArgs = innerIO.execArgs;
-      innerExecArgs.list.forEach((arg, i) => {
-        const input = args[arg.name];
-        // If argument is a constant, update the `innerExecArgs`.
-        if (input instanceof mm.ValueRef === false && input !== undefined) {
-          innerExecArgs.list[i] = VarInfo.withValue(arg, this.wrapArgValueToVarValue(input));
-        }
-      });
+      innerIO.execArgs = execArgs;
 
       // IMPORTANT! Give `innerIO` a name as it doesn't have one.
       // Calling `__configure` with another table won't change inner action's
@@ -130,17 +167,6 @@ class WrapIOProcessor extends BaseIOProcessor {
       false,
     );
 
-    const execArgs = new VarList(`Exec args of action "${action}"`, true);
-    for (const arg of innerFuncArgs.distinctList) {
-      const input = args[arg.name];
-      // Update all arguments in `execArgs` that have been overwritten as constant.
-      if (input instanceof mm.ValueRef === false && input !== undefined) {
-        execArgs.add(VarInfo.withValue(arg, this.wrapArgValueToVarValue(input)));
-      } else {
-        execArgs.add(arg);
-      }
-    }
-
     return new WrapIO(
       dialect,
       action,
@@ -154,15 +180,9 @@ class WrapIOProcessor extends BaseIOProcessor {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  private wrapArgValueToVarValue(value: mm.WrapArgValue): VarValue {
-    if (value instanceof mm.ValueRef) {
-      return value;
-    }
+  private handleConstantValue(value: string | number | mm.Table | null): ValueType {
     if (value instanceof mm.Table) {
       return value;
-    }
-    if (value instanceof mm.RenameArg) {
-      return value.name;
     }
     if (value === null) {
       return mm.constants.NULL;

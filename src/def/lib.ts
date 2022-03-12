@@ -1,7 +1,6 @@
 import * as su from '../lib/stringUtils.js';
 import * as core from './core.js';
 import * as types from './types.js';
-import { VarInfo } from '../lib/varInfo.js';
 
 export function tablePascalName(tableName: string): string {
   return su.toPascalCase(tableName);
@@ -38,6 +37,6 @@ export function cfTableUsageCode(tableParamName: string) {
   return `${tableParamName}.${core.tableMemSQLName}()`;
 }
 
-export function cfTableVarInfo(tableParamName: string) {
-  return new VarInfo(tableParamName, types.dbxTableType);
+export function cfTableVarDef(tableParamName: string) {
+  return { name: tableParamName, type: types.dbxTableType };
 }

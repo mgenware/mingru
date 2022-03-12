@@ -7,16 +7,16 @@ import { SQLIO, sqlIO, SQLIOBuilderOption } from './sqlIO.js';
 import { ActionIO } from './actionIO.js';
 import * as stringUtils from '../lib/stringUtils.js';
 import {
-  VarInfo,
+  VarDef,
   AtomicTypeInfo,
   CompoundTypeInfo,
   typeInfoToArray,
   typeInfoToPointer,
 } from '../lib/varInfo.js';
-import VarList from '../lib/varList.js';
+import { ParamList, ValueList } from '../lib/varList.js';
 import { registerHandler } from './actionToIO.js';
 import * as defs from '../def/defs.js';
-import { VarInfoBuilder } from '../lib/varInfoHelper.js';
+import { VarDefBuilder } from '../lib/varInfoHelper.js';
 import { forEachWithSlots } from '../lib/arrayUtils.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
 import BaseIOProcessor from './baseIOProcessor.js';
@@ -137,9 +137,9 @@ export class SelectIO extends ActionIO {
     // `cols` can be empty, it indicates `SELECT *`, which is used in `selectExists`.
     public cols: SelectedColumnIO[],
     public whereIO: SQLIO | null,
-    funcArgs: VarList,
-    execArgs: VarList,
-    returnValues: VarList,
+    funcArgs: ParamList,
+    execArgs: ValueList,
+    returnValues: ParamList,
     // K: ORDER BY params name, V: IO.
     public orderByInputIOs: Map<string, OrderByInputIO>,
   ) {
@@ -198,7 +198,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
   actionUniqueTypeName = '';
 
   // Params needed when ORDER BY inputs are present.
-  private orderByInputParams: VarInfo[] = [];
+  private orderByInputParams: VarDef[] = [];
   // Tracks subqueries func args.
   private subqueryIOs: ActionIO[] = [];
 
@@ -236,13 +236,13 @@ export class SelectIOProcessor extends BaseIOProcessor {
     const isOffsetInput = offsetValue instanceof mm.SQLVariable;
 
     // Func args
-    const limitTypeInfo = new VarInfo('limit', defs.intTypeInfo);
-    const offsetTypeInfo = new VarInfo('offset', defs.intTypeInfo);
-    const funcArgs = new VarList(`Func args of action "${this.action}"`, true);
+    const limitTypeInfo = { name: 'limit', type: defs.intTypeInfo };
+    const offsetTypeInfo = { name: 'offset', type: defs.intTypeInfo };
+    const funcArgs = new ParamList(`Func args of action "${this.action}"`);
     if (this.configurableTableName) {
-      funcArgs.add(defs.cfTableVarInfo(this.configurableTableName));
+      funcArgs.add(defs.cfTableVarDef(this.configurableTableName));
     }
-    const execArgs = new VarList(`Exec args of action "${this.action}"`, true);
+    const execArgs = new ValueList(`Exec args of action "${this.action}"`);
 
     const sql: StringSegment[] = [isUnionMode ? '' : 'SELECT '];
     let whereIO: SQLIO | null = null;
@@ -478,25 +478,25 @@ export class SelectIOProcessor extends BaseIOProcessor {
       funcArgs.add(limitTypeInfo);
       funcArgs.add(offsetTypeInfo);
       funcArgs.add(defs.selectActionMaxVar);
-      execArgs.add(limitTypeInfo);
-      execArgs.add(offsetTypeInfo);
+      execArgs.addVarDef(limitTypeInfo);
+      execArgs.addVarDef(offsetTypeInfo);
     } else if (pgMode === mm.SelectActionPaginationMode.pageMode) {
       funcArgs.add(defs.pageVar);
       funcArgs.add(defs.pageSizeVar);
-      execArgs.add(limitTypeInfo);
-      execArgs.add(offsetTypeInfo);
+      execArgs.addVarDef(limitTypeInfo);
+      execArgs.addVarDef(offsetTypeInfo);
     } else if (limitValue !== undefined) {
       // User specified LIMIT and OFFSET
       // Ignore number values, they were directly written in SQL.
       if (limitValue instanceof mm.SQLVariable) {
-        const userLimitVarInfo = VarInfoBuilder.fromSQLVar(limitValue, dialect);
+        const userLimitVarInfo = VarDefBuilder.fromSQLVar(limitValue, dialect);
         funcArgs.add(userLimitVarInfo);
-        execArgs.add(userLimitVarInfo);
+        execArgs.addVarDef(userLimitVarInfo);
       }
       if (offsetValue instanceof mm.SQLVariable) {
-        const userOffsetVarInfo = VarInfoBuilder.fromSQLVar(offsetValue, dialect);
+        const userOffsetVarInfo = VarDefBuilder.fromSQLVar(offsetValue, dialect);
         funcArgs.add(userOffsetVarInfo);
-        execArgs.add(userOffsetVarInfo);
+        execArgs.addVarDef(userOffsetVarInfo);
       }
     }
 
@@ -506,7 +506,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     }
 
     // Set return values.
-    const returnValues = new VarList(`Return values of action "${this.action}"`, true);
+    const returnValues = new ParamList(`Return values of action "${this.action}"`);
     if (!opt.selectionLiteMode) {
       if (selMode === mm.SelectActionMode.field || selMode === mm.SelectActionMode.fieldList) {
         const col = colIOs[0];
@@ -515,12 +515,10 @@ export class SelectIOProcessor extends BaseIOProcessor {
         }
         const originalTypeInfo = dialect.colTypeToGoType(col.getResultType());
         const typeInfo = col.nullable ? typeInfoToPointer(originalTypeInfo) : originalTypeInfo;
-        returnValues.add(
-          new VarInfo(
-            mm.ReturnValues.result,
-            selMode === mm.SelectActionMode.field ? typeInfo : typeInfoToArray(typeInfo),
-          ),
-        );
+        returnValues.add({
+          name: mm.ReturnValues.result,
+          type: selMode === mm.SelectActionMode.field ? typeInfo : typeInfoToArray(typeInfo),
+        });
 
         if (pgMode === mm.SelectActionPaginationMode.pagination) {
           returnValues.add(defs.selectActionMaxVar);
@@ -528,7 +526,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
           returnValues.add(defs.hasNextVar);
         }
       } else if (selMode === mm.SelectActionMode.exists) {
-        returnValues.add(new VarInfo(mm.ReturnValues.result, defs.boolTypeInfo));
+        returnValues.add({ name: mm.ReturnValues.result, type: defs.boolTypeInfo });
       } else {
         // Handle return types that can be customized by attributes.
         // `selMode` == `.rowList` or `.row` or `.union`.
@@ -547,12 +545,10 @@ export class SelectIOProcessor extends BaseIOProcessor {
         }
         const resultTypeInfo = new AtomicTypeInfo(resultType, `${resultType}{}`, null);
 
-        returnValues.add(
-          new VarInfo(
-            mm.ReturnValues.result,
-            new CompoundTypeInfo(resultTypeInfo, false, isResultTypeArray),
-          ),
-        );
+        returnValues.add({
+          name: mm.ReturnValues.result,
+          type: new CompoundTypeInfo(resultTypeInfo, false, isResultTypeArray),
+        });
         if (pgMode === mm.SelectActionPaginationMode.pagination) {
           returnValues.add(defs.selectActionMaxVar);
         } else if (pgMode === mm.SelectActionPaginationMode.pageMode) {
@@ -610,9 +606,9 @@ export class SelectIOProcessor extends BaseIOProcessor {
 
       // Add ORDER BY inputs params.
       // `orderBy1` for enum param, and `orderBy1Desc` for ordering.
-      this.orderByInputParams.push(new VarInfo(orderByParamName, defs.intTypeInfo));
+      this.orderByInputParams.push({ name: orderByParamName, type: defs.intTypeInfo });
       const orderByDescVarName = `${orderByParamName}Desc`;
-      this.orderByInputParams.push(new VarInfo(orderByDescVarName, defs.boolTypeInfo));
+      this.orderByInputParams.push({ name: orderByDescVarName, type: defs.boolTypeInfo });
 
       this.orderByInputCounter++;
       return [{ code: orderByResultName }];

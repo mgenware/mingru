@@ -2,27 +2,18 @@
 import toTypeString from 'to-type-string';
 import * as mm from 'mingru-models';
 import { Dialect, StringSegment } from '../dialect.js';
-import VarList from '../lib/varList.js';
-import { VarInfo } from '../lib/varInfo.js';
-import { VarInfoBuilder } from '../lib/varInfoHelper.js';
+import { SQLVarList } from '../lib/varList.js';
+import { VarDefBuilder } from '../lib/varInfoHelper.js';
 import { makeStringFromSegments } from '../build/goCodeUtil.js';
 import { join2DArrays } from '../lib/arrayUtils.js';
 import { actionToIO } from './actionToIO.js';
 import { ActionIO } from './actionIO.js';
 
 export class SQLIO {
-  get vars(): VarInfo[] {
-    return this.varList.list;
-  }
-
-  get distinctVars(): VarInfo[] {
-    return this.varList.distinctList;
-  }
-
   constructor(
     public sql: mm.SQL,
     public dialect: Dialect,
-    public varList: VarList,
+    public vars: SQLVarList,
     public code: StringSegment[],
   ) {}
 
@@ -127,7 +118,7 @@ function handleElement(
       const input = element.toInput();
       if (input.isArray) {
         return [
-          { code: `mingru.InputPlaceholders(len(${VarInfoBuilder.getSQLVarInputName(input)}))` },
+          { code: `mingru.InputPlaceholders(len(${VarDefBuilder.getSQLVarInputName(input)}))` },
         ];
       }
       return dialect.inputPlaceholder();
@@ -202,7 +193,7 @@ export function sqlIO(
   defaultTable: mm.Table | null,
   opt?: SQLIOBuilderOption,
 ): SQLIO {
-  const vars = new VarList(`Expression ${sql.toString()}`, true);
+  const vars = new SQLVarList(`Expression ${sql.toString()}`);
   if (!Array.isArray(sql.elements)) {
     throw new Error(`Elements should be an array, got \`${toTypeString(sql.elements)}\``);
   }
@@ -213,8 +204,8 @@ export function sqlIO(
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
       const sqlVar = element.toInput();
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      const varInfo = VarInfoBuilder.fromSQLVar(sqlVar, dialect);
-      vars.add(varInfo);
+      const varDef = VarDefBuilder.fromSQLVar(sqlVar, dialect);
+      vars.add(varDef);
     }
   }
 

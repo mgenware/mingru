@@ -1,18 +1,21 @@
-import { VarInfo } from './varInfo.js';
+import { VarDef, ValueType } from './varInfo.js';
 
 /**
  * Note that variables with same names and types are considered duplicates. Variables with same
      names but different types are always invalid and will trigger exceptions.
  * When duplicates are allowed:
- *   Used in `SQLIO` (for example, WHERE expressions): all variables are tracked in insertion order.
- * When duplicates are NOT allowed:
- *   Used in selected columns, setters. Exceptions are thrown in this case.
+ *   - `SQLIO`: all variables are tracked in insertion order
+ *   - ExecArgs: same variable may be passed multiple times
+ * When duplicates are ignored:
+ *   - Selected columns
+ *   - Setters
+ *   - FuncArgs
  */
-export default class VarList {
+class VarListBase<T extends VarDef> {
   // A list of variables in insertion order.
-  list: VarInfo[] = [];
+  list: T[] = [];
   // A map containing all unique variables.
-  private map = new Map<string, VarInfo>();
+  private map = new Map<string, T>();
 
   constructor(public name: string, public allowDuplicates = false) {}
 
@@ -21,15 +24,18 @@ export default class VarList {
     return this.list.length;
   }
 
-  get distinctList(): VarInfo[] {
+  get distinctList(): T[] {
+    if (!this.allowDuplicates) {
+      throw new Error('`allowDuplicates` is false. Use `list` instead.');
+    }
     return [...this.map.values()];
   }
 
-  getByIndex(idx: number): VarInfo | undefined {
+  getByIndex(idx: number): T | undefined {
     return this.list[idx];
   }
 
-  getByName(name: string): VarInfo | undefined {
+  getByName(name: string): T | undefined {
     return this.map.get(name);
   }
 
@@ -37,13 +43,13 @@ export default class VarList {
     return [...this.map.keys()];
   }
 
-  add(varInfo: VarInfo) {
+  add(varInfo: T) {
     const prev = this.getByName(varInfo.name);
     if (prev) {
       // Found an existing var with the same name, check if their types are identical.
       if (prev.type.toString() === varInfo.type.toString()) {
         if (!this.allowDuplicates) {
-          throw new Error(`Duplicate variables "${varInfo.name}" found in "${this.name}"`);
+          return;
         }
         // Duplicates are allowed here.
         this.list.push(varInfo);
@@ -61,7 +67,7 @@ export default class VarList {
     this.list.push(varInfo);
   }
 
-  merge(vars: VarInfo[]) {
+  merge(vars: T[]) {
     for (const v of vars) {
       this.add(v);
     }
@@ -75,5 +81,49 @@ export default class VarList {
       return `${s} {${mapStr}}`;
     }
     return s;
+  }
+}
+
+export class ParamList extends VarListBase<VarDef> {
+  constructor(name: string) {
+    super(name, false);
+  }
+}
+
+export class SQLVarList extends VarListBase<VarDef> {
+  constructor(name: string) {
+    super(name, true);
+  }
+}
+
+export class ValueList {
+  values: ValueType[] = [];
+
+  static fromValues(name: string, values: ValueType[]) {
+    const r = new ValueList(name);
+    r.values = values;
+    return r;
+  }
+
+  constructor(public name: string) {}
+
+  addVarDef(v: VarDef) {
+    this.values.push(v.name);
+  }
+
+  addValue(v: ValueType) {
+    this.values.push(v);
+  }
+
+  mergeVarDef(vars: VarDef[]) {
+    for (const v of vars) {
+      this.values.push(v.name);
+    }
+  }
+
+  mergeList(list: ValueList) {
+    for (const v of list.values) {
+      this.values.push(v);
+    }
   }
 }

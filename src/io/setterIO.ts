@@ -1,8 +1,8 @@
 import * as mm from 'mingru-models';
 import { SQLIO, sqlIO, SQLIOBuilderOption } from './sqlIO.js';
-import VarList from '../lib/varList.js';
+import { ParamList } from '../lib/varList.js';
 import { Dialect } from '../dialect.js';
-import { VarInfo } from '../lib/varInfo.js';
+import { VarDef } from '../lib/varInfo.js';
 import dtDefault from '../build/dtDefault.js';
 
 export class SetterIO {
@@ -124,9 +124,9 @@ export class SetterIO {
   constructor(public col: mm.Column, public sql: SQLIO) {}
 }
 
-export function settersToVarList(name: string, setters: SetterIO[], items?: VarInfo[]): VarList {
+export function settersToParamList(name: string, setters: SetterIO[], items?: VarDef[]) {
   // Set inputs
-  const list = new VarList(name);
+  const list = new ParamList(name);
   if (items) {
     for (const v of items) {
       list.add(v);
@@ -134,7 +134,7 @@ export function settersToVarList(name: string, setters: SetterIO[], items?: VarI
   }
   // Merge setter inputs
   for (const setter of setters) {
-    list.merge(setter.sql.varList.list);
+    list.merge(setter.sql.vars.list);
   }
   return list;
 }

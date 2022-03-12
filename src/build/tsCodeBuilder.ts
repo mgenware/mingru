@@ -40,7 +40,7 @@ export function buildTSInterface(structData: GoStructData, typeName?: string) {
     }
     try {
       const tsType = goTypeToTSType(mem.type);
-      code += `  ${mem.camelCaseName()}?: ${tsType.type};\n`;
+      code += `  ${mem.name}?: ${tsType.type};\n`;
     } catch (err) {
       mustBeErr(err);
       throw new Error(

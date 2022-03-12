@@ -1,10 +1,9 @@
 import * as mm from 'mingru-models';
 import { Dialect, StringSegment } from '../dialect.js';
-import { settersToVarList, SetterIO } from './setterIO.js';
+import { settersToParamList, SetterIO } from './setterIO.js';
 import { SQLIO, sqlIO } from './sqlIO.js';
 import { ActionIO } from './actionIO.js';
-import VarList from '../lib/varList.js';
-import { VarInfo } from '../lib/varInfo.js';
+import { ParamList, ValueList } from '../lib/varList.js';
 import { registerHandler } from './actionToIO.js';
 import * as defs from '../def/defs.js';
 import * as utils from '../lib/stringUtils.js';
@@ -20,10 +19,10 @@ export class UpdateIO extends ActionIO {
     sql: StringSegment[],
     public setters: SetterIO[],
     public where: SQLIO | null,
-    funcArgs: VarList,
-    execArgs: VarList,
-    returnValues: VarList,
-    public setterArgs: VarList,
+    funcArgs: ParamList,
+    execArgs: ValueList,
+    returnValues: ParamList,
+    public setterArgs: ParamList,
   ) {
     super(dialect, updateAction, sql, funcArgs, execArgs, returnValues, false);
     throwOnEmptyArray(setters, 'setters');
@@ -78,28 +77,29 @@ class UpdateIOProcessor extends BaseIOProcessor {
     }
 
     // funcArgs
-    const setterVars = settersToVarList(`SetterInputs of action "${action}"`, setterIOs);
-    const funcArgs = new VarList(`Func args of action "${action}"`, true);
+    const setterVars = settersToParamList(`SetterInputs of action "${action}"`, setterIOs);
+    const funcArgs = new ParamList(`Func args of action "${action}"`);
     if (this.configurableTableName) {
-      funcArgs.add(defs.cfTableVarInfo(this.configurableTableName));
+      funcArgs.add(defs.cfTableVarDef(this.configurableTableName));
     }
 
-    const execArgs = new VarList(`Exec args of action "${action}"`, true);
+    const execArgs = new ValueList(`Exec args of action "${action}"`);
     // funcArgs = WHERE(distinct) + setters
     // execArgs = setters + WHERE(all)
-    execArgs.merge(setterVars.list);
+    execArgs.mergeVarDef(setterVars.list);
     if (whereIO) {
-      funcArgs.merge(whereIO.distinctVars);
-      execArgs.merge(whereIO.vars);
+      funcArgs.merge(whereIO.vars.list);
+      execArgs.mergeVarDef(whereIO.vars.list);
     }
     funcArgs.merge(setterVars.list);
 
     // Return values
-    const returnValues = new VarList(`Return values of action "${action}"`);
+    const returnValues = new ParamList(`Return values of action "${action}"`);
     if (!actionData.ensureOneRowAffected) {
-      returnValues.add(
-        new VarInfo(mm.ReturnValues.rowsAffected, dialect.colTypeToGoType(mm.int().__type())),
-      );
+      returnValues.add({
+        name: mm.ReturnValues.rowsAffected,
+        type: dialect.colTypeToGoType(mm.int().__type()),
+      });
     }
 
     return new UpdateIO(

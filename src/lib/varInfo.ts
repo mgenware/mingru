@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import * as mm from 'mingru-models';
-import { toCamelCase, toPascalCase } from './stringUtils.js';
 
 export class AtomicTypeInfo {
   moduleName = '';
@@ -110,43 +109,9 @@ export function typeInfoWithoutPointer(typeInfo: TypeInfo): TypeInfo {
   return typeInfo;
 }
 
-export type VarValue = string | mm.ValueRef | mm.Table;
-
-export class VarInfo {
-  static withValue(v: VarInfo, value: VarValue): VarInfo {
-    return new VarInfo(v.name, v.type, value);
-  }
-
-  static withName(v: VarInfo, name: string): VarInfo {
-    return new VarInfo(name, v.type, v.value);
-  }
-
-  readonly pascalName: string;
-
-  constructor(public name: string, public type: TypeInfo, public value?: VarValue) {
-    this.pascalName = toPascalCase(name);
-    Object.freeze(this);
-  }
-
-  camelCaseName(): string {
-    return toCamelCase(this.name);
-  }
-
-  pascalCaseName(): string {
-    return toPascalCase(this.name);
-  }
-
-  get hasValueRef(): boolean {
-    return this.value instanceof mm.ValueRef;
-  }
-
-  toString(): string {
-    let s = `${this.name}: ${this.type.toString()}`;
-    if (this.value !== undefined) {
-      s += `=${this.value}`;
-    }
-    return s;
-  }
+export interface VarDef {
+  name: string;
+  type: TypeInfo;
 }
 
-export default VarInfo;
+export type ValueType = string | mm.CapturedVar | mm.Table;

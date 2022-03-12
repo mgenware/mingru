@@ -39,7 +39,7 @@ it('Pass values in child actions (no return value declaration)', async () => {
       mm
         .insertOne()
         .setInputs()
-        .wrap({ firstName: mm.valueRef('firstName') }),
+        .wrap({ firstName: mm.captureVar('firstName') }),
     );
   }
   const employeeTA = mm.tableActions(employee, EmployeeTA);
@@ -60,7 +60,7 @@ it('Pass values in child actions and declare return values', async () => {
         mm
           .insertOne()
           .setInputs()
-          .wrap({ firstName: mm.valueRef('firstName') })
+          .wrap({ firstName: mm.captureVar('firstName') })
           .declareReturnValues({
             [mm.ReturnValues.insertedID]: 'id2',
           }),
@@ -184,7 +184,7 @@ it('Reference property values', async () => {
         .insertOne()
         .setInputs()
         .wrap({
-          age: mm.valueRef('res.Age'),
+          age: mm.captureVar('res.Age'),
           name: '"FOO"',
         }),
     );

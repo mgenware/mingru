@@ -26,7 +26,7 @@ const wrapSelf = mm.tableActions(user, WrapSelfTA);
 class WrapOtherTA extends mm.TableActions {
   standard = wrapSelf.s.wrap({ id: '123' });
   nested = wrapSelf.d.wrap({ id: '123' });
-  retValue = wrapSelf.d.wrap({ id: new mm.ValueRef('extID') });
+  retValue = wrapSelf.d.wrap({ id: mm.captureVar('extID') });
 }
 const wrapOther = mm.tableActions(post, WrapOtherTA);
 

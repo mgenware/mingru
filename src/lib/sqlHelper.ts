@@ -2,7 +2,7 @@ import * as mm from 'mingru-models';
 import toTypeString from 'to-type-string';
 import { ActionIO } from '../io/actionIO.js';
 import { SQLIO } from '../io/sqlIO.js';
-import VarList from './varList.js';
+import { ValueList, ParamList } from './varList.js';
 import * as defs from '../def/defs.js';
 import { StringSegment } from '../dialect.js';
 import BaseIOProcessor from '../io/baseIOProcessor.js';
@@ -112,24 +112,28 @@ export function visitColumnsFromSelectedColumn(
   return visitColumns(scCore, fn);
 }
 
-export function mergeIOVerListsWithSQLIO(funcArgs: VarList, execArgs: VarList, io: SQLIO | null) {
+export function mergeIOVerListsWithSQLIO(
+  funcArgs: ParamList,
+  execArgs: ValueList,
+  io: SQLIO | null,
+) {
   if (!io) {
     return;
   }
-  funcArgs.merge(io.distinctVars);
-  execArgs.merge(io.vars);
+  funcArgs.merge(io.vars.list);
+  execArgs.mergeVarDef(io.vars.list);
 }
 
 export function mergeIOVerListsWithActionIO(
-  funcArgs: VarList,
-  execArgs: VarList,
+  funcArgs: ParamList,
+  execArgs: ValueList,
   io: ActionIO | null,
 ) {
   if (!io) {
     return;
   }
-  funcArgs.merge(io.funcArgs.distinctList);
-  execArgs.merge(io.execArgs.list);
+  funcArgs.merge(io.funcArgs.list);
+  execArgs.mergeList(io.execArgs);
 }
 
 export function handleNonSelectSQLFrom(

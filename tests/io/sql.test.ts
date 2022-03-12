@@ -45,7 +45,7 @@ it('Nested SQLs', () => {
 
   const io = mr.sqlIO(sql, dialect, null);
   eq(
-    io.varList.toString(),
+    io.vars.toString(),
     'id: uint64, urlName: string, b: a, sig: *string, sig: *string, b: a {id: uint64, urlName: string, b: a, sig: *string}',
   );
 });
@@ -56,7 +56,7 @@ it('list and distinctList', () => {
   const sql = mm.sql`${i1} ${i2} ${user.age.toInput()}`;
 
   const io = mr.sqlIO(sql, dialect, null);
-  eq(io.varList.toString(), 'id: uint64, id: uint64, id: uint64, age: int {id: uint64, age: int}');
+  eq(io.vars.toString(), 'id: uint64, id: uint64, id: uint64, age: int {id: uint64, age: int}');
 });
 
 it('Conflicting names', () => {

@@ -6,12 +6,14 @@ import { UpdateIO } from '../io/updateIO.js';
 import { InsertIO } from '../io/insertIO.js';
 import { DeleteIO } from '../io/deleteIO.js';
 import {
-  VarInfo,
+  VarDef,
+  ValueType,
   CompoundTypeInfo,
   getAtomicTypeInfo,
   typeInfoWithoutArray,
   typeInfoToPointer,
 } from '../lib/varInfo.js';
+import { ValueList, ParamList } from '../lib/varList.js';
 import * as go from './goCodeUtil.js';
 import * as defs from '../def/defs.js';
 import logger from '../logger.js';
@@ -127,8 +129,7 @@ export default class CoreBuilder {
     const funcName = pri ? stringUtils.lowercaseFirstChar(ioFuncName) : ioFuncName;
     // Used for generating interface member if needed.
     let funcSigString = '';
-    // Use `funcArgs.distinctList` cuz duplicate vars are not allowed.
-    const funcArgs = io.funcArgs.distinctList;
+    const funcArgs = io.funcArgs.list;
     const returnValues = io.returnValues.list;
     const builder = new LinesBuilder();
 
@@ -139,9 +140,7 @@ export default class CoreBuilder {
     // allFuncArgs = original func args + arg stubs.
     const allFuncArgs = [io.dbArgVarInfo(), ...funcArgs, ...io.funcStubs];
     this.imports.addVars(allFuncArgs);
-    const funcParamsCode = allFuncArgs
-      .map((p) => `${p.camelCaseName()} ${p.type.fullTypeName}`)
-      .join(', ');
+    const funcParamsCode = allFuncArgs.map((p) => `${p.name} ${p.type.fullTypeName}`).join(', ');
     // Wrap all params with parentheses.
     funcSigString += `(${funcParamsCode})`;
 
@@ -192,9 +191,7 @@ export default class CoreBuilder {
         returnValueStrings.push(
           `fmt.Errorf("The array argument \`${arrayParam.name}\` cannot be empty")`,
         );
-        inputArrayChecks.push(
-          `if len(${go.transformVarInfo(arrayParam, go.VarInfoNameCase.camelCase)}) == 0 {`,
-        );
+        inputArrayChecks.push(`if len(${arrayParam.name}) == 0 {`);
         inputArrayChecks.increaseIndent();
         inputArrayChecks.push(`return ${returnValueStrings.join(', ')}`);
         inputArrayChecks.decreaseIndent();
@@ -385,7 +382,7 @@ export default class CoreBuilder {
     }
 
     // Selected columns.
-    const selectedFields = new Map<string, VarInfo>();
+    const selectedFields = new Map<string, VarDef>();
     const jsonIgnoreFields = new Set<string>();
     const omitEmptyFields = new Set<string>();
     const omitAllEmptyFields = options.jsonTags?.excludeEmptyValues || false;
@@ -397,7 +394,7 @@ export default class CoreBuilder {
       const fieldName = userModelName ?? stringUtils.toPascalCase(col.modelName);
       const originalTypeInfo = this.dialect.colTypeToGoType(col.getResultType());
       const typeInfo = col.nullable ? typeInfoToPointer(originalTypeInfo) : originalTypeInfo;
-      const varInfo = new VarInfo(fieldName, typeInfo);
+      const varInfo: VarDef = { name: fieldName, type: typeInfo };
 
       selectedFields.set(varInfo.name, varInfo);
 
@@ -464,7 +461,9 @@ export default class CoreBuilder {
       const scanParams =
         selMode === mm.SelectActionMode.fieldList
           ? `&${defs.itemVarName}`
-          : joinParams([...selectedFields.values()].map((p) => `&item.${p.pascalName}`));
+          : joinParams(
+              [...selectedFields.values()].map((p) => `&item.${stringUtils.toPascalCase(p.name)}`),
+            );
       if (pgMode === mm.SelectActionPaginationMode.pageMode) {
         // Add `fmt` import as we are using `fmt.Errorf`.
         this.imports.add(defs.fmtImport);
@@ -483,11 +482,12 @@ export default class CoreBuilder {
         );
       }
       // Call the `Query` method.
-      this.injectQueryPreparationCode(builder, io.execArgs.list, variadicQueryParams);
+      this.injectQueryPreparationCode(builder, io.funcArgs, io.execArgs, variadicQueryParams);
       builder.push(
         `rows, err := ${defs.mrQueryableParam}.Query(${this.getQueryParamsCode(
           sqlLiteral,
-          io.execArgs.list,
+          io.funcArgs,
+          io.execArgs,
           variadicQueryParams,
         )})`,
       );
@@ -546,17 +546,18 @@ export default class CoreBuilder {
         builder.push(`var ${defs.resultVarName} ${resultTypeString}`);
       } else {
         scanParams = joinParams(
-          [...selectedFields.values()].map((p) => `&${defs.resultVarName}.${p.pascalName}`),
+          [...selectedFields.values()].map((p) => `&${defs.resultVarName}.${p.name}`),
         );
         builder.push(`var ${defs.resultVarName} ${atomicResultType}`);
       }
 
       // Call the `Query` func.
-      this.injectQueryPreparationCode(builder, io.execArgs.list, variadicQueryParams);
+      this.injectQueryPreparationCode(builder, io.funcArgs, io.execArgs, variadicQueryParams);
       builder.push(
         `err := ${defs.mrQueryableParam}.QueryRow(${this.getQueryParamsCode(
           sqlLiteral,
-          io.execArgs.list,
+          io.funcArgs,
+          io.execArgs,
           variadicQueryParams,
         )}).Scan(${scanParams})`,
       );
@@ -583,14 +584,14 @@ export default class CoreBuilder {
   private update(io: UpdateIO, variadicParams: boolean): CodeMap {
     const { updateAction: action } = io;
     const builder = new LinesBuilder();
-    const queryArgs = io.execArgs.list;
 
     const sqlLiteral = io.getSQLCode();
-    this.injectQueryPreparationCode(builder, queryArgs, variadicParams);
+    this.injectQueryPreparationCode(builder, io.funcArgs, io.execArgs, variadicParams);
     builder.push(
       `${defs.resultVarName}, err := ${defs.mrQueryableParam}.Exec(${this.getQueryParamsCode(
         sqlLiteral,
-        queryArgs,
+        io.funcArgs,
+        io.execArgs,
         variadicParams,
       )})`,
     );
@@ -607,14 +608,13 @@ export default class CoreBuilder {
   private insert(io: InsertIO, variadicParams: boolean): CodeMap {
     const { fetchInsertedID } = io;
     const builder = new LinesBuilder();
-    const queryArgs = io.execArgs.list;
 
     const sqlLiteral = io.getSQLCode();
-    this.injectQueryPreparationCode(builder, queryArgs, variadicParams);
+    this.injectQueryPreparationCode(builder, io.funcArgs, io.execArgs, variadicParams);
     builder.push(
       `${fetchInsertedID ? defs.resultVarName : '_'}, err := ${
         defs.mrQueryableParam
-      }.Exec(${this.getQueryParamsCode(sqlLiteral, queryArgs, variadicParams)})`,
+      }.Exec(${this.getQueryParamsCode(sqlLiteral, io.funcArgs, io.execArgs, variadicParams)})`,
     );
 
     // Return the result
@@ -629,14 +629,14 @@ export default class CoreBuilder {
   private delete(io: DeleteIO, variadicParams: boolean): CodeMap {
     const { deleteAction: action } = io;
     const builder = new LinesBuilder();
-    const queryArgs = io.execArgs.list;
 
     const sqlLiteral = io.getSQLCode();
-    this.injectQueryPreparationCode(builder, queryArgs, variadicParams);
+    this.injectQueryPreparationCode(builder, io.funcArgs, io.execArgs, variadicParams);
     builder.push(
       `${defs.resultVarName}, err := ${defs.mrQueryableParam}.Exec(${this.getQueryParamsCode(
         sqlLiteral,
-        queryArgs,
+        io.funcArgs,
+        io.execArgs,
         variadicParams,
       )})`,
     );
@@ -652,11 +652,19 @@ export default class CoreBuilder {
 
   private wrap(io: WrapIO, variadicParams: boolean): CodeMap {
     const builder = new LinesBuilder();
-    const queryArgs = [io.dbArgVarInfo(), ...io.execArgs.list];
+    const queryArgs = ValueList.fromValues(io.execArgs.name, [
+      io.dbArgVarInfo().name,
+      ...io.execArgs.values,
+    ]);
 
-    this.injectQueryPreparationCode(builder, queryArgs, variadicParams);
+    this.injectQueryPreparationCode(builder, io.funcArgs, queryArgs, variadicParams);
     builder.push(
-      `return ${io.funcPath}(${this.getQueryParamsCode(null, queryArgs, variadicParams)})`,
+      `return ${io.funcPath}(${this.getQueryParamsCode(
+        null,
+        io.funcArgs,
+        queryArgs,
+        variadicParams,
+      )})`,
     );
     return new CodeMap(builder);
   }
@@ -666,7 +674,7 @@ export default class CoreBuilder {
 
     // Lines builder for code inside DB transaction closure.
     const innerBuilder = new LinesBuilder();
-    const { memberIOs, returnValues, funcArgs } = io;
+    const { memberIOs, returnValues } = io;
 
     // We don't use mrQueryable in transaction arguments but we still need to
     // import the dbx namespace as we're calling mingru.transact.
@@ -699,9 +707,7 @@ export default class CoreBuilder {
       returnValuesCode += `err ${hasDeclaredVars ? ':' : ''}= `;
       returnValuesCode += memberIO.callPath;
       // Generating the calling code of this member
-      const queryParamsCode = mActionIO.funcArgs.list
-        .map((p) => go.transformVarInfo(p, go.VarInfoNameCase.camelCase))
-        .join(', ');
+      const queryParamsCode = mActionIO.funcArgs.list.map((p) => p.name).join(', ');
 
       // If this is a temp member (created inside transaction),
       // then we also need to generate the member func body code.
@@ -738,15 +744,6 @@ export default class CoreBuilder {
 
     const builder = new LinesBuilder();
 
-    // Declare params that have a value.
-    const funcArgsWithValues = funcArgs.list.filter((v) => v.value);
-    if (funcArgsWithValues.length) {
-      this.imports.addVars(funcArgsWithValues);
-      for (const v of funcArgsWithValues) {
-        builder.push(`${v.name} := ${go.transformVarInfo(v, go.VarInfoNameCase.camelCase)}`);
-      }
-    }
-
     // Declare return variables if needed.
     if (returnValues.length) {
       this.imports.addVars(returnValues.list);
@@ -773,8 +770,8 @@ export default class CoreBuilder {
 
   // A varList usually ends without an error type, call this to append
   // an Go error type to the varList.
-  private appendErrorType(vars: VarInfo[]): VarInfo[] {
-    return [...vars, new VarInfo('error', defs.errorType)];
+  private appendErrorType(vars: VarDef[]): VarDef[] {
+    return [...vars, defs.errorVar];
   }
 
   private txExportedVar(name: string): string {
@@ -783,25 +780,26 @@ export default class CoreBuilder {
 
   private injectQueryPreparationCode(
     builder: LinesBuilder,
-    args: VarInfo[],
+    funcArgs: ParamList,
+    execArgs: ValueList,
     variadicParams: boolean,
   ) {
     if (variadicParams) {
       builder.push(`var ${defs.queryParamsVarName} []interface{}`);
-      for (const param of args) {
-        if (param.type instanceof CompoundTypeInfo && param.type.isArray) {
-          builder.push(
-            `for _, item := range ${go.transformVarInfo(param, go.VarInfoNameCase.camelCase)} {`,
-          );
+      // When `variadicParams` is on, search for variable types from func args. Variables of
+      // array type are expanded.
+      const stringExecArgs = execArgs.values.filter((v) => typeof v === 'string') as string[];
+      for (const val of stringExecArgs) {
+        if (this.isValueArray(funcArgs, val)) {
+          builder.push(`for _, item := range ${go.transformValue(val)} {`);
           builder.increaseIndent();
           builder.push(`${defs.queryParamsVarName} = append(${defs.queryParamsVarName}, item)`);
           builder.decreaseIndent();
           builder.push('}');
         } else {
           builder.push(
-            `${defs.queryParamsVarName} = append(${defs.queryParamsVarName}, ${go.transformVarInfo(
-              param,
-              go.VarInfoNameCase.camelCase,
+            `${defs.queryParamsVarName} = append(${defs.queryParamsVarName}, ${go.transformValue(
+              val,
             )})`,
           );
         }
@@ -811,25 +809,30 @@ export default class CoreBuilder {
 
   private getQueryParamsCode(
     firstParam: string | null,
-    args: VarInfo[],
+    funcArgs: ParamList,
+    execArgs: ValueList,
     variadicParams: boolean,
   ): string {
     let tailParams = '';
     if (variadicParams) {
       tailParams = `${defs.queryParamsVarName}...`;
     } else {
-      tailParams = args
-        .map(
-          (p) =>
-            `${
-              p.type instanceof CompoundTypeInfo && p.type.isArray ? '...' : ''
-            }${go.transformVarInfo(p, go.VarInfoNameCase.camelCase)}`,
-        )
+      tailParams = execArgs.values
+        .map((p) => `${this.isValueArray(funcArgs, p) ? '...' : ''}${go.transformValue(p)}`)
         .join(', ');
     }
     if (firstParam && tailParams) {
       return `${firstParam}, ${tailParams}`;
     }
     return (firstParam || '') + tailParams;
+  }
+
+  // Checks if the func arg referenced by a `Value`(usually through exec args) is an array.
+  private isValueArray(funcArgs: ParamList, value: ValueType) {
+    if (typeof value === 'string') {
+      const arg = funcArgs.getByName(value);
+      return arg && arg.type instanceof CompoundTypeInfo && arg.type.isArray;
+    }
+    return false;
   }
 }
