@@ -32,7 +32,7 @@ export default class Builder {
     this.workingDir = tempy.directory();
   }
 
-  async build(source: Array<mm.TableActions | mm.Table>): Promise<void> {
+  async build(source: Array<mm.ActionGroup | mm.Table>): Promise<void> {
     const { opts, workingDir, outDir } = this;
 
     let somethingBuilt = false;
@@ -46,7 +46,7 @@ export default class Builder {
     if (opts.createTableSQL) {
       const tables = dedup(
         source
-          .map((item) => (item instanceof mm.Table ? item : item.__getData().table))
+          .map((item) => (item instanceof mm.Table ? item : item.__getData().groupTable))
           .filter((t) => !t.__getData().virtualTable),
       );
       await this.buildCreateTableSQL(tables);
@@ -64,7 +64,7 @@ export default class Builder {
     await fs.cp(workingDir, this.outDir, { recursive: true });
   }
 
-  private async buildSource(source: Array<mm.TableActions | mm.Table>) {
+  private async buildSource(source: Array<mm.ActionGroup | mm.Table>) {
     const coreBuilderWrapper = new CoreBuilderWrapper();
     await coreBuilderWrapper.buildAsync(
       source,

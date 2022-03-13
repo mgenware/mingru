@@ -4,11 +4,11 @@ import user from '../models/user.js';
 import post from '../models/post.js';
 
 it('Wrap', async () => {
-  class UserTA extends mm.TableActions {
+  class UserTA extends mm.ActionGroup {
     t = mm.updateOne().setInputs().by(user.id);
   }
-  const userTA = mm.tableActions(user, UserTA);
-  class PostTA extends mm.TableActions {
+  const userTA = mm.actionGroup(user, UserTA);
+  class PostTA extends mm.ActionGroup {
     // ROOT_TABLE: post
     // TABLE: user
     s = mm
@@ -32,20 +32,20 @@ it('Wrap', async () => {
     // TABLE: post
     t3 = mm.updateOne().setInputs().by(post.id).wrap({ title: '"t3"' });
   }
-  const ta = mm.tableActions(post, PostTA);
+  const ta = mm.actionGroup(post, PostTA);
   await testBuildAsync(ta, 'wrap/wrap');
 });
 
 it('`Wrap + RenameArg`', async () => {
-  class UserTA extends mm.TableActions {
+  class UserTA extends mm.ActionGroup {
     t = mm.updateOne().setInputs().by(user.id);
   }
-  const userTA = mm.tableActions(user, UserTA);
-  class PostTA extends mm.TableActions {
+  const userTA = mm.actionGroup(user, UserTA);
+  class PostTA extends mm.ActionGroup {
     a = userTA.t;
     b = userTA.t.wrap({ sig: mm.renameArg('renamed') });
   }
-  const postTA = mm.tableActions(post, PostTA);
+  const postTA = mm.actionGroup(post, PostTA);
   await testBuildAsync(userTA, 'wrap/renameArg/user_ta');
   await testBuildAsync(postTA, 'wrap/renameArg/post_ta');
 });

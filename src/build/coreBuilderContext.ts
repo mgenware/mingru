@@ -11,7 +11,7 @@ export default class CoreBuilderContext {
   #tsResultTypes = new Set<string>();
 
   // Actions that have been built.
-  #actions = new Set<mm.TableActions>();
+  #actions = new Set<mm.ActionGroup>();
   // Tables that have been built.
   #tables = new Set<mm.Table>();
 
@@ -27,7 +27,7 @@ export default class CoreBuilderContext {
     return [...this.#tsResultTypes];
   }
 
-  get actions(): readonly mm.TableActions[] {
+  get actions(): readonly mm.ActionGroup[] {
     return [...this.#actions];
   }
 
@@ -50,7 +50,7 @@ export default class CoreBuilderContext {
     }
   }
 
-  addAction(action: mm.TableActions) {
+  addAction(action: mm.ActionGroup) {
     this.#actions.add(action);
   }
 
@@ -58,7 +58,7 @@ export default class CoreBuilderContext {
     this.#tables.add(table);
   }
 
-  hasAction(action: mm.TableActions) {
+  hasAction(action: mm.ActionGroup) {
     return this.#actions.has(action);
   }
 

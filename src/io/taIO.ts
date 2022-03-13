@@ -17,9 +17,9 @@ export class TAIO {
   // Table name in database.
   tableDBName: string;
 
-  constructor(public ta: mm.TableActions, public opt: ActionToIOOptions) {
+  constructor(public ta: mm.ActionGroup, public opt: ActionToIOOptions) {
     const taData = ta.__getData();
-    const taTable = taData.table;
+    const taTable = taData.groupTable;
     const taTableName = taTable.__getData().name;
     const taOpt = taData.options;
     // Actions are sorted alphabetically.

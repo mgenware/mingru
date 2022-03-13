@@ -17,15 +17,15 @@ import { dedup } from '../lib/arrayUtils.js';
 // Wraps a `CoreBuilder` and handles input options and file operations.
 export default class CoreBuilderWrapper {
   async buildAsync(
-    source: Array<mm.TableActions | mm.Table>,
+    source: Array<mm.ActionGroup | mm.Table>,
     outDir: string,
     ioOpts: ActionToIOOptions,
     opts: BuildOptions,
   ) {
-    let actions: mm.TableActions[] = [];
+    let actions: mm.ActionGroup[] = [];
     let tables: mm.Table[] = [];
     for (const item of source) {
-      if (item instanceof mm.TableActions) {
+      if (item instanceof mm.ActionGroup) {
         actions.push(item);
       } else {
         tables.push(item);
@@ -38,7 +38,7 @@ export default class CoreBuilderWrapper {
     const context = new CoreBuilderContext();
     await Promise.all(
       actions.map(async (ta) => {
-        const taTable = ta.__getData().table;
+        const taTable = ta.__getData().groupTable;
         const taIO = new TAIO(ta, ioOpts);
         const builder = new CoreBuilder(taIO, opts, context);
         const code = builder.build();

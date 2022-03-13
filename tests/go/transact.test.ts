@@ -10,7 +10,7 @@ it('Declare return types', async () => {
     firstName = mm.varChar(50);
   }
   const employee = mm.table(Employee, { dbName: 'employees' });
-  class EmployeeTA extends mm.TableActions {
+  class EmployeeTA extends mm.ActionGroup {
     insert = mm.insertOne().setInputs();
     insert2 = mm
       .transact(
@@ -21,7 +21,7 @@ it('Declare return types', async () => {
       )
       .setReturnValues('id2');
   }
-  const employeeTA = mm.tableActions(employee, EmployeeTA);
+  const employeeTA = mm.actionGroup(employee, EmployeeTA);
   await testBuildAsync(employeeTA, 'tx/declareRetFromInsert/employee');
 });
 
@@ -31,7 +31,7 @@ it('Pass values in child actions (no return value declaration)', async () => {
     firstName = mm.varChar(50);
   }
   const employee = mm.table(Employee, { dbName: 'employees' });
-  class EmployeeTA extends mm.TableActions {
+  class EmployeeTA extends mm.ActionGroup {
     getFirstName = mm.selectField(employee.firstName).by(employee.id);
     insert = mm.insertOne().setInputs();
     insert1 = mm.transact(
@@ -42,7 +42,7 @@ it('Pass values in child actions (no return value declaration)', async () => {
         .wrap({ firstName: mm.captureVar('firstName') }),
     );
   }
-  const employeeTA = mm.tableActions(employee, EmployeeTA);
+  const employeeTA = mm.actionGroup(employee, EmployeeTA);
   await testBuildAsync(employeeTA, 'tx/passValues/employee');
 });
 
@@ -52,7 +52,7 @@ it('Pass values in child actions and declare return values', async () => {
     firstName = mm.varChar(50);
   }
   const employee = mm.table(Employee, { dbName: 'employees' });
-  class EmployeeTA extends mm.TableActions {
+  class EmployeeTA extends mm.ActionGroup {
     getFirstName = mm.selectField(employee.firstName).by(employee.id);
     insert = mm
       .transact(
@@ -67,7 +67,7 @@ it('Pass values in child actions and declare return values', async () => {
       )
       .setReturnValues('firstName', 'id2');
   }
-  const employeeTA = mm.tableActions(employee, EmployeeTA);
+  const employeeTA = mm.actionGroup(employee, EmployeeTA);
   await testBuildAsync(employeeTA, 'tx/passValuesAndDecRet/employee');
 });
 
@@ -81,20 +81,20 @@ it('Return multiple values', async () => {
     hireDate = mm.date();
   }
   const employee = mm.table(Employee, { dbName: 'employees' });
-  class EmployeeTA extends mm.TableActions {
+  class EmployeeTA extends mm.ActionGroup {
     insertEmp = mm.insertOne().setInputs();
   }
-  const employeeTA = mm.tableActions(employee, EmployeeTA);
+  const employeeTA = mm.actionGroup(employee, EmployeeTA);
   class Dept extends mm.Table {
     no = mm.pk().setDBName('dept_no');
     name = mm.varChar(40).setDBName('dept_name');
   }
 
   const dept = mm.table(Dept, { dbName: 'departments' });
-  class DeptTA extends mm.TableActions {
+  class DeptTA extends mm.ActionGroup {
     insertDept = mm.insertOne().setInputs();
   }
-  const deptTA = mm.tableActions(dept, DeptTA);
+  const deptTA = mm.actionGroup(dept, DeptTA);
   class DeptManager extends mm.Table {
     empNo = employee.id;
     deptNo = dept.no;
@@ -104,7 +104,7 @@ it('Return multiple values', async () => {
   const deptManager = mm.table(DeptManager, { dbName: 'dept_manager' });
   const empNo = 'empNo';
   const deptNo = 'deptNo';
-  class DeptManagerTA extends mm.TableActions {
+  class DeptManagerTA extends mm.ActionGroup {
     insertCore = mm.insertOne().setInputs();
     insert = mm
       .transact(
@@ -118,7 +118,7 @@ it('Return multiple values', async () => {
       .setReturnValues(deptNo, empNo);
   }
 
-  const deptManagerTA = mm.tableActions(deptManager, DeptManagerTA);
+  const deptManagerTA = mm.actionGroup(deptManager, DeptManagerTA);
   await testBuildAsync(employeeTA, 'tx/multipleRetValues/employee');
   await testBuildAsync(deptTA, 'tx/multipleRetValues/dept');
   await testBuildAsync(deptManagerTA, 'tx/multipleRetValues/deptManager');
@@ -130,20 +130,20 @@ it('Inline member actions', async () => {
     postCount = mm.int();
   }
   const user = mm.table(User);
-  class UserTA extends mm.TableActions {
+  class UserTA extends mm.ActionGroup {
     updatePostCount = mm
       .updateOne()
       .set(user.postCount, mm.sql`${user.postCount} + ${mm.input(mm.int(), 'offset')}`)
       .by(user.id);
   }
-  const userTA = mm.tableActions(user, UserTA);
+  const userTA = mm.actionGroup(user, UserTA);
   class Post extends mm.Table {
     id = mm.pk();
     title = mm.varChar(200);
   }
 
   const post2 = mm.table(Post, { dbName: 'db_post' });
-  class PostTA extends mm.TableActions {
+  class PostTA extends mm.ActionGroup {
     insertCore = mm.insertOne().setInputs();
     insert = mm.transact(
       userTA.updatePostCount.wrap({ offset: '1' }),
@@ -153,19 +153,19 @@ it('Inline member actions', async () => {
       this.insertCore.wrap({ title: '"abc"' }),
     );
   }
-  const postTA = mm.tableActions(post2, PostTA);
+  const postTA = mm.actionGroup(post2, PostTA);
   await testBuildAsync(userTA, 'tx/tmpActions/user');
   await testBuildAsync(postTA, 'tx/tmpActions/post');
 });
 
 it('Inline member actions (with from)', async () => {
-  class PostTA extends mm.TableActions {
+  class PostTA extends mm.ActionGroup {
     t = mm.transact(
       mm.insertOne().from(cmt2).setInputs(),
       mm.insertOne().from(postCmt).setInputs(),
     );
   }
-  const postTA = mm.tableActions(post, PostTA);
+  const postTA = mm.actionGroup(post, PostTA);
   await testBuildAsync(postTA, 'tx/tmpActionsWithFrom/post');
 });
 
@@ -177,7 +177,7 @@ it('Reference property values', async () => {
     name = mm.varChar(200);
   }
   const user = mm.table(User);
-  class UserTA extends mm.TableActions {
+  class UserTA extends mm.ActionGroup {
     t = mm.transact(
       mm.selectRow(user.age, user.name).declareReturnValue(mm.ReturnValues.result, 'res'),
       mm
@@ -189,7 +189,7 @@ it('Reference property values', async () => {
         }),
     );
   }
-  const userTA = mm.tableActions(user, UserTA);
+  const userTA = mm.actionGroup(user, UserTA);
   await testBuildAsync(userTA, 'tx/refPropertyValues/user');
 });
 
@@ -199,7 +199,7 @@ it('Use the return value of a TX', async () => {
     firstName = mm.varChar(50);
   }
   const employee = mm.table(Employee, { dbName: 'employees' });
-  class EmployeeTA extends mm.TableActions {
+  class EmployeeTA extends mm.ActionGroup {
     insert = mm.insertOne().setInputs();
     insert2 = mm
       .transact(
@@ -215,12 +215,12 @@ it('Use the return value of a TX', async () => {
       .transact(this.insert, this.insert2.declareReturnValue('id2', 'id3'))
       .setReturnValues('id3');
   }
-  const employeeTA = mm.tableActions(employee, EmployeeTA);
+  const employeeTA = mm.actionGroup(employee, EmployeeTA);
   await testBuildAsync(employeeTA, 'tx/useTXReturnValue/employee');
 });
 
 it('Call an inner TX with .wrap', async () => {
-  class PostTA extends mm.TableActions {
+  class PostTA extends mm.ActionGroup {
     t = mm.transact(
       mm.insertOne().from(cmt2).setInputs(),
       mm.insertOne().from(postCmt).setInputs(),
@@ -228,6 +228,6 @@ it('Call an inner TX with .wrap', async () => {
 
     wrapped = this.t.wrap({ rplCount: 1, cmtID: 2 });
   }
-  const postTA = mm.tableActions(post, PostTA);
+  const postTA = mm.actionGroup(post, PostTA);
   await testBuildAsync(postTA, 'tx/callTxWrap/post');
 });

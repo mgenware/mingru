@@ -6,7 +6,7 @@ import post from '../models/post.js';
 import { commonIOOptions } from './common.js';
 import { eq, ok } from '../assert-aliases.js';
 
-class WrapSelfTA extends mm.TableActions {
+class WrapSelfTA extends mm.ActionGroup {
   s = mm
     .updateSome()
     .set(user.url_name, mm.sql`${mm.input(user.url_name)}`)
@@ -21,14 +21,14 @@ class WrapSelfTA extends mm.TableActions {
     .whereSQL(mm.sql`${user.url_name.toInput()} ${user.id.toInput()} ${user.url_name.toInput()}`)
     .wrap({ sig: '"haha"' });
 }
-const wrapSelf = mm.tableActions(user, WrapSelfTA);
+const wrapSelf = mm.actionGroup(user, WrapSelfTA);
 
-class WrapOtherTA extends mm.TableActions {
+class WrapOtherTA extends mm.ActionGroup {
   standard = wrapSelf.s.wrap({ id: '123' });
   nested = wrapSelf.d.wrap({ id: '123' });
   retValue = wrapSelf.d.wrap({ id: mm.captureVar('extID') });
 }
-const wrapOther = mm.tableActions(post, WrapOtherTA);
+const wrapOther = mm.actionGroup(post, WrapOtherTA);
 
 it('WrapIO', () => {
   const wrappedIO = mr.wrapIO(wrapSelf.d, commonIOOptions);
@@ -61,7 +61,7 @@ it('getInputs (wrapOther, nested)', () => {
 });
 
 it('Throws on undefined inputs', () => {
-  class UserTA extends mm.TableActions {
+  class UserTA extends mm.ActionGroup {
     t = mm
       .selectRow(user.id, user.url_name)
       .whereSQL(mm.sql`${user.id.toInput()} ${user.url_name.toInput()} ${user.id.toInput()}`);
@@ -70,7 +70,7 @@ it('Throws on undefined inputs', () => {
       haha: '"tony"',
     });
   }
-  const ta = mm.tableActions(user, UserTA);
+  const ta = mm.actionGroup(user, UserTA);
   const v = ta.t2;
   itThrows(
     () => mr.wrapIO(v, commonIOOptions),

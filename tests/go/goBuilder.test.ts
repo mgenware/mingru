@@ -5,15 +5,15 @@ import post from '../models/post.js';
 import { testBuildFullAsync, testBuildAsync } from './common.js';
 
 it('Single action', async () => {
-  class PostTA extends mm.TableActions {
+  class PostTA extends mm.ActionGroup {
     selectT = mm.selectRow(post.id, post.title);
   }
-  const ta = mm.tableActions(post, PostTA);
+  const ta = mm.actionGroup(post, PostTA);
   await testBuildFullAsync(ta, 'goBuilder/singleAction');
 });
 
 it('Multiple actions', async () => {
-  class PostTA extends mm.TableActions {
+  class PostTA extends mm.ActionGroup {
     selectPostTitle = mm.selectRow(post.id, post.title);
     selectPostInfo = mm.selectRow(
       post.id,
@@ -26,16 +26,16 @@ it('Multiple actions', async () => {
 
     deleteByID = mm.deleteSome().whereSQL(mm.sql`${post.id} = ${mm.input(post.id)}`);
   }
-  const ta = mm.tableActions(post, PostTA);
+  const ta = mm.actionGroup(post, PostTA);
   await testBuildFullAsync(ta, 'goBuilder/multipleActions');
 });
 
 it('Action info appended to error message', async () => {
   await itRejects(async () => {
-    class PostTA extends mm.TableActions {
+    class PostTA extends mm.ActionGroup {
       t = mm.unsafeInsert().setInputs(user.id);
     }
-    const ta = mm.tableActions(post, PostTA);
+    const ta = mm.actionGroup(post, PostTA);
     await testBuildAsync(ta, '');
   }, 'Source table assertion failed, expected "Post(post, db=db_post)", got "User(user)". [action "post.t"]');
 });

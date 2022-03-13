@@ -7,10 +7,10 @@ import { commonIOOptions } from './common.js';
 import { eq, ok } from '../assert-aliases.js';
 
 it('Insert inputs', () => {
-  class PostTA extends mm.TableActions {
+  class PostTA extends mm.ActionGroup {
     t = mm.unsafeInsert().setInputs(post.title, post.user_id);
   }
-  const postTA = mm.tableActions(post, PostTA);
+  const postTA = mm.actionGroup(post, PostTA);
   const v = postTA.t;
   const io = mr.insertIO(v, commonIOOptions);
 
@@ -19,13 +19,13 @@ it('Insert inputs', () => {
 });
 
 it('Insert inputs and values', () => {
-  class PostTA extends mm.TableActions {
+  class PostTA extends mm.ActionGroup {
     t = mm
       .unsafeInsert()
       .setInputs(post.title, post.user_id)
       .set(post.datetime, mm.sql`NOW()`);
   }
-  const postTA = mm.tableActions(post, PostTA);
+  const postTA = mm.actionGroup(post, PostTA);
   const v = postTA.t;
   const io = mr.insertIO(v, commonIOOptions);
 
@@ -37,13 +37,13 @@ it('Insert inputs and values', () => {
 });
 
 it('getInputs', () => {
-  class UserTA extends mm.TableActions {
+  class UserTA extends mm.ActionGroup {
     t = mm
       .unsafeInsert()
       .setInputs(user.sig, user.id)
       .set(user.url_name, user.url_name.toInput('b'));
   }
-  const ta = mm.tableActions(user, UserTA);
+  const ta = mm.actionGroup(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, commonIOOptions);
   eq(io.funcArgs.toString(), 'sig: *string, id: uint64, b: string');
@@ -51,26 +51,26 @@ it('getInputs', () => {
 });
 
 it('returnValues (insert)', () => {
-  class UserTA extends mm.TableActions {
+  class UserTA extends mm.ActionGroup {
     t = mm
       .unsafeInsert()
       .setInputs(user.sig, user.id)
       .set(user.url_name, user.url_name.toInput('b'));
   }
-  const ta = mm.tableActions(user, UserTA);
+  const ta = mm.actionGroup(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, commonIOOptions);
   eq(io.returnValues.toString(), '');
 });
 
 it('returnValues (insertOne)', () => {
-  class UserTA extends mm.TableActions {
+  class UserTA extends mm.ActionGroup {
     t = mm
       .unsafeInsertOne()
       .setInputs(user.sig, user.id)
       .set(user.url_name, user.url_name.toInput('b'));
   }
-  const ta = mm.tableActions(user, UserTA);
+  const ta = mm.actionGroup(user, UserTA);
   const v = ta.t;
   const io = mr.insertIO(v, commonIOOptions);
   eq(io.returnValues.toString(), '__insertedID: uint64');
@@ -78,10 +78,10 @@ it('returnValues (insertOne)', () => {
 
 it('Validate setters', () => {
   itThrows(() => {
-    class PostTA extends mm.TableActions {
+    class PostTA extends mm.ActionGroup {
       t = mm.unsafeInsert().setInputs(user.id);
     }
-    const ta = mm.tableActions(post, PostTA);
+    const ta = mm.actionGroup(post, PostTA);
     mr.insertIO(ta.t, commonIOOptions);
   }, 'Source table assertion failed, expected "Post(post, db=db_post)", got "User(user)".');
 });
@@ -95,10 +95,10 @@ it('setDefaults', () => {
   }
   const post2 = mm.table(Post);
 
-  class PostTA extends mm.TableActions {
+  class PostTA extends mm.ActionGroup {
     t = mm.insertOne().setDefaults().setInputs();
   }
-  const postTA = mm.tableActions(post2, PostTA);
+  const postTA = mm.actionGroup(post2, PostTA);
   const v = postTA.t;
   const io = mr.insertIO(v, commonIOOptions);
 

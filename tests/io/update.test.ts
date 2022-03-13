@@ -8,7 +8,7 @@ import { commonIOOptions } from './common.js';
 import { eq, ok } from '../assert-aliases.js';
 
 it('Update', () => {
-  class PostTA extends mm.TableActions {
+  class PostTA extends mm.ActionGroup {
     t = mm
       .updateSome()
       .set(post.title, mm.sql`"haha"`)
@@ -16,7 +16,7 @@ it('Update', () => {
       .set(post.cmtCount, mm.sql`${post.cmtCount} + 1`)
       .by(post.id);
   }
-  const postTA = mm.tableActions(post, PostTA);
+  const postTA = mm.actionGroup(post, PostTA);
   const v = postTA.t;
   const io = mr.updateIO(v, commonIOOptions);
 
@@ -33,13 +33,13 @@ it('Update', () => {
 });
 
 it('Update with WHERE', () => {
-  class PostTA extends mm.TableActions {
+  class PostTA extends mm.ActionGroup {
     t = mm
       .updateOne()
       .set(post.title, mm.sql`"haha"`)
       .whereSQL(mm.sql`${post.id} = 1`);
   }
-  const postTA = mm.tableActions(post, PostTA);
+  const postTA = mm.actionGroup(post, PostTA);
   const v = postTA.t;
   const io = mr.updateIO(v, commonIOOptions);
 
@@ -47,7 +47,7 @@ it('Update with WHERE', () => {
 });
 
 it('getInputs', () => {
-  class UserTA extends mm.TableActions {
+  class UserTA extends mm.ActionGroup {
     t = mm
       .updateSome()
       .set(user.url_name, mm.sql`${mm.input(user.url_name)}`)
@@ -55,7 +55,7 @@ it('getInputs', () => {
       .set(user.follower_count, mm.sql`${user.follower_count} + 1`)
       .whereSQL(mm.sql`${user.url_name.toInput()} ${user.id.toInput()} ${user.url_name.toInput()}`);
   }
-  const ta = mm.tableActions(user, UserTA);
+  const ta = mm.actionGroup(user, UserTA);
   const v = ta.t;
   const io = mr.updateIO(v, commonIOOptions);
   eq(io.setterArgs.toString(), 'urlName: string, sig: *string');
@@ -64,7 +64,7 @@ it('getInputs', () => {
 });
 
 it('returnValues', () => {
-  class UserTA extends mm.TableActions {
+  class UserTA extends mm.ActionGroup {
     t = mm
       .updateSome()
       .set(user.url_name, mm.sql`${mm.input(user.url_name)}`)
@@ -72,7 +72,7 @@ it('returnValues', () => {
       .set(user.follower_count, mm.sql`${user.follower_count} + 1`)
       .whereSQL(mm.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
   }
-  const ta = mm.tableActions(user, UserTA);
+  const ta = mm.actionGroup(user, UserTA);
   const v = ta.t;
   const io = mr.updateIO(v, commonIOOptions);
   eq(io.returnValues.toString(), '__rowsAffected: int');
@@ -80,10 +80,10 @@ it('returnValues', () => {
 
 it('Validate setters', () => {
   itThrows(() => {
-    class PostTA extends mm.TableActions {
+    class PostTA extends mm.ActionGroup {
       t = mm.unsafeUpdateAll().setInputs(user.id).setInputs();
     }
-    const ta = mm.tableActions(post, PostTA);
+    const ta = mm.actionGroup(post, PostTA);
     mr.insertIO(ta.t, commonIOOptions);
   }, 'Source table assertion failed, expected "Post(post, db=db_post)", got "User(user)".');
 });
@@ -97,10 +97,10 @@ it('setDefaults', () => {
   }
   const post2 = mm.table(Post);
 
-  class PostTA extends mm.TableActions {
+  class PostTA extends mm.ActionGroup {
     t = mm.unsafeUpdateAll().setDefaults(post2.datetime);
   }
-  const postTA = mm.tableActions(post2, PostTA);
+  const postTA = mm.actionGroup(post2, PostTA);
   const v = postTA.t;
   const io = mr.updateIO(v, commonIOOptions);
 
@@ -108,13 +108,13 @@ it('setDefaults', () => {
 });
 
 it('Input order in funcArgs and execArgs', () => {
-  class PostTA extends mm.TableActions {
+  class PostTA extends mm.ActionGroup {
     t = mm
       .updateOne()
       .setInputs(post.title, post.id)
       .whereSQL(mm.sql`${post.id} = ${post.id.toInput()}`);
   }
-  const postTA = mm.tableActions(post, PostTA);
+  const postTA = mm.actionGroup(post, PostTA);
   const v = postTA.t;
   const io = mr.updateIO(v, commonIOOptions);
 

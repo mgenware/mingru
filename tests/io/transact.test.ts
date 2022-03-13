@@ -9,7 +9,7 @@ import { commonIOOptions } from './common.js';
 import { eq, ok } from '../assert-aliases.js';
 
 it('TransactIO', () => {
-  class WrapSelfTA extends mm.TableActions {
+  class WrapSelfTA extends mm.ActionGroup {
     s = mm
       .updateSome()
       .set(user.url_name, mm.sql`${mm.input(user.url_name)}`)
@@ -18,14 +18,14 @@ it('TransactIO', () => {
 
     d = this.s.wrap({ sig: '"haha"' });
   }
-  const wrapSelf = mm.tableActions(user, WrapSelfTA);
+  const wrapSelf = mm.actionGroup(user, WrapSelfTA);
 
-  class WrapOtherTA extends mm.TableActions {
+  class WrapOtherTA extends mm.ActionGroup {
     standard = wrapSelf.s.wrap({ id: '123' });
     nested = wrapSelf.d.wrap({ id: '123' });
     t1 = mm.transact(wrapSelf.s, wrapSelf.d, this.standard);
   }
-  const wrapOther = mm.tableActions(post, WrapOtherTA);
+  const wrapOther = mm.actionGroup(post, WrapOtherTA);
   const io = mr.transactIO(wrapOther.t1, commonIOOptions);
   ok(io instanceof mr.TransactIO);
   eq(io.funcArgs.toString(), 'urlName: string, sig: *string, followerCount: *string, id: uint64');
@@ -34,11 +34,11 @@ it('TransactIO', () => {
 });
 
 it('Members with WRAP actions', () => {
-  class SourceTA extends mm.TableActions {
+  class SourceTA extends mm.ActionGroup {
     s = mm.updateSome().setInputs(user.sig, user.follower_count).by(user.id);
   }
-  const srcTA = mm.tableActions(user, SourceTA);
-  class WrapTA extends mm.TableActions {
+  const srcTA = mm.actionGroup(user, SourceTA);
+  class WrapTA extends mm.ActionGroup {
     s = mm.updateSome().setInputs(user.sig, user.follower_count).by(user.id);
     s2 = this.s.wrap({ sig: '"haha"' });
     t = mm.transact(this.s.wrap({ sig: '"haha"' }));
@@ -46,7 +46,7 @@ it('Members with WRAP actions', () => {
     t3 = mm.transact(this.s);
     t4 = mm.transact(srcTA.s);
   }
-  const wrapTA = mm.tableActions(user, WrapTA);
+  const wrapTA = mm.actionGroup(user, WrapTA);
 
   const io = mr.transactIO(wrapTA.t, commonIOOptions);
   ok(io instanceof mr.TransactIO);
@@ -95,7 +95,7 @@ it('TX member IOs', () => {
     firstName = mm.varChar(50);
   }
   const employee = mm.table(Employee, { dbName: 'employees' });
-  class EmployeeTA extends mm.TableActions {
+  class EmployeeTA extends mm.ActionGroup {
     insert = mm.insertOne().setInputs();
     insert2 = mm
       .transact(
@@ -106,7 +106,7 @@ it('TX member IOs', () => {
       )
       .setReturnValues('id2');
   }
-  const employeeTA = mm.tableActions(employee, EmployeeTA);
+  const employeeTA = mm.actionGroup(employee, EmployeeTA);
   const io = mr.transactIO(employeeTA.insert2, commonIOOptions);
   const members = io.memberIOs;
   eq(
@@ -122,13 +122,13 @@ it('TX member IOs', () => {
 });
 
 it('Merging SQL vars', () => {
-  class PostTA extends mm.TableActions {
+  class PostTA extends mm.ActionGroup {
     t = mm.transact(
       mm.insertOne().from(cmt2).setInputs(),
       mm.insertOne().from(postCmt).setInputs(),
     );
   }
-  const postTA = mm.tableActions(post, PostTA);
+  const postTA = mm.actionGroup(post, PostTA);
   const io = mr.transactIO(postTA.t, commonIOOptions);
   const mio = io.memberIOs[0]!;
   eq(mio.toString(), 'TransactMemberIO(InsertAction(-, ft=Cmt(cmt)), mrTable.tChild1)');
@@ -141,7 +141,7 @@ it('Merging SQL vars', () => {
 });
 
 it('Merging SQL vars (WRAPPED)', () => {
-  class PostTA extends mm.TableActions {
+  class PostTA extends mm.ActionGroup {
     t = mm.transact(
       mm.insertOne().from(cmt2).setInputs(),
       mm.insertOne().from(postCmt).setInputs(),
@@ -149,7 +149,7 @@ it('Merging SQL vars (WRAPPED)', () => {
 
     wrapped = this.t.wrap({ rplCount: 1, cmtID: 2 });
   }
-  const postTA = mm.tableActions(post, PostTA);
+  const postTA = mm.actionGroup(post, PostTA);
   const io = mr.wrapIO(postTA.wrapped, commonIOOptions);
   eq(io.returnValues.toString(), '');
   eq(

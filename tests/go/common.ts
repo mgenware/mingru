@@ -29,7 +29,7 @@ function getTAIOOption(_: mr.BuildOptions | undefined): mr.ActionToIOOptions {
 }
 
 export async function testBuildAsync(
-  ta: mm.TableActions,
+  ta: mm.ActionGroup,
   path: string,
   opts?: mr.BuildOptions,
   ctx?: mr.CoreBuilderContext,
@@ -53,7 +53,7 @@ export async function testBuildAsync(
 }
 
 export async function testBuildFullAsync(
-  ta: mm.TableActions,
+  ta: mm.ActionGroup,
   path: string,
   opts?: mr.BuildOptions,
   ctx?: mr.CoreBuilderContext,
@@ -88,7 +88,7 @@ export interface TestOptions {
 }
 
 export async function testBuildToDirAsync(
-  source: Array<mm.TableActions | mm.Table>,
+  source: Array<mm.ActionGroup | mm.Table>,
   files: string[],
   expectedDirName: string,
   buildOpts?: mr.BuildOptions,
