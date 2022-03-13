@@ -65,3 +65,22 @@ it('configurableTable with WRAP action inside transactions', async () => {
   await testBuildAsync(commonTA, 'configurable-table/wrap-tx/common');
   await testBuildAsync(consumerTA, 'configurable-table/wrap-tx/consumer');
 });
+
+it('configurableTable with static TA', async () => {
+  class UserUtil extends User {
+    id = mm.pk();
+  }
+  const userUtil = mm.table(UserUtil, { virtualTable: true });
+
+  class UserUtilTA extends mm.TableActions {
+    t = mm.updateOne().setInputs().by(userUtil.id);
+  }
+  const userUtilTA = mm.tableActions(userUtil, UserUtilTA, { configurableTableName: 'cname' });
+
+  class PostTA extends mm.TableActions {
+    t = userUtilTA.t.wrap({ cname: post });
+  }
+  const postTA = mm.tableActions(post, PostTA);
+  await testBuildAsync(userUtilTA, 'configurable-table/static-ta/userUtil');
+  await testBuildAsync(postTA, 'configurable-table/static-ta/post');
+});
