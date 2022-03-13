@@ -13,7 +13,7 @@ export * from './io/selectIO.js';
 export * from './io/updateIO.js';
 export * from './io/insertIO.js';
 export * from './io/deleteIO.js';
-export * from './io/taIO.js';
+export * from './io/agIO.js';
 export * from './io/setterIO.js';
 export * from './io/actionIO.js';
 export * from './io/sqlIO.js';

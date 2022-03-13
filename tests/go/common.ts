@@ -23,7 +23,7 @@ function defaultOptions() {
   return defOpts;
 }
 
-function getTAIOOption(_: mr.BuildOptions | undefined): mr.ActionToIOOptions {
+function getAGIOOption(_: mr.BuildOptions | undefined): mr.ActionToIOOptions {
   const ioOpt = { ...commonIOOptions };
   return ioOpt;
 }
@@ -41,7 +41,7 @@ export async function testBuildAsync(
   }
   mr.logger.enabled = false;
   const builder = new mr.CoreBuilder(
-    new mr.TAIO(ta, getTAIOOption(opts)),
+    new mr.AGIO(ta, getAGIOOption(opts)),
     opts ?? defaultOptions(),
     ctx ?? new mr.CoreBuilderContext(),
   );
@@ -65,7 +65,7 @@ export async function testBuildFullAsync(
   }
   mr.logger.enabled = false;
   const builder = new mr.CoreBuilder(
-    new mr.TAIO(ta, getTAIOOption(opts)),
+    new mr.AGIO(ta, getAGIOOption(opts)),
     opts ?? defaultOptions(),
     ctx ?? new mr.CoreBuilderContext(),
   );

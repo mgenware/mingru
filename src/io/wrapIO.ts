@@ -160,7 +160,7 @@ class WrapIOProcessor extends BaseIOProcessor {
       // IMPORTANT! Give `innerIO` a name as it doesn't have one.
       // Calling `__configure` with another table won't change inner action's
       // previous table.
-      innerAction.__configure(this.mustGetActionName(), groupTable, action.__getGroupOptions());
+      innerAction.__configure(this.mustGetActionName(), groupTable, this.opt);
       innerIO.capturedFuncArgs = capturedFuncArgs;
       innerIO.capturedVars = capturedVars;
       return innerIO;

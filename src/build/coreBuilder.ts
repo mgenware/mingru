@@ -17,7 +17,7 @@ import { ValueList, ParamList } from '../lib/varList.js';
 import * as go from './goCodeUtil.js';
 import * as defs from '../def/defs.js';
 import logger from '../logger.js';
-import { TAIO } from '../io/taIO.js';
+import { AGIO } from '../io/agIO.js';
 import { ActionIO } from '../io/actionIO.js';
 import { WrapIO } from '../io/wrapIO.js';
 import { TransactIO } from '../io/transactIO.js';
@@ -65,7 +65,7 @@ class CodeMap {
 }
 
 // Generates code (Go and TypeScript interfaces if configured)
-// from a table action IO object(`TAIO`).
+// from a table action IO object(`AGIO`).
 export default class CoreBuilder {
   // Set when `Option.tsOut` is present.
   tsTypeCollector?: TSTypeCollector;
@@ -74,7 +74,7 @@ export default class CoreBuilder {
   private imports = new go.ImportList();
   private dialect: Dialect;
 
-  constructor(public taIO: TAIO, public opts: BuildOptions, public context: CoreBuilderContext) {
+  constructor(public taIO: AGIO, public opts: BuildOptions, public context: CoreBuilderContext) {
     this.dialect = taIO.opt.dialect;
     this.options = opts;
     if (opts.tsOutDir) {
@@ -84,7 +84,7 @@ export default class CoreBuilder {
 
   build(): string {
     const { options, taIO } = this;
-    const action = taIO.ta;
+    const action = taIO.ag;
     this.context.addAction(action);
     this.context.addTable(action.__getData().groupTable);
 

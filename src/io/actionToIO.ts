@@ -34,6 +34,12 @@ export function actionToIO(
     if (!handler) {
       throw new Error(`The type "${actionType}" is not supported in actionToIO`);
     }
+
+    const agOpt = action.__getGroupOptions();
+    if (agOpt?.configurableTableName) {
+      // eslint-disable-next-line no-param-reassign
+      opt = { ...opt, configurableTableName: agOpt.configurableTableName };
+    }
     const result = handler(action, opt);
     actionToIOMap.set(action, result);
     return result;

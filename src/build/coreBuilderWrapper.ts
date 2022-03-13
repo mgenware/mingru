@@ -5,7 +5,7 @@ import * as mfs from 'm-fs';
 import logger from '../logger.js';
 import CoreBuilder from './coreBuilder.js';
 import CoreBuilderContext from './coreBuilderContext.js';
-import { TAIO } from '../io/taIO.js';
+import { AGIO } from '../io/agIO.js';
 import { BuildOptions } from './buildOptions.js';
 import * as go from './goCodeUtil.js';
 import * as defs from '../def/defs.js';
@@ -39,7 +39,7 @@ export default class CoreBuilderWrapper {
     await Promise.all(
       actions.map(async (ta) => {
         const taTable = ta.__getData().groupTable;
-        const taIO = new TAIO(ta, ioOpts);
+        const taIO = new AGIO(ta, ioOpts);
         const builder = new CoreBuilder(taIO, opts, context);
         const code = builder.build();
         const fileName = stringUtil.toSnakeCase(taTable.__getData().name) + '_ag'; // Add a "_ag" suffix to table actions file.
