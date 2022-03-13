@@ -42,7 +42,7 @@ export default class CoreBuilderWrapper {
         const taIO = new TAIO(ta, ioOpts);
         const builder = new CoreBuilder(taIO, opts, context);
         const code = builder.build();
-        const fileName = stringUtil.toSnakeCase(taTable.__getData().name) + '_ta'; // Add a "_ta" suffix to table actions file.
+        const fileName = stringUtil.toSnakeCase(taTable.__getData().name) + '_ag'; // Add a "_ag" suffix to table actions file.
         const outFile = np.join(outDir, fileName + '.go');
         await mfs.writeFileAsync(outFile, code);
         if (builder.tsTypeCollector?.count) {

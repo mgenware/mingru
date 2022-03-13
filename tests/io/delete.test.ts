@@ -6,10 +6,10 @@ import { commonIOOptions } from './common.js';
 import { ok, eq } from '../assert-aliases.js';
 
 it('Delete', () => {
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     t = mm.unsafeDeleteAll().by(post.id);
   }
-  const postTA = mm.actionGroup(post, PostTA);
+  const postTA = mm.actionGroup(post, PostAG);
   const v = postTA.t;
   const io = mr.deleteIO(v, commonIOOptions);
 
@@ -18,10 +18,10 @@ it('Delete', () => {
 });
 
 it('Delete with where', () => {
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     t = mm.unsafeDeleteAll().whereSQL(mm.sql`${post.id} = 1`);
   }
-  const postTA = mm.actionGroup(post, PostTA);
+  const postTA = mm.actionGroup(post, PostAG);
   const v = postTA.t;
   const io = mr.deleteIO(v, commonIOOptions);
 
@@ -29,10 +29,10 @@ it('Delete with where', () => {
 });
 
 it('getInputs', () => {
-  class UserTA extends mm.ActionGroup {
+  class UserAG extends mm.ActionGroup {
     t = mm.deleteOne().whereSQL(mm.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
   }
-  const ta = mm.actionGroup(user, UserTA);
+  const ta = mm.actionGroup(user, UserAG);
   const v = ta.t;
   const io = mr.deleteIO(v, commonIOOptions);
   eq(io.funcArgs.toString(), 'id: uint64, urlName: string');
@@ -40,10 +40,10 @@ it('getInputs', () => {
 });
 
 it('returnValues', () => {
-  class UserTA extends mm.ActionGroup {
+  class UserAG extends mm.ActionGroup {
     t = mm.deleteOne().whereSQL(mm.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
   }
-  const ta = mm.actionGroup(user, UserTA);
+  const ta = mm.actionGroup(user, UserAG);
   const v = ta.t;
   const io = mr.deleteIO(v, commonIOOptions);
   const { returnValues } = io;
@@ -51,10 +51,10 @@ it('returnValues', () => {
 });
 
 it('getInputs (no WHERE)', () => {
-  class UserTA extends mm.ActionGroup {
+  class UserAG extends mm.ActionGroup {
     t = mm.unsafeDeleteAll();
   }
-  const ta = mm.actionGroup(user, UserTA);
+  const ta = mm.actionGroup(user, UserAG);
   const v = ta.t;
   const io = mr.deleteIO(v, commonIOOptions);
   const inputs = io.funcArgs;
@@ -62,10 +62,10 @@ it('getInputs (no WHERE)', () => {
 });
 
 it('returnValues (no WHERE)', () => {
-  class UserTA extends mm.ActionGroup {
+  class UserAG extends mm.ActionGroup {
     t = mm.unsafeDeleteAll();
   }
-  const ta = mm.actionGroup(user, UserTA);
+  const ta = mm.actionGroup(user, UserAG);
   const v = ta.t;
   const io = mr.deleteIO(v, commonIOOptions);
   const { returnValues } = io;

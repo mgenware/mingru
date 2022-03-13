@@ -6,7 +6,7 @@ import postReply from '../models/postReply.js';
 import { testBuildToDirAsync, migrationUpFile, migrationDownFile } from './common.js';
 
 it('Single table', async () => {
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     selectPostTitle = mm.selectRow(post.id, post.title);
     selectPostInfo = mm.selectRow(
       post.id,
@@ -18,84 +18,84 @@ it('Single table', async () => {
     updatePostTitle = mm.unsafeUpdateAll().set(post.title, mm.sql`${mm.input(post.title)}`);
     deleteByID = mm.deleteOne().whereSQL(mm.sql`${post.id} = ${mm.input(post.id)}`);
   }
-  const ta = mm.actionGroup(post, PostTA);
+  const ta = mm.actionGroup(post, PostAG);
   await testBuildToDirAsync([ta], ['post'], 'singleTable');
 });
 
 it('Multiple tables', async () => {
-  class UserTA extends mm.ActionGroup {
+  class UserAG extends mm.ActionGroup {
     selectProfile = mm.selectRow(user.display_name, user.sig);
     updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
     deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
   }
-  const userTA = mm.actionGroup(user, UserTA);
+  const userTA = mm.actionGroup(user, UserAG);
 
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     selectPostInfo = mm.selectRow(post.id, post.content, post.user_id.join(user).url_name);
 
     updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToInput());
 
     deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
   }
-  const postTA = mm.actionGroup(post, PostTA);
+  const postTA = mm.actionGroup(post, PostAG);
   const actions = [userTA, postTA];
   await testBuildToDirAsync(actions, ['post', 'user'], 'multipleTables');
 });
 
 it('Multiple tables (dedup)', async () => {
-  class UserTA extends mm.ActionGroup {
+  class UserAG extends mm.ActionGroup {
     selectProfile = mm.selectRow(user.display_name, user.sig);
     updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
     deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
   }
-  const userTA = mm.actionGroup(user, UserTA);
+  const userTA = mm.actionGroup(user, UserAG);
 
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     selectPostInfo = mm.selectRow(post.id, post.content, post.user_id.join(user).url_name);
 
     updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToInput());
 
     deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
   }
-  const postTA = mm.actionGroup(post, PostTA);
+  const postTA = mm.actionGroup(post, PostAG);
   const actions = [userTA, postTA, postTA, user];
   await testBuildToDirAsync(actions, ['post', 'user'], 'multipleTables');
 });
 
 it('Custom package name', async () => {
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     selectPostTitle = mm.selectRow(post.id, post.title);
   }
-  const ta = mm.actionGroup(post, PostTA);
+  const ta = mm.actionGroup(post, PostAG);
   await testBuildToDirAsync([ta], ['post'], 'customPackageName', {
     packageName: 'haha',
   });
 });
 
 it('Table DBName', async () => {
-  class PostRplTA extends mm.ActionGroup {
+  class PostRplAG extends mm.ActionGroup {
     insertPostReply = mm.unsafeInsertOne().setInputs(postReply.to_user_id, postReply.user_id);
   }
-  const ta = mm.actionGroup(postReply, PostRplTA);
+  const ta = mm.actionGroup(postReply, PostRplAG);
   await testBuildToDirAsync([ta], ['post_reply'], 'tableName');
 });
 
 it('Multiple tables, CSQL', async () => {
-  class UserTA extends mm.ActionGroup {
+  class UserAG extends mm.ActionGroup {
     selectProfile = mm.selectRow(user.display_name, user.sig);
     updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
     deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
   }
-  const userTA = mm.actionGroup(user, UserTA);
+  const userTA = mm.actionGroup(user, UserAG);
 
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     selectPostInfo = mm.selectRow(post.id, post.content, post.user_id.join(user).url_name);
 
     updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToInput());
 
     deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
   }
-  const postTA = mm.actionGroup(post, PostTA);
+  const postTA = mm.actionGroup(post, PostAG);
 
   class ExtraTable extends mm.Table {
     id = mm.pk();
@@ -111,21 +111,21 @@ it('Multiple tables, CSQL', async () => {
 });
 
 it('Multiple tables, CSQL (dedup)', async () => {
-  class UserTA extends mm.ActionGroup {
+  class UserAG extends mm.ActionGroup {
     selectProfile = mm.selectRow(user.display_name, user.sig);
     updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
     deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
   }
-  const userTA = mm.actionGroup(user, UserTA);
+  const userTA = mm.actionGroup(user, UserAG);
 
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     selectPostInfo = mm.selectRow(post.id, post.content, post.user_id.join(user).url_name);
 
     updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToInput());
 
     deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
   }
-  const postTA = mm.actionGroup(post, PostTA);
+  const postTA = mm.actionGroup(post, PostAG);
 
   class ExtraTable extends mm.Table {
     id = mm.pk();
@@ -150,7 +150,7 @@ it('CSQL and virtual tables', async () => {
 });
 
 it('Types', async () => {
-  class UserTA extends mm.ActionGroup {
+  class UserAG extends mm.ActionGroup {
     selectByID = mm
       .selectRow(user.id)
       .by(user.id)
@@ -161,9 +161,9 @@ it('Types', async () => {
 
     deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
   }
-  const userTA = mm.actionGroup(user, UserTA);
+  const userTA = mm.actionGroup(user, UserAG);
 
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     selectByID = mm
       .selectRow(post.id)
       .by(post.id)
@@ -176,26 +176,26 @@ it('Types', async () => {
 
     selectTime = mm.selectRow(post.n_datetime).resultTypeNameAttr('Res3');
   }
-  const postTA = mm.actionGroup(post, PostTA);
+  const postTA = mm.actionGroup(post, PostAG);
   const actions = [userTA, postTA];
   await testBuildToDirAsync(actions, ['#types.go', 'post', 'user'], 'types');
 });
 
 it('Result type merging', async () => {
-  class UserTA extends mm.ActionGroup {
+  class UserAG extends mm.ActionGroup {
     t1 = mm.selectRow(user.id, user.age).by(user.id).resultTypeNameAttr('Res');
     t2 = mm
       .selectRow(user.display_name, user.age, user.follower_count)
       .by(user.id)
       .resultTypeNameAttr('Res');
   }
-  const userTA = mm.actionGroup(user, UserTA);
+  const userTA = mm.actionGroup(user, UserAG);
   const actions = [userTA];
   await testBuildToDirAsync(actions, ['#types.go', 'user'], 'resultTypeMerging');
 });
 
 it('TS interfaces', async () => {
-  class UserTA extends mm.ActionGroup {
+  class UserAG extends mm.ActionGroup {
     selectByID = mm
       .selectRow(user.id)
       .by(user.id)
@@ -211,9 +211,9 @@ it('TS interfaces', async () => {
 
     deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
   }
-  const userTA = mm.actionGroup(user, UserTA);
+  const userTA = mm.actionGroup(user, UserAG);
 
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     selectByID = mm
       .selectRow(post.id)
       .by(post.id)
@@ -228,7 +228,7 @@ it('TS interfaces', async () => {
 
     selectTime = mm.selectRow(post.n_datetime).resultTypeNameAttr('Res3');
   }
-  const postTA = mm.actionGroup(post, PostTA);
+  const postTA = mm.actionGroup(post, PostAG);
   const actions = [userTA, postTA];
   await testBuildToDirAsync(actions, ['#types.go', 'post', 'user'], 'tsInterfaces', undefined, {
     testTSTypes: true,
@@ -236,51 +236,51 @@ it('TS interfaces', async () => {
 });
 
 it('Multiple tables + Configurable table + virtual table', async () => {
-  class UserTA extends mm.ActionGroup {
+  class UserAG extends mm.ActionGroup {
     selectProfile = mm.selectRow(user.display_name, user.sig);
     updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
     deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
   }
-  const userTA = mm.actionGroup(user, UserTA);
+  const userTA = mm.actionGroup(user, UserAG);
 
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     selectPostInfo = mm.selectRow(post.id, post.content, post.user_id.join(user).url_name);
     updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToInput());
     deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
   }
-  const postTA = mm.actionGroup(post, PostTA, { configurableTableName: 'mrFromTable' });
+  const postTA = mm.actionGroup(post, PostAG, { configurableTableName: 'mrFromTable' });
 
   // Mirror of the user table.
   class VUser extends User {}
   const vUser = mm.table(VUser);
 
-  class VUserTA extends mm.ActionGroup {
+  class VUserAG extends mm.ActionGroup {
     selectProfile = mm.selectRow(vUser.display_name, vUser.sig);
     updateProfile = mm.unsafeUpdateAll().setInputs(vUser.sig);
     deleteByID = mm.deleteOne().whereSQL(vUser.id.isEqualToInput());
   }
-  const vUserTA = mm.actionGroup(vUser, VUserTA, { configurableTableName: 'mrFromTable' });
+  const vUserAG = mm.actionGroup(vUser, VUserAG, { configurableTableName: 'mrFromTable' });
 
-  const actions = [userTA, postTA, vUserTA];
+  const actions = [userTA, postTA, vUserAG];
   await testBuildToDirAsync(actions, ['post', 'user', 'v_user'], 'multipleTablesConfTable');
 });
 
 it('cleanOutDir = false', async () => {
-  class UserTA extends mm.ActionGroup {
+  class UserAG extends mm.ActionGroup {
     selectProfile = mm.selectRow(user.display_name, user.sig);
     updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
     deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
   }
-  const userTA = mm.actionGroup(user, UserTA);
+  const userTA = mm.actionGroup(user, UserAG);
 
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     selectPostInfo = mm.selectRow(post.id, post.content, post.user_id.join(user).url_name);
 
     updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToInput());
 
     deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
   }
-  const postTA = mm.actionGroup(post, PostTA);
+  const postTA = mm.actionGroup(post, PostAG);
   const testName = 'cleanOutDir';
   // First build.
   const builder = await testBuildToDirAsync([userTA], [], testName, undefined, { runOnly: true });
@@ -291,21 +291,21 @@ it('cleanOutDir = false', async () => {
 });
 
 it('cleanOutDir = true', async () => {
-  class UserTA extends mm.ActionGroup {
+  class UserAG extends mm.ActionGroup {
     selectProfile = mm.selectRow(user.display_name, user.sig);
     updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
     deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
   }
-  const userTA = mm.actionGroup(user, UserTA);
+  const userTA = mm.actionGroup(user, UserAG);
 
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     selectPostInfo = mm.selectRow(post.id, post.content, post.user_id.join(user).url_name);
 
     updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToInput());
 
     deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
   }
-  const postTA = mm.actionGroup(post, PostTA);
+  const postTA = mm.actionGroup(post, PostAG);
   const testName = 'cleanOutDir';
   // First build.
   const builder = await testBuildToDirAsync([userTA], [], testName, undefined, { runOnly: true });
@@ -335,14 +335,14 @@ it('cleanOutDir = true', async () => {
 });
 
 it('tables.go', async () => {
-  class UserTA extends mm.ActionGroup {
+  class UserAG extends mm.ActionGroup {
     selectByID = mm
       .selectRow(user.id)
       .by(user.id)
       .attr(mm.ActionAttribute.groupTypeName, 'Type1')
       .resultTypeNameAttr('Res1');
   }
-  const userTA = mm.actionGroup(user, UserTA);
+  const userTA = mm.actionGroup(user, UserAG);
   const actions = [userTA, user, post, postReply];
   await testBuildToDirAsync(actions, ['#tables.go', 'user'], 'tablesGo');
 });

@@ -12,10 +12,10 @@ import { commonIOOptions } from './common.js';
 import { eq, ok } from '../assert-aliases.js';
 
 it('Select', () => {
-  class UserTA extends mm.ActionGroup {
+  class UserAG extends mm.ActionGroup {
     t = mm.selectRow(user.id, user.url_name);
   }
-  const userTA = mm.actionGroup(user, UserTA);
+  const userTA = mm.actionGroup(user, UserAG);
   const v = userTA.t;
   const io = mr.selectIO(v, commonIOOptions);
 
@@ -25,12 +25,12 @@ it('Select', () => {
 });
 
 it('Where', () => {
-  class UserTA extends mm.ActionGroup {
+  class UserAG extends mm.ActionGroup {
     t = mm
       .selectRow(user.id, user.url_name)
       .whereSQL(mm.sql`${user.id} = 1 ${user.id.toInput()} ${user.id.toInput()}`);
   }
-  const userTA = mm.actionGroup(user, UserTA);
+  const userTA = mm.actionGroup(user, UserAG);
   const v = userTA.t;
   const io = mr.selectIO(v, commonIOOptions);
 
@@ -39,7 +39,7 @@ it('Where', () => {
 });
 
 it('Where and inputs', () => {
-  class UserTA extends mm.ActionGroup {
+  class UserAG extends mm.ActionGroup {
     t = mm
       .selectRow(user.id, user.url_name)
       .whereSQL(
@@ -49,7 +49,7 @@ it('Where and inputs', () => {
         )}`,
       );
   }
-  const userTA = mm.actionGroup(user, UserTA);
+  const userTA = mm.actionGroup(user, UserAG);
   const v = userTA.t;
   const io = mr.selectIO(v, commonIOOptions);
 
@@ -58,10 +58,10 @@ it('Where and inputs', () => {
 });
 
 it('Basic join', () => {
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     t = mm.selectRow(post.user_id.join(user).url_name, post.title);
   }
-  const postTA = mm.actionGroup(post, PostTA);
+  const postTA = mm.actionGroup(post, PostAG);
   const v = postTA.t;
   const io = mr.selectIO(v, commonIOOptions);
 
@@ -72,14 +72,14 @@ it('Basic join', () => {
 });
 
 it('Multiple cols join and custom table name', () => {
-  class RplTA extends mm.ActionGroup {
+  class RplAG extends mm.ActionGroup {
     t = mm.selectRow(
       rpl.user_id.join(user).url_name,
       rpl.user_id.join(user).id,
       rpl.to_user_id.join(user).url_name,
     );
   }
-  const rplTA = mm.actionGroup(rpl, RplTA);
+  const rplTA = mm.actionGroup(rpl, RplAG);
   const v = rplTA.t;
   const io = mr.selectIO(v, commonIOOptions);
 
@@ -90,10 +90,10 @@ it('Multiple cols join and custom table name', () => {
 });
 
 it('Join a table with custom table name', () => {
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     t = mm.selectRow(post.user_id, post.user_id.join(rpl).to_user_id);
   }
-  const postTA = mm.actionGroup(post, PostTA);
+  const postTA = mm.actionGroup(post, PostAG);
   const v = postTA.t;
   const io = mr.selectIO(v, commonIOOptions);
 
@@ -104,10 +104,10 @@ it('Join a table with custom table name', () => {
 });
 
 it('Join a table with custom column name', () => {
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     t = mm.selectRow(post.user_id, post.user_id.join(rpl, rpl.custom_id).to_user_id);
   }
-  const postTA = mm.actionGroup(post, PostTA);
+  const postTA = mm.actionGroup(post, PostAG);
   const v = postTA.t;
   const io = mr.selectIO(v, commonIOOptions);
 
@@ -118,7 +118,7 @@ it('Join a table with custom column name', () => {
 });
 
 it('3-table joins and WHERE', () => {
-  class CmtTA extends mm.ActionGroup {
+  class CmtAG extends mm.ActionGroup {
     t = mm
       .selectRow(
         cmt.id,
@@ -135,7 +135,7 @@ it('3-table joins and WHERE', () => {
           .url_name.isEqualToInput()} | ${cmt.id.isEqualToInput()} | ${cmt.target_id.isEqualToInput()}`,
       );
   }
-  const cmtTA = mm.actionGroup(cmt, CmtTA);
+  const cmtTA = mm.actionGroup(cmt, CmtAG);
   const v = cmtTA.t;
   const io = mr.selectIO(v, commonIOOptions);
 
@@ -147,7 +147,7 @@ it('3-table joins and WHERE', () => {
 
 it('Join and from', () => {
   const jCmt = postCmt.cmt_id.join(cmt2);
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     selectT = mm
       .selectRow(
         jCmt.content,
@@ -160,7 +160,7 @@ it('Join and from', () => {
       .from(postCmt)
       .by(postCmt.post_id);
   }
-  const ta = mm.actionGroup(post, PostTA);
+  const ta = mm.actionGroup(post, PostAG);
   const io = mr.selectIO(ta.selectT, commonIOOptions);
 
   eq(ta.__getData().groupTable, post);
@@ -172,7 +172,7 @@ it('Join and from', () => {
 });
 
 it('AS', () => {
-  class CmtTA extends mm.ActionGroup {
+  class CmtAG extends mm.ActionGroup {
     t = mm.selectRow(
       cmt.id,
       cmt.user_id.as('a'),
@@ -181,7 +181,7 @@ it('AS', () => {
       cmt.target_id.join(post).user_id.join(user).url_name.as('c'),
     );
   }
-  const cmtTA = mm.actionGroup(cmt, CmtTA);
+  const cmtTA = mm.actionGroup(cmt, CmtAG);
   const v = cmtTA.t;
   const io = mr.selectIO(v, commonIOOptions);
 
@@ -192,7 +192,7 @@ it('AS', () => {
 });
 
 it('Duplicate selected names', () => {
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     t = mm.selectRow(
       post.title,
       post.title,
@@ -205,7 +205,7 @@ it('Duplicate selected names', () => {
       post.user_id.join(user).url_name.as('a'),
     );
   }
-  const postTA = mm.actionGroup(post, PostTA);
+  const postTA = mm.actionGroup(post, PostAG);
   const v = postTA.t;
   itThrows(
     () => mr.selectIO(v, commonIOOptions),
@@ -214,34 +214,34 @@ it('Duplicate selected names', () => {
 });
 
 it('getInputs', () => {
-  class UserTA extends mm.ActionGroup {
+  class UserAG extends mm.ActionGroup {
     t = mm
       .selectRow(user.id, user.url_name)
       .whereSQL(mm.sql`${user.id.toInput()} ${user.url_name.toInput()} ${user.id.toInput()}`);
   }
-  const ta = mm.actionGroup(user, UserTA);
+  const ta = mm.actionGroup(user, UserAG);
   const v = ta.t;
   const io = mr.selectIO(v, commonIOOptions);
   eq(io.funcArgs.toString(), 'id: uint64, urlName: string');
 });
 
 it('getInputs (no WHERE)', () => {
-  class UserTA extends mm.ActionGroup {
+  class UserAG extends mm.ActionGroup {
     t = mm.selectRow(user.id, user.url_name);
   }
-  const ta = mm.actionGroup(user, UserTA);
+  const ta = mm.actionGroup(user, UserAG);
   const v = ta.t;
   const io = mr.selectIO(v, commonIOOptions);
   eq(io.funcArgs.list.length, 0);
 });
 
 it('returnValues', () => {
-  class UserTA extends mm.ActionGroup {
+  class UserAG extends mm.ActionGroup {
     t = mm
       .selectRow(user.id)
       .whereSQL(mm.sql`${user.id.toInput()} ${post.title.toInput()} ${user.id.toInput()}`);
   }
-  const ta = mm.actionGroup(user, UserTA);
+  const ta = mm.actionGroup(user, UserAG);
   const v = ta.t;
   const io = mr.selectIO(v, commonIOOptions);
   eq(io.returnValues.toString(), '__result: UserTableTResult');
@@ -249,14 +249,14 @@ it('returnValues', () => {
 
 it('GROUP BY and HAVING', () => {
   const yearCol = mm.sel(mm.sql`${mm.year(post.datetime)}`, 'year');
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     t = mm
       .selectRow(yearCol, mm.sel(mm.sql`${mm.sum(post.cmtCount)}`, 'total'))
       .by(post.id)
       .groupBy(yearCol, 'total')
       .havingSQL(mm.and(mm.sql`${yearCol} > 2010`, mm.sql`\`total\` > 100`));
   }
-  const ta = mm.actionGroup(post, PostTA);
+  const ta = mm.actionGroup(post, PostAG);
   const v = ta.t;
   const io = mr.selectIO(v, commonIOOptions);
   eq(
@@ -268,40 +268,40 @@ it('GROUP BY and HAVING', () => {
 it('Unrelated cols', () => {
   // Selected cols
   itThrows(() => {
-    class UserTA extends mm.ActionGroup {
+    class UserAG extends mm.ActionGroup {
       t = mm.selectRow(post.user_id);
     }
-    const ta = mm.actionGroup(user, UserTA);
+    const ta = mm.actionGroup(user, UserAG);
     const v = ta.t;
     mr.selectIO(v, commonIOOptions);
   }, 'Source table assertion failed, expected "User(user)", got "Post(post, db=db_post)".');
 
   // WHERE col
   itThrows(() => {
-    class UserTA extends mm.ActionGroup {
+    class UserAG extends mm.ActionGroup {
       t = mm.selectRow(user.id).whereSQL(mm.sql`${post.id}`);
     }
-    const ta = mm.actionGroup(user, UserTA);
+    const ta = mm.actionGroup(user, UserAG);
     const v = ta.t;
     mr.selectIO(v, commonIOOptions);
   }, 'Source table assertion failed, expected "User(user)", got "Post(post, db=db_post)".');
 
   // Do NOT throws on inputs
   assert.doesNotThrow(() => {
-    class UserTA extends mm.ActionGroup {
+    class UserAG extends mm.ActionGroup {
       t = mm.selectRow(user.id).whereSQL(mm.sql`${post.id.toInput()}`);
     }
-    const ta = mm.actionGroup(user, UserTA);
+    const ta = mm.actionGroup(user, UserAG);
     const v = ta.t;
     mr.selectIO(v, commonIOOptions);
   });
 });
 
 it('Select DISTINCT', () => {
-  class UserTA extends mm.ActionGroup {
+  class UserAG extends mm.ActionGroup {
     t = mm.selectRow(user.id, user.url_name).distinct();
   }
-  const userTA = mm.actionGroup(user, UserTA);
+  const userTA = mm.actionGroup(user, UserAG);
   const v = userTA.t;
   const io = mr.selectIO(v, commonIOOptions);
 
@@ -311,12 +311,12 @@ it('Select DISTINCT', () => {
 });
 
 it('Join types', () => {
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     left = mm.selectRow(post.user_id.leftJoin(user).url_name);
     right = mm.selectRow(post.user_id.rightJoin(user).url_name);
     full = mm.selectRow(post.user_id.fullJoin(user).url_name);
   }
-  const postTA = mm.actionGroup(post, PostTA);
+  const postTA = mm.actionGroup(post, PostAG);
   eq(
     mr.selectIO(postTA.left, commonIOOptions).getSQLCode(),
     '"SELECT `join_1`.`url_name` FROM `db_post` AS `db_post` LEFT JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`"',

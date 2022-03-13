@@ -130,8 +130,8 @@ export async function testBuildToDirAsync(
       actual = np.join(outDir, tableSQLFile, file);
     } else {
       // A go file
-      actual = np.join(outDir, `${file}_ta.go`);
-      expected = np.join(expectedDirPath, `${file}_ta.go`);
+      actual = np.join(outDir, `${file}_ag.go`);
+      expected = np.join(expectedDirPath, `${file}_ag.go`);
     }
     promises.push(testFilesAsync(actual, expected));
   }

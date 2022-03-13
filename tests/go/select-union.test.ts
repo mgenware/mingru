@@ -7,7 +7,7 @@ import { testBuildAsync } from './common.js';
 it('UNION', async () => {
   class Activity extends mm.GhostTable {}
   const activity = mm.table(Activity);
-  class ActivityTA extends mm.ActionGroup {
+  class ActivityAG extends mm.ActionGroup {
     t = mm
       .selectRow(user.id, user.sig.as('generic_sig'), user.url_name.as('generic_name'))
       .from(user)
@@ -16,7 +16,7 @@ it('UNION', async () => {
       .unionAll(mm.selectRows(like.user_id, like.value).from(like))
       .orderByAsc(user.id);
   }
-  const ta = mm.actionGroup(activity, ActivityTA);
+  const ta = mm.actionGroup(activity, ActivityAG);
 
   await testBuildAsync(ta, 'select-union/union');
 });
@@ -24,7 +24,7 @@ it('UNION', async () => {
 it('UNION starting from another member', async () => {
   class Activity extends mm.GhostTable {}
   const activity = mm.table(Activity);
-  class ActivityTA extends mm.ActionGroup {
+  class ActivityAG extends mm.ActionGroup {
     privateT = mm
       .selectRow(user.id, user.sig.as('generic_sig'), user.url_name.as('generic_name'))
       .from(user)
@@ -35,7 +35,7 @@ it('UNION starting from another member', async () => {
       .unionAll(mm.selectRows(like.user_id, like.value).from(like))
       .orderByAsc('generic_sig');
   }
-  const ta = mm.actionGroup(activity, ActivityTA);
+  const ta = mm.actionGroup(activity, ActivityAG);
 
   await testBuildAsync(ta, 'select-union/unionWithReusedMem');
 });
@@ -43,7 +43,7 @@ it('UNION starting from another member', async () => {
 it('UNION with LIMIT n OFFSET', async () => {
   class Activity extends mm.GhostTable {}
   const activity = mm.table(Activity);
-  class ActivityTA extends mm.ActionGroup {
+  class ActivityAG extends mm.ActionGroup {
     t1 = mm
       .selectRows(user.id, user.sig.as('generic_sig'), user.url_name.as('generic_name'))
       .from(user)
@@ -59,7 +59,7 @@ it('UNION with LIMIT n OFFSET', async () => {
       .orderByAsc(user.id)
       .paginate();
   }
-  const ta = mm.actionGroup(activity, ActivityTA);
+  const ta = mm.actionGroup(activity, ActivityAG);
 
   await testBuildAsync(ta, 'select-union/unionLimitOffset');
 });
@@ -67,7 +67,7 @@ it('UNION with LIMIT n OFFSET', async () => {
 it('UNION with page mode', async () => {
   class Activity extends mm.GhostTable {}
   const activity = mm.table(Activity);
-  class ActivityTA extends mm.ActionGroup {
+  class ActivityAG extends mm.ActionGroup {
     t1 = mm
       .selectRows(user.id, user.sig.as('generic_sig'), user.url_name.as('generic_name'))
       .pageMode()
@@ -83,7 +83,7 @@ it('UNION with page mode', async () => {
       .pageMode()
       .orderByAsc(user.id);
   }
-  const ta = mm.actionGroup(activity, ActivityTA);
+  const ta = mm.actionGroup(activity, ActivityAG);
 
   await testBuildAsync(ta, 'select-union/unionPageMode');
 });

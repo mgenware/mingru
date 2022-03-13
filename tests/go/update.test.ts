@@ -4,7 +4,7 @@ import { testBuildAsync } from './common.js';
 import cols from '../models/cols.js';
 
 it('UpdateSome', async () => {
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     updateT = mm
       .updateSome()
       .set(post.title, mm.sql`"haha"`)
@@ -12,12 +12,12 @@ it('UpdateSome', async () => {
       .set(post.cmtCount, mm.sql`${post.cmtCount} + 1`)
       .by(post.id);
   }
-  const ta = mm.actionGroup(post, PostTA);
+  const ta = mm.actionGroup(post, PostAG);
   await testBuildAsync(ta, 'update/update');
 });
 
 it('UpdateOne', async () => {
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     updateT = mm
       .updateOne()
       .set(post.title, mm.sql`"haha"`)
@@ -25,12 +25,12 @@ it('UpdateOne', async () => {
       .set(post.cmtCount, mm.sql`${post.cmtCount} + 1`)
       .by(post.id);
   }
-  const ta = mm.actionGroup(post, PostTA);
+  const ta = mm.actionGroup(post, PostAG);
   await testBuildAsync(ta, 'update/updateOne');
 });
 
 it('Update with where', async () => {
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     updateT = mm
       .updateOne()
       .set(post.title, mm.sql`"haha"`)
@@ -41,23 +41,23 @@ it('Update with where', async () => {
         )}`,
       );
   }
-  const ta = mm.actionGroup(post, PostTA);
+  const ta = mm.actionGroup(post, PostAG);
   await testBuildAsync(ta, 'update/updateWithWhere');
 });
 
 it('Update with non-input setters', async () => {
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     updateT = mm
       .unsafeUpdateAll()
       .set(post.title, mm.sql`"haha"`)
       .set(post.content, post.content.toInput());
   }
-  const ta = mm.actionGroup(post, PostTA);
+  const ta = mm.actionGroup(post, PostAG);
   await testBuildAsync(ta, 'update/updateWithNonInputSetters');
 });
 
 it('Duplicate names in WHERE and setters', async () => {
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     updateT = mm
       .updateSome()
       .set(post.content, post.content.toInput())
@@ -67,12 +67,12 @@ it('Duplicate names in WHERE and setters', async () => {
         mm.sql`${post.title.isEqualToInput()} ${post.title.isEqualToInput()} AND ${post.content.isEqualToInput()}`,
       );
   }
-  const ta = mm.actionGroup(post, PostTA);
+  const ta = mm.actionGroup(post, PostAG);
   await testBuildAsync(ta, 'update/dupNamesWhereSetters');
 });
 
 it('Custom DB column name', async () => {
-  class PostTA extends mm.ActionGroup {
+  class PostAG extends mm.ActionGroup {
     updateT = mm
       .unsafeUpdateAll()
       .set(post.title, mm.sql`"haha"`)
@@ -80,22 +80,22 @@ it('Custom DB column name', async () => {
       .set(post.cmtCount, mm.sql`${post.cmtCount} + 1`)
       .by(post.id);
   }
-  const ta = mm.actionGroup(post, PostTA);
+  const ta = mm.actionGroup(post, PostAG);
   await testBuildAsync(ta, 'update/customName');
 });
 
 it('Update with defaults', async () => {
-  class ColsTA extends mm.ActionGroup {
+  class ColsAG extends mm.ActionGroup {
     updateT = mm.updateOne().setInputs(cols.fk).setDefaults().by(cols.id);
   }
-  const ta = mm.actionGroup(cols, ColsTA);
+  const ta = mm.actionGroup(cols, ColsAG);
   await testBuildAsync(ta, 'update/updateWithDefaults');
 });
 
 it('Update with defaults and inputs', async () => {
-  class ColsTA extends mm.ActionGroup {
+  class ColsAG extends mm.ActionGroup {
     updateT = mm.updateOne().setDefaults().setInputs().by(cols.id);
   }
-  const ta = mm.actionGroup(cols, ColsTA);
+  const ta = mm.actionGroup(cols, ColsAG);
   await testBuildAsync(ta, 'update/updateWithDefaultsAndInputs');
 });

@@ -28,10 +28,10 @@ it('dtDefault', () => {
 });
 
 it('insertWithDefaults', () => {
-  class ColsTA extends mm.ActionGroup {
+  class ColsAG extends mm.ActionGroup {
     insertT = mm.insert().setInputs(cols.fk).setDefaults();
   }
-  const ta = mm.actionGroup(cols, ColsTA);
+  const ta = mm.actionGroup(cols, ColsAG);
   const v = ta.insertT;
   const io = mr.insertIO(v, commonIOOptions);
 
