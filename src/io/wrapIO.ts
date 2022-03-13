@@ -54,7 +54,7 @@ class WrapIOProcessor extends BaseIOProcessor {
         const availableArgs = [innerIO.dbArgVarInfo().name];
         availableArgs.push(...innerFuncArgs.keys());
         throw new Error(
-          `The argument "${key}" doesn't exist in action "${action}". Available arguments: ${availableArgs.join(
+          `The argument "${key}" doesn't exist in action "${innerAction}". Available arguments: ${availableArgs.join(
             ',',
           )}, your arguments: ${Object.keys(userArgs)}`,
         );

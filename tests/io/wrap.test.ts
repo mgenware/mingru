@@ -74,7 +74,7 @@ it('Throws on undefined inputs', () => {
   const v = ta.t2;
   itThrows(
     () => mr.wrapIO(v, commonIOOptions),
-    'The argument "haha" doesn\'t exist in action "WrapAction(t2, t=User(user))". Available arguments: mrQueryable,id,urlName, your arguments: haha',
+    'The argument "haha" doesn\'t exist in action "SelectAction(t, t=User(user))". Available arguments: mrQueryable,id,urlName, your arguments: haha',
   );
 });
 

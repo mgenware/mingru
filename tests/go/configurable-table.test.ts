@@ -66,7 +66,7 @@ it('configurableTable with WRAP action inside transactions', async () => {
   await testBuildAsync(consumerTA, 'configurable-table/wrap-tx/consumer');
 });
 
-it('configurableTable with static TA', async () => {
+it('Call a table action with configurable table that has not been initialized', async () => {
   class UserUtil extends User {
     id = mm.pk();
   }
@@ -81,6 +81,7 @@ it('configurableTable with static TA', async () => {
     t = userUtilTA.t.wrap({ cname: post });
   }
   const postTA = mm.tableActions(post, PostTA);
-  await testBuildAsync(userUtilTA, 'configurable-table/static-ta/userUtil');
+  // Build post TA first.
   await testBuildAsync(postTA, 'configurable-table/static-ta/post');
+  await testBuildAsync(userUtilTA, 'configurable-table/static-ta/userUtil');
 });
