@@ -250,10 +250,10 @@ export default class CoreBuilder {
 
     let code = builder.toString();
     if (bodyMap.head) {
-      code = `${bodyMap.head}\n${code}`;
+      code = stringUtils.joinLines(bodyMap.head, code);
     }
     if (bodyMap.tail) {
-      code = `${code}\n${bodyMap.tail}`;
+      code = stringUtils.joinLines(code, bodyMap.tail);
     }
     return code;
   }
@@ -685,10 +685,7 @@ export default class CoreBuilder {
     // Declare err variable.
     innerBuilder.push('var err error');
 
-    let memberIdx = -1;
-    const memberCount = memberIOs.length;
     for (const memberIO of memberIOs) {
-      memberIdx++;
       const mActionIO = memberIO.actionIO;
 
       // Return value code:
@@ -721,10 +718,7 @@ export default class CoreBuilder {
       if (memberIO.isInline) {
         const methodCode = this.buildActionIO(memberIO.actionIO, memberIO.assignedName, true);
         // Put func code into head.
-        headCode += methodCode;
-        if (memberIdx !== memberCount - 1) {
-          headCode += '\n';
-        }
+        headCode = stringUtils.joinLines(headCode, methodCode);
       }
 
       callMemCode += '(tx';

@@ -41,3 +41,16 @@ export function validateSetters(setters: ReadonlyMap<mm.Column, unknown>, table:
     setter.__checkSourceTable(table);
   }
 }
+
+export function joinLines(prev: string, next: string) {
+  if (!prev) {
+    return next;
+  }
+  if (prev.charAt(prev.length - 1) === '\n') {
+    if (prev.charAt(prev.length - 2) === '\n') {
+      return prev + next;
+    }
+    return prev + '\n' + next;
+  }
+  return prev + '\n\n' + next;
+}
