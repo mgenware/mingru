@@ -18,7 +18,7 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-func (mrTable *TableTypePost) UpdateTimes(mrQueryable mingru.Queryable, datetime time.Time, nDatetime *time.Time, nDate *time.Time) (int, error) {
+func (mrTable *TableTypePost) UpdateTimes(mrQueryable mingru.Queryable, nDatetime *time.Time, nDate *time.Time, datetime time.Time) (int, error) {
 	result, err := mrQueryable.Exec("UPDATE `db_post` SET `datetime` = ? WHERE `n_datetime` = ? OR `n_date` = ?", datetime, nDatetime, nDate)
 	return mingru.GetRowsAffectedIntWithError(result, err)
 }

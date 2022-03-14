@@ -14,7 +14,7 @@ func (mrTable *TableTypeCols) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-func (mrTable *TableTypeCols) UpdateT(mrQueryable mingru.Queryable, fk uint64, id uint64) error {
+func (mrTable *TableTypeCols) UpdateT(mrQueryable mingru.Queryable, id uint64, fk uint64) error {
 	result, err := mrQueryable.Exec("UPDATE `cols` SET `text` = '', `int` = 0, `nullable` = NULL, `fk` = ?, `def_int` = -3, `def_var_char` = '一二', `def_time` = CURTIME() WHERE `id` = ?", fk, id)
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }

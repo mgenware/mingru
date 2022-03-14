@@ -84,11 +84,14 @@ class UpdateIOProcessor extends BaseIOProcessor {
     }
 
     const execArgs = new ValueList(`Exec args of action "${action}"`);
-    // Setters come before WHERE in SQL.
+    // For func args, WHERE is scanned first, so that ID columns (usually contained in WHERE)
+    // come first.
+    if (whereIO) {
+      funcArgs.merge(whereIO.vars.list);
+    }
     execArgs.mergeVarDef(setterVars.list);
     funcArgs.merge(setterVars.list);
     if (whereIO) {
-      funcArgs.merge(whereIO.vars.list);
       execArgs.mergeVarDef(whereIO.vars.list);
     }
 

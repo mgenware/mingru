@@ -14,6 +14,6 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-func (mrTable *TableTypePost) T(mrQueryable mingru.Queryable, urlName string, displayName string, sig *string, age int, followerCount *string, id uint64) error {
-	return UserUtil.T(mrQueryable, Post, urlName, displayName, sig, age, followerCount, id)
+func (mrTable *TableTypePost) T(mrQueryable mingru.Queryable, id uint64, urlName string, displayName string, sig *string, age int, followerCount *string) error {
+	return UserUtil.T(mrQueryable, Post, id, urlName, displayName, sig, age, followerCount)
 }

@@ -30,6 +30,6 @@ func (mrTable *TableTypePost) SelPost(mrQueryable mingru.Queryable, id uint64) (
 	return UserUtil.Sel(mrQueryable, Post, id)
 }
 
-func (mrTable *TableTypePost) UpdPost(mrQueryable mingru.Queryable, urlName string, displayName string, sig *string, age int, followerCount *string, id uint64) error {
-	return UserUtil.Upd(mrQueryable, Post, urlName, displayName, sig, age, followerCount, id)
+func (mrTable *TableTypePost) UpdPost(mrQueryable mingru.Queryable, id uint64, urlName string, displayName string, sig *string, age int, followerCount *string) error {
+	return UserUtil.Upd(mrQueryable, Post, id, urlName, displayName, sig, age, followerCount)
 }

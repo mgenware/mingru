@@ -41,22 +41,22 @@ it('WrapIO', () => {
 
 it('getInputs (wrapSelf and innerIO)', () => {
   const io = mr.wrapIO(wrapSelf.d, commonIOOptions) as mr.WrapIO;
-  eq(io.funcArgs.toString(), 'urlName: string, followerCount: *string, id: uint64');
-  eq(io.execArgs.toString(), 'urlName, "haha", followerCount, id');
+  eq(io.funcArgs.toString(), 'urlName: string, id: uint64, followerCount: *string');
+  eq(io.execArgs.toString(), 'urlName, id, "haha", followerCount');
   eq(io.funcPath, 'mrTable.S');
 });
 
 it('getInputs (wrapOther)', () => {
   const io = mr.wrapIO(wrapOther.standard, commonIOOptions) as mr.WrapIO;
   eq(io.funcArgs.toString(), 'urlName: string, sig: *string, followerCount: *string');
-  eq(io.execArgs.toString(), 'urlName, sig, followerCount, 123');
+  eq(io.execArgs.toString(), 'urlName, 123, sig, followerCount');
   eq(io.funcPath, 'User.S');
 });
 
 it('getInputs (wrapOther, nested)', () => {
   const io = mr.wrapIO(wrapOther.nested, commonIOOptions) as mr.WrapIO;
   eq(io.funcArgs.toString(), 'urlName: string, followerCount: *string');
-  eq(io.execArgs.toString(), 'urlName, followerCount, 123');
+  eq(io.execArgs.toString(), 'urlName, 123, followerCount');
   eq(io.funcPath, 'User.D');
 });
 
@@ -80,7 +80,7 @@ it('Throws on undefined inputs', () => {
 
 it('ReturnRef', () => {
   const io = mr.wrapIO(wrapOther.retValue, commonIOOptions) as mr.WrapIO;
-  eq(io.funcArgs.toString(), 'urlName: string, followerCount: *string, id: uint64');
-  eq(io.execArgs.toString(), 'urlName, followerCount, id');
+  eq(io.funcArgs.toString(), 'urlName: string, id: uint64, followerCount: *string');
+  eq(io.execArgs.toString(), 'urlName, id, followerCount');
   eq(io.funcPath, 'User.D');
 });

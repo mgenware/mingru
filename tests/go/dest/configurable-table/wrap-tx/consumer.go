@@ -33,7 +33,7 @@ func (mrTable *TableTypePost) Tx(db *sql.DB, urlName string, displayName string,
 		if err != nil {
 			return err
 		}
-		err = UserUtil.Upd(tx, mrFromTable, urlName, displayName, sig, age, followerCount, id)
+		err = UserUtil.Upd(tx, mrFromTable, id, urlName, displayName, sig, age, followerCount)
 		if err != nil {
 			return err
 		}

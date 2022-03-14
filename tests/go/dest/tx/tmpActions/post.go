@@ -19,16 +19,16 @@ func (mrTable *TableTypePost) MingruSQLName() string {
 // ------------ Actions ------------
 
 func (mrTable *TableTypePost) insertChild1(mrQueryable mingru.Queryable, id uint64) error {
-	return User.UpdatePostCount(mrQueryable, 1, id)
+	return User.UpdatePostCount(mrQueryable, id, 1)
 }
 
-func (mrTable *TableTypePost) insertChild3(mrQueryable mingru.Queryable, title string, id uint64) error {
+func (mrTable *TableTypePost) insertChild3(mrQueryable mingru.Queryable, id uint64, title string) error {
 	result, err := mrQueryable.Exec("UPDATE `db_post` SET `title` = ? WHERE `id` = ?", title, id)
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }
 
 func (mrTable *TableTypePost) insertChild4(mrQueryable mingru.Queryable, id uint64) error {
-	result, err := mrQueryable.Exec("UPDATE `db_post` SET `title` = ? WHERE `id` = ?", "TITLE", id)
+	result, err := mrQueryable.Exec("UPDATE `db_post` SET `title` = ? WHERE `id` = ?", id, "TITLE")
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }
 
@@ -47,7 +47,7 @@ func (mrTable *TableTypePost) Insert(db *sql.DB, id uint64, title string) error 
 		if err != nil {
 			return err
 		}
-		err = mrTable.insertChild3(tx, title, id)
+		err = mrTable.insertChild3(tx, id, title)
 		if err != nil {
 			return err
 		}

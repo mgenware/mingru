@@ -14,7 +14,7 @@ func (mrTable *TableTypeUserUtil) MingruSQLName() string {
 
 // ------------ Actions ------------
 
-func (mrTable *TableTypeUserUtil) T(mrQueryable mingru.Queryable, cname mingru.Table, urlName string, displayName string, sig *string, age int, followerCount *string, id uint64) error {
+func (mrTable *TableTypeUserUtil) T(mrQueryable mingru.Queryable, cname mingru.Table, id uint64, urlName string, displayName string, sig *string, age int, followerCount *string) error {
 	result, err := mrQueryable.Exec("UPDATE "+cname.MingruSQLName()+" SET `url_name` = ?, `display_name` = ?, `sig` = ?, `age` = ?, `follower_c` = ? WHERE `id` = ?", urlName, displayName, sig, age, followerCount, id)
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }
