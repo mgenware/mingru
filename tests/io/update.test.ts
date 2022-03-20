@@ -12,7 +12,7 @@ it('Update', () => {
     t = mm
       .updateSome()
       .set(post.title, mm.sql`"haha"`)
-      .set(post.content, mm.sql`${mm.input(post.content)}`)
+      .set(post.content, mm.sql`${mm.param(post.content)}`)
       .set(post.cmtCount, mm.sql`${post.cmtCount} + 1`)
       .by(post.id);
   }
@@ -50,10 +50,10 @@ it('getInputs', () => {
   class UserAG extends mm.ActionGroup {
     t = mm
       .updateSome()
-      .set(user.url_name, mm.sql`${mm.input(user.url_name)}`)
-      .setInputs(user.sig)
+      .set(user.url_name, mm.sql`${mm.param(user.url_name)}`)
+      .setParams(user.sig)
       .set(user.follower_count, mm.sql`${user.follower_count} + 1`)
-      .whereSQL(mm.sql`${user.url_name.toInput()} ${user.id.toInput()} ${user.url_name.toInput()}`);
+      .whereSQL(mm.sql`${user.url_name.toParam()} ${user.id.toParam()} ${user.url_name.toParam()}`);
   }
   const ta = mm.actionGroup(user, UserAG);
   const v = ta.t;
@@ -67,10 +67,10 @@ it('returnValues', () => {
   class UserAG extends mm.ActionGroup {
     t = mm
       .updateSome()
-      .set(user.url_name, mm.sql`${mm.input(user.url_name)}`)
-      .setInputs(user.sig)
+      .set(user.url_name, mm.sql`${mm.param(user.url_name)}`)
+      .setParams(user.sig)
       .set(user.follower_count, mm.sql`${user.follower_count} + 1`)
-      .whereSQL(mm.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
+      .whereSQL(mm.sql`${user.id.toParam()} ${user.url_name.toParam()}`);
   }
   const ta = mm.actionGroup(user, UserAG);
   const v = ta.t;
@@ -81,7 +81,7 @@ it('returnValues', () => {
 it('Validate setters', () => {
   itThrows(() => {
     class PostAG extends mm.ActionGroup {
-      t = mm.unsafeUpdateAll().setInputs(user.id).setInputs();
+      t = mm.unsafeUpdateAll().setParams(user.id).setParams();
     }
     const ta = mm.actionGroup(post, PostAG);
     mr.insertIO(ta.t, commonIOOptions);
@@ -111,8 +111,8 @@ it('Input order in funcArgs and execArgs', () => {
   class PostAG extends mm.ActionGroup {
     t = mm
       .updateOne()
-      .setInputs(post.title, post.id)
-      .whereSQL(mm.sql`${post.id} = ${post.id.toInput()}`);
+      .setParams(post.title, post.id)
+      .whereSQL(mm.sql`${post.id} = ${post.id.toParam()}`);
   }
   const postTA = mm.actionGroup(post, PostAG);
   const v = postTA.t;

@@ -6,10 +6,10 @@ import { testBuildAsync } from './common.js';
 it('configurableTable', async () => {
   class UserAG extends mm.ActionGroup {
     selectT = mm.selectRow(user.id, user.age);
-    insertT = mm.insertOne().setInputs();
-    updateT = mm.updateOne().setInputs().by(user.id);
+    insertT = mm.insertOne().setParams();
+    updateT = mm.updateOne().setParams().by(user.id);
     deleteT = mm.deleteOne().by(user.id);
-    transactT = mm.transact(this.insertT, mm.insertOne().from(post).setInputs());
+    transactT = mm.transact(this.insertT, mm.insertOne().from(post).setParams());
   }
   const ta = mm.actionGroup(user, UserAG, { configurableTableName: 'mrFromTable' });
   await testBuildAsync(ta, 'configurable-table/from/user');
@@ -20,9 +20,9 @@ it('configurableTable with WRAP action', async () => {
   class UserUtil extends User {}
   const userUtil = mm.table(UserUtil, { virtualTable: true });
   class CommonAG extends mm.ActionGroup {
-    insert = mm.insertOne().setInputs();
+    insert = mm.insertOne().setParams();
     del = mm.deleteOne().by(userUtil.id);
-    upd = mm.updateOne().setInputs().by(userUtil.id);
+    upd = mm.updateOne().setParams().by(userUtil.id);
     sel = mm.selectRows(userUtil.display_name).by(userUtil.id).orderByAsc(userUtil.display_name);
   }
   const commonTA = mm.actionGroup(userUtil, CommonAG, { configurableTableName: 'mrFromTable' });
@@ -44,9 +44,9 @@ it('configurableTable with WRAP action inside transactions', async () => {
   class UserUtil extends User {}
   const userUtil = mm.table(UserUtil, { virtualTable: true });
   class CommonAG extends mm.ActionGroup {
-    insert = mm.insertOne().setInputs();
+    insert = mm.insertOne().setParams();
     del = mm.deleteOne().by(userUtil.id);
-    upd = mm.updateOne().setInputs().by(userUtil.id);
+    upd = mm.updateOne().setParams().by(userUtil.id);
     sel = mm.selectRows(userUtil.display_name).by(userUtil.id).orderByAsc(userUtil.display_name);
   }
   const commonTA = mm.actionGroup(userUtil, CommonAG, { configurableTableName: 'mrFromTable' });
@@ -73,7 +73,7 @@ it('Call a table action with configurable table that has not been initialized', 
   const userUtil = mm.table(UserUtil, { virtualTable: true });
 
   class UserUtilAG extends mm.ActionGroup {
-    t = mm.updateOne().setInputs().by(userUtil.id);
+    t = mm.updateOne().setParams().by(userUtil.id);
   }
   const userUtilTA = mm.actionGroup(userUtil, UserUtilAG, { configurableTableName: 'cname' });
 

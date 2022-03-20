@@ -15,8 +15,8 @@ it('Single table', async () => {
       post.user_id.join(user).url_name,
     );
 
-    updatePostTitle = mm.unsafeUpdateAll().set(post.title, mm.sql`${mm.input(post.title)}`);
-    deleteByID = mm.deleteOne().whereSQL(mm.sql`${post.id} = ${mm.input(post.id)}`);
+    updatePostTitle = mm.unsafeUpdateAll().set(post.title, mm.sql`${mm.param(post.title)}`);
+    deleteByID = mm.deleteOne().whereSQL(mm.sql`${post.id} = ${mm.param(post.id)}`);
   }
   const ta = mm.actionGroup(post, PostAG);
   await testBuildToDirAsync([ta], ['post'], 'singleTable');
@@ -25,17 +25,17 @@ it('Single table', async () => {
 it('Multiple tables', async () => {
   class UserAG extends mm.ActionGroup {
     selectProfile = mm.selectRow(user.display_name, user.sig);
-    updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
-    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
+    updateProfile = mm.unsafeUpdateAll().setParams(user.sig);
+    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToParam());
   }
   const userTA = mm.actionGroup(user, UserAG);
 
   class PostAG extends mm.ActionGroup {
     selectPostInfo = mm.selectRow(post.id, post.content, post.user_id.join(user).url_name);
 
-    updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToInput());
+    updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToParam());
 
-    deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
+    deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToParam());
   }
   const postTA = mm.actionGroup(post, PostAG);
   const actions = [userTA, postTA];
@@ -45,17 +45,17 @@ it('Multiple tables', async () => {
 it('Multiple tables (dedup)', async () => {
   class UserAG extends mm.ActionGroup {
     selectProfile = mm.selectRow(user.display_name, user.sig);
-    updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
-    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
+    updateProfile = mm.unsafeUpdateAll().setParams(user.sig);
+    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToParam());
   }
   const userTA = mm.actionGroup(user, UserAG);
 
   class PostAG extends mm.ActionGroup {
     selectPostInfo = mm.selectRow(post.id, post.content, post.user_id.join(user).url_name);
 
-    updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToInput());
+    updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToParam());
 
-    deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
+    deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToParam());
   }
   const postTA = mm.actionGroup(post, PostAG);
   const actions = [userTA, postTA, postTA, user];
@@ -74,7 +74,7 @@ it('Custom package name', async () => {
 
 it('Table DBName', async () => {
   class PostRplAG extends mm.ActionGroup {
-    insertPostReply = mm.unsafeInsertOne().setInputs(postReply.to_user_id, postReply.user_id);
+    insertPostReply = mm.unsafeInsertOne().setParams(postReply.to_user_id, postReply.user_id);
   }
   const ta = mm.actionGroup(postReply, PostRplAG);
   await testBuildToDirAsync([ta], ['post_reply'], 'tableName');
@@ -83,17 +83,17 @@ it('Table DBName', async () => {
 it('Multiple tables, CSQL', async () => {
   class UserAG extends mm.ActionGroup {
     selectProfile = mm.selectRow(user.display_name, user.sig);
-    updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
-    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
+    updateProfile = mm.unsafeUpdateAll().setParams(user.sig);
+    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToParam());
   }
   const userTA = mm.actionGroup(user, UserAG);
 
   class PostAG extends mm.ActionGroup {
     selectPostInfo = mm.selectRow(post.id, post.content, post.user_id.join(user).url_name);
 
-    updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToInput());
+    updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToParam());
 
-    deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
+    deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToParam());
   }
   const postTA = mm.actionGroup(post, PostAG);
 
@@ -113,17 +113,17 @@ it('Multiple tables, CSQL', async () => {
 it('Multiple tables, CSQL (dedup)', async () => {
   class UserAG extends mm.ActionGroup {
     selectProfile = mm.selectRow(user.display_name, user.sig);
-    updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
-    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
+    updateProfile = mm.unsafeUpdateAll().setParams(user.sig);
+    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToParam());
   }
   const userTA = mm.actionGroup(user, UserAG);
 
   class PostAG extends mm.ActionGroup {
     selectPostInfo = mm.selectRow(post.id, post.content, post.user_id.join(user).url_name);
 
-    updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToInput());
+    updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToParam());
 
-    deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
+    deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToParam());
   }
   const postTA = mm.actionGroup(post, PostAG);
 
@@ -159,7 +159,7 @@ it('Types', async () => {
 
     selectProfile = mm.selectRow(user.display_name, user.sig).resultTypeNameAttr('Res2');
 
-    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
+    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToParam());
   }
   const userTA = mm.actionGroup(user, UserAG);
 
@@ -209,7 +209,7 @@ it('TS interfaces', async () => {
       .resultTypeNameAttr('Res3')
       .attr(mm.ActionAttribute.enableTSResultType, true);
 
-    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
+    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToParam());
   }
   const userTA = mm.actionGroup(user, UserAG);
 
@@ -238,15 +238,15 @@ it('TS interfaces', async () => {
 it('Multiple tables + Configurable table + virtual table', async () => {
   class UserAG extends mm.ActionGroup {
     selectProfile = mm.selectRow(user.display_name, user.sig);
-    updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
-    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
+    updateProfile = mm.unsafeUpdateAll().setParams(user.sig);
+    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToParam());
   }
   const userTA = mm.actionGroup(user, UserAG);
 
   class PostAG extends mm.ActionGroup {
     selectPostInfo = mm.selectRow(post.id, post.content, post.user_id.join(user).url_name);
-    updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToInput());
-    deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
+    updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToParam());
+    deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToParam());
   }
   const postTA = mm.actionGroup(post, PostAG, { configurableTableName: 'mrFromTable' });
 
@@ -256,8 +256,8 @@ it('Multiple tables + Configurable table + virtual table', async () => {
 
   class VUserAG extends mm.ActionGroup {
     selectProfile = mm.selectRow(vUser.display_name, vUser.sig);
-    updateProfile = mm.unsafeUpdateAll().setInputs(vUser.sig);
-    deleteByID = mm.deleteOne().whereSQL(vUser.id.isEqualToInput());
+    updateProfile = mm.unsafeUpdateAll().setParams(vUser.sig);
+    deleteByID = mm.deleteOne().whereSQL(vUser.id.isEqualToParam());
   }
   const vUserAG = mm.actionGroup(vUser, VUserAG, { configurableTableName: 'mrFromTable' });
 
@@ -268,17 +268,17 @@ it('Multiple tables + Configurable table + virtual table', async () => {
 it('cleanOutDir = false', async () => {
   class UserAG extends mm.ActionGroup {
     selectProfile = mm.selectRow(user.display_name, user.sig);
-    updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
-    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
+    updateProfile = mm.unsafeUpdateAll().setParams(user.sig);
+    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToParam());
   }
   const userTA = mm.actionGroup(user, UserAG);
 
   class PostAG extends mm.ActionGroup {
     selectPostInfo = mm.selectRow(post.id, post.content, post.user_id.join(user).url_name);
 
-    updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToInput());
+    updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToParam());
 
-    deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
+    deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToParam());
   }
   const postTA = mm.actionGroup(post, PostAG);
   const testName = 'cleanOutDir';
@@ -293,17 +293,17 @@ it('cleanOutDir = false', async () => {
 it('cleanOutDir = true', async () => {
   class UserAG extends mm.ActionGroup {
     selectProfile = mm.selectRow(user.display_name, user.sig);
-    updateProfile = mm.unsafeUpdateAll().setInputs(user.sig);
-    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToInput());
+    updateProfile = mm.unsafeUpdateAll().setParams(user.sig);
+    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToParam());
   }
   const userTA = mm.actionGroup(user, UserAG);
 
   class PostAG extends mm.ActionGroup {
     selectPostInfo = mm.selectRow(post.id, post.content, post.user_id.join(user).url_name);
 
-    updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToInput());
+    updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToParam());
 
-    deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToInput());
+    deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToParam());
   }
   const postTA = mm.actionGroup(post, PostAG);
   const testName = 'cleanOutDir';

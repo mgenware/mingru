@@ -12,7 +12,7 @@ it('unsafeDeleteAll', async () => {
 
 it('deleteSome', async () => {
   class PostAG extends mm.ActionGroup {
-    deleteT = mm.deleteSome().whereSQL(mm.sql`${post.user_id} = ${mm.input(post.user_id)}`);
+    deleteT = mm.deleteSome().whereSQL(mm.sql`${post.user_id} = ${mm.param(post.user_id)}`);
   }
   const ta = mm.actionGroup(post, PostAG);
   await testBuildAsync(ta, 'delete/deleteWithWhere');

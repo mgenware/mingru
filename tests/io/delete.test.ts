@@ -30,7 +30,7 @@ it('Delete with where', () => {
 
 it('getInputs', () => {
   class UserAG extends mm.ActionGroup {
-    t = mm.deleteOne().whereSQL(mm.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
+    t = mm.deleteOne().whereSQL(mm.sql`${user.id.toParam()} ${user.url_name.toParam()}`);
   }
   const ta = mm.actionGroup(user, UserAG);
   const v = ta.t;
@@ -41,7 +41,7 @@ it('getInputs', () => {
 
 it('returnValues', () => {
   class UserAG extends mm.ActionGroup {
-    t = mm.deleteOne().whereSQL(mm.sql`${user.id.toInput()} ${user.url_name.toInput()}`);
+    t = mm.deleteOne().whereSQL(mm.sql`${user.id.toParam()} ${user.url_name.toParam()}`);
   }
   const ta = mm.actionGroup(user, UserAG);
   const v = ta.t;

@@ -22,9 +22,9 @@ it('Multiple actions', async () => {
       post.user_id.join(user).url_name,
     );
 
-    updatePostTitle = mm.unsafeUpdateAll().set(post.title, mm.sql`${mm.input(post.title)}`);
+    updatePostTitle = mm.unsafeUpdateAll().set(post.title, mm.sql`${mm.param(post.title)}`);
 
-    deleteByID = mm.deleteSome().whereSQL(mm.sql`${post.id} = ${mm.input(post.id)}`);
+    deleteByID = mm.deleteSome().whereSQL(mm.sql`${post.id} = ${mm.param(post.id)}`);
   }
   const ta = mm.actionGroup(post, PostAG);
   await testBuildFullAsync(ta, 'goBuilder/multipleActions');
@@ -33,7 +33,7 @@ it('Multiple actions', async () => {
 it('Action info appended to error message', async () => {
   await itRejects(async () => {
     class PostAG extends mm.ActionGroup {
-      t = mm.unsafeInsert().setInputs(user.id);
+      t = mm.unsafeInsert().setParams(user.id);
     }
     const ta = mm.actionGroup(post, PostAG);
     await testBuildAsync(ta, '');

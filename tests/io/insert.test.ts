@@ -8,7 +8,7 @@ import { eq, ok } from '../assert-aliases.js';
 
 it('Insert inputs', () => {
   class PostAG extends mm.ActionGroup {
-    t = mm.unsafeInsert().setInputs(post.title, post.user_id);
+    t = mm.unsafeInsert().setParams(post.title, post.user_id);
   }
   const postTA = mm.actionGroup(post, PostAG);
   const v = postTA.t;
@@ -22,7 +22,7 @@ it('Insert inputs and values', () => {
   class PostAG extends mm.ActionGroup {
     t = mm
       .unsafeInsert()
-      .setInputs(post.title, post.user_id)
+      .setParams(post.title, post.user_id)
       .set(post.datetime, mm.sql`NOW()`);
   }
   const postTA = mm.actionGroup(post, PostAG);
@@ -40,8 +40,8 @@ it('getInputs', () => {
   class UserAG extends mm.ActionGroup {
     t = mm
       .unsafeInsert()
-      .setInputs(user.sig, user.id)
-      .set(user.url_name, user.url_name.toInput('b'));
+      .setParams(user.sig, user.id)
+      .set(user.url_name, user.url_name.toParam('b'));
   }
   const ta = mm.actionGroup(user, UserAG);
   const v = ta.t;
@@ -54,8 +54,8 @@ it('returnValues (insert)', () => {
   class UserAG extends mm.ActionGroup {
     t = mm
       .unsafeInsert()
-      .setInputs(user.sig, user.id)
-      .set(user.url_name, user.url_name.toInput('b'));
+      .setParams(user.sig, user.id)
+      .set(user.url_name, user.url_name.toParam('b'));
   }
   const ta = mm.actionGroup(user, UserAG);
   const v = ta.t;
@@ -67,8 +67,8 @@ it('returnValues (insertOne)', () => {
   class UserAG extends mm.ActionGroup {
     t = mm
       .unsafeInsertOne()
-      .setInputs(user.sig, user.id)
-      .set(user.url_name, user.url_name.toInput('b'));
+      .setParams(user.sig, user.id)
+      .set(user.url_name, user.url_name.toParam('b'));
   }
   const ta = mm.actionGroup(user, UserAG);
   const v = ta.t;
@@ -79,7 +79,7 @@ it('returnValues (insertOne)', () => {
 it('Validate setters', () => {
   itThrows(() => {
     class PostAG extends mm.ActionGroup {
-      t = mm.unsafeInsert().setInputs(user.id);
+      t = mm.unsafeInsert().setParams(user.id);
     }
     const ta = mm.actionGroup(post, PostAG);
     mr.insertIO(ta.t, commonIOOptions);
@@ -96,7 +96,7 @@ it('setDefaults', () => {
   const post2 = mm.table(Post);
 
   class PostAG extends mm.ActionGroup {
-    t = mm.insertOne().setDefaults().setInputs();
+    t = mm.insertOne().setDefaults().setParams();
   }
   const postTA = mm.actionGroup(post2, PostAG);
   const v = postTA.t;

@@ -11,7 +11,7 @@ it('Declare return types', async () => {
   }
   const employee = mm.table(Employee, { dbName: 'employees' });
   class EmployeeAG extends mm.ActionGroup {
-    insert = mm.insertOne().setInputs();
+    insert = mm.insertOne().setParams();
     insert2 = mm
       .transact(
         this.insert,
@@ -33,12 +33,12 @@ it('Pass values in child actions (no return value declaration)', async () => {
   const employee = mm.table(Employee, { dbName: 'employees' });
   class EmployeeAG extends mm.ActionGroup {
     getFirstName = mm.selectField(employee.firstName).by(employee.id);
-    insert = mm.insertOne().setInputs();
+    insert = mm.insertOne().setParams();
     insert1 = mm.transact(
       this.getFirstName.declareReturnValue(mm.ReturnValues.result, 'firstName'),
       mm
         .insertOne()
-        .setInputs()
+        .setParams()
         .wrap({ firstName: mm.captureVar('firstName') }),
     );
   }
@@ -59,7 +59,7 @@ it('Pass values in child actions and declare return values', async () => {
         this.getFirstName.declareReturnValue(mm.ReturnValues.result, 'firstName'),
         mm
           .insertOne()
-          .setInputs()
+          .setParams()
           .wrap({ firstName: mm.captureVar('firstName') })
           .declareReturnValues({
             [mm.ReturnValues.insertedID]: 'id2',
@@ -82,7 +82,7 @@ it('Return multiple values', async () => {
   }
   const employee = mm.table(Employee, { dbName: 'employees' });
   class EmployeeAG extends mm.ActionGroup {
-    insertEmp = mm.insertOne().setInputs();
+    insertEmp = mm.insertOne().setParams();
   }
   const employeeTA = mm.actionGroup(employee, EmployeeAG);
   class Dept extends mm.Table {
@@ -92,7 +92,7 @@ it('Return multiple values', async () => {
 
   const dept = mm.table(Dept, { dbName: 'departments' });
   class DeptAG extends mm.ActionGroup {
-    insertDept = mm.insertOne().setInputs();
+    insertDept = mm.insertOne().setParams();
   }
   const deptTA = mm.actionGroup(dept, DeptAG);
   class DeptManager extends mm.Table {
@@ -105,7 +105,7 @@ it('Return multiple values', async () => {
   const empNo = 'empNo';
   const deptNo = 'deptNo';
   class DeptManagerAG extends mm.ActionGroup {
-    insertCore = mm.insertOne().setInputs();
+    insertCore = mm.insertOne().setParams();
     insert = mm
       .transact(
         employeeTA.insertEmp.declareReturnValue(mm.ReturnValues.insertedID, empNo),
@@ -133,7 +133,7 @@ it('Inline member actions', async () => {
   class UserAG extends mm.ActionGroup {
     updatePostCount = mm
       .updateOne()
-      .set(user.postCount, mm.sql`${user.postCount} + ${mm.input(mm.int(), 'offset')}`)
+      .set(user.postCount, mm.sql`${user.postCount} + ${mm.param(mm.int(), 'offset')}`)
       .by(user.id);
   }
   const userTA = mm.actionGroup(user, UserAG);
@@ -144,12 +144,12 @@ it('Inline member actions', async () => {
 
   const post2 = mm.table(Post, { dbName: 'db_post' });
   class PostAG extends mm.ActionGroup {
-    insertCore = mm.insertOne().setInputs();
+    insertCore = mm.insertOne().setParams();
     insert = mm.transact(
       userTA.updatePostCount.wrap({ offset: '1' }),
       this.insertCore,
-      mm.updateOne().setInputs().by(post2.id),
-      mm.updateOne().setInputs().by(post2.id).wrap({ title: '"TITLE"' }),
+      mm.updateOne().setParams().by(post2.id),
+      mm.updateOne().setParams().by(post2.id).wrap({ title: '"TITLE"' }),
       this.insertCore.wrap({ title: '"abc"' }),
     );
   }
@@ -161,8 +161,8 @@ it('Inline member actions', async () => {
 it('Inline member actions (with from)', async () => {
   class PostAG extends mm.ActionGroup {
     t = mm.transact(
-      mm.insertOne().from(cmt2).setInputs(),
-      mm.insertOne().from(postCmt).setInputs(),
+      mm.insertOne().from(cmt2).setParams(),
+      mm.insertOne().from(postCmt).setParams(),
     );
   }
   const postTA = mm.actionGroup(post, PostAG);
@@ -182,7 +182,7 @@ it('Reference property values', async () => {
       mm.selectRow(user.age, user.name).declareReturnValue(mm.ReturnValues.result, 'res'),
       mm
         .insertOne()
-        .setInputs()
+        .setParams()
         .wrap({
           age: mm.captureVar('res.Age'),
           name: '"FOO"',
@@ -200,7 +200,7 @@ it('Use the return value of a TX', async () => {
   }
   const employee = mm.table(Employee, { dbName: 'employees' });
   class EmployeeAG extends mm.ActionGroup {
-    insert = mm.insertOne().setInputs();
+    insert = mm.insertOne().setParams();
     insert2 = mm
       .transact(
         this.insert,
@@ -222,8 +222,8 @@ it('Use the return value of a TX', async () => {
 it('Call an inner TX with .wrap', async () => {
   class PostAG extends mm.ActionGroup {
     t = mm.transact(
-      mm.insertOne().from(cmt2).setInputs(),
-      mm.insertOne().from(postCmt).setInputs(),
+      mm.insertOne().from(cmt2).setParams(),
+      mm.insertOne().from(postCmt).setParams(),
     );
 
     wrapped = this.t.wrap({ rplCount: 1, cmtID: 2 });

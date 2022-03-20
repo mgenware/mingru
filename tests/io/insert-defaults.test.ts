@@ -29,7 +29,7 @@ it('dtDefault', () => {
 
 it('insertWithDefaults', () => {
   class ColsAG extends mm.ActionGroup {
-    insertT = mm.insert().setInputs(cols.fk).setDefaults();
+    insertT = mm.insert().setParams(cols.fk).setDefaults();
   }
   const ta = mm.actionGroup(cols, ColsAG);
   const v = ta.insertT;

@@ -16,9 +16,9 @@ it('Select (where)', async () => {
     selectTimes = mm
       .selectRows(post.datetime, post.date)
       .whereSQL(
-        mm.sql`${post.n_datetime} = ${post.n_datetime.toInput()} OR ${
+        mm.sql`${post.n_datetime} = ${post.n_datetime.toParam()} OR ${
           post.n_date
-        } = ${post.n_date.toInput()}`,
+        } = ${post.n_date.toParam()}`,
       )
       .orderByAsc(post.id);
   }
@@ -36,8 +36,8 @@ it('Select field', async () => {
 
 it('Update', async () => {
   class PostAG extends mm.ActionGroup {
-    updateTimes = mm.unsafeUpdateAll().setInputs(post.datetime, post.date);
-    updateNullableTimes = mm.unsafeUpdateAll().setInputs(post.n_datetime, post.n_date);
+    updateTimes = mm.unsafeUpdateAll().setParams(post.datetime, post.date);
+    updateNullableTimes = mm.unsafeUpdateAll().setParams(post.n_datetime, post.n_date);
   }
   const ta = mm.actionGroup(post, PostAG);
   await testBuildToDirAsync([ta], ['post'], 'extraImportsUpdate');
@@ -47,11 +47,11 @@ it('Update (where)', async () => {
   class PostAG extends mm.ActionGroup {
     updateTimes = mm
       .updateSome()
-      .setInputs(post.datetime)
+      .setParams(post.datetime)
       .whereSQL(
-        mm.sql`${post.n_datetime} = ${post.n_datetime.toInput()} OR ${
+        mm.sql`${post.n_datetime} = ${post.n_datetime.toParam()} OR ${
           post.n_date
-        } = ${post.n_date.toInput()}`,
+        } = ${post.n_date.toParam()}`,
       );
   }
   const ta = mm.actionGroup(post, PostAG);
@@ -63,9 +63,9 @@ it('Delete (where)', async () => {
     deleteTimes = mm
       .deleteOne()
       .whereSQL(
-        mm.sql`${post.n_datetime} = ${post.n_datetime.toInput()} OR ${
+        mm.sql`${post.n_datetime} = ${post.n_datetime.toParam()} OR ${
           post.n_date
-        } = ${post.n_date.toInput()}`,
+        } = ${post.n_date.toParam()}`,
       );
   }
   const ta = mm.actionGroup(post, PostAG);
@@ -74,7 +74,7 @@ it('Delete (where)', async () => {
 
 it('Insert', async () => {
   class PostAG extends mm.ActionGroup {
-    insertTimes = mm.unsafeInsertOne().setInputs(post.datetime, post.n_datetime);
+    insertTimes = mm.unsafeInsertOne().setParams(post.datetime, post.n_datetime);
   }
   const ta = mm.actionGroup(post, PostAG);
   await testBuildToDirAsync([ta], ['post'], 'extraImportsInsert');

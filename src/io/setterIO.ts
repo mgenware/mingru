@@ -82,8 +82,8 @@ export class SetterIO {
     opt?: SQLIOBuilderOption,
   ): SetterIO {
     switch (autoSetter) {
-      case mm.AutoSetterType.input: {
-        return new SetterIO(col, sqlIO(mm.sql`${col.toInput()}`, dialect, sourceTable, opt));
+      case mm.AutoSetterType.param: {
+        return new SetterIO(col, sqlIO(mm.sql`${col.toParam()}`, dialect, sourceTable, opt));
       }
 
       case mm.AutoSetterType.default: {

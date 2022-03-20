@@ -6,7 +6,7 @@ import user from '../models/user.js';
 
 it('insert', async () => {
   class PostAG extends mm.ActionGroup {
-    insertT = mm.insert().setInputs(post.title, post.user_id).setInputs();
+    insertT = mm.insert().setParams(post.title, post.user_id).setParams();
   }
   const ta = mm.actionGroup(post, PostAG);
   await testBuildAsync(ta, 'insert/insert');
@@ -14,7 +14,7 @@ it('insert', async () => {
 
 it('unsafeInsert', async () => {
   class PostAG extends mm.ActionGroup {
-    insertT = mm.unsafeInsert().setInputs(post.title, post.user_id);
+    insertT = mm.unsafeInsert().setParams(post.title, post.user_id);
   }
   const ta = mm.actionGroup(post, PostAG);
   await testBuildAsync(ta, 'insert/unsafeInsert');
@@ -31,7 +31,7 @@ it('insertOne', async () => {
   }
   const employee = mm.table(Employee, { dbName: 'employees' });
   class EmployeeAG extends mm.ActionGroup {
-    insertT = mm.insertOne().setInputs();
+    insertT = mm.insertOne().setParams();
   }
   const ta = mm.actionGroup(employee, EmployeeAG);
   await testBuildAsync(ta, 'insert/insertOne');
@@ -39,7 +39,7 @@ it('insertOne', async () => {
 
 it('unsafeInsertOne', async () => {
   class PostAG extends mm.ActionGroup {
-    insertT = mm.unsafeInsertOne().setInputs(post.title, post.user_id);
+    insertT = mm.unsafeInsertOne().setParams(post.title, post.user_id);
   }
   const ta = mm.actionGroup(post, PostAG);
   await testBuildAsync(ta, 'insert/unsafeInsertOne');
@@ -49,7 +49,7 @@ it('Insert with non-input setters', async () => {
   class PostAG extends mm.ActionGroup {
     insertT = mm
       .unsafeInsert()
-      .setInputs(post.title, post.user_id)
+      .setParams(post.title, post.user_id)
       .set(post.content, mm.sql`"haha"`);
   }
   const ta = mm.actionGroup(post, PostAG);
@@ -58,7 +58,7 @@ it('Insert with non-input setters', async () => {
 
 it('insertWithDefaults', async () => {
   class ColsAG extends mm.ActionGroup {
-    insertT = mm.insert().setInputs(cols.fk).setDefaults();
+    insertT = mm.insert().setParams(cols.fk).setDefaults();
   }
   const ta = mm.actionGroup(cols, ColsAG);
   await testBuildAsync(ta, 'insert/insertWithDefaults');
@@ -66,7 +66,7 @@ it('insertWithDefaults', async () => {
 
 it('Custom DB name', async () => {
   class PostAG extends mm.ActionGroup {
-    insertT = mm.unsafeInsert().setInputs(post.title, post.cmtCount);
+    insertT = mm.unsafeInsert().setParams(post.title, post.cmtCount);
   }
   const ta = mm.actionGroup(post, PostAG);
   await testBuildAsync(ta, 'insert/customDBName');
@@ -83,7 +83,7 @@ it('Set auto-increment as input', async () => {
   }
   const employee = mm.table(Employee, { dbName: 'employees' });
   class EmployeeAG extends mm.ActionGroup {
-    insertT = mm.insertOne().setInputs(employee.id).setInputs();
+    insertT = mm.insertOne().setParams(employee.id).setParams();
   }
   const ta = mm.actionGroup(employee, EmployeeAG);
   await testBuildAsync(ta, 'insert/aiColumnAsInput');
@@ -109,7 +109,7 @@ it('Nullable FK and `setInputs`', async () => {
   }
   const myPost = mm.table(Post);
   class PostAG extends mm.ActionGroup {
-    insertT = mm.insertOne().setInputs();
+    insertT = mm.insertOne().setParams();
   }
   const ta = mm.actionGroup(myPost, PostAG);
   await testBuildAsync(ta, 'insert/nullableFKSetInputs');

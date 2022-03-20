@@ -9,16 +9,16 @@ import { eq, ok } from '../assert-aliases.js';
 class WrapSelfAG extends mm.ActionGroup {
   s = mm
     .updateSome()
-    .set(user.url_name, mm.sql`${mm.input(user.url_name)}`)
-    .setInputs(user.sig, user.follower_count)
-    .whereSQL(mm.sql`${user.url_name.toInput()} ${user.id.toInput()} ${user.url_name.toInput()}`);
+    .set(user.url_name, mm.sql`${mm.param(user.url_name)}`)
+    .setParams(user.sig, user.follower_count)
+    .whereSQL(mm.sql`${user.url_name.toParam()} ${user.id.toParam()} ${user.url_name.toParam()}`);
 
   d = this.s.wrap({ sig: '"haha"' });
   dTmp = mm
     .updateSome()
-    .set(user.url_name, mm.sql`${mm.input(user.url_name)}`)
-    .setInputs(user.sig, user.follower_count)
-    .whereSQL(mm.sql`${user.url_name.toInput()} ${user.id.toInput()} ${user.url_name.toInput()}`)
+    .set(user.url_name, mm.sql`${mm.param(user.url_name)}`)
+    .setParams(user.sig, user.follower_count)
+    .whereSQL(mm.sql`${user.url_name.toParam()} ${user.id.toParam()} ${user.url_name.toParam()}`)
     .wrap({ sig: '"haha"' });
 }
 const wrapSelf = mm.actionGroup(user, WrapSelfAG);
@@ -64,7 +64,7 @@ it('Throws on undefined inputs', () => {
   class UserAG extends mm.ActionGroup {
     t = mm
       .selectRow(user.id, user.url_name)
-      .whereSQL(mm.sql`${user.id.toInput()} ${user.url_name.toInput()} ${user.id.toInput()}`);
+      .whereSQL(mm.sql`${user.id.toParam()} ${user.url_name.toParam()} ${user.id.toParam()}`);
 
     t2 = this.t.wrap({
       haha: '"tony"',

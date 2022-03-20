@@ -588,14 +588,14 @@ export class SelectIOProcessor extends BaseIOProcessor {
   }
 
   private getOrderByColumnSQL(col: mm.OrderByColumnType): StringSegment[] {
-    if (col instanceof mm.OrderByColumnInput) {
+    if (col instanceof mm.OrderByColumnParam) {
       const enumTypeName = `${this.actionUniqueTypeName}OrderBy${this.orderByInputCounter}`;
       const orderByParamName = `${orderByInputParamName}${this.orderByInputCounter}`;
       const orderByResultName = `${orderByParamName}SQL`;
       const names: string[] = [];
       const values: StringSegment[][] = [];
       for (const choice of col.columns) {
-        const [displayName, code] = this.getOrderByNonInputColumnSQL(choice);
+        const [displayName, code] = this.getOrderByNonParamColumnSQL(choice);
         names.push(stringUtils.toPascalCase(`${enumTypeName}${displayName}`));
         values.push(code);
       }
@@ -613,7 +613,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
       this.orderByInputCounter++;
       return [{ code: orderByResultName }];
     }
-    const [, code] = this.getOrderByNonInputColumnSQL(col.column);
+    const [, code] = this.getOrderByNonParamColumnSQL(col.column);
     if (col.desc) {
       return [...code, ' DESC'];
     }
@@ -622,7 +622,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
 
   // Gets ORDER BY value of the specified column. Returns an array of string segments
   // along with a column display name which is used in ORDER BY inputs.
-  private getOrderByNonInputColumnSQL(
+  private getOrderByNonParamColumnSQL(
     col: mm.SelectedColumnTypesOrName,
   ): [string, StringSegment[]] {
     const { dialect } = this.opt;

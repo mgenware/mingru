@@ -114,8 +114,8 @@ function handleElement(
       return res;
     }
 
-    case mm.SQLElementType.input: {
-      const input = element.toInput();
+    case mm.SQLElementType.param: {
+      const input = element.toParam();
       if (input.isArray) {
         return [
           { code: `mingru.InputPlaceholders(len(${VarDefBuilder.getSQLVarInputName(input)}))` },
@@ -198,11 +198,11 @@ export function sqlIO(
     throw new Error(`Elements should be an array, got \`${toTypeString(sql.elements)}\``);
   }
   for (const element of sql.elements) {
-    if (element.type === mm.SQLElementType.input) {
+    if (element.type === mm.SQLElementType.param) {
       // There's no unsafe calls here. It's probably an ESLint TypeScript bug.
       // eslint-disable-next-line max-len
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
-      const sqlVar = element.toInput();
+      const sqlVar = element.toParam();
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       const varDef = VarDefBuilder.fromSQLVar(sqlVar, dialect);
       vars.add(varDef);

@@ -5,7 +5,7 @@ import post from '../models/post.js';
 
 it('Wrap', async () => {
   class UserAG extends mm.ActionGroup {
-    t = mm.updateOne().setInputs().by(user.id);
+    t = mm.updateOne().setParams().by(user.id);
   }
   const userTA = mm.actionGroup(user, UserAG);
   class PostAG extends mm.ActionGroup {
@@ -14,10 +14,10 @@ it('Wrap', async () => {
     s = mm
       .updateSome()
       .from(user)
-      .set(user.url_name, mm.sql`${mm.input(user.url_name)}`)
-      .setInputs(user.sig, user.follower_count)
+      .set(user.url_name, mm.sql`${mm.param(user.url_name)}`)
+      .setParams(user.sig, user.follower_count)
       .whereSQL(
-        mm.sql`${user.url_name.toInput()} ${user.id.toInput()} ${user.sig.toInput()} ${user.url_name.toInput()}`,
+        mm.sql`${user.url_name.toParam()} ${user.id.toParam()} ${user.sig.toParam()} ${user.url_name.toParam()}`,
       );
 
     // ROOT_TABLE: post
@@ -30,7 +30,7 @@ it('Wrap', async () => {
 
     // ROOT_TABLE: post
     // TABLE: post
-    t3 = mm.updateOne().setInputs().by(post.id).wrap({ title: '"t3"' });
+    t3 = mm.updateOne().setParams().by(post.id).wrap({ title: '"t3"' });
   }
   const ta = mm.actionGroup(post, PostAG);
   await testBuildAsync(ta, 'wrap/wrap');
@@ -38,7 +38,7 @@ it('Wrap', async () => {
 
 it('`Wrap + RenameArg`', async () => {
   class UserAG extends mm.ActionGroup {
-    t = mm.updateOne().setInputs().by(user.id);
+    t = mm.updateOne().setParams().by(user.id);
   }
   const userTA = mm.actionGroup(user, UserAG);
   class PostAG extends mm.ActionGroup {

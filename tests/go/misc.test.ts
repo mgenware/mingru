@@ -8,7 +8,7 @@ it('Ghost table', async () => {
   const ghost = mm.table(Ghost);
   class GhostAG extends mm.ActionGroup {
     selectT = mm.selectRows(post.id, post.title).from(post).orderByAsc(post.id);
-    insertT = mm.insert().from(cols).setInputs(cols.fk).setDefaults();
+    insertT = mm.insert().from(cols).setParams(cols.fk).setDefaults();
   }
   const ta = mm.actionGroup(ghost, GhostAG);
   await testBuildAsync(ta, 'misc/ghostTable');

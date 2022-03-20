@@ -77,7 +77,7 @@ it('selectField + nullable', async () => {
 
 it('WHERE', async () => {
   class PostAG extends mm.ActionGroup {
-    selectT = mm.selectRow(post.id, post.title).whereSQL(mm.sql`${post.id} = ${mm.input(post.id)}`);
+    selectT = mm.selectRow(post.id, post.title).whereSQL(mm.sql`${post.id} = ${mm.param(post.id)}`);
   }
   const ta = mm.actionGroup(post, PostAG);
   await testBuildAsync(ta, 'select/where');
@@ -85,7 +85,7 @@ it('WHERE', async () => {
 
 it('selectRows with WHERE', async () => {
   class PostAG extends mm.ActionGroup {
-    selectT = mm.selectRows(post.id, post.title).where`${post.id.isEqualToInput()}`.orderByAsc(
+    selectT = mm.selectRows(post.id, post.title).where`${post.id.isEqualToParam()}`.orderByAsc(
       post.id,
     );
   }
@@ -98,7 +98,7 @@ it('selectRows, WHERE, orderBy', async () => {
   class PostAG extends mm.ActionGroup {
     selectT = mm
       .selectRows(post.id, cc, post.title)
-      .whereSQL(mm.sql`${post.id} = ${post.id.toInput()}`)
+      .whereSQL(mm.sql`${post.id} = ${post.id.toParam()}`)
       .orderByAsc(post.title)
       .orderByAsc(cc)
       .orderByDesc(post.title)
@@ -113,10 +113,10 @@ it('ORDER BY inputs', async () => {
   class PostAG extends mm.ActionGroup {
     selectT = mm
       .selectRows(post.id, cc, post.title)
-      .whereSQL(mm.sql`${post.id} = ${post.id.toInput()}`)
+      .whereSQL(mm.sql`${post.id} = ${post.id.toParam()}`)
       .orderByAsc(post.title)
-      .orderByInput(cc, post.title, post.cmtCount)
-      .orderByInput('n', post.title);
+      .orderByParams(cc, post.title, post.cmtCount)
+      .orderByParams('n', post.title);
   }
   const ta = mm.actionGroup(post, PostAG);
   await testBuildAsync(ta, 'select/orderByInputs');
@@ -135,7 +135,7 @@ it('WHERE: multiple cols', async () => {
     selectT = mm
       .selectRow(post.id, post.title)
       .whereSQL(
-        mm.sql`${post.id} = ${mm.input(post.id)} && ${post.title} != ${mm.input(post.title)}`,
+        mm.sql`${post.id} = ${mm.param(post.id)} && ${post.title} != ${mm.param(post.title)}`,
       );
   }
   const ta = mm.actionGroup(post, PostAG);
@@ -147,7 +147,7 @@ it('Custom params', async () => {
     selectT = mm
       .selectRow(post.id, post.title)
       .whereSQL(
-        mm.sql`${post.id} = ${mm.input(post.id, 'id')} && raw_name = ${mm.input(
+        mm.sql`${post.id} = ${mm.param(post.id, 'id')} && raw_name = ${mm.param(
           { type: 'string', defaultValue: 0 },
           'name',
         )}`,
@@ -181,7 +181,7 @@ it('Join implied by WHERE', async () => {
   class CmtAG extends mm.ActionGroup {
     selectT = mm
       .selectRow(cmt.id)
-      .whereSQL(cmt.target_id.join(post).user_id.join(user).url_name.isEqualToInput());
+      .whereSQL(cmt.target_id.join(post).user_id.join(user).url_name.isEqualToParam());
   }
   const ta = mm.actionGroup(cmt, CmtAG);
   await testBuildAsync(ta, 'select/joinImpliedByWhere');
@@ -281,7 +281,7 @@ it('Explicit join with multiple columns and an extra SQL', async () => {
         user,
         user.url_name,
         [[post.m_user_id, user.id]],
-        (jt) => mm.sql`AND ${jt.age.isEqualToInput()} AND ${post.id.isEqualToInput()}`,
+        (jt) => mm.sql`AND ${jt.age.isEqualToParam()} AND ${post.id.isEqualToParam()}`,
       ).age,
     );
   }
@@ -412,9 +412,9 @@ it('WHERE, inputs, joins', async () => {
     selectT = mm
       .selectRow(cmt.id)
       .whereSQL(
-        mm.sql` ${cmt.id.toInput()}, ${cmt.user_id.toInput()}, ${cmt.target_id
+        mm.sql` ${cmt.id.toParam()}, ${cmt.user_id.toParam()}, ${cmt.target_id
           .join(post)
-          .title.toInput()}, ${cmt.target_id.join(post).user_id.join(user).url_name.toInput()}`,
+          .title.toParam()}, ${cmt.target_id.join(post).user_id.join(user).url_name.toParam()}`,
       );
   }
   const ta = mm.actionGroup(cmt, CmtAG);
@@ -435,7 +435,7 @@ it('Column aliases', async () => {
         mm.sql`${cmt.votes.join(post).reviewer_id} ${cmt.target_id
           .join(post)
           .user_id.join(user)
-          .url_name.toInput()}`,
+          .url_name.toParam()}`,
       )
       .groupBy(cmt.votes).having`${cmt.votes} ${cmt.votes.join(post).time}`
       .orderByAsc(cmt.votes)
@@ -460,7 +460,7 @@ it('No column aliases', async () => {
         mm.sql`${cmt.votes.join(post).reviewer_id} ${cmt.target_id
           .join(post)
           .user_id.join(user)
-          .url_name.toInput()}`,
+          .url_name.toParam()}`,
       )
       .groupBy(cmt.votes).having`${cmt.votes} ${cmt.votes.join(post).time}`
       .orderByAsc(cmt.votes)
@@ -493,8 +493,8 @@ it('GROUP BY and HAVING', async () => {
       .groupBy(yearCol, 'total')
       .havingSQL(
         mm.and(
-          mm.sql`${yearCol} > ${mm.input(mm.int(), 'year')}`,
-          mm.sql`\`total\` > ${mm.int().toInput('total')}`,
+          mm.sql`${yearCol} > ${mm.param(mm.int(), 'year')}`,
+          mm.sql`\`total\` > ${mm.int().toParam('total')}`,
         ),
       );
   }
@@ -506,7 +506,7 @@ it('HAVING and JOIN', async () => {
   class PostAG extends mm.ActionGroup {
     t = mm.selectRows(post.n_time).groupBy(post.title).having`${post.user_id
       .join(user)
-      .id.isEqualToInput()}`.orderByAsc(post.user_id);
+      .id.isEqualToParam()}`.orderByAsc(post.user_id);
   }
   const ta = mm.actionGroup(post, PostAG);
   await testBuildAsync(ta, 'select/groupByAndHavingJoin');
@@ -634,7 +634,7 @@ it('SELECT, EXISTS, IF', async () => {
 
 it('selectExists', async () => {
   class PostAG extends mm.ActionGroup {
-    t = mm.selectExists().whereSQL(post.user_id.join(user).sig.isEqualToInput());
+    t = mm.selectExists().whereSQL(post.user_id.join(user).sig.isEqualToParam());
   }
   const ta = mm.actionGroup(post, PostAG);
   await testBuildAsync(ta, 'select/selectExists');
@@ -642,9 +642,9 @@ it('selectExists', async () => {
 
 it('toInputArray', async () => {
   class PostAG extends mm.ActionGroup {
-    t = mm.selectRows(post.id, post.title).where`${post.id} IN ${post.id.toArrayInput(
+    t = mm.selectRows(post.id, post.title).where`${post.id} IN ${post.id.toArrayParam(
       'ids',
-    )} OR ${post.id.isNotEqualToInput('idInput')} OR ${post.id.isInArrayInput()}`.orderByAsc(
+    )} OR ${post.id.isNotEqualToParam('idInput')} OR ${post.id.isInArrayParam()}`.orderByAsc(
       post.id,
     );
   }
@@ -654,11 +654,11 @@ it('toInputArray', async () => {
 
 it('Inputs', async () => {
   class PostAG extends mm.ActionGroup {
-    t = mm.selectRow(post.id).where`${post.n_datetime.toInput()} ${post.n_datetime.toInput('p2', {
+    t = mm.selectRow(post.id).where`${post.n_datetime.toParam()} ${post.n_datetime.toParam('p2', {
       nullable: false,
-    })} ${post.n_datetime.toInput('p3', {
+    })} ${post.n_datetime.toParam('p3', {
       nullable: true,
-    })} ${post.id.toInput('p4', { nullable: false })} ${post.id.toInput('p5', { nullable: true })}`;
+    })} ${post.id.toParam('p4', { nullable: false })} ${post.id.toParam('p5', { nullable: true })}`;
   }
   const ta = mm.actionGroup(post, PostAG);
   await testBuildAsync(ta, 'select/inputs');
@@ -666,13 +666,13 @@ it('Inputs', async () => {
 
 it('Inputs with array', async () => {
   class PostAG extends mm.ActionGroup {
-    t = mm.selectRow(post.id).where`${post.n_datetime.toInput(undefined, {
+    t = mm.selectRow(post.id).where`${post.n_datetime.toParam(undefined, {
       isArray: true,
-    })} ${post.n_datetime.toInput('p2', {
+    })} ${post.n_datetime.toParam('p2', {
       nullable: false,
-    })} ${post.n_datetime.toInput('p3', {
+    })} ${post.n_datetime.toParam('p3', {
       nullable: true,
-    })} ${post.id.toInput('p4', { nullable: false })} ${post.id.toInput('p5', { nullable: true })}`;
+    })} ${post.id.toParam('p4', { nullable: false })} ${post.id.toParam('p5', { nullable: true })}`;
   }
   const ta = mm.actionGroup(post, PostAG);
   await testBuildAsync(ta, 'select/inputsArrayVersion');
@@ -684,7 +684,7 @@ it('Nested AS in SQL calls', async () => {
   class PostAG extends mm.ActionGroup {
     t = mm.selectRow(mm.sel(mm.year(mm.year(post.id)), 'name1')).where`${mm.year(
       mm.year(post.id),
-    )} == ${post.id.toInput('idInput')}`;
+    )} == ${post.id.toParam('idInput')}`;
   }
   const ta = mm.actionGroup(post, PostAG);
   await testBuildAsync(ta, 'select/nestedAsInCalls');
@@ -697,7 +697,7 @@ it('Nested AS in SQL calls (with join)', async () => {
   class PostAG extends mm.ActionGroup {
     t = mm.selectRow(mm.sel(mm.year(mm.year(col)), 'name1')).where`${mm.year(
       mm.year(col),
-    )} == ${col.toInput('ageInput')}`;
+    )} == ${col.toParam('ageInput')}`;
   }
   const ta = mm.actionGroup(post, PostAG);
   await testBuildAsync(ta, 'select/nestedAsInCallsWithJoin');

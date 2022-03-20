@@ -28,7 +28,7 @@ it('Where', () => {
   class UserAG extends mm.ActionGroup {
     t = mm
       .selectRow(user.id, user.url_name)
-      .whereSQL(mm.sql`${user.id} = 1 ${user.id.toInput()} ${user.id.toInput()}`);
+      .whereSQL(mm.sql`${user.id} = 1 ${user.id.toParam()} ${user.id.toParam()}`);
   }
   const userTA = mm.actionGroup(user, UserAG);
   const v = userTA.t;
@@ -43,7 +43,7 @@ it('Where and inputs', () => {
     t = mm
       .selectRow(user.id, user.url_name)
       .whereSQL(
-        mm.sql`${user.id} = ${mm.input(user.id)} && ${user.url_name} = ${mm.input(
+        mm.sql`${user.id} = ${mm.param(user.id)} && ${user.url_name} = ${mm.param(
           { type: 'string', defaultValue: null },
           'userName',
         )}`,
@@ -132,7 +132,7 @@ it('3-table joins and WHERE', () => {
         mm.sql`${cmt.user_id} = 1 AND ${cmt.target_id.join(post).title} = 2 | ${cmt.target_id
           .join(post)
           .user_id.join(user)
-          .url_name.isEqualToInput()} | ${cmt.id.isEqualToInput()} | ${cmt.target_id.isEqualToInput()}`,
+          .url_name.isEqualToParam()} | ${cmt.id.isEqualToParam()} | ${cmt.target_id.isEqualToParam()}`,
       );
   }
   const cmtTA = mm.actionGroup(cmt, CmtAG);
@@ -217,7 +217,7 @@ it('getInputs', () => {
   class UserAG extends mm.ActionGroup {
     t = mm
       .selectRow(user.id, user.url_name)
-      .whereSQL(mm.sql`${user.id.toInput()} ${user.url_name.toInput()} ${user.id.toInput()}`);
+      .whereSQL(mm.sql`${user.id.toParam()} ${user.url_name.toParam()} ${user.id.toParam()}`);
   }
   const ta = mm.actionGroup(user, UserAG);
   const v = ta.t;
@@ -239,7 +239,7 @@ it('returnValues', () => {
   class UserAG extends mm.ActionGroup {
     t = mm
       .selectRow(user.id)
-      .whereSQL(mm.sql`${user.id.toInput()} ${post.title.toInput()} ${user.id.toInput()}`);
+      .whereSQL(mm.sql`${user.id.toParam()} ${post.title.toParam()} ${user.id.toParam()}`);
   }
   const ta = mm.actionGroup(user, UserAG);
   const v = ta.t;
@@ -289,7 +289,7 @@ it('Unrelated cols', () => {
   // Do NOT throws on inputs
   assert.doesNotThrow(() => {
     class UserAG extends mm.ActionGroup {
-      t = mm.selectRow(user.id).whereSQL(mm.sql`${post.id.toInput()}`);
+      t = mm.selectRow(user.id).whereSQL(mm.sql`${post.id.toParam()}`);
     }
     const ta = mm.actionGroup(user, UserAG);
     const v = ta.t;

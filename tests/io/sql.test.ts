@@ -35,13 +35,13 @@ it('toSQL(sourceTable)', () => {
 });
 
 it('Nested SQLs', () => {
-  const i1 = mm.input(user.id);
-  const i2 = user.url_name.toInput();
-  const sql1 = mm.sql`${user.url_name} = ${i2} ${mm.input({ type: 'a', defaultValue: null }, 'b')}`;
-  const i3 = mm.input(user.sig);
+  const i1 = mm.param(user.id);
+  const i2 = user.url_name.toParam();
+  const sql1 = mm.sql`${user.url_name} = ${i2} ${mm.param({ type: 'a', defaultValue: null }, 'b')}`;
+  const i3 = mm.param(user.sig);
   const sql2 = mm.sql`_${user.id} = ${i1} AND ${sql1}`;
-  const i4 = mm.input({ type: 'a', defaultValue: null }, 'b');
-  const sql = mm.sql`START${sql2} OR ${user.sig} = ${i3} = ${mm.input(user.sig)} ${i4}`;
+  const i4 = mm.param({ type: 'a', defaultValue: null }, 'b');
+  const sql = mm.sql`START${sql2} OR ${user.sig} = ${i3} = ${mm.param(user.sig)} ${i4}`;
 
   const io = mr.sqlIO(sql, dialect, null);
   eq(
@@ -51,9 +51,9 @@ it('Nested SQLs', () => {
 });
 
 it('list and distinctList', () => {
-  const i1 = mm.input(user.id);
+  const i1 = mm.param(user.id);
   const i2 = mm.sql`${i1} ${i1}`;
-  const sql = mm.sql`${i1} ${i2} ${user.age.toInput()}`;
+  const sql = mm.sql`${i1} ${i2} ${user.age.toParam()}`;
 
   const io = mr.sqlIO(sql, dialect, null);
   eq(io.vars.toString(), 'id: uint64, id: uint64, id: uint64, age: int {id: uint64, age: int}');
@@ -61,12 +61,12 @@ it('list and distinctList', () => {
 
 it('Conflicting names', () => {
   itThrows(() => {
-    const sql = mm.sql`${user.id.toInput()}${mm.input({ type: 'b', defaultValue: null }, 'id')}`;
+    const sql = mm.sql`${user.id.toParam()}${mm.param({ type: 'b', defaultValue: null }, 'id')}`;
     mr.sqlIO(sql, dialect, null);
   }, 'Cannot handle two variables with the same name "id" but different types ("uint64" and "b") in "Expression `VAR(Column(id, t=User(user)))VAR({"type":"b","defaultValue":null}, name=id)`"');
 
   itThrows(() => {
-    const sql = mm.sql`${mm.input({ type: 'a', defaultValue: null }, 'v1')}${mm.input(
+    const sql = mm.sql`${mm.param({ type: 'a', defaultValue: null }, 'v1')}${mm.param(
       { type: 'b', defaultValue: null },
       'v1',
     )}`;

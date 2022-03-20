@@ -12,9 +12,9 @@ it('TransactIO', () => {
   class WrapSelfAG extends mm.ActionGroup {
     s = mm
       .updateSome()
-      .set(user.url_name, mm.sql`${mm.input(user.url_name)}`)
-      .setInputs(user.sig, user.follower_count)
-      .whereSQL(mm.sql`${user.url_name.toInput()} ${user.id.toInput()} ${user.url_name.toInput()}`);
+      .set(user.url_name, mm.sql`${mm.param(user.url_name)}`)
+      .setParams(user.sig, user.follower_count)
+      .whereSQL(mm.sql`${user.url_name.toParam()} ${user.id.toParam()} ${user.url_name.toParam()}`);
 
     d = this.s.wrap({ sig: '"haha"' });
   }
@@ -35,11 +35,11 @@ it('TransactIO', () => {
 
 it('Members with WRAP actions', () => {
   class SourceAG extends mm.ActionGroup {
-    s = mm.updateSome().setInputs(user.sig, user.follower_count).by(user.id);
+    s = mm.updateSome().setParams(user.sig, user.follower_count).by(user.id);
   }
   const srcTA = mm.actionGroup(user, SourceAG);
   class WrapAG extends mm.ActionGroup {
-    s = mm.updateSome().setInputs(user.sig, user.follower_count).by(user.id);
+    s = mm.updateSome().setParams(user.sig, user.follower_count).by(user.id);
     s2 = this.s.wrap({ sig: '"haha"' });
     t = mm.transact(this.s.wrap({ sig: '"haha"' }));
     t2 = mm.transact(this.s2);
@@ -96,7 +96,7 @@ it('TX member IOs', () => {
   }
   const employee = mm.table(Employee, { dbName: 'employees' });
   class EmployeeAG extends mm.ActionGroup {
-    insert = mm.insertOne().setInputs();
+    insert = mm.insertOne().setParams();
     insert2 = mm
       .transact(
         this.insert,
@@ -124,8 +124,8 @@ it('TX member IOs', () => {
 it('Merging SQL vars', () => {
   class PostAG extends mm.ActionGroup {
     t = mm.transact(
-      mm.insertOne().from(cmt2).setInputs(),
-      mm.insertOne().from(postCmt).setInputs(),
+      mm.insertOne().from(cmt2).setParams(),
+      mm.insertOne().from(postCmt).setParams(),
     );
   }
   const postTA = mm.actionGroup(post, PostAG);
@@ -143,8 +143,8 @@ it('Merging SQL vars', () => {
 it('Merging SQL vars (WRAPPED)', () => {
   class PostAG extends mm.ActionGroup {
     t = mm.transact(
-      mm.insertOne().from(cmt2).setInputs(),
-      mm.insertOne().from(postCmt).setInputs(),
+      mm.insertOne().from(cmt2).setParams(),
+      mm.insertOne().from(postCmt).setParams(),
     );
 
     wrapped = this.t.wrap({ rplCount: 1, cmtID: 2 });
