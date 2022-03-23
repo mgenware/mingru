@@ -37,5 +37,5 @@ it('Action info appended to error message', async () => {
     }
     const ta = mm.actionGroup(post, PostAG);
     await testBuildAsync(ta, '');
-  }, 'Source table assertion failed, expected "Post(post, db=db_post)", got "User(user)". [action "post.t"]');
+  }, 'Source table assertion failed, expected "Post(post, db=db_post)", got "User(user)". [Validating setter of InsertAction(t, t=Post(post, db=db_post))] [Setter: Column(id, t=User(user))] [action "post.t"]');
 });

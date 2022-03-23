@@ -54,9 +54,15 @@ class UpdateIOProcessor extends BaseIOProcessor {
 
     // Setters
     if (actionData.setters) {
-      utils.validateSetters(actionData.setters, sqlTable);
+      utils.validateSetters(actionData.setters, sqlTable, `[Validating setters of ${action}]`);
     }
-    const setterIOs = SetterIO.fromAction(action, dialect, true, sqlTable);
+    const setterIOs = SetterIO.fromAction(
+      action,
+      dialect,
+      true,
+      sqlTable,
+      `[Building setters of ${action}]`,
+    );
 
     forEachWithSlots(
       setterIOs,
@@ -69,7 +75,7 @@ class UpdateIOProcessor extends BaseIOProcessor {
 
     // WHERE
     const whereIO = actionData.whereSQLValue
-      ? sqlIO(actionData.whereSQLValue, dialect, sqlTable)
+      ? sqlIO(actionData.whereSQLValue, dialect, sqlTable, `[Building WHERE of ${action}]`)
       : null;
     if (whereIO) {
       sql.push(' WHERE ');

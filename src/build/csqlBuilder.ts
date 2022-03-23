@@ -40,7 +40,12 @@ export default class CSQLBuilder {
       if (colData.index) {
         indicesLines.push(`${colData.isUniqueIndex ? 'UNIQUE ' : ''}INDEX (${colDBNameEncoded})`);
       }
-      const io = sqlIO(dialect.colToSQLType(col), dialect, null);
+      const io = sqlIO(
+        dialect.colToSQLType(col),
+        dialect,
+        null,
+        `[Building SQL type of column ${col}]`,
+      );
       body.push(`${dialect.encodeColumnName(col)} ${extractStringContentFromSegments(io.code)}`);
 
       const colAlias = colData.attrs?.get(mm.ColumnAttribute.alias);
@@ -50,7 +55,12 @@ export default class CSQLBuilder {
         }
         colAliases.add(colAlias);
         const code = extractStringContentFromSegments(
-          sqlIO(dialect.colToSQLType(col, SQLTypeMode.alias), dialect, null).code,
+          sqlIO(
+            dialect.colToSQLType(col, SQLTypeMode.alias),
+            dialect,
+            null,
+            `[Building SQL type of column ${col}] with alias ${colAlias}`,
+          ).code,
         );
         body.push(`${dialect.encodeName(colAlias)} ${code}`);
       }

@@ -274,7 +274,7 @@ it('Unrelated cols', () => {
     const ta = mm.actionGroup(user, UserAG);
     const v = ta.t;
     mr.selectIO(v, commonIOOptions);
-  }, 'Source table assertion failed, expected "User(user)", got "Post(post, db=db_post)".');
+  }, 'Source table assertion failed, expected "User(user)", got "Post(post, db=db_post)". [Validating source of column Column(user_id, t=Post(post, db=db_post))]');
 
   // WHERE col
   itThrows(() => {
@@ -284,7 +284,7 @@ it('Unrelated cols', () => {
     const ta = mm.actionGroup(user, UserAG);
     const v = ta.t;
     mr.selectIO(v, commonIOOptions);
-  }, 'Source table assertion failed, expected "User(user)", got "Post(post, db=db_post)".');
+  }, 'Source table assertion failed, expected "User(user)", got "Post(post, db=db_post)". [Handling WHERE of SelectAction(t, t=User(user))]');
 
   // Do NOT throws on inputs
   assert.doesNotThrow(() => {

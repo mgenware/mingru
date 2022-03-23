@@ -8,7 +8,7 @@ const TimePkg = 'time';
 const dialect = mr.mysql;
 
 function sqlEq(sql: mm.SQL, value: string) {
-  eq(mr.sqlIO(sql, dialect, null).getCodeString(), `"${value}"`);
+  eq(mr.sqlIO(sql, dialect, null, 'sqlEq').getCodeString(), `"${value}"`);
 }
 
 function testDTToGoType(col: mm.Column, type: string, pkg?: string) {

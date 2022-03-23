@@ -29,13 +29,14 @@ function getSQLCode(
   dialect: Dialect,
   rewriteElement: ((element: mm.SQLElement) => StringSegment[] | null) | null,
   subqueryCallback: ((action: mm.Action, io: ActionIO) => void) | null,
+  context: string,
 ): StringSegment[] {
   const res: StringSegment[] = [];
   for (const element of sql.elements) {
     if (element.type === mm.SQLElementType.column) {
       const col = element.toColumn();
       if (sourceTable) {
-        col.__checkSourceTable(sourceTable);
+        col.__checkSourceTable(sourceTable, context);
       }
     }
     let rewriteElementRes: StringSegment[] | null = null;
@@ -47,7 +48,7 @@ function getSQLCode(
     // Note that it doesn't handle elements in subqueries.
     const elementResults =
       rewriteElementRes === null
-        ? handleElement(element, sourceTable, dialect, rewriteElement, subqueryCallback)
+        ? handleElement(element, sourceTable, dialect, rewriteElement, subqueryCallback, context)
         : rewriteElementRes;
     for (const r of elementResults) {
       res.push(r);
@@ -85,6 +86,7 @@ function handleElement(
   dialect: Dialect,
   rewriteElement: ((element: mm.SQLElement) => StringSegment[] | null) | null,
   subqueryCallback: ((action: mm.Action, io: ActionIO) => void) | null,
+  context: string,
 ): StringSegment[] {
   switch (element.type) {
     case mm.SQLElementType.rawString: {
@@ -104,7 +106,7 @@ function handleElement(
         res.push(
           ...join2DArrays(
             call.params.map((p) =>
-              getSQLCode(p, defaultTable, dialect, rewriteElement, subqueryCallback),
+              getSQLCode(p, defaultTable, dialect, rewriteElement, subqueryCallback, context),
             ),
             ', ',
           ),
@@ -141,6 +143,7 @@ function handleElement(
             dialect,
             rewriteElement,
             subqueryCallback,
+            context,
           );
         }
         return [dialect.encodeColumnName(core)];
@@ -157,6 +160,7 @@ function handleElement(
         dialect,
         rewriteElement,
         subqueryCallback,
+        context,
       );
     }
 
@@ -191,6 +195,7 @@ export function sqlIO(
   dialect: Dialect,
   // Default table if `FROM` is not present.
   defaultTable: mm.Table | null,
+  context: string,
   opt?: SQLIOBuilderOption,
 ): SQLIO {
   const vars = new SQLVarList(`Expression ${sql.toString()}`);
@@ -221,6 +226,7 @@ export function sqlIO(
       dialect,
       opt.rewriteElement || null,
       opt.subqueryCallback || null,
+      context,
     ),
   );
 }

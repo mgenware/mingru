@@ -368,7 +368,13 @@ export class SelectIOProcessor extends BaseIOProcessor {
       // after joins are handled below.
       let whereSQL: StringSegment[] = [];
       if (whereSQLValue) {
-        whereIO = sqlIO(whereSQLValue, dialect, sqlTable, this.getSQLBuilderOpt());
+        whereIO = sqlIO(
+          whereSQLValue,
+          dialect,
+          sqlTable,
+          `[Handling WHERE of ${this.action}]`,
+          this.getSQLBuilderOpt(),
+        );
         whereSQL = [' WHERE ', ...whereIO.code];
       }
 
@@ -415,7 +421,13 @@ export class SelectIOProcessor extends BaseIOProcessor {
     // HAVING
     let havingIO: SQLIO | null = null;
     if (havingSQLValue) {
-      havingIO = sqlIO(havingSQLValue, dialect, sqlTable, this.getSQLBuilderOpt());
+      havingIO = sqlIO(
+        havingSQLValue,
+        dialect,
+        sqlTable,
+        `[Handling HAVING of ${this.action}]`,
+        this.getSQLBuilderOpt(),
+      );
       sql.push(' HAVING ', ...havingIO.code);
     }
 
@@ -747,7 +759,10 @@ export class SelectIOProcessor extends BaseIOProcessor {
       sql = colSQL;
     }
     const variableName = alias || modelName;
-    return [variableName, sqlIO(sql, this.opt.dialect, sqlTable, opt).code];
+    return [
+      variableName,
+      sqlIO(sql, this.opt.dialect, sqlTable, `Getting selected SQL col code ${col}`, opt).code,
+    ];
   }
 
   // Returns SQL expr of the selected column.
@@ -820,7 +835,13 @@ export class SelectIOProcessor extends BaseIOProcessor {
 
     // Add alias.
     const rawExpr = dialect.as(core, stringUtils.toSnakeCase(selectedName));
-    const info = sqlIO(rawExpr, dialect, sqlTable, this.getSQLBuilderOpt());
+    const info = sqlIO(
+      rawExpr,
+      dialect,
+      sqlTable,
+      `[Handling raw expr in ${core}]`,
+      this.getSQLBuilderOpt(),
+    );
     return new SelectedColumnIO(
       dialect.encodeName(selectedName),
       sCol,
@@ -846,7 +867,13 @@ export class SelectIOProcessor extends BaseIOProcessor {
       // Update `JoinIO.extraSQL` if needed.
       // See `JoinIO.extraSQL` for details.
       if (!result.extraSQL && table.extraSQL) {
-        result.extraSQL = sqlIO(table.extraSQL, dialect, sqlTable, this.getSQLBuilderOpt());
+        result.extraSQL = sqlIO(
+          table.extraSQL,
+          dialect,
+          sqlTable,
+          `[Updating extra SQL for ${table}]`,
+          this.getSQLBuilderOpt(),
+        );
       }
       return result;
     }
@@ -888,7 +915,13 @@ export class SelectIOProcessor extends BaseIOProcessor {
         return true;
       });
 
-      const extraSQLIO = sqlIO(table.extraSQL, dialect, sqlTable, this.getSQLBuilderOpt());
+      const extraSQLIO = sqlIO(
+        table.extraSQL,
+        dialect,
+        sqlTable,
+        `[Handling extra SQL of ${table}]`,
+        this.getSQLBuilderOpt(),
+      );
       joinIO.extraSQL = extraSQLIO;
     }
     return joinIO;
@@ -907,7 +940,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     // Make sure column is initialized.
     const colTable = col.__mustGetTable();
     // Make sure column is from current table.
-    col.__checkSourceTable(sqlTable);
+    col.__checkSourceTable(sqlTable, `[Validating source of column ${col}]`);
 
     let colIDString: string;
     let nullable: boolean;

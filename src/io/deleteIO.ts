@@ -47,7 +47,7 @@ class DeleteIOProcessor extends BaseIOProcessor {
 
     // WHERE
     const whereIO = actionData.whereSQLValue
-      ? sqlIO(actionData.whereSQLValue, dialect, sqlTable)
+      ? sqlIO(actionData.whereSQLValue, dialect, sqlTable, `[Building WHERE of ${action}]`)
       : null;
     if (whereIO) {
       sql.push(' WHERE ');

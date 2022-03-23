@@ -9,29 +9,29 @@ const dialect = mr.mysql;
 
 it('Columns and escape strings', () => {
   const sql = mm.sql`abc "aaa" ${post.user_id} ${post.user_id.join(user).url_name}`;
-  const io = mr.sqlIO(sql, dialect, post);
+  const io = mr.sqlIO(sql, dialect, post, 't');
   ok(io instanceof mr.SQLIO);
   eq(io.getCodeString(), '"abc \\"aaa\\" `user_id` `url_name`"');
 });
 
 it('SQL calls', () => {
   const sql = mm.sql`${post.datetime} = ${mm.localDatetimeNow()}`;
-  const io = mr.sqlIO(sql, dialect, post);
+  const io = mr.sqlIO(sql, dialect, post, 't');
   eq(io.getCodeString(), '"`datetime` = NOW()"');
 });
 
 it('toSQL(sourceTable)', () => {
   itThrows(() => {
     const sql = mm.sql`${post.datetime} = ${mm.localDatetimeNow()}`;
-    const io = mr.sqlIO(sql, dialect, user);
+    const io = mr.sqlIO(sql, dialect, user, 't');
     io.getCodeString();
-  }, 'Source table assertion failed, expected "User(user)", got "Post(post, db=db_post)".');
+  }, 'Source table assertion failed, expected "User(user)", got "Post(post, db=db_post)". t');
 
   itThrows(() => {
     const sql = mm.sql`${post.datetime} = ${mm.localDatetimeNow()} ${user.id}`;
-    const io = mr.sqlIO(sql, dialect, post);
+    const io = mr.sqlIO(sql, dialect, post, 't');
     io.getCodeString();
-  }, 'Source table assertion failed, expected "Post(post, db=db_post)", got "User(user)".');
+  }, 'Source table assertion failed, expected "Post(post, db=db_post)", got "User(user)". t');
 });
 
 it('Nested SQLs', () => {
@@ -43,7 +43,7 @@ it('Nested SQLs', () => {
   const i4 = mm.param({ type: 'a', defaultValue: null }, 'b');
   const sql = mm.sql`START${sql2} OR ${user.sig} = ${i3} = ${mm.param(user.sig)} ${i4}`;
 
-  const io = mr.sqlIO(sql, dialect, null);
+  const io = mr.sqlIO(sql, dialect, null, 't');
   eq(
     io.vars.toString(),
     'id: uint64, urlName: string, b: a, sig: *string, sig: *string, b: a {id: uint64, urlName: string, b: a, sig: *string}',
@@ -55,14 +55,14 @@ it('list and distinctList', () => {
   const i2 = mm.sql`${i1} ${i1}`;
   const sql = mm.sql`${i1} ${i2} ${user.age.toParam()}`;
 
-  const io = mr.sqlIO(sql, dialect, null);
+  const io = mr.sqlIO(sql, dialect, null, 't');
   eq(io.vars.toString(), 'id: uint64, id: uint64, id: uint64, age: int {id: uint64, age: int}');
 });
 
 it('Conflicting names', () => {
   itThrows(() => {
     const sql = mm.sql`${user.id.toParam()}${mm.param({ type: 'b', defaultValue: null }, 'id')}`;
-    mr.sqlIO(sql, dialect, null);
+    mr.sqlIO(sql, dialect, null, 't');
   }, 'Cannot handle two variables with the same name "id" but different types ("uint64" and "b") in "Expression `VAR(Column(id, t=User(user)))VAR({"type":"b","defaultValue":null}, name=id)`"');
 
   itThrows(() => {
@@ -70,6 +70,6 @@ it('Conflicting names', () => {
       { type: 'b', defaultValue: null },
       'v1',
     )}`;
-    mr.sqlIO(sql, dialect, null);
+    mr.sqlIO(sql, dialect, null, 't');
   }, 'Cannot handle two variables with the same name "v1" but different types ("a" and "b") in "Expression `VAR({"type":"a","defaultValue":null}, name=v1)VAR({"type":"b","defaultValue":null}, name=v1)`"');
 });

@@ -11,6 +11,7 @@ export class SetterIO {
     dialect: Dialect,
     allowUnsetValues: boolean,
     sourceTable: mm.Table | null,
+    context: string,
     opt?: SQLIOBuilderOption,
   ): SetterIO[] {
     const table = action.__getData().sqlTable || sourceTable;
@@ -31,6 +32,7 @@ export class SetterIO {
           value instanceof mm.SQL ? value : mm.sql`${dialect.objToSQL(value, null)}`,
           dialect,
           sourceTable,
+          `${context} [Key: ${key}, value: ${value}]`,
           opt,
         ),
       );
@@ -60,7 +62,17 @@ export class SetterIO {
             continue;
           }
           isValueSet = true;
-          res.push(this.getAutoSetterValue(col, autoSetter, table, dialect, sourceTable, opt));
+          res.push(
+            this.getAutoSetterValue(
+              col,
+              autoSetter,
+              table,
+              dialect,
+              sourceTable,
+              `${context} [AutoSetter on ${col}]`,
+              opt,
+            ),
+          );
           // If value is set, no need to check other auto setter values.
           break;
         }
@@ -79,11 +91,21 @@ export class SetterIO {
     table: mm.Table,
     dialect: Dialect,
     sourceTable: mm.Table | null,
+    context: string,
     opt?: SQLIOBuilderOption,
   ): SetterIO {
     switch (autoSetter) {
       case mm.AutoSetterType.param: {
-        return new SetterIO(col, sqlIO(mm.sql`${col.toParam()}`, dialect, sourceTable, opt));
+        return new SetterIO(
+          col,
+          sqlIO(
+            mm.sql`${col.toParam()}`,
+            dialect,
+            sourceTable,
+            `${context} [Handling param setter on ${col}]`,
+            opt,
+          ),
+        );
       }
 
       case mm.AutoSetterType.default: {
@@ -113,7 +135,7 @@ export class SetterIO {
           value = dialect.objToSQL(def, table);
         }
 
-        return new SetterIO(col, sqlIO(value, dialect, sourceTable, opt));
+        return new SetterIO(col, sqlIO(value, dialect, sourceTable, context, opt));
       }
 
       default:

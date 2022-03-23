@@ -36,9 +36,13 @@ export function toPascalCase(s: string): string {
   return res;
 }
 
-export function validateSetters(setters: ReadonlyMap<mm.Column, unknown>, table: mm.Table) {
+export function validateSetters(
+  setters: ReadonlyMap<mm.Column, unknown>,
+  table: mm.Table,
+  context: string,
+) {
   for (const setter of setters.keys()) {
-    setter.__checkSourceTable(table);
+    setter.__checkSourceTable(table, `${context} [Setter: ${setter}]`);
   }
 }
 

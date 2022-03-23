@@ -85,7 +85,7 @@ it('Validate setters', () => {
     }
     const ta = mm.actionGroup(post, PostAG);
     mr.insertIO(ta.t, commonIOOptions);
-  }, 'Source table assertion failed, expected "Post(post, db=db_post)", got "User(user)".');
+  }, 'Source table assertion failed, expected "Post(post, db=db_post)", got "User(user)". [Validating setter of UpdateAction(t, t=Post(post, db=db_post))] [Setter: Column(id, t=User(user))]');
 });
 
 it('setDefaults', () => {

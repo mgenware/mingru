@@ -48,13 +48,14 @@ export class InsertIOProcessor extends BaseIOProcessor {
 
     // Setters
     if (actionData.setters) {
-      utils.validateSetters(actionData.setters, sqlTable);
+      utils.validateSetters(actionData.setters, sqlTable, `[Validating setter of ${action}]`);
     }
     const setterIOs = SetterIO.fromAction(
       action,
       dialect,
       !!actionData.allowUnsetColumns,
       sqlTable,
+      `[Building setters of ${action}]`,
     );
     const colNames = setterIOs.map((s) => dialect.encodeColumnName(s.col));
     sql.push(` (${colNames.join(', ')})`);
