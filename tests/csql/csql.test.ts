@@ -131,3 +131,13 @@ it('Column aliases (duplicate aliases)', async () => {
     'Column alias "sig_alias" has been defined.',
   );
 });
+
+it('Self-referencing FKs', async () => {
+  class T extends mm.Table {
+    id = mm.pk();
+    parent_id = mm.fk(this.id);
+    msg = mm.text();
+  }
+  const t = mm.table(T);
+  await testBuildAsync(t, 'selfRefFK/t');
+});
