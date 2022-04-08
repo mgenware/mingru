@@ -43,6 +43,15 @@ it('FK', async () => {
   await testBuildAsync(post, 'fk/post');
 });
 
+it('Nullable FKs', async () => {
+  class T extends mm.Table {
+    id = mm.pk();
+    user_id = mm.fk(user.id).nullable;
+  }
+  const t = mm.table(T);
+  await testBuildAsync(t, 'nullableFK/t');
+});
+
 it('noDefaultOnCSQL', async () => {
   class User extends mm.Table {
     a = mm.int().default(1);
@@ -140,4 +149,14 @@ it('Self-referencing FKs', async () => {
   }
   const t = mm.table(T);
   await testBuildAsync(t, 'selfRefFK/t');
+});
+
+it('Nullable self-referencing FKs', async () => {
+  class T extends mm.Table {
+    id = mm.pk();
+    parent_id = mm.fk(this.id).nullable;
+    msg = mm.text();
+  }
+  const t = mm.table(T);
+  await testBuildAsync(t, 'nullSelfRefFK/t');
 });
