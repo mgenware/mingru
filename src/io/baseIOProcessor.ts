@@ -3,6 +3,12 @@ import { ActionToIOOptions } from './actionToIOOptions.js';
 
 export default class BaseIOProcessor {
   get configurableTableName(): string | undefined {
+    // If `SQLTable` is present (likely `.from` being called in TX),
+    // Ignore `opt.configurableTableName`, the from table is not
+    // configurable anymore.
+    if (this.action.__getData().sqlTable) {
+      return undefined;
+    }
     return this.opt.configurableTableName;
   }
 
