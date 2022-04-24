@@ -11,11 +11,6 @@ type TableTypeUser struct {
 
 var User = &TableTypeUser{}
 
-// MingruSQLName returns the name of this table.
-func (mrTable *TableTypeUser) MingruSQLName() string {
-	return "user"
-}
-
 // ------------ Actions ------------
 
 type UserTableTChild1Result struct {

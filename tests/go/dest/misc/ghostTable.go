@@ -7,11 +7,6 @@ type TableTypeGhost struct {
 
 var Ghost = &TableTypeGhost{}
 
-// MingruSQLName returns the name of this table.
-func (mrTable *TableTypeGhost) MingruSQLName() string {
-	return "ghost"
-}
-
 // ------------ Actions ------------
 
 func (mrTable *TableTypeGhost) InsertT(mrQueryable mingru.Queryable, fk uint64) error {

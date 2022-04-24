@@ -32,11 +32,6 @@ export function actionCallPath(
   return resolvedTableName + '.' + (isPrivate ? su.lowercaseFirstChar(funcName) : funcName);
 }
 
-// Gets the generated Go code to get table name from configurable table param..
-export function cfTableUsageCode(tableParamName: string) {
-  return `${tableParamName}.${core.tableMemSQLName}()`;
-}
-
 export function cfTableVarDef(tableParamName: string) {
-  return { name: tableParamName, type: types.dbxTableType };
+  return { name: tableParamName, type: types.stringTypeInfo };
 }

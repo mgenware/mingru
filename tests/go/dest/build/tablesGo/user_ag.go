@@ -7,11 +7,6 @@ type TableTypeUser struct {
 
 var User = &TableTypeUser{}
 
-// MingruSQLName returns the name of this table.
-func (mrTable *TableTypeUser) MingruSQLName() string {
-	return "user"
-}
-
 // ------------ Actions ------------
 
 func (mrTable *TableTypeUser) SelectByID(mrQueryable mingru.Queryable, id uint64) (Res1, error) {

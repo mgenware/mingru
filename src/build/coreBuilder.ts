@@ -259,7 +259,7 @@ export default class CoreBuilder {
   }
 
   private buildTableObject(): string {
-    const { className, instanceName, tableDBName } = this.taIO;
+    const { className, instanceName } = this.taIO;
     let code = go.struct(
       new go.GoStructData(
         className,
@@ -271,13 +271,8 @@ export default class CoreBuilder {
     );
 
     // Generate table instance.
-    code += `\nvar ${instanceName} = &${className}{}\n`;
+    code += `\nvar ${instanceName} = &${className}{}\n\n`;
 
-    // Generate mingru member functions.
-    code += `\n// ${defs.tableMemSQLName} returns the name of this table.\n`;
-    code += `${this.getFuncSigHead()}${defs.tableMemSQLName}() string {\n`;
-    code += `\treturn ${JSON.stringify(tableDBName)}\n`;
-    code += '}\n\n';
     return code;
   }
 

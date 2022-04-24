@@ -7,11 +7,6 @@ type TableTypeMyTable struct {
 
 var MyTable = &TableTypeMyTable{}
 
-// MingruSQLName returns the name of this table.
-func (mrTable *TableTypeMyTable) MingruSQLName() string {
-	return "my_table"
-}
-
 // ------------ Actions ------------
 
 type MyTableTableSelectTResult struct {

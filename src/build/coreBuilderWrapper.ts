@@ -65,11 +65,11 @@ export default class CoreBuilderWrapper {
 
     await Promise.all([
       this.buildTypes(context, outDir, opts),
-      this.buildTablesWithNoActions(tables, context, outDir, opts),
+      this.buildTables(tables, context, outDir, opts),
     ]);
   }
 
-  private async buildTablesWithNoActions(
+  private async buildTables(
     tables: mm.Table[],
     context: CoreBuilderContext,
     outDir: string,
@@ -91,28 +91,9 @@ export default class CoreBuilderWrapper {
         code += '\n';
       }
       const tableName = t.__getData().name;
-      const className = defs.tableTypeName(tableName);
-      const instanceName = defs.tableInstanceName(tableName);
-      code += go.struct(
-        new go.GoStructData(
-          className,
-          [], // Members
-          null, // JSONKeyStyle
-          null, // ignoredMembers
-          null, // omitEmptyMembers
-        ),
-      );
-
-      // Generate table instance.
-      code += `\nvar ${instanceName} = &${className}{}\n`;
-
-      // Generate mingru member functions.
-      code += `\n// ${defs.tableMemSQLName} returns the name of this table.\n`;
-      code += `func (${defs.tableObjSelf} *${className}) ${defs.tableMemSQLName}() string {\n`;
-      code += `\treturn ${JSON.stringify(t.__getDBName())}\n`;
-      code += '}\n';
+      const tablePascalName = defs.tablePascalName(tableName);
+      code += `const Table${tablePascalName} = ${JSON.stringify(t.__getDBName())}\n`;
     }
-
     const outFile = np.join(outDir, 'tables.go');
     await mfs.writeFileAsync(outFile, (opts.goFileHeader ?? '') + code);
   }

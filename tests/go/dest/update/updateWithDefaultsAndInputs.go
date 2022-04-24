@@ -7,11 +7,6 @@ type TableTypeCols struct {
 
 var Cols = &TableTypeCols{}
 
-// MingruSQLName returns the name of this table.
-func (mrTable *TableTypeCols) MingruSQLName() string {
-	return "cols"
-}
-
 // ------------ Actions ------------
 
 func (mrTable *TableTypeCols) UpdateT(mrQueryable mingru.Queryable, id uint64, fk uint64) error {

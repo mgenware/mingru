@@ -11,11 +11,6 @@ type TableTypeEmployee struct {
 
 var Employee = &TableTypeEmployee{}
 
-// MingruSQLName returns the name of this table.
-func (mrTable *TableTypeEmployee) MingruSQLName() string {
-	return "employees"
-}
-
 // ------------ Actions ------------
 
 func (mrTable *TableTypeEmployee) InsertT(mrQueryable mingru.Queryable, id int, firstName string, lastName string, gender string, birthDate time.Time, hireDate time.Time) (uint64, error) {

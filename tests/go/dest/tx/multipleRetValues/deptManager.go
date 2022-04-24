@@ -12,11 +12,6 @@ type TableTypeDeptManager struct {
 
 var DeptManager = &TableTypeDeptManager{}
 
-// MingruSQLName returns the name of this table.
-func (mrTable *TableTypeDeptManager) MingruSQLName() string {
-	return "dept_manager"
-}
-
 // ------------ Actions ------------
 
 func (mrTable *TableTypeDeptManager) insertChild3(mrQueryable mingru.Queryable, empNo int, deptNo uint64, fromDate time.Time, toDate time.Time) error {

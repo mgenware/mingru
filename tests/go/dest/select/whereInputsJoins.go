@@ -7,11 +7,6 @@ type TableTypePostCmt struct {
 
 var PostCmt = &TableTypePostCmt{}
 
-// MingruSQLName returns the name of this table.
-func (mrTable *TableTypePostCmt) MingruSQLName() string {
-	return "post_cmt"
-}
-
 // ------------ Actions ------------
 
 type PostCmtTableSelectTResult struct {

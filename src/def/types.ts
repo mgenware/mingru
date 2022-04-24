@@ -19,5 +19,3 @@ export const selectActionMaxVar: VarDef = { name: def.maxVarName, type: intTypeI
 export const pageVar: VarDef = { name: def.pageVarName, type: intTypeInfo };
 export const pageSizeVar: VarDef = { name: def.pageSizeVarName, type: intTypeInfo };
 export const hasNextVar: VarDef = { name: def.hasNextVarName, type: boolTypeInfo };
-
-export const dbxTableType = new AtomicTypeInfo('Table', null, def.dbxNamespace);

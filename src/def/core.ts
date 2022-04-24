@@ -21,7 +21,5 @@ export const defaultPackageName = 'da';
 export const fmtImport = 'fmt';
 export const queryParamsVarName = 'queryParams';
 
-// The function name of `mingru.Table` used to get the table name.
-export const tableMemSQLName = 'MingruSQLName';
 // The current instance name of a generated table member function.
 export const tableObjSelf = 'mrTable';

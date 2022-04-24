@@ -699,7 +699,7 @@ export class SelectIOProcessor extends BaseIOProcessor {
     const encodedTableName = e(tableDBName);
     const segList: StringSegment[] = ['FROM '];
     if (this.configurableTableName) {
-      segList.push({ code: defs.cfTableUsageCode(this.configurableTableName) });
+      segList.push({ code: this.configurableTableName });
     } else {
       segList.push(encodedTableName);
     }

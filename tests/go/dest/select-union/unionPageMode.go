@@ -11,11 +11,6 @@ type TableTypeActivity struct {
 
 var Activity = &TableTypeActivity{}
 
-// MingruSQLName returns the name of this table.
-func (mrTable *TableTypeActivity) MingruSQLName() string {
-	return "activity"
-}
-
 // ------------ Actions ------------
 
 type ActivityTableTResult struct {
