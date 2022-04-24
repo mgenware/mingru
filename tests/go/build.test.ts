@@ -19,7 +19,7 @@ it('Single table', async () => {
     deleteByID = mm.deleteOne().whereSQL(mm.sql`${post.id} = ${mm.param(post.id)}`);
   }
   const ta = mm.actionGroup(post, PostAG);
-  await testBuildToDirAsync([ta], ['post'], 'singleTable');
+  await testBuildToDirAsync([ta], ['post', '#tables.go'], 'singleTable');
 });
 
 it('Multiple tables', async () => {
@@ -332,17 +332,4 @@ it('cleanOutDir = true', async () => {
       ),
     /no such file or directory/,
   );
-});
-
-it('tables.go', async () => {
-  class UserAG extends mm.ActionGroup {
-    selectByID = mm
-      .selectRow(user.id)
-      .by(user.id)
-      .attr(mm.ActionAttribute.groupTypeName, 'Type1')
-      .resultTypeNameAttr('Res1');
-  }
-  const userTA = mm.actionGroup(user, UserAG);
-  const actions = [userTA, user, post, postReply];
-  await testBuildToDirAsync(actions, ['#tables.go', 'user'], 'tablesGo');
 });

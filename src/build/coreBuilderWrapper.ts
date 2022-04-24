@@ -65,23 +65,11 @@ export default class CoreBuilderWrapper {
 
     await Promise.all([
       this.buildTypes(context, outDir, opts),
-      this.buildTables(tables, context, outDir, opts),
+      this.buildTables(tables, outDir, opts),
     ]);
   }
 
-  private async buildTables(
-    tables: mm.Table[],
-    context: CoreBuilderContext,
-    outDir: string,
-    opts: BuildOptions,
-  ) {
-    // Tables that are included in `context.tables` don't need to be built again.
-    // eslint-disable-next-line no-param-reassign
-    tables = tables.filter((t) => !context.hasTable(t));
-    if (!tables.length) {
-      return;
-    }
-
+  private async buildTables(tables: mm.Table[], outDir: string, opts: BuildOptions) {
     let code = `package ${opts.packageName || defs.defaultPackageName}\n\n`;
     let first = true;
     for (const t of tables) {

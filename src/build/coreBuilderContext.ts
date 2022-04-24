@@ -12,8 +12,6 @@ export default class CoreBuilderContext {
 
   // Actions that have been built.
   #actions = new Set<mm.ActionGroup>();
-  // Tables that have been built.
-  #tables = new Set<mm.Table>();
 
   get interfaces(): Readonly<Record<string, Map<string, FuncSignature>>> {
     return this.#interfaces;
@@ -29,10 +27,6 @@ export default class CoreBuilderContext {
 
   get actions(): readonly mm.ActionGroup[] {
     return [...this.#actions];
-  }
-
-  get tables(): readonly mm.Table[] {
-    return [...this.#tables];
   }
 
   addSharedInterface(name: string, funcSig: FuncSignature) {
@@ -54,16 +48,8 @@ export default class CoreBuilderContext {
     this.#actions.add(action);
   }
 
-  addTable(table: mm.Table) {
-    this.#tables.add(table);
-  }
-
   hasAction(action: mm.ActionGroup) {
     return this.#actions.has(action);
-  }
-
-  hasTable(table: mm.Table) {
-    return this.#tables.has(table);
   }
 
   hasTsResultType(type: string) {

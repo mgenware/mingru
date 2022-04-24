@@ -86,7 +86,6 @@ export default class CoreBuilder {
     const { options, taIO } = this;
     const action = taIO.ag;
     this.context.addAction(action);
-    this.context.addTable(action.__getData().groupTable);
 
     let code = options.goFileHeader ?? defs.fileHeader;
     code += `package ${options.packageName || defs.defaultPackageName}\n\n`;
