@@ -39,7 +39,7 @@ it('Multiple tables', async () => {
   }
   const postTA = mm.actionGroup(post, PostAG);
   const actions = [userTA, postTA];
-  await testBuildToDirAsync(actions, ['post', 'user'], 'multipleTables');
+  await testBuildToDirAsync(actions, ['post', 'user', '#tables.go'], 'multipleTables');
 });
 
 it('Multiple tables (dedup)', async () => {

@@ -27,6 +27,7 @@ export default class CoreBuilderWrapper {
     for (const item of source) {
       if (item instanceof mm.ActionGroup) {
         actions.push(item);
+        tables.push(item.__getData().groupTable);
       } else {
         tables.push(item);
       }
@@ -71,13 +72,7 @@ export default class CoreBuilderWrapper {
 
   private async buildTables(tables: mm.Table[], outDir: string, opts: BuildOptions) {
     let code = `package ${opts.packageName || defs.defaultPackageName}\n\n`;
-    let first = true;
     for (const t of tables) {
-      if (first) {
-        first = false;
-      } else {
-        code += '\n';
-      }
       const tableName = t.__getData().name;
       const tablePascalName = defs.tablePascalName(tableName);
       code += `const Table${tablePascalName} = ${JSON.stringify(t.__getDBName())}\n`;
