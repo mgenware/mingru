@@ -59,7 +59,7 @@ it('Multiple tables (dedup)', async () => {
   }
   const postTA = mm.actionGroup(post, PostAG);
   const actions = [userTA, postTA, postTA, user];
-  await testBuildToDirAsync(actions, ['post', 'user'], 'multipleTables');
+  await testBuildToDirAsync(actions, ['post', 'user', '#tables.go'], 'multipleTables');
 });
 
 it('Custom package name', async () => {
@@ -67,7 +67,7 @@ it('Custom package name', async () => {
     selectPostTitle = mm.selectRow(post.id, post.title);
   }
   const ta = mm.actionGroup(post, PostAG);
-  await testBuildToDirAsync([ta], ['post'], 'customPackageName', {
+  await testBuildToDirAsync([ta], ['post', '#tables.go'], 'customPackageName', {
     packageName: 'haha',
   });
 });
@@ -77,7 +77,7 @@ it('Table DBName', async () => {
     insertPostReply = mm.unsafeInsertOne().setParams(postReply.to_user_id, postReply.user_id);
   }
   const ta = mm.actionGroup(postReply, PostRplAG);
-  await testBuildToDirAsync([ta], ['post_reply'], 'tableName');
+  await testBuildToDirAsync([ta], ['post_reply', '#tables.go'], 'tableName');
 });
 
 it('Multiple tables, CSQL', async () => {
@@ -104,7 +104,16 @@ it('Multiple tables, CSQL', async () => {
 
   await testBuildToDirAsync(
     [userTA, postTA, et],
-    ['post', 'user', 'post.sql', 'user.sql', 'extra_table.sql', migrationUpFile, migrationDownFile],
+    [
+      'post',
+      'user',
+      'post.sql',
+      'user.sql',
+      '#tables.go',
+      'extra_table.sql',
+      migrationUpFile,
+      migrationDownFile,
+    ],
     'multipleTablesCSQL',
     { createTableSQL: true },
   );
@@ -134,7 +143,16 @@ it('Multiple tables, CSQL (dedup)', async () => {
 
   await testBuildToDirAsync(
     [userTA, postTA, user, userTA, et],
-    ['post', 'user', 'post.sql', 'user.sql', 'extra_table.sql', migrationUpFile, migrationDownFile],
+    [
+      'post',
+      'user',
+      'post.sql',
+      'user.sql',
+      '#tables.go',
+      'extra_table.sql',
+      migrationUpFile,
+      migrationDownFile,
+    ],
     'multipleTablesCSQL',
     { createTableSQL: true },
   );
@@ -144,7 +162,10 @@ it('CSQL and virtual tables', async () => {
   class VT extends mm.Table {}
   const vt = mm.table(VT, { virtualTable: true });
   await itRejects(
-    () => testBuildToDirAsync([vt], ['vt.sql'], 'csqlVirtualTable', { createTableSQL: true }),
+    () =>
+      testBuildToDirAsync([vt], ['vt.sql'], 'csqlVirtualTable', {
+        createTableSQL: true,
+      }),
     /ENOENT: no such file or directory/,
   );
 });
@@ -332,4 +353,21 @@ it('cleanOutDir = true', async () => {
       ),
     /no such file or directory/,
   );
+});
+
+it('Single configurable table', async () => {
+  class PostAG extends mm.ActionGroup {
+    selectPostTitle = mm.selectRow(post.id, post.title);
+    selectPostInfo = mm.selectRow(
+      post.id,
+      post.title,
+      post.user_id,
+      post.user_id.join(user).url_name,
+    );
+
+    updatePostTitle = mm.unsafeUpdateAll().set(post.title, mm.sql`${mm.param(post.title)}`);
+    deleteByID = mm.deleteOne().whereSQL(mm.sql`${post.id} = ${mm.param(post.id)}`);
+  }
+  const ta = mm.actionGroup(post, PostAG, { configurableTableName: 'confTable' });
+  await testBuildToDirAsync([ta], ['post', '#tables.go'], 'singleVirtualTable');
 });
