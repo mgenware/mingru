@@ -38,12 +38,12 @@ export default class CoreBuilderWrapper {
 
     const context = new CoreBuilderContext();
     await Promise.all(
-      actions.map(async (ta) => {
-        const taTable = ta.__getData().groupTable;
-        const taIO = new AGIO(ta, ioOpts);
-        const builder = new CoreBuilder(taIO, opts, context);
+      actions.map(async (ag) => {
+        const agName = ag.constructor.name;
+        const agIO = new AGIO(ag, ioOpts);
+        const builder = new CoreBuilder(agIO, opts, context);
         const code = builder.build();
-        const fileName = stringUtil.toSnakeCase(taTable.__getData().name) + '_ag'; // Add a "_ag" suffix to table actions file.
+        const fileName = stringUtil.toSnakeCase(agName);
         const outFile = np.join(outDir, fileName + '.go');
         await mfs.writeFileAsync(outFile, code);
         if (builder.tsTypeCollector?.count) {

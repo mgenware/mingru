@@ -77,7 +77,7 @@ it('Table DBName', async () => {
     insertPostReply = mm.unsafeInsertOne().setParams(postReply.to_user_id, postReply.user_id);
   }
   const ta = mm.actionGroup(postReply, PostRplAG);
-  await testBuildToDirAsync([ta], ['post_reply', '#tables.go'], 'tableName');
+  await testBuildToDirAsync([ta], ['post_rpl', '#tables.go'], 'tableName');
 });
 
 it('Multiple tables, CSQL', async () => {
