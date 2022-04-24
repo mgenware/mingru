@@ -2,10 +2,10 @@ package da
 
 import "github.com/mgenware/mingru-go-lib"
 
-type TableTypePostCmt struct {
+type CmtAGType struct {
 }
 
-var PostCmt = &TableTypePostCmt{}
+var CmtAG = &CmtAGType{}
 
 // ------------ Actions ------------
 
@@ -13,7 +13,7 @@ type PostCmtTableSelectTResult struct {
 	ID uint64
 }
 
-func (mrTable *TableTypePostCmt) SelectT(mrQueryable mingru.Queryable, id uint64, userID uint64, targetTitle string, targetUserUrlName string) (PostCmtTableSelectTResult, error) {
+func (mrTable *CmtAGType) SelectT(mrQueryable mingru.Queryable, id uint64, userID uint64, targetTitle string, targetUserUrlName string) (PostCmtTableSelectTResult, error) {
 	var result PostCmtTableSelectTResult
 	err := mrQueryable.QueryRow("SELECT `id` FROM `post_cmt` WHERE  ?, ?, ?, ?", id, userID, targetTitle, targetUserUrlName).Scan(&result.ID)
 	if err != nil {

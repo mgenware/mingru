@@ -6,10 +6,10 @@ import (
 	"github.com/mgenware/mingru-go-lib"
 )
 
-type TableTypePost struct {
+type PostAGType struct {
 }
 
-var Post = &TableTypePost{}
+var PostAG = &PostAGType{}
 
 // ------------ Actions ------------
 
@@ -30,7 +30,7 @@ type PostTableSelectTResult struct {
 	Title string
 }
 
-func (mrTable *TableTypePost) SelectT(mrQueryable mingru.Queryable, id uint64, orderBy1 int, orderBy1Desc bool, orderBy2 int, orderBy2Desc bool) ([]PostTableSelectTResult, error) {
+func (mrTable *PostAGType) SelectT(mrQueryable mingru.Queryable, id uint64, orderBy1 int, orderBy1Desc bool, orderBy2 int, orderBy2Desc bool) ([]PostTableSelectTResult, error) {
 	var orderBy1SQL string
 	switch orderBy1 {
 	case PostTableSelectTOrderBy1N:

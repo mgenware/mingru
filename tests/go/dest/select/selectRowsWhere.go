@@ -2,10 +2,10 @@ package da
 
 import "github.com/mgenware/mingru-go-lib"
 
-type TableTypePost struct {
+type PostAGType struct {
 }
 
-var Post = &TableTypePost{}
+var PostAG = &PostAGType{}
 
 // ------------ Actions ------------
 
@@ -14,7 +14,7 @@ type PostTableSelectTResult struct {
 	Title string
 }
 
-func (mrTable *TableTypePost) SelectT(mrQueryable mingru.Queryable, id uint64) ([]PostTableSelectTResult, error) {
+func (mrTable *PostAGType) SelectT(mrQueryable mingru.Queryable, id uint64) ([]PostTableSelectTResult, error) {
 	rows, err := mrQueryable.Query("SELECT `id`, `title` FROM `db_post` WHERE `id` = ? ORDER BY `id`", id)
 	if err != nil {
 		return nil, err

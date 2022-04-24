@@ -2,19 +2,19 @@ package da
 
 import "github.com/mgenware/mingru-go-lib"
 
-type TableTypeUserUtil struct {
+type CommonAGType struct {
 }
 
-var UserUtil = &TableTypeUserUtil{}
+var CommonAG = &CommonAGType{}
 
 // ------------ Actions ------------
 
-func (mrTable *TableTypeUserUtil) Del(mrQueryable mingru.Queryable, mrFromTable string, id uint64) error {
+func (mrTable *CommonAGType) Del(mrQueryable mingru.Queryable, mrFromTable string, id uint64) error {
 	result, err := mrQueryable.Exec("DELETE FROM "+mrFromTable+" WHERE `id` = ?", id)
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }
 
-func (mrTable *TableTypeUserUtil) Insert(mrQueryable mingru.Queryable, mrFromTable string, urlName string, displayName string, sig *string, age int, followerCount *string) (uint64, error) {
+func (mrTable *CommonAGType) Insert(mrQueryable mingru.Queryable, mrFromTable string, urlName string, displayName string, sig *string, age int, followerCount *string) (uint64, error) {
 	result, err := mrQueryable.Exec("INSERT INTO "+mrFromTable+" (`url_name`, `display_name`, `sig`, `age`, `follower_c`) VALUES (?, ?, ?, ?, ?)", urlName, displayName, sig, age, followerCount)
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }
@@ -23,7 +23,7 @@ type UserUtilTableSelResult struct {
 	DisplayName string
 }
 
-func (mrTable *TableTypeUserUtil) Sel(mrQueryable mingru.Queryable, mrFromTable string, id uint64) ([]UserUtilTableSelResult, error) {
+func (mrTable *CommonAGType) Sel(mrQueryable mingru.Queryable, mrFromTable string, id uint64) ([]UserUtilTableSelResult, error) {
 	rows, err := mrQueryable.Query("SELECT `display_name` FROM "+mrFromTable+" WHERE `id` = ? ORDER BY `display_name`", id)
 	if err != nil {
 		return nil, err
@@ -45,7 +45,7 @@ func (mrTable *TableTypeUserUtil) Sel(mrQueryable mingru.Queryable, mrFromTable 
 	return result, nil
 }
 
-func (mrTable *TableTypeUserUtil) Upd(mrQueryable mingru.Queryable, mrFromTable string, id uint64, urlName string, displayName string, sig *string, age int, followerCount *string) error {
+func (mrTable *CommonAGType) Upd(mrQueryable mingru.Queryable, mrFromTable string, id uint64, urlName string, displayName string, sig *string, age int, followerCount *string) error {
 	result, err := mrQueryable.Exec("UPDATE "+mrFromTable+" SET `url_name` = ?, `display_name` = ?, `sig` = ?, `age` = ?, `follower_c` = ? WHERE `id` = ?", urlName, displayName, sig, age, followerCount, id)
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }

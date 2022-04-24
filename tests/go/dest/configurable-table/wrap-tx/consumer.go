@@ -6,18 +6,18 @@ import (
 	"github.com/mgenware/mingru-go-lib"
 )
 
-type TableTypePost struct {
+type ConsumerAGType struct {
 }
 
-var Post = &TableTypePost{}
+var ConsumerAG = &ConsumerAGType{}
 
 // ------------ Actions ------------
 
-func (mrTable *TableTypePost) txChild1(mrQueryable mingru.Queryable, urlName string, displayName string, sig *string, age int, followerCount *string) (uint64, error) {
-	return UserUtil.Insert(mrQueryable, User, urlName, displayName, sig, age, followerCount)
+func (mrTable *ConsumerAGType) txChild1(mrQueryable mingru.Queryable, urlName string, displayName string, sig *string, age int, followerCount *string) (uint64, error) {
+	return UserUtil.Insert(mrQueryable, TableUser, urlName, displayName, sig, age, followerCount)
 }
 
-func (mrTable *TableTypePost) Tx(db *sql.DB, urlName string, displayName string, sig *string, age int, followerCount *string, mrFromTable string, id uint64) error {
+func (mrTable *ConsumerAGType) Tx(db *sql.DB, urlName string, displayName string, sig *string, age int, followerCount *string, mrFromTable string, id uint64) error {
 	txErr := mingru.Transact(db, func(tx *sql.Tx) error {
 		var err error
 		_, err = mrTable.txChild1(tx, urlName, displayName, sig, age, followerCount)
@@ -41,6 +41,6 @@ func (mrTable *TableTypePost) Tx(db *sql.DB, urlName string, displayName string,
 	return txErr
 }
 
-func (mrTable *TableTypePost) Wrapped(db *sql.DB, urlName string, displayName string, sig *string, age int, followerCount *string, id uint64) error {
-	return mrTable.Tx(db, urlName, displayName, sig, age, followerCount, Post, id)
+func (mrTable *ConsumerAGType) Wrapped(db *sql.DB, urlName string, displayName string, sig *string, age int, followerCount *string, id uint64) error {
+	return mrTable.Tx(db, urlName, displayName, sig, age, followerCount, TablePost, id)
 }

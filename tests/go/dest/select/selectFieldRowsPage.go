@@ -7,14 +7,14 @@ import (
 	"github.com/mgenware/mingru-go-lib"
 )
 
-type TableTypePost struct {
+type PostAGType struct {
 }
 
-var Post = &TableTypePost{}
+var PostAG = &PostAGType{}
 
 // ------------ Actions ------------
 
-func (mrTable *TableTypePost) SelectT(mrQueryable mingru.Queryable, id uint64, page int, pageSize int) ([]*time.Time, bool, error) {
+func (mrTable *PostAGType) SelectT(mrQueryable mingru.Queryable, id uint64, page int, pageSize int) ([]*time.Time, bool, error) {
 	if page <= 0 {
 		err := fmt.Errorf("Invalid page %v", page)
 		return nil, false, err

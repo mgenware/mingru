@@ -2,10 +2,10 @@ package da
 
 import "github.com/mgenware/mingru-go-lib"
 
-type TableTypePost struct {
+type PostAGType struct {
 }
 
-var Post = &TableTypePost{}
+var PostAG = &PostAGType{}
 
 // ------------ Actions ------------
 
@@ -14,7 +14,7 @@ type PostTableSelectTResult struct {
 	UserUrlName string
 }
 
-func (mrTable *TableTypePost) SelectT(mrQueryable mingru.Queryable) ([]PostTableSelectTResult, error) {
+func (mrTable *PostAGType) SelectT(mrQueryable mingru.Queryable) ([]PostTableSelectTResult, error) {
 	rows, err := mrQueryable.Query("SELECT `join_1`.`url_name`, `db_post`.`title` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id` WHERE `join_1`.`sig`-`db_post`.`user_id` ORDER BY `join_1`.`sig`, `db_post`.`user_id` DESC")
 	if err != nil {
 		return nil, err

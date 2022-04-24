@@ -6,14 +6,14 @@ import (
 	"github.com/mgenware/mingru-go-lib"
 )
 
-type TableTypePost struct {
+type PostAGType struct {
 }
 
-var Post = &TableTypePost{}
+var PostAG = &PostAGType{}
 
 // ------------ Actions ------------
 
-func (mrTable *TableTypePost) InsertTimes(mrQueryable mingru.Queryable, datetime time.Time, nDatetime *time.Time) (uint64, error) {
+func (mrTable *PostAGType) InsertTimes(mrQueryable mingru.Queryable, datetime time.Time, nDatetime *time.Time) (uint64, error) {
 	result, err := mrQueryable.Exec("INSERT INTO `db_post` (`datetime`, `n_datetime`) VALUES (?, ?)", datetime, nDatetime)
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }

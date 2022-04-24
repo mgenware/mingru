@@ -7,10 +7,10 @@ import (
 	"github.com/mgenware/mingru-go-lib"
 )
 
-type TableTypePost struct {
+type PostAGType struct {
 }
 
-var Post = &TableTypePost{}
+var PostAG = &PostAGType{}
 
 // ------------ Actions ------------
 
@@ -18,7 +18,7 @@ type PostTableTResult struct {
 	ID uint64
 }
 
-func (mrTable *TableTypePost) T(mrQueryable mingru.Queryable, nDatetime []*time.Time, p2 time.Time, p3 *time.Time, p4 uint64, p5 *uint64) (PostTableTResult, error) {
+func (mrTable *PostAGType) T(mrQueryable mingru.Queryable, nDatetime []*time.Time, p2 time.Time, p3 *time.Time, p4 uint64, p5 *uint64) (PostTableTResult, error) {
 	if len(nDatetime) == 0 {
 		return PostTableTResult{}, fmt.Errorf("The array argument `nDatetime` cannot be empty")
 	}

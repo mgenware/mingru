@@ -2,10 +2,10 @@ package da
 
 import "github.com/mgenware/mingru-go-lib"
 
-type TableTypeMyTable struct {
+type MyTableAGType struct {
 }
 
-var MyTable = &TableTypeMyTable{}
+var MyTableAG = &MyTableAGType{}
 
 // ------------ Actions ------------
 
@@ -14,7 +14,7 @@ type MyTableTableSelectTResult struct {
 	MyID   uint64
 }
 
-func (mrTable *TableTypeMyTable) SelectT(mrQueryable mingru.Queryable) ([]MyTableTableSelectTResult, error) {
+func (mrTable *MyTableAGType) SelectT(mrQueryable mingru.Queryable) ([]MyTableTableSelectTResult, error) {
 	rows, err := mrQueryable.Query("SELECT `my_id`, `my_name` FROM `my_table` ORDER BY `id`")
 	if err != nil {
 		return nil, err

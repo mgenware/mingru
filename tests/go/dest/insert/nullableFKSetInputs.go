@@ -2,14 +2,14 @@ package da
 
 import "github.com/mgenware/mingru-go-lib"
 
-type TableTypePost struct {
+type PostAGType struct {
 }
 
-var Post = &TableTypePost{}
+var PostAG = &PostAGType{}
 
 // ------------ Actions ------------
 
-func (mrTable *TableTypePost) InsertT(mrQueryable mingru.Queryable, userID *uint64) (uint64, error) {
+func (mrTable *PostAGType) InsertT(mrQueryable mingru.Queryable, userID *uint64) (uint64, error) {
 	result, err := mrQueryable.Exec("INSERT INTO `post` (`user_id`) VALUES (?)", userID)
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }

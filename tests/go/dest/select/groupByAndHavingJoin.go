@@ -6,10 +6,10 @@ import (
 	"github.com/mgenware/mingru-go-lib"
 )
 
-type TableTypePost struct {
+type PostAGType struct {
 }
 
-var Post = &TableTypePost{}
+var PostAG = &PostAGType{}
 
 // ------------ Actions ------------
 
@@ -17,7 +17,7 @@ type PostTableTResult struct {
 	NTime *time.Time
 }
 
-func (mrTable *TableTypePost) T(mrQueryable mingru.Queryable, userID uint64) ([]PostTableTResult, error) {
+func (mrTable *PostAGType) T(mrQueryable mingru.Queryable, userID uint64) ([]PostTableTResult, error) {
 	rows, err := mrQueryable.Query("SELECT `db_post`.`n_time` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id` ORDER BY `db_post`.`user_id` GROUP BY `title` HAVING `join_1`.`id` = ?", userID)
 	if err != nil {
 		return nil, err

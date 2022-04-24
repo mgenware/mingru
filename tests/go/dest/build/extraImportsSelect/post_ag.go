@@ -6,10 +6,10 @@ import (
 	"github.com/mgenware/mingru-go-lib"
 )
 
-type TableTypePost struct {
+type PostAGType struct {
 }
 
-var Post = &TableTypePost{}
+var PostAG = &PostAGType{}
 
 // ------------ Actions ------------
 
@@ -18,7 +18,7 @@ type PostTableSelectNullableTimesResult struct {
 	NDatetime *time.Time
 }
 
-func (mrTable *TableTypePost) SelectNullableTimes(mrQueryable mingru.Queryable) ([]PostTableSelectNullableTimesResult, error) {
+func (mrTable *PostAGType) SelectNullableTimes(mrQueryable mingru.Queryable) ([]PostTableSelectNullableTimesResult, error) {
 	rows, err := mrQueryable.Query("SELECT `n_datetime`, `n_date` FROM `db_post` ORDER BY `id`")
 	if err != nil {
 		return nil, err
@@ -45,7 +45,7 @@ type PostTableSelectTimesResult struct {
 	Datetime time.Time
 }
 
-func (mrTable *TableTypePost) SelectTimes(mrQueryable mingru.Queryable) ([]PostTableSelectTimesResult, error) {
+func (mrTable *PostAGType) SelectTimes(mrQueryable mingru.Queryable) ([]PostTableSelectTimesResult, error) {
 	rows, err := mrQueryable.Query("SELECT `datetime`, `date` FROM `db_post` ORDER BY `id`")
 	if err != nil {
 		return nil, err

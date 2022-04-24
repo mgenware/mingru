@@ -2,14 +2,14 @@ package da
 
 import "github.com/mgenware/mingru-go-lib"
 
-type TableTypePost struct {
+type PostAGType struct {
 }
 
-var Post = &TableTypePost{}
+var PostAG = &PostAGType{}
 
 // ------------ Actions ------------
 
-func (mrTable *TableTypePost) T(mrQueryable mingru.Queryable, userSig *string) (bool, error) {
+func (mrTable *PostAGType) T(mrQueryable mingru.Queryable, userSig *string) (bool, error) {
 	var result bool
 	err := mrQueryable.QueryRow("SELECT EXISTS(SELECT * FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id` WHERE `join_1`.`sig` = ?)", userSig).Scan(&result)
 	if err != nil {

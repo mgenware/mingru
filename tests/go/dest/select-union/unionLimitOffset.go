@@ -2,10 +2,10 @@ package da
 
 import "github.com/mgenware/mingru-go-lib"
 
-type TableTypeActivity struct {
+type ActivityAGType struct {
 }
 
-var Activity = &TableTypeActivity{}
+var ActivityAG = &ActivityAGType{}
 
 // ------------ Actions ------------
 
@@ -15,7 +15,7 @@ type ActivityTableTResult struct {
 	ID          uint64
 }
 
-func (mrTable *TableTypeActivity) T(mrQueryable mingru.Queryable, id uint64, limit int, offset int, max int) ([]ActivityTableTResult, int, error) {
+func (mrTable *ActivityAGType) T(mrQueryable mingru.Queryable, id uint64, limit int, offset int, max int) ([]ActivityTableTResult, int, error) {
 	rows, err := mrQueryable.Query("(SELECT `id`, `sig` AS `generic_sig`, `url_name` AS `generic_name` FROM `user` WHERE `id` = ? LIMIT ? OFFSET ?) UNION ALL (SELECT `user_id`, `value` FROM `like`) UNION (SELECT `title` FROM `db_post` WHERE `id` = ?) ORDER BY `id` LIMIT ? OFFSET ?", id, limit, offset, id, limit, offset)
 	if err != nil {
 		return nil, 0, err
@@ -47,7 +47,7 @@ type ActivityTableT1Result struct {
 	ID          uint64
 }
 
-func (mrTable *TableTypeActivity) T1(mrQueryable mingru.Queryable, id uint64, limit int, offset int, max int) ([]ActivityTableT1Result, int, error) {
+func (mrTable *ActivityAGType) T1(mrQueryable mingru.Queryable, id uint64, limit int, offset int, max int) ([]ActivityTableT1Result, int, error) {
 	rows, err := mrQueryable.Query("SELECT `id`, `sig` AS `generic_sig`, `url_name` AS `generic_name` FROM `user` WHERE `id` = ? ORDER BY `id` LIMIT ? OFFSET ?", id, limit, offset)
 	if err != nil {
 		return nil, 0, err
@@ -77,7 +77,7 @@ type ActivityTableT2Result struct {
 	Title string
 }
 
-func (mrTable *TableTypeActivity) T2(mrQueryable mingru.Queryable, id uint64) ([]ActivityTableT2Result, error) {
+func (mrTable *ActivityAGType) T2(mrQueryable mingru.Queryable, id uint64) ([]ActivityTableT2Result, error) {
 	rows, err := mrQueryable.Query("SELECT `title` FROM `db_post` WHERE `id` = ? ORDER BY `id`", id)
 	if err != nil {
 		return nil, err

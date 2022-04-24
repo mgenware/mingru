@@ -6,14 +6,14 @@ import (
 	"github.com/mgenware/mingru-go-lib"
 )
 
-type TableTypePost struct {
+type PostAGType struct {
 }
 
-var Post = &TableTypePost{}
+var PostAG = &PostAGType{}
 
 // ------------ Actions ------------
 
-func (mrTable *TableTypePost) SelectTime(mrQueryable mingru.Queryable) (*time.Time, error) {
+func (mrTable *PostAGType) SelectTime(mrQueryable mingru.Queryable) (*time.Time, error) {
 	var result *time.Time
 	err := mrQueryable.QueryRow("SELECT `n_datetime` FROM `db_post`").Scan(&result)
 	if err != nil {

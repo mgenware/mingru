@@ -2,14 +2,14 @@ package da
 
 import "github.com/mgenware/mingru-go-lib"
 
-type TableTypePost struct {
+type PostAGType struct {
 }
 
-var Post = &TableTypePost{}
+var PostAG = &PostAGType{}
 
 // ------------ Actions ------------
 
-func (mrTable *TableTypePost) Field(mrQueryable mingru.Queryable) (string, error) {
+func (mrTable *PostAGType) Field(mrQueryable mingru.Queryable) (string, error) {
 	var result string
 	err := mrQueryable.QueryRow("SELECT `join_1`.`url_name` FROM `db_post` AS `db_post` RIGHT JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`").Scan(&result)
 	if err != nil {
@@ -18,7 +18,7 @@ func (mrTable *TableTypePost) Field(mrQueryable mingru.Queryable) (string, error
 	return result, nil
 }
 
-func (mrTable *TableTypePost) FieldRows(mrQueryable mingru.Queryable) ([]string, error) {
+func (mrTable *PostAGType) FieldRows(mrQueryable mingru.Queryable) ([]string, error) {
 	rows, err := mrQueryable.Query("SELECT `join_1`.`url_name` FROM `db_post` AS `db_post` RIGHT JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`")
 	if err != nil {
 		return nil, err
@@ -45,7 +45,7 @@ type PostTableRowResult struct {
 	UserUrlName string
 }
 
-func (mrTable *TableTypePost) Row(mrQueryable mingru.Queryable, id uint64) (PostTableRowResult, error) {
+func (mrTable *PostAGType) Row(mrQueryable mingru.Queryable, id uint64) (PostTableRowResult, error) {
 	var result PostTableRowResult
 	err := mrQueryable.QueryRow("SELECT `join_1`.`url_name`, `db_post`.`id` FROM `db_post` AS `db_post` RIGHT JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id` WHERE `db_post`.`id` = ?", id).Scan(&result.UserUrlName, &result.ID)
 	if err != nil {
@@ -59,7 +59,7 @@ type PostTableRowsResult struct {
 	UserUrlName string
 }
 
-func (mrTable *TableTypePost) Rows(mrQueryable mingru.Queryable) ([]PostTableRowsResult, error) {
+func (mrTable *PostAGType) Rows(mrQueryable mingru.Queryable) ([]PostTableRowsResult, error) {
 	rows, err := mrQueryable.Query("SELECT `join_1`.`url_name`, `db_post`.`id` FROM `db_post` AS `db_post` RIGHT JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`")
 	if err != nil {
 		return nil, err
