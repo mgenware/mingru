@@ -5,7 +5,7 @@ import { StringSegment } from '../dialect.js';
 import CodeStringBuilder from '../lib/codeStringBuilder.js';
 import * as stringUtils from '../lib/stringUtils.js';
 import LinesBuilder from './linesBuilder.js';
-import { tableInstanceName } from '../def/lib.js';
+import { tableNameCode } from '../def/lib.js';
 
 export class FuncSignature {
   constructor(
@@ -318,5 +318,5 @@ export function transformValue(v: ValueType): string {
     return v.path;
   }
   // v is a `mm.Table`.
-  return tableInstanceName(v.__getData().name);
+  return tableNameCode(v);
 }

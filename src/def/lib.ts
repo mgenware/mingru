@@ -1,3 +1,4 @@
+import * as mm from 'mingru-models';
 import * as su from '../lib/stringUtils.js';
 import * as core from './core.js';
 import * as types from './types.js';
@@ -14,12 +15,10 @@ export function paginateCoreFuncName(name: string): string {
   return `${name}Core`;
 }
 
-export function tableTypeName(tableName: string): string {
-  return `TableType${tablePascalName(tableName)}`;
-}
-
-export function tableInstanceName(tableName: string): string {
-  return tablePascalName(tableName);
+export function tableNameCode(t: mm.Table): string {
+  const tableName = t.__getData().name;
+  const pascalName = tablePascalName(tableName);
+  return `Table${pascalName}`;
 }
 
 export function actionCallPath(

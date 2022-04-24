@@ -73,9 +73,7 @@ export default class CoreBuilderWrapper {
   private async buildTables(tables: mm.Table[], outDir: string, opts: BuildOptions) {
     let code = `package ${opts.packageName || defs.defaultPackageName}\n\n`;
     for (const t of tables) {
-      const tableName = t.__getData().name;
-      const tablePascalName = defs.tablePascalName(tableName);
-      code += `const Table${tablePascalName} = ${JSON.stringify(t.__getDBName())}\n`;
+      code += `const ${defs.tableNameCode(t)} = ${JSON.stringify(t.__getDBName())}\n`;
     }
     const outFile = np.join(outDir, 'tables.go');
     await mfs.writeFileAsync(outFile, (opts.goFileHeader ?? '') + code);
