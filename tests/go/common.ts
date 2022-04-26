@@ -32,7 +32,7 @@ export async function testBuildAsync(
   ta: mm.ActionGroup,
   path: string,
   opts?: mr.BuildOptions,
-  ctx?: mr.CoreBuilderContext,
+  ctx?: mr.AGBuilderContext,
 ) {
   let expected = '';
   if (path) {
@@ -40,10 +40,10 @@ export async function testBuildAsync(
     expected = await mfs.readFileAsync(path, 'utf8');
   }
   mr.logger.enabled = false;
-  const builder = new mr.CoreBuilder(
+  const builder = new mr.AGBuilder(
     new mr.AGIO(ta, getAGIOOption(opts)),
     opts ?? defaultOptions(),
-    ctx ?? new mr.CoreBuilderContext(),
+    ctx ?? new mr.AGBuilderContext(),
   );
   const actual = builder.build();
   if (path) {
@@ -56,7 +56,7 @@ export async function testBuildFullAsync(
   ta: mm.ActionGroup,
   path: string,
   opts?: mr.BuildOptions,
-  ctx?: mr.CoreBuilderContext,
+  ctx?: mr.AGBuilderContext,
 ) {
   let content = '';
   if (path) {
@@ -64,10 +64,10 @@ export async function testBuildFullAsync(
     content = await mfs.readFileAsync(path, 'utf8');
   }
   mr.logger.enabled = false;
-  const builder = new mr.CoreBuilder(
+  const builder = new mr.AGBuilder(
     new mr.AGIO(ta, getAGIOOption(opts)),
     opts ?? defaultOptions(),
-    ctx ?? new mr.CoreBuilderContext(),
+    ctx ?? new mr.AGBuilderContext(),
   );
   const actual = builder.build();
   if (path) {

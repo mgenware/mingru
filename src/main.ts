@@ -2,9 +2,8 @@ export * from './dialects/mysql.js';
 export { default as Builder } from './build/builder.js';
 export { default as dtDefault } from './build/dtDefault.js';
 export { default as logger } from './logger.js';
-export { default as CoreBuilder } from './build/coreBuilder.js';
-export { default as CoreBuilderWrapper } from './build/coreBuilderWrapper.js';
-export { default as CoreBuilderContext } from './build/coreBuilderContext.js';
+export { default as AGBuilder } from './build/agBuilder.js';
+export { default as AGBuilderContext } from './build/agBuilderContext.js';
 export { default as CSQLBuilder } from './build/csqlBuilder.js';
 export * from './build/buildOptions.js';
 

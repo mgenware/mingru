@@ -24,7 +24,7 @@ import { TransactIO } from '../io/transactIO.js';
 import LinesBuilder from './linesBuilder.js';
 import * as stringUtils from '../lib/stringUtils.js';
 import { BuildOptions } from './buildOptions.js';
-import CoreBuilderContext from './coreBuilderContext.js';
+import AGBuilderContext from './agBuilderContext.js';
 
 function joinParams(arr: string[]): string {
   return arr.join(', ');
@@ -73,7 +73,7 @@ export default class AGBuilder {
   private imports = new go.ImportList();
   private dialect: Dialect;
 
-  constructor(public taIO: AGIO, public opts: BuildOptions, public context: CoreBuilderContext) {
+  constructor(public taIO: AGIO, public opts: BuildOptions, public context: AGBuilderContext) {
     this.dialect = taIO.opt.dialect;
     this.options = opts;
     if (opts.tsOutDir) {

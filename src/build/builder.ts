@@ -100,7 +100,7 @@ export default class Builder {
       }),
     );
 
-    await this.buildTypes(context, this.workingDir);
+    await this.buildTypes(context);
   }
 
   private async buildTables(tables: mm.Table[]) {
