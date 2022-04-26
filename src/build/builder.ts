@@ -194,7 +194,7 @@ export default class Builder {
 
   private async buildCreateTableSQL(tables: mm.Table[]): Promise<void> {
     const { opt } = this;
-    if (opt.createTableSQL || !tables.length) {
+    if (!opt.createTableSQL || !tables.length) {
       return;
     }
     const csqlBuilders = await Promise.all(tables.map((t) => this.buildCSQLCore(t)));
