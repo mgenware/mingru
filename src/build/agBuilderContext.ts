@@ -1,8 +1,8 @@
 import * as mm from 'mingru-models';
 import { FuncSignature, GoStructData } from './goCodeUtil.js';
 
-// Carries shared information during building. Used in `CoreBuilder`.
-export default class CoreBuilderContext {
+// Carries shared information during building. Used in `AGBuilder`.
+export default class AGBuilderContext {
   // Shared interfaces.
   #interfaces: Record<string, Map<string, FuncSignature>> = {};
   // Shared result types.

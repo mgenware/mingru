@@ -5,82 +5,203 @@ import { promises as fs } from 'fs';
 import del from 'del';
 import tempy from 'tempy';
 import * as defs from '../def/defs.js';
+import * as go from './goCodeUtil.js';
 import { Dialect } from '../dialect.js';
-import CoreBuilderWrapper from './coreBuilderWrapper.js';
 import logger from '../logger.js';
 import CSQLBuilder from './csqlBuilder.js';
 import { BuildOptions } from './buildOptions.js';
-import { toSnakeCase } from '../lib/stringUtils.js';
+import * as su from '../lib/stringUtils.js';
+import { AGIO } from '../io/agIO.js';
 import { dedup } from '../lib/arrayUtils.js';
+import AGBuilderContext from './agBuilderContext.js';
+import AGBuilder from './agBuilder.js';
+import { buildTSInterface } from './tsCodeBuilder.js';
 
 const tableSQLDir = 'table_sql';
 const migSQLDir = 'migration_sql';
 
 export default class Builder {
-  opts: BuildOptions;
+  opt: BuildOptions;
 
   // This is a tmp dir. When build is done successfully.
   // `workingDir` contents get copied to `ourDir`.
   // If `cleanOutDir` is on, `ourDir` gets deleted before copying.
   workingDir: string;
 
-  constructor(public dialect: Dialect, public outDir: string, opts?: BuildOptions) {
+  constructor(public dialect: Dialect, public outDir: string, opt?: BuildOptions) {
     // eslint-disable-next-line no-param-reassign
-    opts = opts ?? {};
-    logger.enabled = !opts.noOutput;
-    this.opts = opts;
+    opt = opt ?? {};
+    logger.enabled = !opt.noOutput;
+    this.opt = opt;
     this.workingDir = tempy.directory();
   }
 
   async build(source: Array<mm.ActionGroup | mm.Table>): Promise<void> {
-    const { opts, workingDir, outDir } = this;
+    const { opt, workingDir, outDir } = this;
 
-    let somethingBuilt = false;
-    if (!opts.noSourceBuilding) {
-      // `buildSource` returns table from the given source array (including ones from actions).
-      // Calling `concat` to convert it to a mutable array.
-      await this.buildSource(source);
-      somethingBuilt = true;
+    let ags: mm.ActionGroup[] = [];
+    let tables: mm.Table[] = [];
+    for (const item of source) {
+      if (item instanceof mm.ActionGroup) {
+        ags.push(item);
+        tables.push(item.__getData().groupTable);
+      } else {
+        tables.push(item);
+      }
     }
 
-    if (opts.createTableSQL) {
-      const tables = dedup(
-        source
-          .map((item) => (item instanceof mm.Table ? item : item.__getData().groupTable))
-          .filter((t) => !t.__getData().virtualTable),
-      );
-      await this.buildCreateTableSQL(tables);
-      somethingBuilt = true;
-    }
+    ags = dedup(ags);
+    tables = dedup(tables.filter((t) => !t.__getData().virtualTable));
 
-    if (!somethingBuilt) {
-      logger.info('No actions needed');
-    }
+    await Promise.all([
+      this.buildActionGroups(ags),
+      this.buildCreateTableSQL(tables),
+      this.buildTables(tables),
+    ]);
 
-    if (opts.cleanOutDir) {
+    if (opt.cleanOutDir) {
       logger.info(`🛀  Cleaning directory "${outDir}"`);
       await del(outDir, { force: true });
     }
     await fs.cp(workingDir, this.outDir, { recursive: true });
   }
 
-  private async buildSource(source: Array<mm.ActionGroup | mm.Table>) {
-    const coreBuilderWrapper = new CoreBuilderWrapper();
-    await coreBuilderWrapper.buildAsync(
-      source,
-      this.workingDir,
-      { dialect: this.dialect },
-      this.opts,
+  private async buildActionGroups(groups: mm.ActionGroup[]) {
+    const { opt } = this;
+    if (opt.noSourceBuilding) {
+      return;
+    }
+    const context = new AGBuilderContext();
+    const outDir = this.workingDir;
+    await Promise.all(
+      groups.map(async (ag) => {
+        const agName = ag.constructor.name;
+        const agIO = new AGIO(ag, { dialect: this.dialect });
+        const builder = new AGBuilder(agIO, opt, context);
+        const code = builder.build();
+        const fileName = su.toSnakeCase(agName);
+        const outFile = np.join(outDir, fileName + '.go');
+        await mfs.writeFileAsync(outFile, code);
+        if (builder.tsTypeCollector?.count) {
+          const { tsOutDir } = opt;
+          if (!tsOutDir) {
+            throw new Error('`Options.tsOut` is required if TypeScript interfaces are used');
+          }
+          await Promise.all(
+            builder.tsTypeCollector.values().map(async (type) => {
+              logger.debug(`⛱ Building TypeScript definition "${type.name}"`);
+              await mfs.writeFileAsync(
+                np.join(tsOutDir, su.toCamelCase(type.name) + '.ts'),
+                (this.opt.goFileHeader ?? defs.fileHeader) + type.code,
+              );
+            }),
+          );
+        }
+      }),
     );
+
+    await this.buildTypes(context, this.workingDir);
+  }
+
+  private async buildTables(tables: mm.Table[]) {
+    const { opt } = this;
+    let code = `package ${opt.packageName || defs.defaultPackageName}\n\n`;
+    for (const t of tables) {
+      code += `const ${defs.tableNameCode(t)} = ${JSON.stringify(t.__getDBName())}\n`;
+    }
+    const outFile = np.join(this.workingDir, 'tables.go');
+    await mfs.writeFileAsync(outFile, (opt.goFileHeader ?? '') + code);
+  }
+
+  private async buildTypes(context: AGBuilderContext) {
+    const { opt } = this;
+    let code = `package ${opt.packageName || defs.defaultPackageName}\n\n`;
+    const imports = new go.ImportList();
+    let resultTypesCode = '';
+
+    const resultTypes = Object.keys(context.resultTypes);
+    if (resultTypes.length) {
+      resultTypesCode += go.sep('Result types') + '\n';
+      // Sort type names alphabetically.
+      resultTypes.sort((a, b) => a.localeCompare(b));
+
+      let tsCode = '';
+      let firstTsMember = true;
+      for (const name of resultTypes) {
+        const resultTypeStructData = context.resultTypes[name];
+        if (!resultTypeStructData) {
+          throw new Error('Unexpected undefined context value');
+        }
+        imports.addVars(resultTypeStructData.members);
+        resultTypesCode += go.struct(resultTypeStructData);
+        resultTypesCode += '\n';
+
+        if (opt.tsOutDir && context.hasTsResultType(name)) {
+          if (firstTsMember) {
+            firstTsMember = false;
+          } else {
+            tsCode += '\n';
+          }
+          tsCode += buildTSInterface(resultTypeStructData);
+        }
+      }
+
+      if (opt.tsOutDir) {
+        const outFile = np.join(opt.tsOutDir, 'types.ts');
+        await mfs.writeFileAsync(outFile, (opt.goFileHeader ?? '') + tsCode);
+      }
+    }
+
+    // Generating additional interface types.
+    const interfaces = Object.keys(context.interfaces);
+    let interfacesCode = '';
+    if (interfaces.length) {
+      interfacesCode += go.sep('Interfaces') + '\n';
+      // Sort interfaces alphabetically.
+      interfaces.sort((a, b) => a.localeCompare(b));
+      for (const name of interfaces) {
+        const contextValue = context.interfaces[name];
+        if (!contextValue) {
+          throw new Error('Unexpected undefined context value');
+        }
+        // Sort interface members alphabetically.
+        const members = [...contextValue.values()];
+        members.sort((a, b) => a.name.localeCompare(b.name));
+
+        interfacesCode += go.interfaceType(
+          name,
+          members.map((m) => m.sig),
+        );
+        interfacesCode += '\n';
+
+        for (const mem of members) {
+          imports.addVars(mem.params);
+          imports.addVars(mem.returnType);
+        }
+      }
+    }
+
+    if (resultTypesCode || interfacesCode) {
+      code += imports.code();
+      code += resultTypesCode + interfacesCode;
+      if (code.endsWith('\n\n')) {
+        code = code.substr(0, code.length - 1);
+      }
+      const outFile = np.join(this.workingDir, 'types.go');
+      await mfs.writeFileAsync(outFile, (opt.goFileHeader ?? '') + code);
+    }
   }
 
   private async buildCreateTableSQL(tables: mm.Table[]): Promise<void> {
-    // Remove duplicate values.
-    const csqlBuilders = await Promise.all(tables.map((t) => this.buildCSQL(t)));
+    const { opt } = this;
+    if (opt.createTableSQL || !tables.length) {
+      return;
+    }
+    const csqlBuilders = await Promise.all(tables.map((t) => this.buildCSQLCore(t)));
 
     // Generate migration up file.
     const migUpSQLFile = np.join(this.workingDir, migSQLDir, 'up.sql');
-    let upSQL = this.opts.sqlFileHeader ?? defs.fileHeader;
+    let upSQL = opt.sqlFileHeader ?? defs.fileHeader;
     let first = true;
     for (const builder of csqlBuilders) {
       if (first) {
@@ -94,7 +215,7 @@ export default class Builder {
 
     // Generate migration down file.
     const migDownSQLFile = np.join(this.workingDir, migSQLDir, 'down.sql');
-    let downSQL = this.opts.sqlFileHeader ?? defs.fileHeader;
+    let downSQL = opt.sqlFileHeader ?? defs.fileHeader;
     // Drop tables in reverse order.
     for (let i = tables.length - 1; i >= 0; i--) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -105,14 +226,14 @@ export default class Builder {
     await mfs.writeFileAsync(migDownSQLFile, downSQL);
   }
 
-  private async buildCSQL(table: mm.Table): Promise<CSQLBuilder> {
-    const { dialect } = this;
+  private async buildCSQLCore(table: mm.Table): Promise<CSQLBuilder> {
+    const { dialect, opt } = this;
     let { workingDir } = this;
     workingDir = np.join(workingDir, tableSQLDir);
     const builder = new CSQLBuilder(table, dialect);
-    const fileName = toSnakeCase(table.__getData().name);
+    const fileName = su.toSnakeCase(table.__getData().name);
     const outFile = np.join(workingDir, fileName + '.sql');
-    const sql = builder.build(this.opts.sqlFileHeader);
+    const sql = builder.build(opt.sqlFileHeader);
     await mfs.writeFileAsync(outFile, sql);
     return builder;
   }

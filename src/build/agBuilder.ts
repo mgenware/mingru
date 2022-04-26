@@ -64,9 +64,8 @@ class CodeMap {
   constructor(public body: LinesBuilder, public head?: string, public tail?: string) {}
 }
 
-// Generates code (Go and TypeScript interfaces if configured)
-// from a table action IO object(`AGIO`).
-export default class CoreBuilder {
+// Build Go and TS code from an AG (action group).
+export default class AGBuilder {
   // Set when `Option.tsOut` is present.
   tsTypeCollector?: TSTypeCollector;
 
