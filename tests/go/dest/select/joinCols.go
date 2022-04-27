@@ -5,7 +5,7 @@ import "github.com/mgenware/mingru-go-lib"
 type RplAGType struct {
 }
 
-var RplAG = &RplAGType{}
+var Rpl = &RplAGType{}
 
 // ------------ Actions ------------
 

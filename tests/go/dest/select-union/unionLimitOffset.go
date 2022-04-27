@@ -5,7 +5,7 @@ import "github.com/mgenware/mingru-go-lib"
 type ActivityAGType struct {
 }
 
-var ActivityAG = &ActivityAGType{}
+var Activity = &ActivityAGType{}
 
 // ------------ Actions ------------
 

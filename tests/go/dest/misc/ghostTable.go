@@ -5,7 +5,7 @@ import "github.com/mgenware/mingru-go-lib"
 type GhostAGType struct {
 }
 
-var GhostAG = &GhostAGType{}
+var Ghost = &GhostAGType{}
 
 // ------------ Actions ------------
 

@@ -160,7 +160,7 @@ type UserAGType struct {
 }
 
 // User ...
-var UserAG = &UserAGType{}
+var User = &UserAGType{}
 
 // ------------ Actions ------------
 

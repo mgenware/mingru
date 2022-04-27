@@ -9,7 +9,7 @@ import (
 type EmployeeAGType struct {
 }
 
-var EmployeeAG = &EmployeeAGType{}
+var Employee = &EmployeeAGType{}
 
 // ------------ Actions ------------
 

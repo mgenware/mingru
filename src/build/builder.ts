@@ -75,11 +75,11 @@ export default class Builder {
     const outDir = this.workingDir;
     await Promise.all(
       groups.map(async (ag) => {
-        const agName = ag.constructor.name;
+        const agName = defs.agName(ag);
         const agIO = new AGIO(ag, { dialect: this.dialect });
         const builder = new AGBuilder(agIO, opt, context);
         const code = builder.build();
-        const fileName = su.toSnakeCase(agName);
+        const fileName = su.toSnakeCase(agName) + '_ag';
         const outFile = np.join(outDir, fileName + '.go');
         await mfs.writeFileAsync(outFile, code);
         if (builder.tsTypeCollector?.count) {

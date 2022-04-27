@@ -5,7 +5,7 @@ import "github.com/mgenware/mingru-go-lib"
 type VUserAGType struct {
 }
 
-var VUserAG = &VUserAGType{}
+var VUser = &VUserAGType{}
 
 // ------------ Actions ------------
 

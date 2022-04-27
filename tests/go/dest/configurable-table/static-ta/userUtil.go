@@ -5,7 +5,7 @@ import "github.com/mgenware/mingru-go-lib"
 type UserUtilAGType struct {
 }
 
-var UserUtilAG = &UserUtilAGType{}
+var UserUtil = &UserUtilAGType{}
 
 // ------------ Actions ------------
 

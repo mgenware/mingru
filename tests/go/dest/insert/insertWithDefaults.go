@@ -5,7 +5,7 @@ import "github.com/mgenware/mingru-go-lib"
 type ColsAGType struct {
 }
 
-var ColsAG = &ColsAGType{}
+var Cols = &ColsAGType{}
 
 // ------------ Actions ------------
 

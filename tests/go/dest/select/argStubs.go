@@ -5,7 +5,7 @@ import "github.com/mgenware/mingru-go-lib"
 type PostAGType struct {
 }
 
-var PostAG = &PostAGType{}
+var Post = &PostAGType{}
 
 // ------------ Actions ------------
 

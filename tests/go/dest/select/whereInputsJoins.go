@@ -5,7 +5,7 @@ import "github.com/mgenware/mingru-go-lib"
 type CmtAGType struct {
 }
 
-var CmtAG = &CmtAGType{}
+var Cmt = &CmtAGType{}
 
 // ------------ Actions ------------
 

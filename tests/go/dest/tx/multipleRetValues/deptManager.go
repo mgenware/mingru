@@ -10,7 +10,7 @@ import (
 type DeptManagerAGType struct {
 }
 
-var DeptManagerAG = &DeptManagerAGType{}
+var DeptManager = &DeptManagerAGType{}
 
 // ------------ Actions ------------
 

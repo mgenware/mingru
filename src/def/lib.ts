@@ -21,6 +21,14 @@ export function tableNameCode(t: mm.Table): string {
   return `Table${pascalName}`;
 }
 
+export function agName(ag: mm.ActionGroup) {
+  const typeName = ag.constructor.name;
+  if (typeName.endsWith('AG')) {
+    return typeName.substring(0, typeName.length - 2);
+  }
+  return typeName;
+}
+
 export function actionCallPath(
   className: string | null,
   actionName: string,

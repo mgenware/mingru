@@ -9,7 +9,7 @@ import (
 type CmtAGType struct {
 }
 
-var CmtAG = &CmtAGType{}
+var Cmt = &CmtAGType{}
 
 // ------------ Actions ------------
 

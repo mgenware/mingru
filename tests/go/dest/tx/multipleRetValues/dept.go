@@ -5,7 +5,7 @@ import "github.com/mgenware/mingru-go-lib"
 type DeptAGType struct {
 }
 
-var DeptAG = &DeptAGType{}
+var Dept = &DeptAGType{}
 
 // ------------ Actions ------------
 

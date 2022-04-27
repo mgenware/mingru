@@ -5,7 +5,7 @@ import "github.com/mgenware/mingru-go-lib"
 type MyTableAGType struct {
 }
 
-var MyTableAG = &MyTableAGType{}
+var MyTable = &MyTableAGType{}
 
 // ------------ Actions ------------
 

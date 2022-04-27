@@ -9,7 +9,7 @@ import (
 type RplAGType struct {
 }
 
-var RplAG = &RplAGType{}
+var Rpl = &RplAGType{}
 
 // ------------ Actions ------------
 

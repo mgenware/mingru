@@ -5,7 +5,7 @@ import "github.com/mgenware/mingru-go-lib"
 type ConsumerAGType struct {
 }
 
-var ConsumerAG = &ConsumerAGType{}
+var Consumer = &ConsumerAGType{}
 
 // ------------ Actions ------------
 

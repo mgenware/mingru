@@ -1,4 +1,5 @@
 import * as mm from 'mingru-models';
+import * as defs from '../def/defs.js';
 import { ActionIO } from './actionIO.js';
 import { actionToIO } from './actionToIO.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
@@ -30,8 +31,8 @@ export class AGIO {
         return actionToIO(action, opt, `action "${agTableName}.${actionName}"`);
       });
 
-    const agName = ag.constructor.name;
-    this.className = `${agName}Type`;
+    const agName = defs.agName(ag);
+    this.className = `${agName}AGType`;
     this.instanceName = agName;
     this.tableDBName = agTable.__getDBName();
   }

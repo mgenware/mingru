@@ -9,7 +9,7 @@ import (
 type ConsumerAGType struct {
 }
 
-var ConsumerAG = &ConsumerAGType{}
+var Consumer = &ConsumerAGType{}
 
 // ------------ Actions ------------
 
