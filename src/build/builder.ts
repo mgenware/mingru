@@ -4,6 +4,7 @@ import * as np from 'path';
 import { promises as fs } from 'fs';
 import del from 'del';
 import tempy from 'tempy';
+import toTypeString from 'to-type-string';
 import * as defs from '../def/defs.js';
 import * as go from './goCodeUtil.js';
 import { Dialect } from '../dialect.js';
@@ -45,13 +46,17 @@ export default class Builder {
       if (item instanceof mm.ActionGroup) {
         ags.push(item);
         tables.push(item.__getData().groupTable);
-      } else {
+      } else if (item instanceof mm.Table) {
         tables.push(item);
+      } else {
+        throw new Error(`Unknown source type ${toTypeString(item)}`);
       }
     }
 
     ags = dedup(ags);
-    tables = dedup(tables.filter((t) => !t.__getData().virtualTable));
+    tables = dedup(
+      tables.filter((t) => !t.__getData().virtualTable && t instanceof mm.GhostTable === false),
+    );
 
     await Promise.all([
       this.buildActionGroups(ags),
