@@ -26,7 +26,7 @@ export function agName(ag: mm.ActionGroup) {
   if (typeName.endsWith('AG')) {
     return typeName.substring(0, typeName.length - 2);
   }
-  return typeName;
+  return su.toPascalCase(typeName);
 }
 
 export function actionCallPath(
