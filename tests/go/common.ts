@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import * as np from 'path';
 import * as mm from 'mingru-models';
-import tempy from 'tempy';
+import { temporaryDirectory } from 'tempy';
 import * as mfs from 'm-fs';
 import * as mr from '../../dist/main.js';
 import { commonIOOptions } from '../io/common.js';
@@ -98,7 +98,7 @@ export async function testBuildToDirAsync(
   buildOpts.goFileHeader = '';
   buildOpts.sqlFileHeader = '';
   buildOpts.noOutput = true;
-  const outDir = testOpts?.outDir ?? tempy.directory();
+  const outDir = testOpts?.outDir ?? temporaryDirectory();
   const tsOutDir = np.join(outDir, tsOutDirName);
   buildOpts.tsOutDir = tsOutDir;
 

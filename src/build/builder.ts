@@ -3,7 +3,7 @@ import * as mfs from 'm-fs';
 import * as np from 'path';
 import { promises as fs } from 'fs';
 import del from 'del';
-import tempy from 'tempy';
+import { temporaryDirectory } from 'tempy';
 import toTypeString from 'to-type-string';
 import * as defs from '../def/defs.js';
 import * as go from './goCodeUtil.js';
@@ -34,7 +34,7 @@ export default class Builder {
     opt = opt ?? {};
     logger.enabled = !opt.noOutput;
     this.opt = opt;
-    this.workingDir = tempy.directory();
+    this.workingDir = temporaryDirectory();
   }
 
   async build(source: Array<mm.ActionGroup | mm.Table>): Promise<void> {
