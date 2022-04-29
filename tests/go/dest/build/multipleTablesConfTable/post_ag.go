@@ -9,7 +9,7 @@ var Post = &PostAGType{}
 
 // ------------ Actions ------------
 
-func (mrTable *PostAGType) DeleteByID(mrQueryable mingru.Queryable, mrFromTable string, id uint64) error {
+func (mrTable *PostAGType) DeleteByID(mrQueryable mingru.Queryable, mrFromTable mingru.Table, id uint64) error {
 	result, err := mrQueryable.Exec("DELETE FROM "+mrFromTable+" WHERE `id` = ?", id)
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }
@@ -20,7 +20,7 @@ type PostTableSelectPostInfoResult struct {
 	UserUrlName string
 }
 
-func (mrTable *PostAGType) SelectPostInfo(mrQueryable mingru.Queryable, mrFromTable string) (PostTableSelectPostInfoResult, error) {
+func (mrTable *PostAGType) SelectPostInfo(mrQueryable mingru.Queryable, mrFromTable mingru.Table) (PostTableSelectPostInfoResult, error) {
 	var result PostTableSelectPostInfoResult
 	err := mrQueryable.QueryRow("SELECT `db_post`.`id`, `db_post`.`content`, `join_1`.`url_name` FROM "+mrFromTable+" AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`").Scan(&result.ID, &result.Content, &result.UserUrlName)
 	if err != nil {
@@ -29,7 +29,7 @@ func (mrTable *PostAGType) SelectPostInfo(mrQueryable mingru.Queryable, mrFromTa
 	return result, nil
 }
 
-func (mrTable *PostAGType) UpdateContent(mrQueryable mingru.Queryable, mrFromTable string, content string) (int, error) {
+func (mrTable *PostAGType) UpdateContent(mrQueryable mingru.Queryable, mrFromTable mingru.Table, content string) (int, error) {
 	result, err := mrQueryable.Exec("UPDATE "+mrFromTable+" SET `content` = `content` = ?", content)
 	return mingru.GetRowsAffectedIntWithError(result, err)
 }

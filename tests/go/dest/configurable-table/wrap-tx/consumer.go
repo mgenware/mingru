@@ -17,7 +17,7 @@ func (mrTable *ConsumerAGType) txChild1(mrQueryable mingru.Queryable, urlName st
 	return UserUtil.Insert(mrQueryable, TableUser, urlName, displayName, sig, age, followerCount)
 }
 
-func (mrTable *ConsumerAGType) Tx(db *sql.DB, urlName string, displayName string, sig *string, age int, followerCount *string, mrFromTable string, id uint64) error {
+func (mrTable *ConsumerAGType) Tx(db *sql.DB, urlName string, displayName string, sig *string, age int, followerCount *string, mrFromTable mingru.Table, id uint64) error {
 	txErr := mingru.Transact(db, func(tx *sql.Tx) error {
 		var err error
 		_, err = mrTable.txChild1(tx, urlName, displayName, sig, age, followerCount)

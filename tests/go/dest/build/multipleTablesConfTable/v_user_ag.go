@@ -9,7 +9,7 @@ var VUser = &VUserAGType{}
 
 // ------------ Actions ------------
 
-func (mrTable *VUserAGType) DeleteByID(mrQueryable mingru.Queryable, mrFromTable string, id uint64) error {
+func (mrTable *VUserAGType) DeleteByID(mrQueryable mingru.Queryable, mrFromTable mingru.Table, id uint64) error {
 	result, err := mrQueryable.Exec("DELETE FROM "+mrFromTable+" WHERE `id` = ?", id)
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }
@@ -19,7 +19,7 @@ type VUserTableSelectProfileResult struct {
 	Sig         *string
 }
 
-func (mrTable *VUserAGType) SelectProfile(mrQueryable mingru.Queryable, mrFromTable string) (VUserTableSelectProfileResult, error) {
+func (mrTable *VUserAGType) SelectProfile(mrQueryable mingru.Queryable, mrFromTable mingru.Table) (VUserTableSelectProfileResult, error) {
 	var result VUserTableSelectProfileResult
 	err := mrQueryable.QueryRow("SELECT `display_name`, `sig` FROM "+mrFromTable).Scan(&result.DisplayName, &result.Sig)
 	if err != nil {
@@ -28,7 +28,7 @@ func (mrTable *VUserAGType) SelectProfile(mrQueryable mingru.Queryable, mrFromTa
 	return result, nil
 }
 
-func (mrTable *VUserAGType) UpdateProfile(mrQueryable mingru.Queryable, mrFromTable string, sig *string) (int, error) {
+func (mrTable *VUserAGType) UpdateProfile(mrQueryable mingru.Queryable, mrFromTable mingru.Table, sig *string) (int, error) {
 	result, err := mrQueryable.Exec("UPDATE "+mrFromTable+" SET `sig` = ?", sig)
 	return mingru.GetRowsAffectedIntWithError(result, err)
 }

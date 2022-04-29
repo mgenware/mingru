@@ -40,5 +40,5 @@ export function actionCallPath(
 }
 
 export function cfTableVarDef(tableParamName: string) {
-  return { name: tableParamName, type: types.stringTypeInfo };
+  return { name: tableParamName, type: types.dbxTableType };
 }

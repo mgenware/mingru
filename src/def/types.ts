@@ -12,6 +12,7 @@ export const stringTypeInfo = new AtomicTypeInfo('string', '', null);
 export const sqlDBType = typeInfoToPointer(new AtomicTypeInfo('DB', null, 'sql|database/sql'));
 export const sqlTxType = typeInfoToPointer(new AtomicTypeInfo('Tx', null, 'sql|database/sql'));
 export const dbxQueryableType = new AtomicTypeInfo('Queryable', null, def.dbxNamespace);
+export const dbxTableType = new AtomicTypeInfo('Table', null, def.dbxNamespace);
 export const dbxQueryableVar: VarDef = { name: def.mrQueryableParam, type: dbxQueryableType };
 export const sqlDBVar: VarDef = { name: def.dbParam, type: sqlDBType };
 export const insertedIDVar: VarDef = { name: mm.ReturnValues.insertedID, type: uint64TypeInfo };
