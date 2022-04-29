@@ -22,7 +22,7 @@ export function tableNameCode(t: mm.Table): string {
 }
 
 export function agName(ag: mm.ActionGroup) {
-  const typeName = ag.constructor.name;
+  const typeName = ag.__getData().name;
   if (typeName.endsWith('AG')) {
     return typeName.substring(0, typeName.length - 2);
   }
