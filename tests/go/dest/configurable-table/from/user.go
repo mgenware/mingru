@@ -15,12 +15,12 @@ var User = &UserAGType{}
 // ------------ Actions ------------
 
 func (mrTable *UserAGType) DeleteT(mrQueryable mingru.Queryable, mrFromTable mingru.Table, id uint64) error {
-	result, err := mrQueryable.Exec("DELETE FROM "+mrFromTable+" WHERE `id` = ?", id)
+	result, err := mrQueryable.Exec("DELETE FROM "+string(mrFromTable)+" WHERE `id` = ?", id)
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }
 
 func (mrTable *UserAGType) InsertT(mrQueryable mingru.Queryable, mrFromTable mingru.Table, urlName string, displayName string, sig *string, age int, followerCount *string) (uint64, error) {
-	result, err := mrQueryable.Exec("INSERT INTO "+mrFromTable+" (`url_name`, `display_name`, `sig`, `age`, `follower_c`) VALUES (?, ?, ?, ?, ?)", urlName, displayName, sig, age, followerCount)
+	result, err := mrQueryable.Exec("INSERT INTO "+string(mrFromTable)+" (`url_name`, `display_name`, `sig`, `age`, `follower_c`) VALUES (?, ?, ?, ?, ?)", urlName, displayName, sig, age, followerCount)
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }
 
@@ -31,7 +31,7 @@ type UserTableSelectTResult struct {
 
 func (mrTable *UserAGType) SelectT(mrQueryable mingru.Queryable, mrFromTable mingru.Table) (UserTableSelectTResult, error) {
 	var result UserTableSelectTResult
-	err := mrQueryable.QueryRow("SELECT `id`, `age` FROM "+mrFromTable).Scan(&result.ID, &result.Age)
+	err := mrQueryable.QueryRow("SELECT `id`, `age` FROM "+string(mrFromTable)).Scan(&result.ID, &result.Age)
 	if err != nil {
 		return result, err
 	}
@@ -60,6 +60,6 @@ func (mrTable *UserAGType) TransactT(db *sql.DB, mrFromTable mingru.Table, urlNa
 }
 
 func (mrTable *UserAGType) UpdateT(mrQueryable mingru.Queryable, mrFromTable mingru.Table, id uint64, urlName string, displayName string, sig *string, age int, followerCount *string) error {
-	result, err := mrQueryable.Exec("UPDATE "+mrFromTable+" SET `url_name` = ?, `display_name` = ?, `sig` = ?, `age` = ?, `follower_c` = ? WHERE `id` = ?", urlName, displayName, sig, age, followerCount, id)
+	result, err := mrQueryable.Exec("UPDATE "+string(mrFromTable)+" SET `url_name` = ?, `display_name` = ?, `sig` = ?, `age` = ?, `follower_c` = ? WHERE `id` = ?", urlName, displayName, sig, age, followerCount, id)
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }

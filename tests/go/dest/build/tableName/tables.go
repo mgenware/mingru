@@ -1,3 +1,5 @@
 package da
 
-const TablePostReply = "post_cmt_rpl"
+import "github.com/mgenware/mingru-go-lib"
+
+const TablePostReply mingru.Table = "post_cmt_rpl"

@@ -135,13 +135,18 @@ export function mergeIOVerListsWithActionIO(
   execArgs.mergeList(io.execArgs);
 }
 
+export function configurableTableParamToStringCode(p: string) {
+  return `string(${p})`;
+}
+
 export function handleNonSelectSQLFrom(
   processor: BaseIOProcessor,
   table: mm.Table,
 ): StringSegment[] {
   const e = processor.opt.dialect.encodeName;
   return processor.configurableTableName
-    ? [{ code: processor.configurableTableName }]
+    ? // Cast `mingru.Table` to `string`.
+      [{ code: configurableTableParamToStringCode(processor.configurableTableName) }]
     : [`${e(table.__getDBName())}`];
 }
 

@@ -1,3 +1,5 @@
 package da
 
-const TablePost = "db_post"
+import "github.com/mgenware/mingru-go-lib"
+
+const TablePost mingru.Table = "db_post"

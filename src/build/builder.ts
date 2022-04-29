@@ -110,9 +110,11 @@ export default class Builder {
 
   private async buildTables(tables: mm.Table[]) {
     const { opt } = this;
-    let code = `package ${opt.packageName || defs.defaultPackageName}\n\n`;
+    let code = `package ${
+      opt.packageName || defs.defaultPackageName
+    }\n\nimport "github.com/mgenware/mingru-go-lib"\n\n`;
     for (const t of tables) {
-      code += `const ${defs.tableNameCode(t)} = ${JSON.stringify(t.__getDBName())}\n`;
+      code += `const ${defs.tableNameCode(t)} mingru.Table = ${JSON.stringify(t.__getDBName())}\n`;
     }
     const outFile = np.join(this.workingDir, 'tables.go');
     await mfs.writeFileAsync(outFile, (opt.goFileHeader ?? '') + code);
