@@ -23,11 +23,7 @@ export class DeleteIO extends ActionIO {
   }
 }
 
-class DeleteIOProcessor extends BaseIOProcessor {
-  constructor(public action: mm.DeleteAction, opt: ActionToIOOptions) {
-    super(action, opt);
-  }
-
+class DeleteIOProcessor extends BaseIOProcessor<mm.DeleteAction> {
   convert(): DeleteIO {
     const sql: StringSegment[] = ['DELETE FROM '];
     const { action, opt } = this;

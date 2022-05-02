@@ -29,11 +29,7 @@ export class InsertIO extends ActionIO {
   }
 }
 
-export class InsertIOProcessor extends BaseIOProcessor {
-  constructor(public action: mm.InsertAction, opt: ActionToIOOptions) {
-    super(action, opt);
-  }
-
+export class InsertIOProcessor extends BaseIOProcessor<mm.InsertAction> {
   convert(): InsertIO {
     const sql: StringSegment[] = ['INSERT INTO '];
     const { action, opt } = this;

@@ -140,7 +140,7 @@ export function configurableTableParamToStringCode(p: string) {
 }
 
 export function handleNonSelectSQLFrom(
-  processor: BaseIOProcessor,
+  processor: BaseIOProcessor<mm.Action>,
   table: mm.Table,
 ): StringSegment[] {
   const e = processor.opt.dialect.encodeName;

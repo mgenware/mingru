@@ -1,22 +1,26 @@
 import * as mm from 'mingru-models';
-import * as su from '../lib/stringUtils.js';
+import * as defs from '../def/defs.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
-import { AGInfo } from './agInfo.js';
 
 export default class BaseIOProcessor<T extends mm.Action> {
   get configurableTableName(): string | undefined {
     const ad = this.action.__getData();
-    if (ad.sqlTable && ad.sqlTable.__getData().tableParam) {
-      return su.toCamelCase(ad.sqlTable.__getData().name);
+    if (ad.sqlTable) {
+      if (ad.sqlTable.__getData().tableParam) {
+        return defs.tableParamName(ad.sqlTable);
+      }
+      // `sqlTable` is present (likely a tmp action in a transaction).
+      // Not a table param even through its group table can be a table param.
+      return undefined;
     }
     const gt = this.groupTable();
     if (gt?.__getData().tableParam) {
-      return su.toCamelCase(gt.__getData().name);
+      return defs.tableParamName(gt);
     }
     return undefined;
   }
 
-  constructor(public agInfo: AGInfo, public action: T, public opt: ActionToIOOptions) {}
+  constructor(public action: T, public opt: ActionToIOOptions) {}
 
   mustGetAvailableSQLTable(): mm.Table {
     const table = this.action.__mustGetAvailableSQLTable(this.opt.outerGroupTable);

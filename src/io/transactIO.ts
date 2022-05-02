@@ -7,7 +7,6 @@ import * as defs from '../def/defs.js';
 import { VarDef } from '../lib/varInfo.js';
 import BaseIOProcessor from './baseIOProcessor.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
-import { AGInfo } from './agInfo.js';
 
 export class TransactMemberIO {
   constructor(
@@ -79,7 +78,8 @@ class TransactIOProcessor extends BaseIOProcessor<mm.TransactAction> {
 
       const isChildInline = !childActionData.name;
       // Is child member AG the same as the outer AG.
-      const isSameAG = isChildInline || actionData.actionGroup === childActionData.actionGroup;
+      const isSameAG =
+        isChildInline || action.__mustGetActionGroup() === childActionData.actionGroup;
       const callPath = defs.actionCallPath(
         isSameAG ? null : childActionData.actionGroup ?? null,
         childName,
@@ -231,8 +231,8 @@ class TransactIOProcessor extends BaseIOProcessor<mm.TransactAction> {
   }
 }
 
-export function transactIO(agInfo: AGInfo, action: mm.Action, opt: ActionToIOOptions): TransactIO {
-  const pro = new TransactIOProcessor(agInfo, action as mm.TransactAction, opt);
+export function transactIO(action: mm.Action, opt: ActionToIOOptions): TransactIO {
+  const pro = new TransactIOProcessor(action as mm.TransactAction, opt);
   return pro.convert();
 }
 

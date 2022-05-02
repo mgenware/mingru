@@ -5,7 +5,6 @@ import { Dialect, StringSegment } from '../dialect.js';
 import { VarDefBuilder } from '../lib/varInfoHelper.js';
 import { makeStringFromSegments } from '../build/goCodeUtil.js';
 import * as defs from '../def/defs.js';
-import { AGInfo } from './agInfo.js';
 
 export class ActionIO {
   funcStubs: VarDef[];
@@ -14,7 +13,7 @@ export class ActionIO {
   capturedVars: Record<string, mm.CapturedVar> = {};
 
   constructor(
-    public agInfo: AGInfo,
+    public dialect: Dialect,
     public action: mm.Action,
     public sql: StringSegment[] | null,
     public funcArgs: ParamList,

@@ -17,7 +17,6 @@ import { dedup } from '../lib/arrayUtils.js';
 import AGBuilderContext from './agBuilderContext.js';
 import AGBuilder from './agBuilder.js';
 import { buildTSInterface } from './tsCodeBuilder.js';
-import { AGInfo } from '../io/agInfo.js';
 
 const tableSQLDir = 'table_sql';
 const migSQLDir = 'migration_sql';
@@ -82,7 +81,7 @@ export default class Builder {
     await Promise.all(
       groups.map(async (ag) => {
         const agName = defs.agInstanceName(ag);
-        const agIO = new AGIO(new AGInfo(ag), { dialect: this.dialect });
+        const agIO = new AGIO(ag, { dialect: this.dialect });
         const builder = new AGBuilder(agIO, opt, context);
         const code = builder.build();
         const fileName = su.toSnakeCase(agName) + '_ag';

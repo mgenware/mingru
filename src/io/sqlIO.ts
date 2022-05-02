@@ -63,7 +63,7 @@ function handleSubquery(
   dialect: Dialect,
 ): ActionIO {
   if (action instanceof mm.SelectAction) {
-    const groupTable = action.__getData().groupTable || defaultGroupTable;
+    const groupTable = action.__getGroupTable() ?? defaultGroupTable;
     if (!groupTable) {
       throw new Error('No group table available for subquery initialization');
     }
@@ -167,7 +167,7 @@ function handleElement(
     case mm.SQLElementType.action: {
       const action = element.value;
       if (action instanceof mm.Action) {
-        const io = handleSubquery(action, action.__getData().groupTable || defaultTable, dialect);
+        const io = handleSubquery(action, action.__getGroupTable() ?? defaultTable, dialect);
         subqueryCallback?.(action, io);
         if (!io.sql) {
           throw new Error(`Unexpected empty SQL code from IO, action "${action}"`);

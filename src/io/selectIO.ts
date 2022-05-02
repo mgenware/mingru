@@ -21,7 +21,6 @@ import { forEachWithSlots } from '../lib/arrayUtils.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
 import BaseIOProcessor from './baseIOProcessor.js';
 import * as sqlHelper from '../lib/sqlHelper.js';
-import { AGInfo } from './agInfo.js';
 
 const orderByInputParamName = 'orderBy';
 
@@ -1007,8 +1006,8 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
   }
 }
 
-export function selectIO(agInfo: AGInfo, action: mm.Action, opt: ActionToIOOptions): SelectIO {
-  const converter = new SelectIOProcessor(agInfo, action as mm.SelectAction, opt);
+export function selectIO(action: mm.Action, opt: ActionToIOOptions): SelectIO {
+  const converter = new SelectIOProcessor(action as mm.SelectAction, opt);
   return converter.convert();
 }
 

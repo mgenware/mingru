@@ -2,9 +2,9 @@ import * as mm from 'mingru-models';
 import mustBeErr from 'must-be-err';
 import { ActionIO } from './actionIO.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
-import { AGInfo } from './agInfo.js';
+import { actionToIOCache } from './cache.js';
 
-export type HandlerType = (agInfo: AGInfo, action: mm.Action, opt: ActionToIOOptions) => ActionIO;
+export type HandlerType = (action: mm.Action, opt: ActionToIOOptions) => ActionIO;
 
 const handlers = new Map<number, HandlerType>();
 
@@ -14,9 +14,6 @@ export function registerHandler(type: mm.ActionType, handler: HandlerType) {
   }
   handlers.set(type, handler);
 }
-
-const actionToIOCache = new Map<mm.Action, ActionIO>();
-const agToAGInfoCache = new Map<mm.ActionGroup, AGInfo>();
 
 export function actionToIO(
   action: mm.Action,
@@ -37,16 +34,7 @@ export function actionToIO(
       throw new Error(`The type "${actionType}" is not supported in actionToIO`);
     }
 
-    const ag = action.__mustGetActionGroup();
-    let agInfo: AGInfo;
-    const cachedAGInfo = agToAGInfoCache.get(ag);
-    if (cachedAGInfo) {
-      agInfo = cachedAGInfo;
-    } else {
-      agInfo = new AGInfo(ag);
-      agToAGInfoCache.set(ag, agInfo);
-    }
-    const result = handler(agInfo, action, opt);
+    const result = handler(action, opt);
     actionToIOCache.set(action, result);
     return result;
   } catch (err) {

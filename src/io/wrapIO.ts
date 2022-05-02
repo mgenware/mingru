@@ -23,11 +23,7 @@ export class WrapIO extends ActionIO {
   }
 }
 
-class WrapIOProcessor extends BaseIOProcessor {
-  constructor(public action: mm.WrapAction, opt: ActionToIOOptions) {
-    super(action, opt);
-  }
-
+class WrapIOProcessor extends BaseIOProcessor<mm.WrapAction> {
   convert(): ActionIO {
     const { action, opt } = this;
     const { dialect } = opt;
@@ -38,6 +34,7 @@ class WrapIOProcessor extends BaseIOProcessor {
     }
     const actionName = this.mustGetActionName();
     const groupTable = this.mustGetGroupTable();
+    const ag = action.__mustGetActionGroup();
 
     const innerIO = actionToIO(
       innerAction,
@@ -160,21 +157,17 @@ class WrapIOProcessor extends BaseIOProcessor {
       // IMPORTANT! Give `innerIO` a name as it doesn't have one.
       // Calling `__configure` with another table won't change inner action's
       // previous table.
-      innerAction.__configure(this.mustGetActionName(), groupTable);
+      innerAction.__configure(`${this.mustGetActionName()}Core`, ag);
       innerIO.capturedFuncArgs = capturedFuncArgs;
       innerIO.capturedVars = capturedVars;
       return innerIO;
     }
 
     // Non-inline case.
-    const innerActionGroupTable = innerActionData.groupTable;
-    // `innerActionGroupTable` should not be null as `innerAction` should
-    // be initialized at the point.
-    if (!innerActionGroupTable) {
-      throw new Error(`Unexpected uninitialized WRAP action "${innerActionData.name}"`);
-    }
+    // Is child member AG the same as the outer AG.
+    const isSameAG = ag === innerActionData.actionGroup;
     const funcPath = defs.actionCallPath(
-      innerActionGroupTable === groupTable ? null : innerActionGroupTable.__getData().name,
+      isSameAG ? null : innerActionData.actionGroup ?? null,
       innerActionData.name || actionName,
       false,
     );

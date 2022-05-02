@@ -29,6 +29,10 @@ export function agInstanceName(ag: mm.ActionGroup) {
   return su.toPascalCase(typeName);
 }
 
+export function tableParamName(table: mm.Table) {
+  return su.toCamelCase(table.__getData().name);
+}
+
 export function actionCallPath(
   ag: mm.ActionGroup | null,
   actionName: string,
