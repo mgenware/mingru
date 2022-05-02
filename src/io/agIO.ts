@@ -1,23 +1,13 @@
-import * as mm from 'mingru-models';
-import * as defs from '../def/defs.js';
 import { ActionIO } from './actionIO.js';
-import { actionToIO } from './actionToIO.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
+import { AGInfo } from './agInfo.js';
 
 // IO object for AG(action group).
 export class AGIO {
   actionIOs: ActionIO[];
 
-  // The name of generated table type.
-  className: string;
-
-  // The name of generated table instance.
-  instanceName: string;
-
-  // Table name in database.
-  tableDBName: string;
-
-  constructor(public ag: mm.ActionGroup, public opt: ActionToIOOptions) {
+  constructor(public agInfo: AGInfo, public opt: ActionToIOOptions) {
+    const { ag } = agInfo;
     const agData = ag.__getData();
     const agTable = agData.groupTable;
     const agTableName = agTable.__getData().name;
@@ -30,10 +20,5 @@ export class AGIO {
         }
         return actionToIO(action, opt, `action "${agTableName}.${actionName}"`);
       });
-
-    const agName = defs.agName(ag);
-    this.className = `${agName}AGType`;
-    this.instanceName = agName;
-    this.tableDBName = agTable.__getDBName();
   }
 }

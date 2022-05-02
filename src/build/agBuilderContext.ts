@@ -10,8 +10,8 @@ export default class AGBuilderContext {
   // Tracks if a result type should have TypeScript definition generated.
   #tsResultTypes = new Set<string>();
 
-  // Actions that have been built.
-  #actions = new Set<mm.ActionGroup>();
+  // Action groups that have been built.
+  #actionGroups = new Set<mm.ActionGroup>();
 
   get interfaces(): Readonly<Record<string, Map<string, FuncSignature>>> {
     return this.#interfaces;
@@ -25,8 +25,8 @@ export default class AGBuilderContext {
     return [...this.#tsResultTypes];
   }
 
-  get actions(): readonly mm.ActionGroup[] {
-    return [...this.#actions];
+  get actionGroups(): readonly mm.ActionGroup[] {
+    return [...this.#actionGroups];
   }
 
   addSharedInterface(name: string, funcSig: FuncSignature) {
@@ -44,12 +44,12 @@ export default class AGBuilderContext {
     }
   }
 
-  addAction(action: mm.ActionGroup) {
-    this.#actions.add(action);
+  addActionGroup(ag: mm.ActionGroup) {
+    this.#actionGroups.add(ag);
   }
 
-  hasAction(action: mm.ActionGroup) {
-    return this.#actions.has(action);
+  hasActionGroup(ag: mm.ActionGroup) {
+    return this.#actionGroups.has(ag);
   }
 
   hasTsResultType(type: string) {

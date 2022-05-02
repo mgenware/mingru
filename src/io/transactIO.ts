@@ -7,6 +7,7 @@ import * as defs from '../def/defs.js';
 import { VarDef } from '../lib/varInfo.js';
 import BaseIOProcessor from './baseIOProcessor.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
+import { AGInfo } from './agInfo.js';
 
 export class TransactMemberIO {
   constructor(
@@ -54,11 +55,7 @@ export interface TXMReturnValueInfo {
   refs: TXMReturnValueSource[];
 }
 
-class TransactIOProcessor extends BaseIOProcessor {
-  constructor(public action: mm.TransactAction, opt: ActionToIOOptions) {
-    super(action, opt);
-  }
-
+class TransactIOProcessor extends BaseIOProcessor<mm.TransactAction> {
   convert(): TransactIO {
     const { action, opt } = this;
     const actionName = this.mustGetActionName();
@@ -72,7 +69,6 @@ class TransactIOProcessor extends BaseIOProcessor {
     const memberIOs = members.map((mem, idx) => {
       const childAction = mem.action;
       const childActionData = mem.action.__getData();
-      const childGroupTable = childActionData.groupTable;
       const childName = childActionData.name || mem.name || `${actionName}Child${idx + 1}`;
 
       const io = actionToIO(
@@ -82,9 +78,10 @@ class TransactIOProcessor extends BaseIOProcessor {
       );
 
       const isChildInline = !childActionData.name;
-      const isChildSameRoot = isChildInline || groupTable === childGroupTable;
+      // Is child member AG the same as the outer AG.
+      const isSameAG = isChildInline || actionData.actionGroup === childActionData.actionGroup;
       const callPath = defs.actionCallPath(
-        isChildSameRoot ? null : childGroupTable?.__getData().name || null,
+        isSameAG ? null : childActionData.actionGroup ?? null,
         childName,
         isChildInline,
       );
@@ -234,8 +231,8 @@ class TransactIOProcessor extends BaseIOProcessor {
   }
 }
 
-export function transactIO(action: mm.Action, opt: ActionToIOOptions): TransactIO {
-  const pro = new TransactIOProcessor(action as mm.TransactAction, opt);
+export function transactIO(agInfo: AGInfo, action: mm.Action, opt: ActionToIOOptions): TransactIO {
+  const pro = new TransactIOProcessor(agInfo, action as mm.TransactAction, opt);
   return pro.convert();
 }
 

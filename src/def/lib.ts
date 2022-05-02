@@ -21,7 +21,7 @@ export function tableNameCode(t: mm.Table): string {
   return `Table${pascalName}`;
 }
 
-export function agName(ag: mm.ActionGroup) {
+export function agInstanceName(ag: mm.ActionGroup) {
   const typeName = ag.__getData().name;
   if (typeName.endsWith('AG')) {
     return typeName.substring(0, typeName.length - 2);
@@ -30,12 +30,12 @@ export function agName(ag: mm.ActionGroup) {
 }
 
 export function actionCallPath(
-  className: string | null,
+  ag: mm.ActionGroup | null,
   actionName: string,
   isPrivate: boolean,
 ): string {
   const funcName = actionPascalName(actionName);
-  const resolvedTableName = className ? tablePascalName(className) : core.tableObjSelf;
+  const resolvedTableName = ag ? agInstanceName(ag) : core.tableObjSelf;
   return resolvedTableName + '.' + (isPrivate ? su.lowercaseFirstChar(funcName) : funcName);
 }
 

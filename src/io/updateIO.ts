@@ -29,11 +29,7 @@ export class UpdateIO extends ActionIO {
   }
 }
 
-class UpdateIOProcessor extends BaseIOProcessor {
-  constructor(public action: mm.UpdateAction, opt: ActionToIOOptions) {
-    super(action, opt);
-  }
-
+class UpdateIOProcessor extends BaseIOProcessor<mm.UpdateAction> {
   convert(): UpdateIO {
     const sql: StringSegment[] = ['UPDATE '];
     const { action, opt } = this;

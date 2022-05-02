@@ -21,6 +21,7 @@ import { forEachWithSlots } from '../lib/arrayUtils.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
 import BaseIOProcessor from './baseIOProcessor.js';
 import * as sqlHelper from '../lib/sqlHelper.js';
+import { AGInfo } from './agInfo.js';
 
 const orderByInputParamName = 'orderBy';
 
@@ -147,7 +148,7 @@ export class SelectIO extends ActionIO {
   }
 }
 
-export class SelectIOProcessor extends BaseIOProcessor {
+export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
   // If true, this is a full join or right join, which means home table columns
   // are all nullable.
   homeTableJoinType?: mm.JoinType;
@@ -201,10 +202,6 @@ export class SelectIOProcessor extends BaseIOProcessor {
   private orderByInputParams: VarDef[] = [];
   // Tracks subqueries func args.
   private subqueryIOs: ActionIO[] = [];
-
-  constructor(public action: mm.SelectAction, opt: ActionToIOOptions) {
-    super(action, opt);
-  }
 
   convert(): SelectIO {
     const actionData = this.action.__getData();
@@ -1010,8 +1007,8 @@ export class SelectIOProcessor extends BaseIOProcessor {
   }
 }
 
-export function selectIO(action: mm.Action, opt: ActionToIOOptions): SelectIO {
-  const converter = new SelectIOProcessor(action as mm.SelectAction, opt);
+export function selectIO(agInfo: AGInfo, action: mm.Action, opt: ActionToIOOptions): SelectIO {
+  const converter = new SelectIOProcessor(agInfo, action as mm.SelectAction, opt);
   return converter.convert();
 }
 

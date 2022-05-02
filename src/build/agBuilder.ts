@@ -17,7 +17,6 @@ import { ValueList, ParamList } from '../lib/varList.js';
 import * as go from './goCodeUtil.js';
 import * as defs from '../def/defs.js';
 import logger from '../logger.js';
-import { AGIO } from '../io/agIO.js';
 import { ActionIO } from '../io/actionIO.js';
 import { WrapIO } from '../io/wrapIO.js';
 import { TransactIO } from '../io/transactIO.js';
@@ -25,6 +24,7 @@ import LinesBuilder from './linesBuilder.js';
 import * as stringUtils from '../lib/stringUtils.js';
 import { BuildOptions } from './buildOptions.js';
 import AGBuilderContext from './agBuilderContext.js';
+import { AGIO } from '../io/agIO.js';
 
 function joinParams(arr: string[]): string {
   return arr.join(', ');
@@ -73,8 +73,8 @@ export default class AGBuilder {
   private imports = new go.ImportList();
   private dialect: Dialect;
 
-  constructor(public taIO: AGIO, public opts: BuildOptions, public context: AGBuilderContext) {
-    this.dialect = taIO.opt.dialect;
+  constructor(public agIO: AGIO, public opts: BuildOptions, public context: AGBuilderContext) {
+    this.dialect = agIO.opt.dialect;
     this.options = opts;
     if (opts.tsOutDir) {
       this.tsTypeCollector = new TSTypeCollector();
@@ -82,9 +82,9 @@ export default class AGBuilder {
   }
 
   build(): string {
-    const { options, taIO } = this;
-    const action = taIO.ag;
-    this.context.addAction(action);
+    const { options, agIO } = this;
+    const { agInfo } = agIO;
+    this.context.addActionGroup(agInfo.ag);
 
     let code = options.goFileHeader ?? defs.fileHeader;
     code += `package ${options.packageName || defs.defaultPackageName}\n\n`;
@@ -102,8 +102,8 @@ export default class AGBuilder {
 
   private buildActions(): string {
     let code = '';
-    logger.debug(`🏁 Building actions [${this.taIO.tableDBName}]`);
-    for (const actionIO of this.taIO.actionIOs) {
+    logger.debug(`🏁 Building action group [${this.agIO.agInfo.instanceName}]`);
+    for (const actionIO of this.agIO.actionIOs) {
       code += `\n${this.buildActionIO(actionIO, undefined)}`;
     }
     return code;
@@ -257,7 +257,7 @@ export default class AGBuilder {
   }
 
   private buildTableObject(): string {
-    const { className, instanceName } = this.taIO;
+    const { className, instanceName } = this.agIO.agInfo;
     let code = go.struct(
       new go.GoStructData(
         className,
@@ -276,7 +276,7 @@ export default class AGBuilder {
 
   // Gets the member function signature head.
   private getFuncSigHead() {
-    const { className } = this.taIO;
+    const { className } = this.agIO.agInfo;
     return `func (${defs.tableObjSelf} *${className}) `;
   }
 

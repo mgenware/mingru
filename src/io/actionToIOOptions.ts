@@ -18,5 +18,7 @@ export interface ActionToIOOptions {
   outerActionName?: string;
 
   // Like `outerActionName`. A fallback value for `groupTable` of outer scope.
+  // Used as a fallback value if current action doesn't have this property.
+  // e.g. tmp actions and TX members.
   outerGroupTable?: mm.Table;
 }
