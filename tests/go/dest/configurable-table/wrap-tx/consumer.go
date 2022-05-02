@@ -14,7 +14,7 @@ var Consumer = &ConsumerAGType{}
 // ------------ Actions ------------
 
 func (mrTable *ConsumerAGType) txChild1(mrQueryable mingru.Queryable, urlName string, displayName string, sig *string, age int, followerCount *string) (uint64, error) {
-	return UserUtil.Insert(mrQueryable, TableUser, urlName, displayName, sig, age, followerCount)
+	return MrFromTable.Insert(mrQueryable, TableUser, urlName, displayName, sig, age, followerCount)
 }
 
 func (mrTable *ConsumerAGType) Tx(db *sql.DB, urlName string, displayName string, sig *string, age int, followerCount *string, mrFromTable mingru.Table, id uint64) error {
@@ -24,15 +24,15 @@ func (mrTable *ConsumerAGType) Tx(db *sql.DB, urlName string, displayName string
 		if err != nil {
 			return err
 		}
-		err = UserUtil.Del(tx, mrFromTable, id)
+		err = MrFromTable.Del(tx, mrFromTable, id)
 		if err != nil {
 			return err
 		}
-		err = UserUtil.Upd(tx, mrFromTable, id, urlName, displayName, sig, age, followerCount)
+		err = MrFromTable.Upd(tx, mrFromTable, id, urlName, displayName, sig, age, followerCount)
 		if err != nil {
 			return err
 		}
-		_, err = UserUtil.Sel(tx, mrFromTable, id)
+		_, err = MrFromTable.Sel(tx, mrFromTable, id)
 		if err != nil {
 			return err
 		}

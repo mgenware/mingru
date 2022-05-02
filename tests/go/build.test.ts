@@ -1,7 +1,7 @@
 import * as mm from 'mingru-models';
 import { itRejects } from 'it-throws';
 import user, { User } from '../models/user.js';
-import post from '../models/post.js';
+import post, { Post } from '../models/post.js';
 import postReply from '../models/postReply.js';
 import { testBuildToDirAsync, migrationUpFile, migrationDownFile } from './common.js';
 
@@ -158,9 +158,9 @@ it('Multiple tables, CSQL (dedup)', async () => {
   );
 });
 
-it('CSQL and virtual tables', async () => {
+it('CSQL and table param', async () => {
   class VT extends mm.Table {}
-  const vt = mm.table(VT, { virtualTable: true });
+  const vt = mm.table(VT, { tableParam: true });
   await itRejects(
     () =>
       testBuildToDirAsync([vt], ['vt.sql'], 'csqlVirtualTable', {
@@ -256,33 +256,34 @@ it('TS interfaces', async () => {
   });
 });
 
-it('Multiple tables + Configurable table + virtual table', async () => {
+it('Multiple tables + Table params', async () => {
   class UserAG extends mm.ActionGroup {
     selectProfile = mm.selectRow(user.display_name, user.sig);
     updateProfile = mm.unsafeUpdateAll().setParams(user.sig);
     deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToParam());
   }
-  const userTA = mm.actionGroup(user, UserAG);
+  const userAG = mm.actionGroup(user, UserAG);
 
+  class PostTP extends Post {}
+  const postTP = mm.table(PostTP, { tableParam: true });
   class PostAG extends mm.ActionGroup {
-    selectPostInfo = mm.selectRow(post.id, post.content, post.user_id.join(user).url_name);
-    updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToParam());
-    deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToParam());
+    selectPostInfo = mm.selectRow(postTP.id, postTP.content, postTP.user_id.join(user).url_name);
+    updateContent = mm.unsafeUpdateAll().set(postTP.content, postTP.content.isEqualToParam());
+    deleteByID = mm.deleteOne().whereSQL(postTP.id.isEqualToParam());
   }
-  const postTA = mm.actionGroup(post, PostAG, { configurableTableName: 'mrFromTable' });
+  const postAG = mm.actionGroup(postTP, PostAG);
 
-  // Mirror of the user table.
-  class VUser extends User {}
-  const vUser = mm.table(VUser);
+  class UserTP extends User {}
+  const userTP = mm.table(UserTP, { tableParam: true });
 
   class VUserAG extends mm.ActionGroup {
-    selectProfile = mm.selectRow(vUser.display_name, vUser.sig);
-    updateProfile = mm.unsafeUpdateAll().setParams(vUser.sig);
-    deleteByID = mm.deleteOne().whereSQL(vUser.id.isEqualToParam());
+    selectProfile = mm.selectRow(userTP.display_name, userTP.sig);
+    updateProfile = mm.unsafeUpdateAll().setParams(userTP.sig);
+    deleteByID = mm.deleteOne().whereSQL(userTP.id.isEqualToParam());
   }
-  const vUserAG = mm.actionGroup(vUser, VUserAG, { configurableTableName: 'mrFromTable' });
+  const vUserAG = mm.actionGroup(userTP, VUserAG);
 
-  const actions = [userTA, postTA, vUserAG];
+  const actions = [userAG, postAG, vUserAG];
   await testBuildToDirAsync(actions, ['post', 'user', 'v_user'], 'multipleTablesConfTable');
 });
 
@@ -356,18 +357,15 @@ it('cleanOutDir = true', async () => {
 });
 
 it('Single configurable table', async () => {
+  class ConfTable extends Post {}
+  const t = mm.table(ConfTable, { tableParam: true });
   class PostAG extends mm.ActionGroup {
-    selectPostTitle = mm.selectRow(post.id, post.title);
-    selectPostInfo = mm.selectRow(
-      post.id,
-      post.title,
-      post.user_id,
-      post.user_id.join(user).url_name,
-    );
+    selectPostTitle = mm.selectRow(t.id, t.title);
+    selectPostInfo = mm.selectRow(t.id, t.title, t.user_id, t.user_id.join(user).url_name);
 
-    updatePostTitle = mm.unsafeUpdateAll().set(post.title, mm.sql`${mm.param(post.title)}`);
-    deleteByID = mm.deleteOne().whereSQL(mm.sql`${post.id} = ${mm.param(post.id)}`);
+    updatePostTitle = mm.unsafeUpdateAll().set(t.title, mm.sql`${mm.param(t.title)}`);
+    deleteByID = mm.deleteOne().whereSQL(mm.sql`${t.id} = ${mm.param(t.id)}`);
   }
-  const ta = mm.actionGroup(post, PostAG, { configurableTableName: 'confTable' });
+  const ta = mm.actionGroup(t, PostAG);
   await testBuildToDirAsync([ta], ['post', '#tables.go'], 'singleVirtualTable');
 });

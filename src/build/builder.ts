@@ -55,7 +55,7 @@ export default class Builder {
 
     ags = dedup(ags);
     tables = dedup(
-      tables.filter((t) => !t.__getData().virtualTable && t instanceof mm.GhostTable === false),
+      tables.filter((t) => !t.__getData().tableParam && t instanceof mm.GhostTable === false),
     );
 
     await Promise.all([
@@ -110,11 +110,16 @@ export default class Builder {
 
   private async buildTables(tables: mm.Table[]) {
     const { opt } = this;
-    let code = `package ${
-      opt.packageName || defs.defaultPackageName
-    }\n\nimport "github.com/mgenware/mingru-go-lib"\n\n`;
-    for (const t of tables) {
-      code += `const ${defs.tableNameCode(t)} mingru.Table = ${JSON.stringify(t.__getDBName())}\n`;
+    let code = `package ${opt.packageName || defs.defaultPackageName}\n\n`;
+    if (tables.length) {
+      code += 'import "github.com/mgenware/mingru-go-lib"\n\n';
+      for (const t of tables) {
+        code += `const ${defs.tableNameCode(t)} mingru.Table = ${JSON.stringify(
+          t.__getDBName(),
+        )}\n`;
+      }
+    } else {
+      code += '/* No tables available. */\n';
     }
     const outFile = np.join(this.workingDir, 'tables.go');
     await mfs.writeFileAsync(outFile, (opt.goFileHeader ?? '') + code);

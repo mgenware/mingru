@@ -4,28 +4,30 @@ import user, { User } from '../models/user.js';
 import { testBuildAsync } from './common.js';
 
 it('configurableTable', async () => {
+  class ConfTable extends User {}
+  const t = mm.table(ConfTable, { tableParam: true });
   class UserAG extends mm.ActionGroup {
-    selectT = mm.selectRow(user.id, user.age);
+    selectT = mm.selectRow(t.id, t.age);
     insertT = mm.insertOne().setParams();
-    updateT = mm.updateOne().setParams().by(user.id);
-    deleteT = mm.deleteOne().by(user.id);
+    updateT = mm.updateOne().setParams().by(t.id);
+    deleteT = mm.deleteOne().by(t.id);
     transactT = mm.transact(this.insertT, mm.insertOne().from(post).setParams());
   }
-  const ta = mm.actionGroup(user, UserAG, { configurableTableName: 'mrFromTable' });
+  const ta = mm.actionGroup(t, UserAG);
   await testBuildAsync(ta, 'configurable-table/from/user');
 });
 
 it('configurableTable with WRAP action', async () => {
   // Two tables with the almost same structure.
-  class UserUtil extends User {}
-  const userUtil = mm.table(UserUtil, { virtualTable: true });
+  class MRFromTable extends User {}
+  const t = mm.table(MRFromTable, { tableParam: true });
   class CommonAG extends mm.ActionGroup {
     insert = mm.insertOne().setParams();
-    del = mm.deleteOne().by(userUtil.id);
-    upd = mm.updateOne().setParams().by(userUtil.id);
-    sel = mm.selectRows(userUtil.display_name).by(userUtil.id).orderByAsc(userUtil.display_name);
+    del = mm.deleteOne().by(t.id);
+    upd = mm.updateOne().setParams().by(t.id);
+    sel = mm.selectRows(t.display_name).by(t.id).orderByAsc(t.display_name);
   }
-  const commonTA = mm.actionGroup(userUtil, CommonAG, { configurableTableName: 'mrFromTable' });
+  const commonTA = mm.actionGroup(t, CommonAG);
 
   class ConsumerAG extends mm.ActionGroup {
     addUser = commonTA.insert.wrap({ mrFromTable: user });
@@ -41,15 +43,15 @@ it('configurableTable with WRAP action', async () => {
 
 it('configurableTable with WRAP action inside transactions', async () => {
   // Two tables with the almost same structure.
-  class UserUtil extends User {}
-  const userUtil = mm.table(UserUtil, { virtualTable: true });
+  class MRFromTable extends User {}
+  const t = mm.table(MRFromTable, { tableParam: true });
   class CommonAG extends mm.ActionGroup {
     insert = mm.insertOne().setParams();
-    del = mm.deleteOne().by(userUtil.id);
-    upd = mm.updateOne().setParams().by(userUtil.id);
-    sel = mm.selectRows(userUtil.display_name).by(userUtil.id).orderByAsc(userUtil.display_name);
+    del = mm.deleteOne().by(t.id);
+    upd = mm.updateOne().setParams().by(t.id);
+    sel = mm.selectRows(t.display_name).by(t.id).orderByAsc(t.display_name);
   }
-  const commonTA = mm.actionGroup(userUtil, CommonAG, { configurableTableName: 'mrFromTable' });
+  const commonTA = mm.actionGroup(t, CommonAG);
 
   class ConsumerAG extends mm.ActionGroup {
     tx = mm.transact(
@@ -67,18 +69,18 @@ it('configurableTable with WRAP action inside transactions', async () => {
 });
 
 it('Call a table action with configurable table that has not been initialized', async () => {
-  class UserUtil extends User {
+  class UserTP extends User {
     id = mm.pk();
   }
-  const userUtil = mm.table(UserUtil, { virtualTable: true });
+  const userTP = mm.table(UserTP, { tableParam: true });
 
   class UserUtilAG extends mm.ActionGroup {
-    t = mm.updateOne().setParams().by(userUtil.id);
+    t = mm.updateOne().setParams().by(userTP.id);
   }
-  const userUtilTA = mm.actionGroup(userUtil, UserUtilAG, { configurableTableName: 'cname' });
+  const userUtilTA = mm.actionGroup(userTP, UserUtilAG);
 
   class PostAG extends mm.ActionGroup {
-    t = userUtilTA.t.wrap({ cname: post });
+    t = userUtilTA.t.wrap({ userTp: post });
   }
   const postTA = mm.actionGroup(post, PostAG);
   // Build post TA first.

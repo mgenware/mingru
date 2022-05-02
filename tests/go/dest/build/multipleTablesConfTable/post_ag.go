@@ -9,27 +9,27 @@ var Post = &PostAGType{}
 
 // ------------ Actions ------------
 
-func (mrTable *PostAGType) DeleteByID(mrQueryable mingru.Queryable, mrFromTable mingru.Table, id uint64) error {
-	result, err := mrQueryable.Exec("DELETE FROM "+string(mrFromTable)+" WHERE `id` = ?", id)
+func (mrTable *PostAGType) DeleteByID(mrQueryable mingru.Queryable, postTp mingru.Table, id uint64) error {
+	result, err := mrQueryable.Exec("DELETE FROM "+string(postTp)+" WHERE `id` = ?", id)
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }
 
-type PostTableSelectPostInfoResult struct {
+type PostTpTableSelectPostInfoResult struct {
 	Content     string
 	ID          uint64
 	UserUrlName string
 }
 
-func (mrTable *PostAGType) SelectPostInfo(mrQueryable mingru.Queryable, mrFromTable mingru.Table) (PostTableSelectPostInfoResult, error) {
-	var result PostTableSelectPostInfoResult
-	err := mrQueryable.QueryRow("SELECT `db_post`.`id`, `db_post`.`content`, `join_1`.`url_name` FROM "+string(mrFromTable)+" AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`").Scan(&result.ID, &result.Content, &result.UserUrlName)
+func (mrTable *PostAGType) SelectPostInfo(mrQueryable mingru.Queryable, postTp mingru.Table) (PostTpTableSelectPostInfoResult, error) {
+	var result PostTpTableSelectPostInfoResult
+	err := mrQueryable.QueryRow("SELECT `post_tp`.`id`, `post_tp`.`content`, `join_1`.`url_name` FROM "+string(postTp)+" AS `post_tp` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `post_tp`.`user_id`").Scan(&result.ID, &result.Content, &result.UserUrlName)
 	if err != nil {
 		return result, err
 	}
 	return result, nil
 }
 
-func (mrTable *PostAGType) UpdateContent(mrQueryable mingru.Queryable, mrFromTable mingru.Table, content string) (int, error) {
-	result, err := mrQueryable.Exec("UPDATE "+string(mrFromTable)+" SET `content` = `content` = ?", content)
+func (mrTable *PostAGType) UpdateContent(mrQueryable mingru.Queryable, postTp mingru.Table, content string) (int, error) {
+	result, err := mrQueryable.Exec("UPDATE "+string(postTp)+" SET `content` = `content` = ?", content)
 	return mingru.GetRowsAffectedIntWithError(result, err)
 }

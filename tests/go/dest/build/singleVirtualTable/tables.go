@@ -1,5 +1,3 @@
 package da
 
-import "github.com/mgenware/mingru-go-lib"
-
-const TablePost mingru.Table = "db_post"
+/* No tables available. */

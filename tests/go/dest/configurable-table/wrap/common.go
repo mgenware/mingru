@@ -19,19 +19,19 @@ func (mrTable *CommonAGType) Insert(mrQueryable mingru.Queryable, mrFromTable mi
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }
 
-type UserUtilTableSelResult struct {
+type MrFromTableTableSelResult struct {
 	DisplayName string
 }
 
-func (mrTable *CommonAGType) Sel(mrQueryable mingru.Queryable, mrFromTable mingru.Table, id uint64) ([]UserUtilTableSelResult, error) {
+func (mrTable *CommonAGType) Sel(mrQueryable mingru.Queryable, mrFromTable mingru.Table, id uint64) ([]MrFromTableTableSelResult, error) {
 	rows, err := mrQueryable.Query("SELECT `display_name` FROM "+string(mrFromTable)+" WHERE `id` = ? ORDER BY `display_name`", id)
 	if err != nil {
 		return nil, err
 	}
-	var result []UserUtilTableSelResult
+	var result []MrFromTableTableSelResult
 	defer rows.Close()
 	for rows.Next() {
-		var item UserUtilTableSelResult
+		var item MrFromTableTableSelResult
 		err = rows.Scan(&item.DisplayName)
 		if err != nil {
 			return nil, err

@@ -1,15 +1,17 @@
 import * as mm from 'mingru-models';
+import * as su from '../lib/stringUtils.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
 
 export default class BaseIOProcessor {
   get configurableTableName(): string | undefined {
-    // If `SQLTable` is present (likely `.from` being called in TX),
-    // Ignore `opt.configurableTableName`, the from table is not
-    // configurable anymore.
-    if (this.action.__getData().sqlTable) {
-      return undefined;
+    const ad = this.action.__getData();
+    if (ad.sqlTable && ad.sqlTable.__getData().tableParam) {
+      return su.toCamelCase(ad.sqlTable.__getData().name);
     }
-    return this.opt.configurableTableName;
+    if (ad.groupTable && ad.groupTable.__getData().tableParam) {
+      return su.toCamelCase(ad.groupTable.__getData().name);
+    }
+    return undefined;
   }
 
   constructor(public action: mm.Action, public opt: ActionToIOOptions) {}

@@ -19,7 +19,4 @@ export interface ActionToIOOptions {
 
   // Like `outerActionName`. A fallback value for `groupTable` of outer scope.
   outerGroupTable?: mm.Table;
-
-  // Mirror of `mingru-models.tableActions`'s `configurableTableName` option.
-  configurableTableName?: string;
 }
