@@ -1,5 +1,5 @@
 import * as mm from 'mingru-models';
-import post from '../models/post.js';
+import post, { Post } from '../models/post.js';
 import user, { User } from '../models/user.js';
 import { testBuildAsync } from './common.js';
 
@@ -64,8 +64,8 @@ it('Table params with WRAP action inside transactions', async () => {
     wrapped = this.tx.wrap({ mrFromTable: post });
   }
   const consumerTA = mm.actionGroup(post, ConsumerAG);
-  await testBuildAsync(commonTA, 'tableParams/wrap-tx/common');
-  await testBuildAsync(consumerTA, 'tableParams/wrap-tx/consumer');
+  await testBuildAsync(commonTA, 'tableParams/wrapTX/common');
+  await testBuildAsync(consumerTA, 'tableParams/wrapTX/consumer');
 });
 
 it('Call a table action with a table param that has not been initialized', async () => {
@@ -84,6 +84,32 @@ it('Call a table action with a table param that has not been initialized', async
   }
   const postTA = mm.actionGroup(post, PostAG);
   // Build post TA first.
-  await testBuildAsync(postTA, 'tableParams/static-ta/post');
-  await testBuildAsync(userUtilTA, 'tableParams/static-ta/userUtil');
+  await testBuildAsync(postTA, 'tableParams/staticAG/post');
+  await testBuildAsync(userUtilTA, 'tableParams/staticAG/userUtil');
+});
+
+it('Multiple table params in transactions', async () => {
+  class UserParam extends User {}
+  const userParam = mm.table(UserParam, { tableParam: true });
+  class CommonAG extends mm.ActionGroup {
+    insert = mm.insertOne().setParams();
+    del = mm.deleteOne().by(userParam.id);
+  }
+  const commonTA = mm.actionGroup(userParam, CommonAG);
+
+  class PostParam extends Post {}
+  const postParam = mm.table(PostParam, { tableParam: true });
+
+  class ConsumerAG extends mm.ActionGroup {
+    tx = mm.transact(
+      commonTA.insert.wrap({ userParam: user }),
+      mm.insert().from(postParam).setDefaults().setParams(),
+      commonTA.del,
+    );
+
+    wrapped = this.tx.wrap({ userParam: post });
+  }
+  const consumerTA = mm.actionGroup(post, ConsumerAG);
+  await testBuildAsync(commonTA, 'tableParams/multipleTP/common');
+  await testBuildAsync(consumerTA, 'tableParams/multipleTP/consumer');
 });
