@@ -11,5 +11,5 @@ it('WHERE', async () => {
   }
   const ta = mm.actionGroup(post, PostAG);
 
-  await testBuildAsync(ta, 'select-sq/where');
+  await testBuildAsync(ta, 'selectSq/where');
 });

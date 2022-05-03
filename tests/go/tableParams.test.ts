@@ -3,7 +3,7 @@ import post from '../models/post.js';
 import user, { User } from '../models/user.js';
 import { testBuildAsync } from './common.js';
 
-it('configurableTable', async () => {
+it('Table params', async () => {
   class ConfTable extends User {}
   const t = mm.table(ConfTable, { tableParam: true });
   class UserAG extends mm.ActionGroup {
@@ -14,10 +14,10 @@ it('configurableTable', async () => {
     transactT = mm.transact(this.insertT, mm.insertOne().from(post).setParams());
   }
   const ta = mm.actionGroup(t, UserAG);
-  await testBuildAsync(ta, 'configurable-table/from/user');
+  await testBuildAsync(ta, 'tableParams/from/user');
 });
 
-it('configurableTable with WRAP action', async () => {
+it('Table params with WRAP action', async () => {
   // Two tables with the almost same structure.
   class MRFromTable extends User {}
   const t = mm.table(MRFromTable, { tableParam: true });
@@ -37,11 +37,11 @@ it('configurableTable with WRAP action', async () => {
     selPost = commonTA.sel.wrap({ mrFromTable: post });
   }
   const consumerTA = mm.actionGroup(post, ConsumerAG);
-  await testBuildAsync(commonTA, 'configurable-table/wrap/common');
-  await testBuildAsync(consumerTA, 'configurable-table/wrap/consumer');
+  await testBuildAsync(commonTA, 'tableParams/wrap/common');
+  await testBuildAsync(consumerTA, 'tableParams/wrap/consumer');
 });
 
-it('configurableTable with WRAP action inside transactions', async () => {
+it('Table params with WRAP action inside transactions', async () => {
   // Two tables with the almost same structure.
   class MRFromTable extends User {}
   const t = mm.table(MRFromTable, { tableParam: true });
@@ -64,11 +64,11 @@ it('configurableTable with WRAP action inside transactions', async () => {
     wrapped = this.tx.wrap({ mrFromTable: post });
   }
   const consumerTA = mm.actionGroup(post, ConsumerAG);
-  await testBuildAsync(commonTA, 'configurable-table/wrap-tx/common');
-  await testBuildAsync(consumerTA, 'configurable-table/wrap-tx/consumer');
+  await testBuildAsync(commonTA, 'tableParams/wrap-tx/common');
+  await testBuildAsync(consumerTA, 'tableParams/wrap-tx/consumer');
 });
 
-it('Call a table action with configurable table that has not been initialized', async () => {
+it('Call a table action with a table param that has not been initialized', async () => {
   class UserTP extends User {
     id = mm.pk();
   }
@@ -84,6 +84,6 @@ it('Call a table action with configurable table that has not been initialized', 
   }
   const postTA = mm.actionGroup(post, PostAG);
   // Build post TA first.
-  await testBuildAsync(postTA, 'configurable-table/static-ta/post');
-  await testBuildAsync(userUtilTA, 'configurable-table/static-ta/userUtil');
+  await testBuildAsync(postTA, 'tableParams/static-ta/post');
+  await testBuildAsync(userUtilTA, 'tableParams/static-ta/userUtil');
 });

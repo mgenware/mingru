@@ -18,7 +18,7 @@ it('UNION', async () => {
   }
   const ta = mm.actionGroup(activity, ActivityAG);
 
-  await testBuildAsync(ta, 'select-union/union');
+  await testBuildAsync(ta, 'selectUnion/union');
 });
 
 it('UNION starting from another member', async () => {
@@ -37,7 +37,7 @@ it('UNION starting from another member', async () => {
   }
   const ta = mm.actionGroup(activity, ActivityAG);
 
-  await testBuildAsync(ta, 'select-union/unionWithReusedMem');
+  await testBuildAsync(ta, 'selectUnion/unionWithReusedMem');
 });
 
 it('UNION with LIMIT n OFFSET', async () => {
@@ -61,7 +61,7 @@ it('UNION with LIMIT n OFFSET', async () => {
   }
   const ta = mm.actionGroup(activity, ActivityAG);
 
-  await testBuildAsync(ta, 'select-union/unionLimitOffset');
+  await testBuildAsync(ta, 'selectUnion/unionLimitOffset');
 });
 
 it('UNION with page mode', async () => {
@@ -85,5 +85,5 @@ it('UNION with page mode', async () => {
   }
   const ta = mm.actionGroup(activity, ActivityAG);
 
-  await testBuildAsync(ta, 'select-union/unionPageMode');
+  await testBuildAsync(ta, 'selectUnion/unionPageMode');
 });
