@@ -97,7 +97,7 @@ export class InsertIOProcessor extends BaseIOProcessor<mm.InsertAction> {
       sql,
       setterIOs,
       !!fetchInsertedID,
-      funcArgs,
+      this.hoiseTableParams(funcArgs),
       execArgs,
       returnValue,
     );

@@ -196,7 +196,7 @@ class TransactIOProcessor extends BaseIOProcessor<mm.TransactAction> {
         }
       }
     }
-    // execArgs is empty for transact io
+    // `execArgs` is empty in `TransactIO`.
     const execArgs = new ValueList(`Exec args of action "${action}"`);
     const returnValues = new ParamList(`Return values of action ${action}`);
 
@@ -216,7 +216,7 @@ class TransactIOProcessor extends BaseIOProcessor<mm.TransactAction> {
       dialect,
       action,
       memberIOs,
-      funcArgs,
+      this.hoiseTableParams(funcArgs),
       execArgs,
       returnValues,
       crv,

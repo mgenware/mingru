@@ -70,7 +70,15 @@ class DeleteIOProcessor extends BaseIOProcessor<mm.DeleteAction> {
       });
     }
 
-    return new DeleteIO(dialect, action, sql, whereIO, funcArgs, execArgs, returnValues);
+    return new DeleteIO(
+      dialect,
+      action,
+      sql,
+      whereIO,
+      this.hoiseTableParams(funcArgs),
+      execArgs,
+      returnValues,
+    );
   }
 }
 

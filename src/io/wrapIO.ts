@@ -171,7 +171,7 @@ class WrapIOProcessor extends BaseIOProcessor<mm.WrapAction> {
     const retIO = new WrapIO(
       dialect,
       action,
-      funcArgs,
+      this.hoiseTableParams(funcArgs),
       execArgs,
       innerIO.returnValues,
       funcPath,

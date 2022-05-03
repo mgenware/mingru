@@ -567,7 +567,7 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
       sql,
       colIOs,
       whereIO,
-      funcArgs,
+      this.hoiseTableParams(funcArgs),
       execArgs,
       returnValues,
       this.orderByInputIOs,

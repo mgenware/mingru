@@ -112,7 +112,7 @@ class UpdateIOProcessor extends BaseIOProcessor<mm.UpdateAction> {
       sql,
       setterIOs,
       whereIO,
-      funcArgs,
+      this.hoiseTableParams(funcArgs),
       execArgs,
       returnValues,
       setterVars,
