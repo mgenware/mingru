@@ -115,7 +115,7 @@ export default class Builder {
       code += 'import "github.com/mgenware/mingru-go-lib"\n\n';
       for (const t of tables) {
         code += `const ${defs.tableNameCode(t)} mingru.Table = ${JSON.stringify(
-          t.__getDBName(),
+          this.dialect.encodeTableName(t),
         )}\n`;
       }
     } else {
