@@ -205,9 +205,9 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
   convert(): SelectIO {
     const actionData = this.action.__getData();
     const isUnionMode = !!actionData.unionMembers?.length;
+    const sqlTable = this.mustGetAvailableSQLTable();
     const unionItems = isUnionMode ? sqlHelper.flattenUnions(this.action) : [];
 
-    const sqlTable = this.mustGetAvailableSQLTable();
     const { opt, selectedModelNames } = this;
     const { dialect } = opt;
     const {
@@ -299,13 +299,11 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
     }
 
     if (!opt.selectionLiteMode) {
-      const actionName = this.mustGetActionName();
-
       // NOTE: not the table defined by FROM, it's the root table defined in table actions.
       // Those fields are used to generate result type definition.
       // This process call be skipped if we don't need a result type.
-      this.tablePascalName = defs.tablePascalName(this.mustGetGroupTable().__getData().name);
-      this.actionPascalName = defs.actionPascalName(actionName);
+      this.tablePascalName = defs.tablePascalName(sqlTable.__getData().name);
+      this.actionPascalName = defs.actionPascalName(this.mustGetActionNameForFullMode());
       this.actionUniqueTypeName = `${this.tablePascalName}Table${this.actionPascalName}`;
     }
 
@@ -1003,6 +1001,10 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
       }
       sqlHelper.visitColumns(sql, visitColFn);
     }
+  }
+
+  private mustGetActionNameForFullMode() {
+    return this.action.__mustGetName();
   }
 }
 

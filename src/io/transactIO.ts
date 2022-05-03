@@ -17,7 +17,7 @@ export class TransactMemberIO {
   ) {}
 
   get isInline(): boolean {
-    return !this.member.action.__getData().name;
+    return !!this.member.action.__getData().inline;
   }
 
   toString(): string {
@@ -57,33 +57,27 @@ export interface TXMReturnValueInfo {
 class TransactIOProcessor extends BaseIOProcessor<mm.TransactAction> {
   convert(): TransactIO {
     const { action, opt } = this;
-    const actionName = this.mustGetActionName();
-    const groupTable = this.mustGetGroupTable();
     const actionData = action.__getData();
     const { dialect } = opt;
     const { members } = actionData;
-    if (!members) {
+    if (!members?.length) {
       throw new Error(`Unexpected empty members at action ${action}`);
     }
+
     const memberIOs = members.map((mem, idx) => {
       const childAction = mem.action;
       const childActionData = mem.action.__getData();
-      const childName = childActionData.name || mem.name || `${actionName}Child${idx + 1}`;
+      const childName = childAction.__mustGetName();
 
-      const io = actionToIO(
-        childAction,
-        { ...opt, outerGroupTable: groupTable, outerActionName: childName },
-        `Transaction child number ${idx + 1}`,
-      );
+      const io = actionToIO(childAction, opt, `Transaction child number ${idx + 1}`);
 
-      const isChildInline = !childActionData.name;
       // Is child member AG the same as the outer AG.
       const isSameAG =
-        isChildInline || action.__mustGetActionGroup() === childActionData.actionGroup;
+        childActionData.inline || action.__mustGetActionGroup() === childActionData.actionGroup;
       const callPath = defs.actionCallPath(
         isSameAG ? null : childActionData.actionGroup ?? null,
         childName,
-        isChildInline,
+        !!childActionData.inline,
       );
       return new TransactMemberIO(mem, childName, io, callPath);
     });

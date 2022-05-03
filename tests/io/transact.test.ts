@@ -131,7 +131,10 @@ it('Merging SQL vars', () => {
   const postTA = mm.actionGroup(post, PostAG);
   const io = mr.transactIO(postTA.t, commonIOOptions);
   const mio = io.memberIOs[0]!;
-  eq(mio.toString(), 'TransactMemberIO(InsertAction(-, ft=Cmt(cmt)), mrTable.tChild1)');
+  eq(
+    mio.toString(),
+    'TransactMemberIO(InsertAction(tChild1, t=Post(post, db=db_post), ft=Cmt(cmt)), mrTable.tChild1)',
+  );
   eq(io.returnValues.toString(), '');
   eq(
     io.funcArgs.toString(),

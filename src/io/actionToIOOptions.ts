@@ -13,12 +13,6 @@ export interface ActionToIOOptions {
   // See https://dev.mysql.com/doc/refman/5.7/en/union.html for details.
   notFirstUnionMember?: boolean;
 
-  // Action name of outer scope. Used as a fallback value if current action
-  // doesn't have this property. e.g. tmp actions and TX members.
-  outerActionName?: string;
-
-  // Like `outerActionName`. A fallback value for `groupTable` of outer scope.
-  // Used as a fallback value if current action doesn't have this property.
-  // e.g. tmp actions and TX members.
+  // Subqueries use this value to locate the outer `sqlGroupTable`.
   outerGroupTable?: mm.Table;
 }

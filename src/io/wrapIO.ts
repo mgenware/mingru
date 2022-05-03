@@ -32,15 +32,10 @@ class WrapIOProcessor extends BaseIOProcessor<mm.WrapAction> {
     if (!innerAction) {
       throw new Error(`Unexpected empty inner action on action "${action}"`);
     }
-    const actionName = this.mustGetActionName();
-    const groupTable = this.mustGetGroupTable();
+    const actionName = action.__mustGetName();
     const ag = action.__mustGetActionGroup();
 
-    const innerIO = actionToIO(
-      innerAction,
-      { ...opt, outerGroupTable: groupTable, outerActionName: actionName },
-      `WrapAction "${actionName}"`,
-    );
+    const innerIO = actionToIO(innerAction, opt, `WrapActionCore "${actionName}"`);
     const innerActionData = innerAction.__getData();
 
     const userArgs = actionData.args || {};
@@ -140,24 +135,25 @@ class WrapIOProcessor extends BaseIOProcessor<mm.WrapAction> {
       }
     }
 
-    // If the inner action doesn't belong to any TA. We can update it
-    // in-place and return it as the IO object for this action.
+    // If the inner action is inline. We can update it in-place and
+    // return it as the IO object for this action.
     // Example:
-    //   mm.update().wrap(args) -> mm.update(args)
-    // NOTE that `innerIO` might be any action types.
-    if (!innerActionData.name) {
+    //   mm.update().wrap(args) -> mm.update(args);
+    if (innerActionData.inline) {
       if (innerAction instanceof mm.TransactAction) {
         throw new Error(
           'Wrapping an unnamed TRANSACT action is not supported. Wrap the TRANSACT action through a member variable instead.',
         );
       }
+
+      // Set the `name` to undefined to allow inner action to be
+      // re-configured.
+      innerActionData.name = undefined;
+      innerAction.__configure(actionName, ag, false);
+
       innerIO.funcArgs = funcArgs;
       innerIO.execArgs = execArgs;
 
-      // IMPORTANT! Give `innerIO` a name as it doesn't have one.
-      // Calling `__configure` with another table won't change inner action's
-      // previous table.
-      innerAction.__configure(`${this.mustGetActionName()}Core`, ag);
       innerIO.capturedFuncArgs = capturedFuncArgs;
       innerIO.capturedVars = capturedVars;
       return innerIO;
@@ -168,7 +164,7 @@ class WrapIOProcessor extends BaseIOProcessor<mm.WrapAction> {
     const isSameAG = ag === innerActionData.actionGroup;
     const funcPath = defs.actionCallPath(
       isSameAG ? null : innerActionData.actionGroup ?? null,
-      innerActionData.name || actionName,
+      innerAction.__mustGetName(),
       false,
     );
 

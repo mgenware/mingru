@@ -13,8 +13,8 @@ export default class BaseIOProcessor<T extends mm.Action> {
       // Not a table param even through its group table can be a table param.
       return undefined;
     }
-    const gt = this.groupTable();
-    if (gt?.__getData().tableParam) {
+    const gt = this.mustGetAvailableSQLTable();
+    if (gt.__getData().tableParam) {
       return defs.tableParamName(gt);
     }
     return undefined;
@@ -22,28 +22,8 @@ export default class BaseIOProcessor<T extends mm.Action> {
 
   constructor(public action: T, public opt: ActionToIOOptions) {}
 
-  mustGetAvailableSQLTable(): mm.Table {
-    const table = this.action.__mustGetAvailableSQLTable(this.opt.outerGroupTable);
-    return table;
-  }
-
-  mustGetGroupTable(): mm.Table {
-    const gt = this.groupTable();
-    if (!gt) {
-      throw new Error(`No available group tables in action "${this.action}"`);
-    }
-    return gt;
-  }
-
-  mustGetActionName(): string {
-    const name = this.action.__getData().name || this.opt.outerActionName;
-    if (!name) {
-      throw new Error(`Action name is empty, action "${this.action}"`);
-    }
-    return name;
-  }
-
-  private groupTable() {
-    return this.action.__getData().actionGroup?.__getData().groupTable ?? this.opt.outerGroupTable;
+  // Use this instead of `__mustGetAvailableSQLTable` to take `opt.outerGroupTable` into account.
+  mustGetAvailableSQLTable() {
+    return this.action.__mustGetAvailableSQLTable(this.opt.outerGroupTable);
   }
 }

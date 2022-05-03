@@ -43,6 +43,6 @@ export function actionCallPath(
   return resolvedTableName + '.' + (isPrivate ? su.lowercaseFirstChar(funcName) : funcName);
 }
 
-export function cfTableVarDef(tableParamName: string) {
-  return { name: tableParamName, type: types.dbxTableType };
+export function cfTableVarDef(tableParam: string) {
+  return { name: tableParam, type: types.dbxTableType };
 }
