@@ -13,13 +13,13 @@ var User = &UserAGType{}
 
 // ------------ Actions ------------
 
-type UserTableTChild1Result struct {
+type UserAGTChild1Result struct {
 	Age  int
 	Name string
 }
 
-func (mrTable *UserAGType) tChild1(mrQueryable mingru.Queryable) (UserTableTChild1Result, error) {
-	var result UserTableTChild1Result
+func (mrTable *UserAGType) tChild1(mrQueryable mingru.Queryable) (UserAGTChild1Result, error) {
+	var result UserAGTChild1Result
 	err := mrQueryable.QueryRow("SELECT `age`, `name` FROM `user`").Scan(&result.Age, &result.Name)
 	if err != nil {
 		return result, err

@@ -13,12 +13,12 @@ var Post = &PostAGType{}
 
 // ------------ Actions ------------
 
-type PostTableSelectTResult struct {
+type PostAGSelectTResult struct {
 	ID    uint64
 	Title string
 }
 
-func (mrTable *PostAGType) SelectT(mrQueryable mingru.Queryable, id uint64, page int, pageSize int) ([]PostTableSelectTResult, bool, error) {
+func (mrTable *PostAGType) SelectT(mrQueryable mingru.Queryable, id uint64, page int, pageSize int) ([]PostAGSelectTResult, bool, error) {
 	if page <= 0 {
 		err := fmt.Errorf("Invalid page %v", page)
 		return nil, false, err
@@ -34,13 +34,13 @@ func (mrTable *PostAGType) SelectT(mrQueryable mingru.Queryable, id uint64, page
 	if err != nil {
 		return nil, false, err
 	}
-	result := make([]PostTableSelectTResult, 0, limit)
+	result := make([]PostAGSelectTResult, 0, limit)
 	itemCounter := 0
 	defer rows.Close()
 	for rows.Next() {
 		itemCounter++
 		if itemCounter <= max {
-			var item PostTableSelectTResult
+			var item PostAGSelectTResult
 			err = rows.Scan(&item.ID, &item.Title)
 			if err != nil {
 				return nil, false, err

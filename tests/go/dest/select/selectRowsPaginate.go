@@ -9,23 +9,23 @@ var Post = &PostAGType{}
 
 // ------------ Actions ------------
 
-type PostTableSelectTResult struct {
+type PostAGSelectTResult struct {
 	ID    uint64
 	Title string
 }
 
-func (mrTable *PostAGType) SelectT(mrQueryable mingru.Queryable, limit int, offset int, max int) ([]PostTableSelectTResult, int, error) {
+func (mrTable *PostAGType) SelectT(mrQueryable mingru.Queryable, limit int, offset int, max int) ([]PostAGSelectTResult, int, error) {
 	rows, err := mrQueryable.Query("SELECT `id`, `title` FROM `db_post` ORDER BY `id` LIMIT ? OFFSET ?", limit, offset)
 	if err != nil {
 		return nil, 0, err
 	}
-	result := make([]PostTableSelectTResult, 0, limit)
+	result := make([]PostAGSelectTResult, 0, limit)
 	itemCounter := 0
 	defer rows.Close()
 	for rows.Next() {
 		itemCounter++
 		if itemCounter <= max {
-			var item PostTableSelectTResult
+			var item PostAGSelectTResult
 			err = rows.Scan(&item.ID, &item.Title)
 			if err != nil {
 				return nil, 0, err

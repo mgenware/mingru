@@ -13,12 +13,12 @@ var Post = &PostAGType{}
 
 // ------------ Actions ------------
 
-type PostTableTResult struct {
+type PostAGTResult struct {
 	ID    uint64
 	Title string
 }
 
-func (mrTable *PostAGType) T(mrQueryable mingru.Queryable, ids []uint64, idInput uint64, id []uint64) ([]PostTableTResult, error) {
+func (mrTable *PostAGType) T(mrQueryable mingru.Queryable, ids []uint64, idInput uint64, id []uint64) ([]PostAGTResult, error) {
 	if len(ids) == 0 {
 		return nil, fmt.Errorf("The array argument `ids` cannot be empty")
 	}
@@ -37,10 +37,10 @@ func (mrTable *PostAGType) T(mrQueryable mingru.Queryable, ids []uint64, idInput
 	if err != nil {
 		return nil, err
 	}
-	var result []PostTableTResult
+	var result []PostAGTResult
 	defer rows.Close()
 	for rows.Next() {
-		var item PostTableTResult
+		var item PostAGTResult
 		err = rows.Scan(&item.ID, &item.Title)
 		if err != nil {
 			return nil, err

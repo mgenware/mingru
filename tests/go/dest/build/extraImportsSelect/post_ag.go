@@ -13,20 +13,20 @@ var Post = &PostAGType{}
 
 // ------------ Actions ------------
 
-type PostTableSelectNullableTimesResult struct {
+type PostAGSelectNullableTimesResult struct {
 	NDate     *time.Time
 	NDatetime *time.Time
 }
 
-func (mrTable *PostAGType) SelectNullableTimes(mrQueryable mingru.Queryable) ([]PostTableSelectNullableTimesResult, error) {
+func (mrTable *PostAGType) SelectNullableTimes(mrQueryable mingru.Queryable) ([]PostAGSelectNullableTimesResult, error) {
 	rows, err := mrQueryable.Query("SELECT `n_datetime`, `n_date` FROM `db_post` ORDER BY `id`")
 	if err != nil {
 		return nil, err
 	}
-	var result []PostTableSelectNullableTimesResult
+	var result []PostAGSelectNullableTimesResult
 	defer rows.Close()
 	for rows.Next() {
-		var item PostTableSelectNullableTimesResult
+		var item PostAGSelectNullableTimesResult
 		err = rows.Scan(&item.NDatetime, &item.NDate)
 		if err != nil {
 			return nil, err
@@ -40,20 +40,20 @@ func (mrTable *PostAGType) SelectNullableTimes(mrQueryable mingru.Queryable) ([]
 	return result, nil
 }
 
-type PostTableSelectTimesResult struct {
+type PostAGSelectTimesResult struct {
 	Date     time.Time
 	Datetime time.Time
 }
 
-func (mrTable *PostAGType) SelectTimes(mrQueryable mingru.Queryable) ([]PostTableSelectTimesResult, error) {
+func (mrTable *PostAGType) SelectTimes(mrQueryable mingru.Queryable) ([]PostAGSelectTimesResult, error) {
 	rows, err := mrQueryable.Query("SELECT `datetime`, `date` FROM `db_post` ORDER BY `id`")
 	if err != nil {
 		return nil, err
 	}
-	var result []PostTableSelectTimesResult
+	var result []PostAGSelectTimesResult
 	defer rows.Close()
 	for rows.Next() {
-		var item PostTableSelectTimesResult
+		var item PostAGSelectTimesResult
 		err = rows.Scan(&item.Datetime, &item.Date)
 		if err != nil {
 			return nil, err

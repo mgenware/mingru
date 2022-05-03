@@ -13,13 +13,13 @@ var Activity = &ActivityAGType{}
 
 // ------------ Actions ------------
 
-type ActivityTableTResult struct {
+type ActivityAGTResult struct {
 	GenericName string
 	GenericSig  *string
 	ID          uint64
 }
 
-func (mrTable *ActivityAGType) T(mrQueryable mingru.Queryable, id uint64, page int, pageSize int) ([]ActivityTableTResult, bool, error) {
+func (mrTable *ActivityAGType) T(mrQueryable mingru.Queryable, id uint64, page int, pageSize int) ([]ActivityAGTResult, bool, error) {
 	if page <= 0 {
 		err := fmt.Errorf("Invalid page %v", page)
 		return nil, false, err
@@ -35,13 +35,13 @@ func (mrTable *ActivityAGType) T(mrQueryable mingru.Queryable, id uint64, page i
 	if err != nil {
 		return nil, false, err
 	}
-	result := make([]ActivityTableTResult, 0, limit)
+	result := make([]ActivityAGTResult, 0, limit)
 	itemCounter := 0
 	defer rows.Close()
 	for rows.Next() {
 		itemCounter++
 		if itemCounter <= max {
-			var item ActivityTableTResult
+			var item ActivityAGTResult
 			err = rows.Scan(&item.ID, &item.GenericSig, &item.GenericName)
 			if err != nil {
 				return nil, false, err
@@ -56,13 +56,13 @@ func (mrTable *ActivityAGType) T(mrQueryable mingru.Queryable, id uint64, page i
 	return result, itemCounter > len(result), nil
 }
 
-type ActivityTableT1Result struct {
+type ActivityAGT1Result struct {
 	GenericName string
 	GenericSig  *string
 	ID          uint64
 }
 
-func (mrTable *ActivityAGType) T1(mrQueryable mingru.Queryable, id uint64, page int, pageSize int) ([]ActivityTableT1Result, bool, error) {
+func (mrTable *ActivityAGType) T1(mrQueryable mingru.Queryable, id uint64, page int, pageSize int) ([]ActivityAGT1Result, bool, error) {
 	if page <= 0 {
 		err := fmt.Errorf("Invalid page %v", page)
 		return nil, false, err
@@ -78,13 +78,13 @@ func (mrTable *ActivityAGType) T1(mrQueryable mingru.Queryable, id uint64, page 
 	if err != nil {
 		return nil, false, err
 	}
-	result := make([]ActivityTableT1Result, 0, limit)
+	result := make([]ActivityAGT1Result, 0, limit)
 	itemCounter := 0
 	defer rows.Close()
 	for rows.Next() {
 		itemCounter++
 		if itemCounter <= max {
-			var item ActivityTableT1Result
+			var item ActivityAGT1Result
 			err = rows.Scan(&item.ID, &item.GenericSig, &item.GenericName)
 			if err != nil {
 				return nil, false, err
@@ -99,19 +99,19 @@ func (mrTable *ActivityAGType) T1(mrQueryable mingru.Queryable, id uint64, page 
 	return result, itemCounter > len(result), nil
 }
 
-type ActivityTableT2Result struct {
+type ActivityAGT2Result struct {
 	Title string
 }
 
-func (mrTable *ActivityAGType) T2(mrQueryable mingru.Queryable, id uint64) ([]ActivityTableT2Result, error) {
+func (mrTable *ActivityAGType) T2(mrQueryable mingru.Queryable, id uint64) ([]ActivityAGT2Result, error) {
 	rows, err := mrQueryable.Query("SELECT `title` FROM `db_post` WHERE `id` = ? ORDER BY `id`", id)
 	if err != nil {
 		return nil, err
 	}
-	var result []ActivityTableT2Result
+	var result []ActivityAGT2Result
 	defer rows.Close()
 	for rows.Next() {
-		var item ActivityTableT2Result
+		var item ActivityAGT2Result
 		err = rows.Scan(&item.Title)
 		if err != nil {
 			return nil, err

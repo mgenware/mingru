@@ -40,13 +40,13 @@ func (mrTable *PostAGType) FieldRows(mrQueryable mingru.Queryable) ([]*string, e
 	return result, nil
 }
 
-type PostTableRowResult struct {
+type PostAGRowResult struct {
 	ID          uint64
 	UserUrlName *string
 }
 
-func (mrTable *PostAGType) Row(mrQueryable mingru.Queryable, id uint64) (PostTableRowResult, error) {
-	var result PostTableRowResult
+func (mrTable *PostAGType) Row(mrQueryable mingru.Queryable, id uint64) (PostAGRowResult, error) {
+	var result PostAGRowResult
 	err := mrQueryable.QueryRow("SELECT `join_1`.`url_name`, `db_post`.`id` FROM `db_post` AS `db_post` LEFT JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id` WHERE `db_post`.`id` = ?", id).Scan(&result.UserUrlName, &result.ID)
 	if err != nil {
 		return result, err
@@ -54,20 +54,20 @@ func (mrTable *PostAGType) Row(mrQueryable mingru.Queryable, id uint64) (PostTab
 	return result, nil
 }
 
-type PostTableRowsResult struct {
+type PostAGRowsResult struct {
 	ID          uint64
 	UserUrlName *string
 }
 
-func (mrTable *PostAGType) Rows(mrQueryable mingru.Queryable) ([]PostTableRowsResult, error) {
+func (mrTable *PostAGType) Rows(mrQueryable mingru.Queryable) ([]PostAGRowsResult, error) {
 	rows, err := mrQueryable.Query("SELECT `join_1`.`url_name`, `db_post`.`id` FROM `db_post` AS `db_post` LEFT JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`")
 	if err != nil {
 		return nil, err
 	}
-	var result []PostTableRowsResult
+	var result []PostAGRowsResult
 	defer rows.Close()
 	for rows.Next() {
-		var item PostTableRowsResult
+		var item PostAGRowsResult
 		err = rows.Scan(&item.UserUrlName, &item.ID)
 		if err != nil {
 			return nil, err

@@ -13,7 +13,7 @@ var Post = &PostAGType{}
 
 // ------------ Actions ------------
 
-type PostTableSelectTResult struct {
+type PostAGSelectTResult struct {
 	CmtCount   uint
 	Content    string
 	Date       time.Time
@@ -29,15 +29,15 @@ type PostTableSelectTResult struct {
 	UserID     uint64
 }
 
-func (mrTable *PostAGType) SelectT(mrQueryable mingru.Queryable) ([]PostTableSelectTResult, error) {
+func (mrTable *PostAGType) SelectT(mrQueryable mingru.Queryable) ([]PostAGSelectTResult, error) {
 	rows, err := mrQueryable.Query("SELECT `id`, `title`, `content`, `user_id`, `reviewer_id`, `cmt_c`, `datetime`, `date`, `time`, `n_datetime`, `n_date`, `n_time`, `my_user_id` FROM `db_post` ORDER BY `id`")
 	if err != nil {
 		return nil, err
 	}
-	var result []PostTableSelectTResult
+	var result []PostAGSelectTResult
 	defer rows.Close()
 	for rows.Next() {
-		var item PostTableSelectTResult
+		var item PostAGSelectTResult
 		err = rows.Scan(&item.ID, &item.Title, &item.Content, &item.UserID, &item.ReviewerID, &item.CmtCount, &item.Datetime, &item.Date, &item.Time, &item.NDatetime, &item.NDate, &item.NTime, &item.MUserID)
 		if err != nil {
 			return nil, err

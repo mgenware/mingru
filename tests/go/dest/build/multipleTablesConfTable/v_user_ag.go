@@ -14,13 +14,13 @@ func (mrTable *VUserAGType) DeleteByID(mrQueryable mingru.Queryable, userTp ming
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }
 
-type UserTpTableSelectProfileResult struct {
+type VUserAGSelectProfileResult struct {
 	DisplayName string
 	Sig         *string
 }
 
-func (mrTable *VUserAGType) SelectProfile(mrQueryable mingru.Queryable, userTp mingru.Table) (UserTpTableSelectProfileResult, error) {
-	var result UserTpTableSelectProfileResult
+func (mrTable *VUserAGType) SelectProfile(mrQueryable mingru.Queryable, userTp mingru.Table) (VUserAGSelectProfileResult, error) {
+	var result VUserAGSelectProfileResult
 	err := mrQueryable.QueryRow("SELECT `display_name`, `sig` FROM "+string(userTp)).Scan(&result.DisplayName, &result.Sig)
 	if err != nil {
 		return result, err

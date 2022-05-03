@@ -9,12 +9,12 @@ var Post = &PostAGType{}
 
 // ------------ Actions ------------
 
-type PostTableTResult struct {
+type PostAGTResult struct {
 	Name1 int
 }
 
-func (mrTable *PostAGType) T(mrQueryable mingru.Queryable, idInput uint64) (PostTableTResult, error) {
-	var result PostTableTResult
+func (mrTable *PostAGType) T(mrQueryable mingru.Queryable, idInput uint64) (PostAGTResult, error) {
+	var result PostAGTResult
 	err := mrQueryable.QueryRow("SELECT YEAR(YEAR(`id`)) AS `name1` FROM `db_post` WHERE YEAR(YEAR(`id`)) == ?", idInput).Scan(&result.Name1)
 	if err != nil {
 		return result, err

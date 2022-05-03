@@ -14,14 +14,14 @@ func (mrTable *PostAGType) DeleteByID(mrQueryable mingru.Queryable, id uint64) e
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }
 
-type PostTableSelectPostInfoResult struct {
+type PostAGSelectPostInfoResult struct {
 	Content     string
 	ID          uint64
 	UserUrlName string
 }
 
-func (mrTable *PostAGType) SelectPostInfo(mrQueryable mingru.Queryable) (PostTableSelectPostInfoResult, error) {
-	var result PostTableSelectPostInfoResult
+func (mrTable *PostAGType) SelectPostInfo(mrQueryable mingru.Queryable) (PostAGSelectPostInfoResult, error) {
+	var result PostAGSelectPostInfoResult
 	err := mrQueryable.QueryRow("SELECT `db_post`.`id`, `db_post`.`content`, `join_1`.`url_name` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`").Scan(&result.ID, &result.Content, &result.UserUrlName)
 	if err != nil {
 		return result, err

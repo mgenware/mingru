@@ -9,13 +9,13 @@ var Post = &PostAGType{}
 
 // ------------ Actions ------------
 
-type PostTableT1Result struct {
+type PostAGT1Result struct {
 	ID    uint64
 	Title string
 }
 
-func (mrTable *PostAGType) T1(mrQueryable mingru.Queryable) (PostTableT1Result, error) {
-	var result PostTableT1Result
+func (mrTable *PostAGType) T1(mrQueryable mingru.Queryable) (PostAGT1Result, error) {
+	var result PostAGT1Result
 	err := mrQueryable.QueryRow("SELECT `id`, `title` FROM `db_post` FOR UPDATE").Scan(&result.ID, &result.Title)
 	if err != nil {
 		return result, err
@@ -23,13 +23,13 @@ func (mrTable *PostAGType) T1(mrQueryable mingru.Queryable) (PostTableT1Result, 
 	return result, nil
 }
 
-type PostTableT2Result struct {
+type PostAGT2Result struct {
 	ID    uint64
 	Title string
 }
 
-func (mrTable *PostAGType) T2(mrQueryable mingru.Queryable) (PostTableT2Result, error) {
-	var result PostTableT2Result
+func (mrTable *PostAGType) T2(mrQueryable mingru.Queryable) (PostAGT2Result, error) {
+	var result PostAGT2Result
 	err := mrQueryable.QueryRow("SELECT `id`, `title` FROM `db_post` LOCK IN SHARE MODE").Scan(&result.ID, &result.Title)
 	if err != nil {
 		return result, err

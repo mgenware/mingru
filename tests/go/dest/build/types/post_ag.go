@@ -22,13 +22,13 @@ func (mrTable *PostAGType) SelectByID(mrQueryable mingru.Queryable, id uint64) (
 	return result, nil
 }
 
-type PostTableSelectPostInfoResult struct {
+type PostAGSelectPostInfoResult struct {
 	NDatetime   *time.Time
 	UserUrlName string
 }
 
-func (mrTable *PostAGType) SelectPostInfo(mrQueryable mingru.Queryable) (PostTableSelectPostInfoResult, error) {
-	var result PostTableSelectPostInfoResult
+func (mrTable *PostAGType) SelectPostInfo(mrQueryable mingru.Queryable) (PostAGSelectPostInfoResult, error) {
+	var result PostAGSelectPostInfoResult
 	err := mrQueryable.QueryRow("SELECT `db_post`.`n_datetime`, `join_1`.`url_name` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id`").Scan(&result.NDatetime, &result.UserUrlName)
 	if err != nil {
 		return result, err

@@ -13,19 +13,19 @@ var Post = &PostAGType{}
 
 // ------------ Actions ------------
 
-type PostTableTResult struct {
+type PostAGTResult struct {
 	NTime *time.Time
 }
 
-func (mrTable *PostAGType) T(mrQueryable mingru.Queryable, userID uint64) ([]PostTableTResult, error) {
+func (mrTable *PostAGType) T(mrQueryable mingru.Queryable, userID uint64) ([]PostAGTResult, error) {
 	rows, err := mrQueryable.Query("SELECT `db_post`.`n_time` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`user_id` ORDER BY `db_post`.`user_id` GROUP BY `title` HAVING `join_1`.`id` = ?", userID)
 	if err != nil {
 		return nil, err
 	}
-	var result []PostTableTResult
+	var result []PostAGTResult
 	defer rows.Close()
 	for rows.Next() {
-		var item PostTableTResult
+		var item PostAGTResult
 		err = rows.Scan(&item.NTime)
 		if err != nil {
 			return nil, err

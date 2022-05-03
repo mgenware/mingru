@@ -14,15 +14,15 @@ var Post = &PostAGType{}
 
 // ------------ Actions ------------
 
-type PostTableTResult struct {
+type PostAGTResult struct {
 	ID uint64
 }
 
-func (mrTable *PostAGType) T(mrQueryable mingru.Queryable, nDatetime []*time.Time, p2 time.Time, p3 *time.Time, p4 uint64, p5 *uint64) (PostTableTResult, error) {
+func (mrTable *PostAGType) T(mrQueryable mingru.Queryable, nDatetime []*time.Time, p2 time.Time, p3 *time.Time, p4 uint64, p5 *uint64) (PostAGTResult, error) {
 	if len(nDatetime) == 0 {
-		return PostTableTResult{}, fmt.Errorf("The array argument `nDatetime` cannot be empty")
+		return PostAGTResult{}, fmt.Errorf("The array argument `nDatetime` cannot be empty")
 	}
-	var result PostTableTResult
+	var result PostAGTResult
 	var queryParams []interface{}
 	for _, item := range nDatetime {
 		queryParams = append(queryParams, item)

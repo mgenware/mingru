@@ -21,7 +21,7 @@ func (mrTable *ConsumerAGType) DelPost(mrQueryable mingru.Queryable, id uint64) 
 	return Common.Del(mrQueryable, TablePost, id)
 }
 
-func (mrTable *ConsumerAGType) SelPost(mrQueryable mingru.Queryable, id uint64) ([]MrFromTableTableSelResult, error) {
+func (mrTable *ConsumerAGType) SelPost(mrQueryable mingru.Queryable, id uint64) ([]CommonAGSelResult, error) {
 	return Common.Sel(mrQueryable, TablePost, id)
 }
 

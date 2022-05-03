@@ -13,20 +13,20 @@ var Post = &PostAGType{}
 
 // ------------ Actions ------------
 
-type PostTableSelectTimesResult struct {
+type PostAGSelectTimesResult struct {
 	Date     time.Time
 	Datetime time.Time
 }
 
-func (mrTable *PostAGType) SelectTimes(mrQueryable mingru.Queryable, nDatetime *time.Time, nDate *time.Time) ([]PostTableSelectTimesResult, error) {
+func (mrTable *PostAGType) SelectTimes(mrQueryable mingru.Queryable, nDatetime *time.Time, nDate *time.Time) ([]PostAGSelectTimesResult, error) {
 	rows, err := mrQueryable.Query("SELECT `datetime`, `date` FROM `db_post` WHERE `n_datetime` = ? OR `n_date` = ? ORDER BY `id`", nDatetime, nDate)
 	if err != nil {
 		return nil, err
 	}
-	var result []PostTableSelectTimesResult
+	var result []PostAGSelectTimesResult
 	defer rows.Close()
 	for rows.Next() {
-		var item PostTableSelectTimesResult
+		var item PostAGSelectTimesResult
 		err = rows.Scan(&item.Datetime, &item.Date)
 		if err != nil {
 			return nil, err

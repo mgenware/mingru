@@ -24,13 +24,13 @@ func (mrTable *UserAGType) InsertT(mrQueryable mingru.Queryable, confTable mingr
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }
 
-type ConfTableTableSelectTResult struct {
+type UserAGSelectTResult struct {
 	Age int
 	ID  uint64
 }
 
-func (mrTable *UserAGType) SelectT(mrQueryable mingru.Queryable, confTable mingru.Table) (ConfTableTableSelectTResult, error) {
-	var result ConfTableTableSelectTResult
+func (mrTable *UserAGType) SelectT(mrQueryable mingru.Queryable, confTable mingru.Table) (UserAGSelectTResult, error) {
+	var result UserAGSelectTResult
 	err := mrQueryable.QueryRow("SELECT `id`, `age` FROM "+string(confTable)).Scan(&result.ID, &result.Age)
 	if err != nil {
 		return result, err

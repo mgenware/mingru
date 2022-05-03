@@ -190,12 +190,10 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
   // K: ORDER BY params name, V: IO.
   orderByInputIOs = new Map<string, OrderByInputIO>();
 
-  // Pascal case of table name.
-  tablePascalName = '';
   // Pascal case of action name.
-  actionPascalName = '';
+  actionPascalName?: string;
   // Used to help generate a type name for this action.
-  actionUniqueTypeName = '';
+  actionUniqueTypeName?: string;
 
   // Params needed when ORDER BY inputs are present.
   private orderByInputParams: VarDef[] = [];
@@ -299,12 +297,10 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
     }
 
     if (!opt.selectionLiteMode) {
-      // NOTE: not the table defined by FROM, it's the root table defined in table actions.
-      // Those fields are used to generate result type definition.
-      // This process call be skipped if we don't need a result type.
-      this.tablePascalName = defs.tablePascalName(sqlTable.__getData().name);
       this.actionPascalName = defs.actionPascalName(this.mustGetActionNameForFullMode());
-      this.actionUniqueTypeName = `${this.tablePascalName}Table${this.actionPascalName}`;
+      this.actionUniqueTypeName = `${defs.agInstanceName(this.action.__mustGetActionGroup())}AG${
+        this.actionPascalName
+      }`;
     }
 
     if (!isUnionMode) {

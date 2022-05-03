@@ -28,5 +28,5 @@ type Type1 interface {
 }
 
 type Type2 interface {
-	SelectPostInfo(mrQueryable mingru.Queryable) (PostTableSelectPostInfoResult, error)
+	SelectPostInfo(mrQueryable mingru.Queryable) (PostAGSelectPostInfoResult, error)
 }

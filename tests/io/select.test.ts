@@ -244,7 +244,7 @@ it('returnValues', () => {
   const ta = mm.actionGroup(user, UserAG);
   const v = ta.t;
   const io = mr.selectIO(v, commonIOOptions);
-  eq(io.returnValues.toString(), '__result: UserTableTResult');
+  eq(io.returnValues.toString(), '__result: UserAGTResult');
 });
 
 it('GROUP BY and HAVING', () => {

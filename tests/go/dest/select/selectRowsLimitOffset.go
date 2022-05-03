@@ -9,20 +9,20 @@ var Post = &PostAGType{}
 
 // ------------ Actions ------------
 
-type PostTableSelectTResult struct {
+type PostAGSelectTResult struct {
 	ID    uint64
 	Title string
 }
 
-func (mrTable *PostAGType) SelectT(mrQueryable mingru.Queryable, offsetVar int) ([]PostTableSelectTResult, error) {
+func (mrTable *PostAGType) SelectT(mrQueryable mingru.Queryable, offsetVar int) ([]PostAGSelectTResult, error) {
 	rows, err := mrQueryable.Query("SELECT `id`, `title` FROM `db_post` ORDER BY `id` LIMIT 10 OFFSET ?", offsetVar)
 	if err != nil {
 		return nil, err
 	}
-	var result []PostTableSelectTResult
+	var result []PostAGSelectTResult
 	defer rows.Close()
 	for rows.Next() {
-		var item PostTableSelectTResult
+		var item PostAGSelectTResult
 		err = rows.Scan(&item.ID, &item.Title)
 		if err != nil {
 			return nil, err

@@ -14,20 +14,20 @@ func (mrTable *GhostAGType) InsertT(mrQueryable mingru.Queryable, fk uint64) err
 	return err
 }
 
-type GhostTableSelectTResult struct {
+type GhostAGSelectTResult struct {
 	ID    uint64
 	Title string
 }
 
-func (mrTable *GhostAGType) SelectT(mrQueryable mingru.Queryable) ([]GhostTableSelectTResult, error) {
+func (mrTable *GhostAGType) SelectT(mrQueryable mingru.Queryable) ([]GhostAGSelectTResult, error) {
 	rows, err := mrQueryable.Query("SELECT `id`, `title` FROM `db_post` ORDER BY `id`")
 	if err != nil {
 		return nil, err
 	}
-	var result []GhostTableSelectTResult
+	var result []GhostAGSelectTResult
 	defer rows.Close()
 	for rows.Next() {
-		var item GhostTableSelectTResult
+		var item GhostAGSelectTResult
 		err = rows.Scan(&item.ID, &item.Title)
 		if err != nil {
 			return nil, err

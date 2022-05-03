@@ -9,7 +9,7 @@ var Post = &PostAGType{}
 
 // ------------ Actions ------------
 
-type PostTableSelectTResult struct {
+type PostAGSelectTResult struct {
 	A                  uint64
 	CmtCount           uint
 	Fc                 *string
@@ -17,8 +17,8 @@ type PostTableSelectTResult struct {
 	MUserID            uint64
 }
 
-func (mrTable *PostAGType) SelectT(mrQueryable mingru.Queryable) (PostTableSelectTResult, error) {
-	var result PostTableSelectTResult
+func (mrTable *PostAGType) SelectT(mrQueryable mingru.Queryable) (PostAGSelectTResult, error) {
+	var result PostAGSelectTResult
 	err := mrQueryable.QueryRow("SELECT `db_post`.`cmt_c`, `db_post`.`my_user_id`, `db_post`.`my_user_id` AS `a`, `join_1`.`follower_c`, `join_1`.`follower_c` AS `fc` FROM `db_post` AS `db_post` INNER JOIN `user` AS `join_1` ON `join_1`.`id` = `db_post`.`my_user_id`").Scan(&result.CmtCount, &result.MUserID, &result.A, &result.MUserFollowerCount, &result.Fc)
 	if err != nil {
 		return result, err
