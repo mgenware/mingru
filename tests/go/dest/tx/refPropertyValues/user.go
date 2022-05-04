@@ -29,6 +29,7 @@ func (mrTable *UserAGType) tChild1(mrQueryable mingru.Queryable) (UserAGTChild1R
 
 func (mrTable *UserAGType) tChild2Core(mrQueryable mingru.Queryable, age int, score int, name string) (uint64, error) {
 	result, err := mrQueryable.Exec("INSERT INTO `user` (`age`, `score`, `name`) VALUES (?, ?, ?)", age, score, name)
+	return mingru.GetLastInsertIDUint64WithError(result, err)
 }
 
 func (mrTable *UserAGType) tChild2(mrQueryable mingru.Queryable, age int, score int) (uint64, error) {

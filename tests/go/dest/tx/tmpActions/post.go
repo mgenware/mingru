@@ -22,9 +22,13 @@ func (mrTable *PostAGType) insertChild3(mrQueryable mingru.Queryable, id uint64,
 	return mingru.CheckOneRowAffectedWithError(result, err)
 }
 
-func (mrTable *PostAGType) insertChild4(mrQueryable mingru.Queryable, id uint64) error {
-	result, err := mrQueryable.Exec("UPDATE `db_post` SET `title` = ? WHERE `id` = ?", id, "TITLE")
+func (mrTable *PostAGType) insertChild4Core(mrQueryable mingru.Queryable, id uint64, title string) error {
+	result, err := mrQueryable.Exec("UPDATE `db_post` SET `title` = ? WHERE `id` = ?", title, id)
 	return mingru.CheckOneRowAffectedWithError(result, err)
+}
+
+func (mrTable *PostAGType) insertChild4(mrQueryable mingru.Queryable, id uint64) error {
+	return mrTable.insertChild4Core(mrQueryable, id, "TITLE")
 }
 
 func (mrTable *PostAGType) insertChild5(mrQueryable mingru.Queryable) (uint64, error) {

@@ -22,9 +22,13 @@ func (mrTable *EmployeeAGType) GetFirstName(mrQueryable mingru.Queryable, id int
 	return result, nil
 }
 
-func (mrTable *EmployeeAGType) insertChild2(mrQueryable mingru.Queryable, firstName string) (uint64, error) {
+func (mrTable *EmployeeAGType) insertChild2Core(mrQueryable mingru.Queryable, firstName string) (uint64, error) {
 	result, err := mrQueryable.Exec("INSERT INTO `employees` (`first_name`) VALUES (?)", firstName)
 	return mingru.GetLastInsertIDUint64WithError(result, err)
+}
+
+func (mrTable *EmployeeAGType) insertChild2(mrQueryable mingru.Queryable, firstName string) (uint64, error) {
+	return mrTable.insertChild2Core(mrQueryable, firstName)
 }
 
 func (mrTable *EmployeeAGType) Insert(db *sql.DB, id int) (string, uint64, error) {
