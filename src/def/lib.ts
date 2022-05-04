@@ -38,9 +38,8 @@ export function actionCallPath(
   actionName: string,
   isPrivate: boolean,
 ): string {
-  const funcName = actionPascalName(actionName);
   const resolvedTableName = ag ? agInstanceName(ag) : core.tableObjSelf;
-  return resolvedTableName + '.' + (isPrivate ? su.lowercaseFirstChar(funcName) : funcName);
+  return resolvedTableName + '.' + (isPrivate ? actionName : su.capitalizeFirstChar(actionName));
 }
 
 export function cfTableVarDef(tableParam: string) {

@@ -114,14 +114,15 @@ it('Multiple table params in transactions', async () => {
   await testBuildAsync(consumerAG, 'tableParams/multipleTP/consumer');
 });
 
-it('Table params in TX `.from`', async () => {
+it('Table params in inline and wrapped TX members', async () => {
   class PostParam extends Post {}
   const postParam = mm.table(PostParam, { tableParam: true });
 
   class UserParam extends User {}
   const userParam = mm.table(UserParam, { tableParam: true });
+
   class UserStaticAG extends mm.ActionGroup {
-    tx = mm.transact(mm.insert().from(postParam).setDefaults().setParams());
+    tx = mm.transact(mm.insert().from(postParam).setDefaults().setParams().wrap({ userID: '123' }));
   }
   const ag = mm.actionGroup(userParam, UserStaticAG);
   await testBuildAsync(ag, 'tableParams/tpTXFrom/user_static');

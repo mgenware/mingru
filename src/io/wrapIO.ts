@@ -21,6 +21,10 @@ export class WrapIO extends ActionIO {
   ) {
     super(dialect, wrapAction, null, funcArgs, execArgs, returnValues, firstParamDB);
   }
+
+  get isInnerActionInline(): boolean {
+    return !!this.innerIO.action.__getData().inline;
+  }
 }
 
 class WrapIOProcessor extends BaseIOProcessor<mm.WrapAction> {
@@ -39,7 +43,7 @@ class WrapIOProcessor extends BaseIOProcessor<mm.WrapAction> {
     const innerActionData = innerAction.__getData();
 
     const userArgs = actionData.args || {};
-    // Throw on non-existing argument names.
+    // Throw on argument names that don't exist.
     const innerFuncArgs = innerIO.funcArgs;
     for (const key of Object.keys(userArgs)) {
       if (!innerFuncArgs.getByName(key)) {
@@ -135,37 +139,12 @@ class WrapIOProcessor extends BaseIOProcessor<mm.WrapAction> {
       }
     }
 
-    // If the inner action is inline. We can update it in-place and
-    // return it as the IO object for this action.
-    // Example:
-    //   mm.update().wrap(args) -> mm.update(args);
-    if (innerActionData.inline) {
-      if (innerAction instanceof mm.TransactAction) {
-        throw new Error(
-          'Wrapping an unnamed TRANSACT action is not supported. Wrap the TRANSACT action through a member variable instead.',
-        );
-      }
-
-      // Set the `name` to undefined to allow inner action to be
-      // re-configured.
-      innerActionData.name = undefined;
-      innerAction.__configure(actionName, ag, false);
-
-      innerIO.funcArgs = funcArgs;
-      innerIO.execArgs = execArgs;
-
-      innerIO.capturedFuncArgs = capturedFuncArgs;
-      innerIO.capturedVars = capturedVars;
-      return innerIO;
-    }
-
-    // Non-inline case.
     // Is child member AG the same as the outer AG.
     const isSameAG = ag === innerActionData.actionGroup;
     const funcPath = defs.actionCallPath(
       isSameAG ? null : innerActionData.actionGroup ?? null,
       innerAction.__mustGetName(),
-      false,
+      !!innerAction.__getData().inline,
     );
 
     const retIO = new WrapIO(

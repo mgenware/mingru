@@ -11,7 +11,6 @@ import { ActionToIOOptions } from './actionToIOOptions.js';
 export class TransactMemberIO {
   constructor(
     public member: mm.TransactionMember,
-    public assignedName: string,
     public actionIO: ActionIO,
     public callPath: string,
   ) {}
@@ -79,7 +78,7 @@ class TransactIOProcessor extends BaseIOProcessor<mm.TransactAction> {
         childName,
         !!childActionData.inline,
       );
-      return new TransactMemberIO(mem, childName, io, callPath);
+      return new TransactMemberIO(mem, io, callPath);
     });
 
     /**

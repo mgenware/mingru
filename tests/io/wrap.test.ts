@@ -33,10 +33,6 @@ const wrapOther = mm.actionGroup(post, WrapOtherAG);
 it('WrapIO', () => {
   const wrappedIO = mr.wrapIO(wrapSelf.d, commonIOOptions);
   ok(wrappedIO instanceof mr.WrapIO);
-
-  // Inline inner action results in merging of outer and inner IOs.
-  const innerIO = mr.wrapIO(wrapSelf.dTmp, commonIOOptions);
-  ok(innerIO instanceof mr.UpdateIO);
 });
 
 it('getInputs (wrapSelf and innerIO)', () => {

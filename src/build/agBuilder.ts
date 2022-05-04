@@ -110,17 +110,10 @@ export default class AGBuilder {
   }
 
   // `fallbackActionName` is used by TRANSACT members as they don't have a `__name`.
-  private buildActionIO(
-    io: ActionIO,
-    fallbackActionName: string | undefined,
-    pri?: boolean,
-  ): string {
+  private buildActionIO(io: ActionIO, pri?: boolean): string {
     const { action } = io;
     const actionData = action.__getData();
-    const actionName = actionData.name || fallbackActionName;
-    if (!actionName) {
-      throw new Error(`Unexpected empty action name, action "${action}"`);
-    }
+    const actionName = action.__mustGetName();
     const ioFuncName = defs.actionPascalName(actionName);
 
     // Prepare variables.
@@ -135,7 +128,7 @@ export default class AGBuilder {
     funcSigString += `${this.getFuncSigHead()}${funcName}`;
 
     // Build func params.
-    // allFuncArgs = original func args + arg stubs.
+    // `allFuncArgs` = original func args + arg stubs.
     const allFuncArgs = [io.dbArgVarInfo(), ...funcArgs, ...io.funcStubs];
     this.imports.addVars(allFuncArgs);
     const funcParamsCode = allFuncArgs.map((p) => `${p.name} ${p.type.fullTypeName}`).join(', ');
@@ -156,8 +149,8 @@ export default class AGBuilder {
 
     const actionAttr = actionData.attrs;
     if (actionAttr?.get(mm.ActionAttribute.groupTypeName) !== undefined) {
-      // Remove the type name from signature:
-      // example: func (a) name() ret -> name() ret.
+      // Remove type name from signature:
+      // Example: func (a) name() ret -> name() ret.
       const idx = funcSigString.indexOf(')');
       const funcSig = new go.FuncSignature(
         funcName,
@@ -182,7 +175,7 @@ export default class AGBuilder {
       (p) => p.type instanceof CompoundTypeInfo && p.type.isArray,
     );
     if (arrayParams.length) {
-      // Array params need `fmt.Errorf` to return errors.
+      // Array params needs `fmt.Errorf` to return errors.
       this.imports.add(defs.fmtImport);
       for (const arrayParam of arrayParams) {
         const returnValueStrings = returnValues.map((v) => v.type.defaultValueString);
@@ -646,6 +639,17 @@ export default class AGBuilder {
   }
 
   private wrap(io: WrapIO, variadicParams: boolean): CodeMap {
+    let headCode = '';
+    const { innerIO } = io;
+
+    // If inner action is inlined (created inside transaction),
+    // we need to generate func body for it.
+    if (io.isInnerActionInline) {
+      const methodCode = this.buildActionIO(innerIO, true);
+      // Put func code into head.
+      headCode = stringUtils.joinLines(headCode, methodCode);
+    }
+
     const builder = new LinesBuilder();
     const queryArgs = ValueList.fromValues(io.execArgs.name, [
       io.dbArgVarInfo().name,
@@ -661,7 +665,7 @@ export default class AGBuilder {
         variadicParams,
       )})`,
     );
-    return new CodeMap(builder);
+    return new CodeMap(builder, headCode);
   }
 
   private transact(io: TransactIO, _variadicQueryParams: boolean): CodeMap {
@@ -706,10 +710,10 @@ export default class AGBuilder {
       // Check if `TXIO.execArgs` is present, which is set by tmp WRAP actions with captured vars.
       // See details in `WrapIO.ts` (the `mm.CapturedVar` section).
 
-      // If this is a temp member (created inside transaction),
-      // then we also need to generate the member func body code.
+      // If this is an inline member (created inside transaction),
+      // we need to generate member func body code.
       if (memberIO.isInline) {
-        const methodCode = this.buildActionIO(memberIO.actionIO, memberIO.assignedName, true);
+        const methodCode = this.buildActionIO(memberIO.actionIO, true);
         // Put func code into head.
         headCode = stringUtils.joinLines(headCode, methodCode);
       }

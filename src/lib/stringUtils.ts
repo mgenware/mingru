@@ -29,6 +29,13 @@ export function lowercaseFirstChar(s: string): string {
   return `${s.charAt(0).toLowerCase()}${s.substr(1)}`;
 }
 
+export function capitalizeFirstChar(s: string): string {
+  if (!s) {
+    return s;
+  }
+  return `${s.charAt(0).toUpperCase()}${s.substr(1)}`;
+}
+
 export function toPascalCase(s: string): string {
   const res = forceAllCapsTrailingID(
     camelCase(s, { preserveConsecutiveUppercase: true, pascalCase: true }),
