@@ -115,7 +115,7 @@ export class ValueList {
     this.values.push(v);
   }
 
-  mergeVarDef(vars: VarDef[]) {
+  mergeVarDefs(vars: VarDef[]) {
     for (const v of vars) {
       this.values.push(v.name);
     }

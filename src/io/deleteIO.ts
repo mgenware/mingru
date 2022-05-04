@@ -58,7 +58,7 @@ class DeleteIOProcessor extends BaseIOProcessor<mm.DeleteAction> {
     const execArgs = new ValueList(`Exec args of action "${action}"`);
     if (whereIO) {
       funcArgs.merge(whereIO.vars.list);
-      execArgs.mergeVarDef(whereIO.vars.list);
+      execArgs.mergeVarDefs(whereIO.vars.list);
     }
 
     // Return values.

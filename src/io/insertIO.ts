@@ -83,7 +83,7 @@ export class InsertIOProcessor extends BaseIOProcessor<mm.InsertAction> {
 
     const execArgs = new ValueList(`Exec args of action ${action}`);
     // Skip the first param if `configurableTable` is true.
-    execArgs.mergeVarDef(this.configurableTableName ? funcArgs.list.slice(1) : funcArgs.list);
+    execArgs.mergeVarDefs(this.configurableTableName ? funcArgs.list.slice(1) : funcArgs.list);
 
     // Return values.
     const returnValue = new ParamList(`Return values of action ${action}`);

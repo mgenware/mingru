@@ -27,18 +27,18 @@ it('Table params with WRAP action', async () => {
     upd = mm.updateOne().setParams().by(t.id);
     sel = mm.selectRows(t.display_name).by(t.id).orderByAsc(t.display_name);
   }
-  const commonTA = mm.actionGroup(t, CommonAG);
+  const commonAG = mm.actionGroup(t, CommonAG);
 
   class ConsumerAG extends mm.ActionGroup {
-    addUser = commonTA.insert.wrap({ mrFromTable: user });
-    addPost = commonTA.insert.wrap({ mrFromTable: post });
-    delPost = commonTA.del.wrap({ mrFromTable: post });
-    updPost = commonTA.upd.wrap({ mrFromTable: post });
-    selPost = commonTA.sel.wrap({ mrFromTable: post });
+    addUser = commonAG.insert.wrap({ mrFromTable: user });
+    addPost = commonAG.insert.wrap({ mrFromTable: post });
+    delPost = commonAG.del.wrap({ mrFromTable: post });
+    updPost = commonAG.upd.wrap({ mrFromTable: post });
+    selPost = commonAG.sel.wrap({ mrFromTable: post });
   }
-  const consumerTA = mm.actionGroup(post, ConsumerAG);
-  await testBuildAsync(commonTA, 'tableParams/wrap/common');
-  await testBuildAsync(consumerTA, 'tableParams/wrap/consumer');
+  const consumerAG = mm.actionGroup(post, ConsumerAG);
+  await testBuildAsync(commonAG, 'tableParams/wrap/common');
+  await testBuildAsync(consumerAG, 'tableParams/wrap/consumer');
 });
 
 it('Table params with WRAP action inside transactions', async () => {
@@ -51,21 +51,21 @@ it('Table params with WRAP action inside transactions', async () => {
     upd = mm.updateOne().setParams().by(t.id);
     sel = mm.selectRows(t.display_name).by(t.id).orderByAsc(t.display_name);
   }
-  const commonTA = mm.actionGroup(t, CommonAG);
+  const commonAG = mm.actionGroup(t, CommonAG);
 
   class ConsumerAG extends mm.ActionGroup {
     tx = mm.transact(
-      commonTA.insert.wrap({ mrFromTable: user }),
-      commonTA.del,
-      commonTA.upd,
-      commonTA.sel,
+      commonAG.insert.wrap({ mrFromTable: user }),
+      commonAG.del,
+      commonAG.upd,
+      commonAG.sel,
     );
 
     wrapped = this.tx.wrap({ mrFromTable: post });
   }
-  const consumerTA = mm.actionGroup(post, ConsumerAG);
-  await testBuildAsync(commonTA, 'tableParams/wrapTX/common');
-  await testBuildAsync(consumerTA, 'tableParams/wrapTX/consumer');
+  const consumerAG = mm.actionGroup(post, ConsumerAG);
+  await testBuildAsync(commonAG, 'tableParams/wrapTX/common');
+  await testBuildAsync(consumerAG, 'tableParams/wrapTX/consumer');
 });
 
 it('Call a table action with a table param that has not been initialized', async () => {
@@ -95,21 +95,34 @@ it('Multiple table params in transactions', async () => {
     insert = mm.insertOne().setParams();
     del = mm.deleteOne().by(userParam.id);
   }
-  const commonTA = mm.actionGroup(userParam, CommonAG);
+  const commonAG = mm.actionGroup(userParam, CommonAG);
 
   class PostParam extends Post {}
   const postParam = mm.table(PostParam, { tableParam: true });
 
   class ConsumerAG extends mm.ActionGroup {
     tx = mm.transact(
-      commonTA.insert.wrap({ userParam: user }),
+      commonAG.insert.wrap({ userParam: user }),
       mm.insert().from(postParam).setDefaults().setParams(),
-      commonTA.del,
+      commonAG.del,
     );
 
     wrapped = this.tx.wrap({ userParam: post });
   }
-  const consumerTA = mm.actionGroup(post, ConsumerAG);
-  await testBuildAsync(commonTA, 'tableParams/multipleTP/common');
-  await testBuildAsync(consumerTA, 'tableParams/multipleTP/consumer');
+  const consumerAG = mm.actionGroup(post, ConsumerAG);
+  await testBuildAsync(commonAG, 'tableParams/multipleTP/common');
+  await testBuildAsync(consumerAG, 'tableParams/multipleTP/consumer');
+});
+
+it('Table params in TX `.from`', async () => {
+  class PostParam extends Post {}
+  const postParam = mm.table(PostParam, { tableParam: true });
+
+  class UserParam extends User {}
+  const userParam = mm.table(UserParam, { tableParam: true });
+  class UserStaticAG extends mm.ActionGroup {
+    tx = mm.transact(mm.insert().from(postParam).setDefaults().setParams());
+  }
+  const ag = mm.actionGroup(userParam, UserStaticAG);
+  await testBuildAsync(ag, 'tableParams/tpTXFrom/user_static');
 });

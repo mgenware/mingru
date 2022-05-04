@@ -91,10 +91,10 @@ class UpdateIOProcessor extends BaseIOProcessor<mm.UpdateAction> {
     if (whereIO) {
       funcArgs.merge(whereIO.vars.list);
     }
-    execArgs.mergeVarDef(setterVars.list);
+    execArgs.mergeVarDefs(setterVars.list);
     funcArgs.merge(setterVars.list);
     if (whereIO) {
-      execArgs.mergeVarDef(whereIO.vars.list);
+      execArgs.mergeVarDefs(whereIO.vars.list);
     }
 
     // Return values

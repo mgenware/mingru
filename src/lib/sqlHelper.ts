@@ -120,7 +120,7 @@ export function mergeIOVerListsWithSQLIO(
     return;
   }
   funcArgs.merge(io.vars.list);
-  execArgs.mergeVarDef(io.vars.list);
+  execArgs.mergeVarDefs(io.vars.list);
 }
 
 export function mergeIOVerListsWithActionIO(
