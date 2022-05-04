@@ -38,7 +38,7 @@
     "eslint-plugin-import": "^2.26.0",
     "it-throws": "^4.2.0",
     "mgenware-tsconfig-node": "^14.1.0",
-    "mingru-models": "^0.63.3",
+    "mingru-models": "^0.64.0",
     "mocha": "^10.0.0",
     "source-map-support": "^0.5.21",
     "typescript": "^4.6.4"
@@ -48,7 +48,7 @@
     "chalk": "^5.0.1",
     "decamelize": "^6.0.0",
     "del": "^6.0.0",
-    "eslint-config-mgenware": "^0.7.1",
+    "eslint-config-mgenware": "^0.8.0",
     "m-fs": "^5.1.0",
     "must-be-err": "^0.1.1",
     "tempy": "^3.0.0",
