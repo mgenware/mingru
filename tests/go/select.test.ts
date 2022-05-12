@@ -115,8 +115,8 @@ it('ORDER BY inputs', async () => {
       .selectRows(post.id, cc, post.title)
       .whereSQL(mm.sql`${post.id} = ${post.id.toParam()}`)
       .orderByAsc(post.title)
-      .orderByParams(cc, post.title, post.cmtCount)
-      .orderByParams('n', post.title);
+      .orderByParams([cc, post.title, post.cmtCount])
+      .orderByParams(['n', post.title]);
   }
   const ta = mm.actionGroup(post, PostAG);
   await testBuildAsync(ta, 'select/orderByInputs');

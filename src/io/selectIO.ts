@@ -589,14 +589,14 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
     };
   }
 
-  private getOrderByColumnSQL(col: mm.OrderByColumnType): StringSegment[] {
+  private getOrderByColumnSQL(col: mm.OrderByColumnTypes): StringSegment[] {
     if (col instanceof mm.OrderByColumnParam) {
       const enumTypeName = `${this.actionUniqueTypeName}OrderBy${this.orderByInputCounter}`;
       const orderByParamName = `${orderByInputParamName}${this.orderByInputCounter}`;
       const orderByResultName = `${orderByParamName}SQL`;
       const names: string[] = [];
       const values: StringSegment[][] = [];
-      for (const choice of col.columns) {
+      for (const choice of col.columnChoices) {
         const [displayName, code] = this.getOrderByNonParamColumnSQL(choice);
         names.push(stringUtils.toPascalCase(`${enumTypeName}${displayName}`));
         values.push(code);
