@@ -89,22 +89,19 @@ export class JoinIO {
 
 export class OrderByParamChoiceIO {
   constructor(
-    public name: string,
+    public pascalName: string,
     public value: StringSegment[],
     public followingColumnValues: StringSegment[][],
   ) {}
 }
 
 export class OrderByParamIO {
-  choiceNames: string[];
   constructor(
     public enumTypeName: string,
     public choices: OrderByParamChoiceIO[],
     // The name of the variable used in SELECT IO SQL.
     public sqlVarName: string,
-  ) {
-    this.choiceNames = this.choices.map((c) => c.name);
-  }
+  ) {}
 }
 
 export class SelectedColumnIO {
@@ -604,7 +601,7 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
 
       for (const choice of col.columnChoices) {
         const [displayName, choiceCode] = this.getOrderByNonParamColumnSQL(choice);
-        const choiceName = stringUtils.toPascalCase(`${enumTypeName}${displayName}`);
+        const choiceName = stringUtils.toPascalCase(displayName);
         let followingColumnValues: StringSegment[][] = [];
 
         const followingColumns = col.followingColumns?.get(choice);

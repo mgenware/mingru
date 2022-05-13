@@ -289,12 +289,13 @@ export function buildSwitch(
   builder.push('}');
 }
 
-export function buildEnum(builder: LinesBuilder, values: string[]) {
+export function buildEnum(builder: LinesBuilder, typeName: string, values: string[]) {
+  builder.push(`type ${typeName} int\n`);
   builder.push('const (');
   builder.increaseIndent();
   let isFirst = true;
   for (const val of values) {
-    builder.push(val + (isFirst ? ' = iota' : ''));
+    builder.push(`${typeName}${val}${isFirst ? ` ${typeName}` : ''}${isFirst ? ' = iota' : ''}`);
     if (isFirst) {
       isFirst = false;
     }

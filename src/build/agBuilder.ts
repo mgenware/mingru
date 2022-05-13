@@ -328,7 +328,11 @@ export default class AGBuilder {
       for (const [paramVarName, paramIO] of io.orderByParamIOs.entries()) {
         // Add ORDER BY enum type definition to header.
         const enumDefsBuilder = new LinesBuilder();
-        go.buildEnum(enumDefsBuilder, paramIO.choiceNames);
+        go.buildEnum(
+          enumDefsBuilder,
+          paramIO.enumTypeName,
+          paramIO.choices.map((c) => c.pascalName),
+        );
         headerCode = go.appendWithSeparator(headerCode, enumDefsBuilder.toString());
 
         // Add switch-case code.
@@ -341,7 +345,9 @@ export default class AGBuilder {
         // Switch-case code.
         const cases: Record<string, string> = {};
         paramIO.choices.forEach((ch) => {
-          cases[ch.name] = `${resultVarName} = ${go.makeStringFromSegments(ch.value)}`;
+          cases[
+            `${paramIO.enumTypeName}${ch.pascalName}`
+          ] = `${resultVarName} = ${go.makeStringFromSegments(ch.value)}`;
         });
 
         // Add `fmt` import as we are using `fmt.Errorf`.

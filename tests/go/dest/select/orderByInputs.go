@@ -13,14 +13,18 @@ var Post = &PostAGType{}
 
 // ------------ Actions ------------
 
+type PostAGSelectTOrderBy1 int
+
 const (
-	PostAGSelectTOrderBy1N = iota
+	PostAGSelectTOrderBy1N PostAGSelectTOrderBy1 = iota
 	PostAGSelectTOrderBy1Title
 	PostAGSelectTOrderBy1CmtCount
 )
 
+type PostAGSelectTOrderBy2 int
+
 const (
-	PostAGSelectTOrderBy2N = iota
+	PostAGSelectTOrderBy2N PostAGSelectTOrderBy2 = iota
 	PostAGSelectTOrderBy2Title
 )
 
