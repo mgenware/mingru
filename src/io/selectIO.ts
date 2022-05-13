@@ -22,7 +22,7 @@ import { ActionToIOOptions } from './actionToIOOptions.js';
 import BaseIOProcessor from './baseIOProcessor.js';
 import * as sqlHelper from '../lib/sqlHelper.js';
 
-const orderByInputParamName = 'orderBy';
+const orderByFuncParamName = 'orderBy';
 
 export class JoinIO {
   // `JoinTable.extraSQL` is not included in `JoinTable.keyPath` to avoid
@@ -86,14 +86,24 @@ export class JoinIO {
   }
 }
 
-export class OrderByInputIO {
+export class OrderByParamChoiceIO {
+  constructor(
+    public name: string,
+    public value: StringSegment[],
+    public followingColumnValues: StringSegment[][],
+  ) {}
+}
+
+export class OrderByParamIO {
+  choiceNames: string[];
   constructor(
     public enumTypeName: string,
-    public enumNames: string[],
-    public enumValues: StringSegment[][],
+    public choices: OrderByParamChoiceIO[],
     // The name of the variable used in SELECT IO SQL.
     public sqlVarName: string,
-  ) {}
+  ) {
+    this.choiceNames = this.choices.map((c) => c.name);
+  }
 }
 
 export class SelectedColumnIO {
@@ -141,7 +151,7 @@ export class SelectIO extends ActionIO {
     execArgs: ValueList,
     returnValues: ParamList,
     // K: ORDER BY params name, V: IO.
-    public orderByInputIOs: Map<string, OrderByInputIO>,
+    public orderByParamIOs: Map<string, OrderByParamIO>,
   ) {
     super(dialect, selectAction, sql, funcArgs, execArgs, returnValues, false);
   }
@@ -185,18 +195,18 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
   // Tracks all selected model names.
   selectedModelNames = new Set<string>();
 
-  // Number of ORDER BY inputs.
-  orderByInputCounter = 1;
+  // Number of ORDER BY params.
+  orderByParamCounter = 1;
   // K: ORDER BY params name, V: IO.
-  orderByInputIOs = new Map<string, OrderByInputIO>();
+  orderByParamIOs = new Map<string, OrderByParamIO>();
 
   // Pascal case of action name.
   actionPascalName?: string;
   // Used to help generate a type name for this action.
   actionUniqueTypeName?: string;
 
-  // Params needed when ORDER BY inputs are present.
-  private orderByInputParams: VarDef[] = [];
+  // Func params needed when ORDER BY params are present.
+  private orderByFuncParams: VarDef[] = [];
   // Tracks subqueries func args.
   private subqueryIOs: ActionIO[] = [];
 
@@ -503,7 +513,7 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
     }
 
     // ORDER BY inputs.
-    for (const param of this.orderByInputParams) {
+    for (const param of this.orderByFuncParams) {
       funcArgs.add(param);
     }
 
@@ -570,7 +580,7 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
       this.hoiseTableParams(funcArgs),
       execArgs,
       returnValues,
-      this.orderByInputIOs,
+      this.orderByParamIOs,
     );
   }
 
@@ -591,39 +601,55 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
 
   private getOrderByColumnSQL(col: mm.OrderByColumnTypes): StringSegment[] {
     if (col instanceof mm.OrderByColumnParam) {
-      const enumTypeName = `${this.actionUniqueTypeName}OrderBy${this.orderByInputCounter}`;
-      const orderByParamName = `${orderByInputParamName}${this.orderByInputCounter}`;
+      const enumTypeName = `${this.actionUniqueTypeName}OrderBy${this.orderByParamCounter}`;
+      const orderByParamName = `${orderByFuncParamName}${this.orderByParamCounter}`;
       const orderByResultName = `${orderByParamName}SQL`;
-      const names: string[] = [];
-      const values: StringSegment[][] = [];
+      const choiceIOs: OrderByParamChoiceIO[] = [];
+
       for (const choice of col.columnChoices) {
-        const [displayName, code] = this.getOrderByNonParamColumnSQL(choice);
-        names.push(stringUtils.toPascalCase(`${enumTypeName}${displayName}`));
-        values.push(code);
+        const [displayName, choiceCode] = this.getOrderByNonParamColumnSQL(choice);
+        const choiceName = stringUtils.toPascalCase(`${enumTypeName}${displayName}`);
+        let followingColumnValues: StringSegment[][] = [];
+
+        const followingColumns = col.followingColumns?.get(choice);
+        if (followingColumns) {
+          followingColumnValues = followingColumns.map(
+            (fc) => this.getOrderByNonParamColumnSQLWithOrdering(fc)[1],
+          );
+        }
+        const choiceIO = new OrderByParamChoiceIO(choiceName, choiceCode, followingColumnValues);
+        choiceIOs.push(choiceIO);
       }
-      this.orderByInputIOs.set(
+      this.orderByParamIOs.set(
         orderByParamName,
-        new OrderByInputIO(enumTypeName, names, values, orderByResultName),
+        new OrderByParamIO(enumTypeName, choiceIOs, orderByResultName),
       );
 
-      // Add ORDER BY inputs params.
+      // Add ORDER BY params.
       // `orderBy1` for enum param, and `orderBy1Desc` for ordering.
-      this.orderByInputParams.push({ name: orderByParamName, type: defs.intTypeInfo });
+      this.orderByFuncParams.push({ name: orderByParamName, type: defs.intTypeInfo });
       const orderByDescVarName = `${orderByParamName}Desc`;
-      this.orderByInputParams.push({ name: orderByDescVarName, type: defs.boolTypeInfo });
+      this.orderByFuncParams.push({ name: orderByDescVarName, type: defs.boolTypeInfo });
 
-      this.orderByInputCounter++;
+      this.orderByParamCounter++;
       return [{ code: orderByResultName }];
     }
-    const [, code] = this.getOrderByNonParamColumnSQL(col.column);
-    if (col.desc) {
-      return [...code, ' DESC'];
-    }
+    const [, code] = this.getOrderByNonParamColumnSQLWithOrdering(col);
     return code;
   }
 
+  private getOrderByNonParamColumnSQLWithOrdering(
+    orderByCol: mm.OrderByColumn,
+  ): [string, StringSegment[]] {
+    const [name, code] = this.getOrderByNonParamColumnSQL(orderByCol.column);
+    if (orderByCol.desc) {
+      return [name, [...code, ' DESC']];
+    }
+    return [name, code];
+  }
+
   // Gets ORDER BY value of the specified column. Returns an array of string segments
-  // along with a column display name which is used in ORDER BY inputs.
+  // along with a column display name which is used in ORDER BY params.
   private getOrderByNonParamColumnSQL(
     col: mm.SelectedColumnTypesOrName,
   ): [string, StringSegment[]] {

@@ -108,7 +108,7 @@ it('selectRows, WHERE, orderBy', async () => {
   await testBuildAsync(ta, 'select/selectRowsWhereOrder');
 });
 
-it('ORDER BY inputs', async () => {
+it('ORDER BY params', async () => {
   const cc = mm.sel(mm.sql`RAND()`, 'n', new mm.ColumnType(mm.dt.int));
   class PostAG extends mm.ActionGroup {
     selectT = mm
@@ -120,6 +120,25 @@ it('ORDER BY inputs', async () => {
   }
   const ta = mm.actionGroup(post, PostAG);
   await testBuildAsync(ta, 'select/orderByInputs');
+});
+
+it('ORDER BY params with following columns', async () => {
+  const cc = mm.sel(mm.sql`RAND()`, 'n', new mm.ColumnType(mm.dt.int));
+  const followingColumns = new Map<mm.SelectedColumnTypesOrName, mm.OrderByColumn[]>();
+  followingColumns.set(
+    post.cmtCount,
+    [post.id, post.date].map((c) => new mm.OrderByColumn(c)),
+  );
+  class PostAG extends mm.ActionGroup {
+    selectT = mm
+      .selectRows(post.id, cc, post.title)
+      .whereSQL(mm.sql`${post.id} = ${post.id.toParam()}`)
+      .orderByAsc(post.title)
+      .orderByParams([cc, post.title, post.cmtCount], followingColumns)
+      .orderByParams(['n', post.title]);
+  }
+  const ta = mm.actionGroup(post, PostAG);
+  await testBuildAsync(ta, 'select/orderByInputsFC');
 });
 
 it('selectField, WHERE', async () => {

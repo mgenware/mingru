@@ -325,29 +325,25 @@ export default class AGBuilder {
 
     const builder = new LinesBuilder();
 
-    // Prepare extra definitions for ORDER BY inputs.
-    if (io.orderByInputIOs.size) {
-      for (const [paramVarName, inputIO] of io.orderByInputIOs.entries()) {
+    // Prepare extra definitions for ORDER BY params.
+    if (io.orderByParamIOs.size) {
+      for (const [paramVarName, paramIO] of io.orderByParamIOs.entries()) {
         // Add ORDER BY enum type definition to header.
         const enumDefsBuilder = new LinesBuilder();
-        go.buildEnum(enumDefsBuilder, inputIO.enumNames);
+        go.buildEnum(enumDefsBuilder, paramIO.choiceNames);
         headerCode = go.appendWithSeparator(headerCode, enumDefsBuilder.toString());
 
         // Add switch-case code.
         // Example:
         // `paramVarName` = `orderBy1`.
         // `resultVarName` = `orderBy1SQL`.
-        const resultVarName = inputIO.sqlVarName;
+        const resultVarName = paramIO.sqlVarName;
 
         builder.push(`var ${resultVarName} string`);
         // Switch-case code.
         const cases: Record<string, string> = {};
-        inputIO.enumNames.forEach((enumName, i) => {
-          const enumValue = inputIO.enumValues[i];
-          if (!enumValue) {
-            throw new Error('Unexpected undefined enum value');
-          }
-          cases[enumName] = `${resultVarName} = ${go.makeStringFromSegments(enumValue)}`;
+        paramIO.choices.forEach((ch) => {
+          cases[ch.name] = `${resultVarName} = ${go.makeStringFromSegments(ch.value)}`;
         });
 
         // Add `fmt` import as we are using `fmt.Errorf`.
