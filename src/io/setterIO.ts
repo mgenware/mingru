@@ -1,14 +1,13 @@
 import * as mm from 'mingru-models';
 import { SQLIO, sqlIO, SQLIOBuilderOption } from './sqlIO.js';
 import { ParamList } from '../lib/varList.js';
-import { Dialect } from '../dialect.js';
 import { VarDef } from '../lib/varInfo.js';
 import dtDefault from '../build/dtDefault.js';
+import ctx from '../ctx.js';
 
 export class SetterIO {
   static fromAction(
     action: mm.CoreUpdateAction,
-    dialect: Dialect,
     allowUnsetValues: boolean,
     sourceTable: mm.Table | null,
     context: string,
@@ -29,8 +28,7 @@ export class SetterIO {
       return new SetterIO(
         key,
         sqlIO(
-          value instanceof mm.SQL ? value : mm.sql`${dialect.objToSQL(value, null)}`,
-          dialect,
+          value instanceof mm.SQL ? value : mm.sql`${ctx.dialect.objToSQL(value, null)}`,
           sourceTable,
           `${context} [Key: ${key}, value: ${value}]`,
           opt,
@@ -67,7 +65,6 @@ export class SetterIO {
               col,
               autoSetter,
               table,
-              dialect,
               sourceTable,
               `${context} [AutoSetter on ${col}]`,
               opt,
@@ -89,7 +86,6 @@ export class SetterIO {
     col: mm.Column,
     autoSetter: mm.AutoSetterType,
     table: mm.Table,
-    dialect: Dialect,
     sourceTable: mm.Table | null,
     context: string,
     opt?: SQLIOBuilderOption,
@@ -100,7 +96,6 @@ export class SetterIO {
           col,
           sqlIO(
             mm.sql`${col.toParam()}`,
-            dialect,
             sourceTable,
             `${context} [Handling param setter on ${col}]`,
             opt,
@@ -117,7 +112,7 @@ export class SetterIO {
           if (defValue instanceof mm.SQL) {
             value = defValue;
           } else {
-            value = dialect.objToSQL(defValue, table);
+            value = ctx.dialect.objToSQL(defValue, table);
           }
         } else if (colType.nullable) {
           value = mm.sql`${mm.constants.NULL}`;
@@ -132,10 +127,10 @@ export class SetterIO {
               `Cannot determine the default value of type "${type}" at column "${col}"`,
             );
           }
-          value = dialect.objToSQL(def, table);
+          value = ctx.dialect.objToSQL(def, table);
         }
 
-        return new SetterIO(col, sqlIO(value, dialect, sourceTable, context, opt));
+        return new SetterIO(col, sqlIO(value, sourceTable, context, opt));
       }
 
       default:

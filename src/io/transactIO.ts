@@ -1,5 +1,4 @@
 import * as mm from 'mingru-models';
-import { Dialect } from '../dialect.js';
 import { ActionIO } from './actionIO.js';
 import { ParamList, ValueList } from '../lib/varList.js';
 import { actionToIO, registerHandler } from './actionToIO.js';
@@ -26,7 +25,6 @@ export class TransactMemberIO {
 
 export class TransactIO extends ActionIO {
   constructor(
-    dialect: Dialect,
     public transactAction: mm.TransactAction,
     public memberIOs: TransactMemberIO[],
     funcArgs: ParamList,
@@ -34,7 +32,7 @@ export class TransactIO extends ActionIO {
     returnValues: ParamList,
     public childReturnValues: { [name: string]: TXMReturnValueInfo | undefined },
   ) {
-    super(dialect, transactAction, null, funcArgs, execArgs, returnValues, true);
+    super(transactAction, null, funcArgs, execArgs, returnValues, true);
   }
 }
 
@@ -57,7 +55,6 @@ class TransactIOProcessor extends BaseIOProcessor<mm.TransactAction> {
   convert(): TransactIO {
     const { action, opt } = this;
     const actionData = action.__getData();
-    const { dialect } = opt;
     const { members } = actionData;
     if (!members?.length) {
       throw new Error(`Unexpected empty members at action ${action}`);
@@ -212,7 +209,6 @@ class TransactIOProcessor extends BaseIOProcessor<mm.TransactAction> {
     }
 
     const result = new TransactIO(
-      dialect,
       action,
       memberIOs,
       this.hoiseTableParams(funcArgs),

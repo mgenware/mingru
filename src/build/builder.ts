@@ -7,7 +7,6 @@ import { temporaryDirectory } from 'tempy';
 import toTypeString from 'to-type-string';
 import * as defs from '../def/defs.js';
 import * as go from './goCodeUtil.js';
-import { Dialect } from '../dialect.js';
 import logger from '../logger.js';
 import CSQLBuilder from './csqlBuilder.js';
 import { BuildOptions } from './buildOptions.js';
@@ -17,6 +16,7 @@ import { dedup } from '../lib/arrayUtils.js';
 import AGBuilderContext from './agBuilderContext.js';
 import AGBuilder from './agBuilder.js';
 import { buildTSInterface } from './tsCodeBuilder.js';
+import ctx from '../ctx.js';
 
 const tableSQLDir = 'table_sql';
 const migSQLDir = 'migration_sql';
@@ -29,7 +29,7 @@ export default class Builder {
   // If `cleanOutDir` is on, `ourDir` gets deleted before copying.
   workingDir: string;
 
-  constructor(public dialect: Dialect, public outDir: string, opt?: BuildOptions) {
+  constructor(public outDir: string, opt?: BuildOptions) {
     // eslint-disable-next-line no-param-reassign
     opt = opt ?? {};
     logger.enabled = !opt.noOutput;
@@ -81,7 +81,7 @@ export default class Builder {
     await Promise.all(
       groups.map(async (ag) => {
         const agName = defs.agInstanceName(ag);
-        const agIO = new AGIO(ag, { dialect: this.dialect });
+        const agIO = new AGIO(ag, {});
         const builder = new AGBuilder(agIO, opt, context);
         const code = builder.build();
         const fileName = su.toSnakeCase(agName) + '_ag';
@@ -115,7 +115,7 @@ export default class Builder {
       code += 'import "github.com/mgenware/mingru-go-lib"\n\n';
       for (const t of tables) {
         code += `const ${defs.tableNameCode(t)} mingru.Table = ${JSON.stringify(
-          this.dialect.encodeTableName(t),
+          ctx.dialect.encodeTableName(t),
         )}\n`;
       }
     } else {
@@ -239,10 +239,10 @@ export default class Builder {
   }
 
   private async buildCSQLCore(table: mm.Table): Promise<CSQLBuilder> {
-    const { dialect, opt } = this;
+    const { opt } = this;
     let { workingDir } = this;
     workingDir = np.join(workingDir, tableSQLDir);
-    const builder = new CSQLBuilder(table, dialect);
+    const builder = new CSQLBuilder(table);
     const fileName = su.toSnakeCase(table.__getData().name);
     const outFile = np.join(workingDir, fileName + '.sql');
     const sql = builder.build(opt.sqlFileHeader);

@@ -2,7 +2,7 @@
 import * as mm from 'mingru-models';
 import toTypeString from 'to-type-string';
 import mustBeErr from 'must-be-err';
-import { Dialect, StringSegment } from '../dialect.js';
+import { StringSegment } from '../dialect.js';
 import { SQLIO, sqlIO, SQLIOBuilderOption } from './sqlIO.js';
 import { ActionIO } from './actionIO.js';
 import * as stringUtils from '../lib/stringUtils.js';
@@ -21,6 +21,7 @@ import { forEachWithSlots } from '../lib/arrayUtils.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
 import BaseIOProcessor from './baseIOProcessor.js';
 import * as sqlHelper from '../lib/sqlHelper.js';
+import ctx from '../ctx.js';
 
 const orderByFuncParamName = 'orderBy';
 
@@ -44,9 +45,9 @@ export class JoinIO {
     public extraColumns: [mm.Column, mm.Column][],
   ) {}
 
-  toSegments(dialect: Dialect): StringSegment[] {
+  toSegments(): StringSegment[] {
     const sql: StringSegment[] = [];
-    const e = dialect.encodeName;
+    const e = ctx.dialect.encodeName;
     const alias1 = e(this.tableAlias);
     const alias2 = e(this.localTable);
     sql.push(
@@ -141,7 +142,6 @@ export class SelectedColumnIO {
 
 export class SelectIO extends ActionIO {
   constructor(
-    dialect: Dialect,
     public selectAction: mm.SelectAction,
     sql: StringSegment[],
     // `cols` can be empty, it indicates `SELECT *`, which is used in `selectExists`.
@@ -153,7 +153,7 @@ export class SelectIO extends ActionIO {
     // K: ORDER BY params name, V: IO.
     public orderByParamIOs: Map<string, OrderByParamIO>,
   ) {
-    super(dialect, selectAction, sql, funcArgs, execArgs, returnValues, false);
+    super(selectAction, sql, funcArgs, execArgs, returnValues, false);
   }
 }
 
@@ -217,7 +217,6 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
     const unionItems = isUnionMode ? sqlHelper.flattenUnions(this.action) : [];
 
     const { opt, selectedModelNames } = this;
-    const { dialect } = opt;
     const {
       limitValue,
       offsetValue,
@@ -370,7 +369,6 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
       if (whereSQLValue) {
         whereIO = sqlIO(
           whereSQLValue,
-          dialect,
           sqlTable,
           `[Handling WHERE of ${this.action}]`,
           this.getSQLBuilderOpt(),
@@ -381,7 +379,7 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
       // Joins
       if (this.hasJoin) {
         for (const join of this.joins) {
-          const code = join.toSegments(dialect);
+          const code = join.toSegments();
           sql.push(' ', ...code);
         }
       }
@@ -412,7 +410,7 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
       forEachWithSlots(
         groupByColumns,
         (col) => {
-          sql.push(dialect.encodeName(col));
+          sql.push(ctx.dialect.encodeName(col));
         },
         () => sql.push(', '),
       );
@@ -423,7 +421,6 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
     if (havingSQLValue) {
       havingIO = sqlIO(
         havingSQLValue,
-        dialect,
         sqlTable,
         `[Handling HAVING of ${this.action}]`,
         this.getSQLBuilderOpt(),
@@ -501,12 +498,12 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
       // User specified LIMIT and OFFSET
       // Ignore number values, they were directly written in SQL.
       if (limitValue instanceof mm.SQLVariable) {
-        const userLimitVarInfo = VarDefBuilder.fromSQLVar(limitValue, dialect);
+        const userLimitVarInfo = VarDefBuilder.fromSQLVar(limitValue);
         funcArgs.add(userLimitVarInfo);
         execArgs.addVarDef(userLimitVarInfo);
       }
       if (offsetValue instanceof mm.SQLVariable) {
-        const userOffsetVarInfo = VarDefBuilder.fromSQLVar(offsetValue, dialect);
+        const userOffsetVarInfo = VarDefBuilder.fromSQLVar(offsetValue);
         funcArgs.add(userOffsetVarInfo);
         execArgs.addVarDef(userOffsetVarInfo);
       }
@@ -525,7 +522,7 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
         if (!col) {
           throw new Error('Unexpected empty selected columns');
         }
-        const originalTypeInfo = dialect.colTypeToGoType(col.getResultType());
+        const originalTypeInfo = ctx.dialect.colTypeToGoType(col.getResultType());
         const typeInfo = col.nullable ? typeInfoToPointer(originalTypeInfo) : originalTypeInfo;
         returnValues.add({
           name: mm.ReturnValues.result,
@@ -570,7 +567,6 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
     }
 
     return new SelectIO(
-      dialect,
       // DO NOT use `coreAction` here, it might be the first UNION member, which
       // could possibly have an empty name.
       this.action,
@@ -653,10 +649,8 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
   private getOrderByNonParamColumnSQL(
     col: mm.SelectedColumnTypesOrName,
   ): [string, StringSegment[]] {
-    const { dialect } = this.opt;
-
     if (typeof col === 'string') {
-      return [col, [dialect.encodeName(col)]];
+      return [col, [ctx.dialect.encodeName(col)]];
     }
     if (col instanceof mm.Column) {
       const io = this.columnPathToIOMap.get(col.__getPath());
@@ -665,7 +659,7 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
     if (col instanceof mm.SelectedColumn) {
       const colData = col.__getData();
       if (colData.selectedName) {
-        return [colData.selectedName, [dialect.encodeName(colData.selectedName)]];
+        return [colData.selectedName, [ctx.dialect.encodeName(colData.selectedName)]];
       }
       if (colData.core instanceof mm.Column) {
         return [
@@ -686,8 +680,7 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
   // It's used in ORDER BY.
   // Returns [varName, SQL segments].
   private getColumnSQLFromExistingData(col: mm.Column): StringSegment[] {
-    const { dialect } = this.opt;
-    let value = dialect.encodeColumnName(col);
+    let value = ctx.dialect.encodeColumnName(col);
     if (this.hasJoin) {
       const colTable = col.__mustGetTable();
       if (colTable instanceof mm.JoinTable) {
@@ -699,18 +692,17 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
             `Column path ”${joinPath}“ does not have a associated value in column alias map`,
           );
         }
-        value = `${dialect.encodeName(join.tableAlias)}.${value}`;
+        value = `${ctx.dialect.encodeName(join.tableAlias)}.${value}`;
       } else {
         // Use table name as alias
-        value = `${dialect.encodeName(this.localTableAlias(colTable))}.${value}`;
+        value = `${ctx.dialect.encodeName(this.localTableAlias(colTable))}.${value}`;
       }
     }
     return [value];
   }
 
   private handleFrom(table: mm.Table): StringSegment[] {
-    const { opt } = this;
-    const e = opt.dialect.encodeName;
+    const e = ctx.dialect.encodeName;
     const tableDBName = table.__getDBName();
     const encodedTableName = e(tableDBName);
     const segList: StringSegment[] = ['FROM '];
@@ -772,15 +764,12 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
     const modelName = col.__getModelName();
     let sql: mm.SQL;
     if (alias) {
-      sql = this.opt.dialect.as(colSQL, stringUtils.toSnakeCase(alias));
+      sql = ctx.dialect.as(colSQL, stringUtils.toSnakeCase(alias));
     } else {
       sql = colSQL;
     }
     const variableName = alias || modelName;
-    return [
-      variableName,
-      sqlIO(sql, this.opt.dialect, sqlTable, `Getting selected SQL col code ${col}`, opt).code,
-    ];
+    return [variableName, sqlIO(sql, sqlTable, `Getting selected SQL col code ${col}`, opt).code];
   }
 
   // Returns SQL expr of the selected column.
@@ -792,7 +781,6 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
    */
   private handleSelectedColumn(sCol: mm.SelectedColumnTypes): SelectedColumnIO {
     const sqlTable = this.mustGetAvailableSQLTable();
-    const { dialect } = this.opt;
     // Plain columns like `post.id`.
     if (sCol instanceof mm.Column) {
       const colResult = this.handlePlainSelectedColumn(sCol);
@@ -852,16 +840,15 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
     }
 
     // Add alias.
-    const rawExpr = dialect.as(core, stringUtils.toSnakeCase(selectedName));
+    const rawExpr = ctx.dialect.as(core, stringUtils.toSnakeCase(selectedName));
     const info = sqlIO(
       rawExpr,
-      dialect,
       sqlTable,
       `[Handling raw expr in ${core}]`,
       this.getSQLBuilderOpt(),
     );
     return new SelectedColumnIO(
-      dialect.encodeName(selectedName),
+      ctx.dialect.encodeName(selectedName),
       sCol,
       info.code,
       selectedName, // inputName
@@ -879,7 +866,6 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
     }
 
     const sqlTable = this.mustGetAvailableSQLTable();
-    const { dialect } = this.opt;
     const result = this.jcMap.get(table.keyPath);
     if (result) {
       // Update `JoinIO.extraSQL` if needed.
@@ -887,7 +873,6 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
       if (!result.extraSQL && table.extraSQL) {
         result.extraSQL = sqlIO(
           table.extraSQL,
-          dialect,
           sqlTable,
           `[Updating extra SQL for ${table}]`,
           this.getSQLBuilderOpt(),
@@ -935,7 +920,6 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
 
       const extraSQLIO = sqlIO(
         table.extraSQL,
-        dialect,
         sqlTable,
         `[Handling extra SQL of ${table}]`,
         this.getSQLBuilderOpt(),
@@ -953,8 +937,7 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
     id: StringSegment;
   } {
     const sqlTable = this.mustGetAvailableSQLTable();
-    const { dialect } = this.opt;
-    const e = dialect.encodeName;
+    const e = ctx.dialect.encodeName;
     // Make sure column is initialized.
     const colTable = col.__mustGetTable();
     // Make sure column is from current table.

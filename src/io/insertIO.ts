@@ -1,5 +1,5 @@
 import * as mm from 'mingru-models';
-import { Dialect, StringSegment } from '../dialect.js';
+import { StringSegment } from '../dialect.js';
 import { settersToParamList, SetterIO } from './setterIO.js';
 import { ActionIO } from './actionIO.js';
 import { registerHandler } from './actionToIO.js';
@@ -11,12 +11,12 @@ import { forEachWithSlots } from '../lib/arrayUtils.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
 import BaseIOProcessor from './baseIOProcessor.js';
 import { handleNonSelectSQLFrom } from '../lib/sqlHelper.js';
+import ctx from '../ctx.js';
 
 export class InsertIO extends ActionIO {
   returnMember: ActionIO | undefined;
 
   constructor(
-    dialect: Dialect,
     public insertAction: mm.InsertAction,
     sql: StringSegment[],
     public setters: SetterIO[],
@@ -25,15 +25,14 @@ export class InsertIO extends ActionIO {
     execArgs: ValueList,
     returnValues: ParamList,
   ) {
-    super(dialect, insertAction, sql, funcArgs, execArgs, returnValues, false);
+    super(insertAction, sql, funcArgs, execArgs, returnValues, false);
   }
 }
 
 export class InsertIOProcessor extends BaseIOProcessor<mm.InsertAction> {
   convert(): InsertIO {
     const sql: StringSegment[] = ['INSERT INTO '];
-    const { action, opt } = this;
-    const { dialect } = opt;
+    const { action } = this;
     const actionData = action.__getData();
     const sqlTable = this.mustGetAvailableSQLTable();
     const fetchInsertedID = actionData.ensureOneRowAffected && !!sqlTable.__getData().aiPKs.length;
@@ -48,12 +47,11 @@ export class InsertIOProcessor extends BaseIOProcessor<mm.InsertAction> {
     }
     const setterIOs = SetterIO.fromAction(
       action,
-      dialect,
       !!actionData.allowUnsetColumns,
       sqlTable,
       `[Building setters of ${action}]`,
     );
-    const colNames = setterIOs.map((s) => dialect.encodeColumnName(s.col));
+    const colNames = setterIOs.map((s) => ctx.dialect.encodeColumnName(s.col));
     sql.push(` (${colNames.join(', ')})`);
 
     // Values
@@ -92,7 +90,6 @@ export class InsertIOProcessor extends BaseIOProcessor<mm.InsertAction> {
     }
 
     return new InsertIO(
-      dialect,
       action,
       sql,
       setterIOs,

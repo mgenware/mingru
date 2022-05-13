@@ -1,5 +1,5 @@
 import * as mm from 'mingru-models';
-import { Dialect, StringSegment } from '../dialect.js';
+import { StringSegment } from '../dialect.js';
 import { ActionIO } from './actionIO.js';
 import { SQLIO, sqlIO } from './sqlIO.js';
 import { ParamList, ValueList } from '../lib/varList.js';
@@ -8,10 +8,10 @@ import * as defs from '../def/defs.js';
 import BaseIOProcessor from './baseIOProcessor.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
 import { handleNonSelectSQLFrom } from '../lib/sqlHelper.js';
+import ctx from '../ctx.js';
 
 export class DeleteIO extends ActionIO {
   constructor(
-    dialect: Dialect,
     public deleteAction: mm.DeleteAction,
     sql: StringSegment[],
     public where: SQLIO | null,
@@ -19,15 +19,14 @@ export class DeleteIO extends ActionIO {
     execArgs: ValueList,
     returnValues: ParamList,
   ) {
-    super(dialect, deleteAction, sql, funcArgs, execArgs, returnValues, false);
+    super(deleteAction, sql, funcArgs, execArgs, returnValues, false);
   }
 }
 
 class DeleteIOProcessor extends BaseIOProcessor<mm.DeleteAction> {
   convert(): DeleteIO {
     const sql: StringSegment[] = ['DELETE FROM '];
-    const { action, opt } = this;
-    const { dialect } = opt;
+    const { action } = this;
     const sqlTable = this.mustGetAvailableSQLTable();
     const actionData = action.__getData();
 
@@ -43,7 +42,7 @@ class DeleteIOProcessor extends BaseIOProcessor<mm.DeleteAction> {
 
     // WHERE
     const whereIO = actionData.whereSQLValue
-      ? sqlIO(actionData.whereSQLValue, dialect, sqlTable, `[Building WHERE of ${action}]`)
+      ? sqlIO(actionData.whereSQLValue, sqlTable, `[Building WHERE of ${action}]`)
       : null;
     if (whereIO) {
       sql.push(' WHERE ');
@@ -66,12 +65,11 @@ class DeleteIOProcessor extends BaseIOProcessor<mm.DeleteAction> {
     if (!actionData.ensureOneRowAffected) {
       returnValues.add({
         name: mm.ReturnValues.rowsAffected,
-        type: dialect.colTypeToGoType(mm.int().__type()),
+        type: ctx.dialect.colTypeToGoType(mm.int().__type()),
       });
     }
 
     return new DeleteIO(
-      dialect,
       action,
       sql,
       whereIO,

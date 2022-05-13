@@ -1,21 +1,17 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import toTypeString from 'to-type-string';
 import * as mm from 'mingru-models';
-import { Dialect, StringSegment } from '../dialect.js';
+import { StringSegment } from '../dialect.js';
 import { SQLVarList } from '../lib/varList.js';
 import { VarDefBuilder } from '../lib/varInfoHelper.js';
 import { makeStringFromSegments } from '../build/goCodeUtil.js';
 import { join2DArrays } from '../lib/arrayUtils.js';
 import { actionToIO } from './actionToIO.js';
 import { ActionIO } from './actionIO.js';
+import ctx from '../ctx.js';
 
 export class SQLIO {
-  constructor(
-    public sql: mm.SQL,
-    public dialect: Dialect,
-    public vars: SQLVarList,
-    public code: StringSegment[],
-  ) {}
+  constructor(public sql: mm.SQL, public vars: SQLVarList, public code: StringSegment[]) {}
 
   getCodeString(): string {
     return makeStringFromSegments(this.code);
@@ -26,7 +22,6 @@ export class SQLIO {
 function getSQLCode(
   sql: mm.SQL,
   sourceTable: mm.Table | null,
-  dialect: Dialect,
   rewriteElement: ((element: mm.SQLElement) => StringSegment[] | null) | null,
   subqueryCallback: ((action: mm.Action, io: ActionIO) => void) | null,
   context: string,
@@ -48,7 +43,7 @@ function getSQLCode(
     // Note that it doesn't handle elements in subqueries.
     const elementResults =
       rewriteElementRes === null
-        ? handleElement(element, sourceTable, dialect, rewriteElement, subqueryCallback, context)
+        ? handleElement(element, sourceTable, rewriteElement, subqueryCallback, context)
         : rewriteElementRes;
     for (const r of elementResults) {
       res.push(r);
@@ -57,11 +52,7 @@ function getSQLCode(
   return res;
 }
 
-function handleSubquery(
-  action: mm.Action,
-  defaultGroupTable: mm.Table | null,
-  dialect: Dialect,
-): ActionIO {
+function handleSubquery(action: mm.Action, defaultGroupTable: mm.Table | null): ActionIO {
   if (action instanceof mm.SelectAction) {
     const groupTable = action.__getGroupTable() ?? defaultGroupTable;
     if (!groupTable) {
@@ -72,7 +63,7 @@ function handleSubquery(
 
     const io = actionToIO(
       action,
-      { dialect, selectionLiteMode: true, outerGroupTable: groupTable },
+      { selectionLiteMode: true, outerGroupTable: groupTable },
       'handleSubquery',
     );
     return io;
@@ -83,7 +74,6 @@ function handleSubquery(
 function handleElement(
   element: mm.SQLElement,
   defaultTable: mm.Table | null,
-  dialect: Dialect,
   rewriteElement: ((element: mm.SQLElement) => StringSegment[] | null) | null,
   subqueryCallback: ((action: mm.Action, io: ActionIO) => void) | null,
   context: string,
@@ -94,19 +84,19 @@ function handleElement(
     }
 
     case mm.SQLElementType.column: {
-      return [dialect.encodeColumnName(element.toColumn())];
+      return [ctx.dialect.encodeColumnName(element.toColumn())];
     }
 
     case mm.SQLElementType.call: {
       const call = element.toCall();
-      const name = dialect.sqlCall(call.type);
+      const name = ctx.dialect.sqlCall(call.type);
       const res: StringSegment[] = [`${name}(`];
 
       if (call.params.length) {
         res.push(
           ...join2DArrays(
             call.params.map((p) =>
-              getSQLCode(p, defaultTable, dialect, rewriteElement, subqueryCallback, context),
+              getSQLCode(p, defaultTable, rewriteElement, subqueryCallback, context),
             ),
             ', ',
           ),
@@ -123,7 +113,7 @@ function handleElement(
           { code: `mingru.InputPlaceholders(len(${VarDefBuilder.getSQLVarInputName(input)}))` },
         ];
       }
-      return dialect.inputPlaceholder();
+      return ctx.dialect.inputPlaceholder();
     }
 
     case mm.SQLElementType.rawColumn: {
@@ -133,20 +123,19 @@ function handleElement(
         throw new Error(`Unexpected undefined core at raw column "${rawCol}"`);
       }
       if (selectedName) {
-        return [dialect.encodeName(selectedName)];
+        return [ctx.dialect.encodeName(selectedName)];
       }
       if (core instanceof mm.Column) {
         if (selectedName) {
           return getSQLCode(
-            dialect.as(mm.sql`${core}`, selectedName),
+            ctx.dialect.as(mm.sql`${core}`, selectedName),
             defaultTable,
-            dialect,
             rewriteElement,
             subqueryCallback,
             context,
           );
         }
-        return [dialect.encodeColumnName(core)];
+        return [ctx.dialect.encodeColumnName(core)];
       }
 
       if (!selectedName) {
@@ -155,9 +144,8 @@ function handleElement(
         );
       }
       return getSQLCode(
-        dialect.as(core, selectedName),
+        ctx.dialect.as(core, selectedName),
         defaultTable,
-        dialect,
         rewriteElement,
         subqueryCallback,
         context,
@@ -167,7 +155,7 @@ function handleElement(
     case mm.SQLElementType.action: {
       const action = element.value;
       if (action instanceof mm.Action) {
-        const io = handleSubquery(action, action.__getGroupTable() ?? defaultTable, dialect);
+        const io = handleSubquery(action, action.__getGroupTable() ?? defaultTable);
         subqueryCallback?.(action, io);
         if (!io.sql) {
           throw new Error(`Unexpected empty SQL code from IO, action "${action}"`);
@@ -192,7 +180,6 @@ export interface SQLIOBuilderOption {
 
 export function sqlIO(
   sql: mm.SQL,
-  dialect: Dialect,
   // Default table if `FROM` is not present.
   defaultTable: mm.Table | null,
   context: string,
@@ -209,7 +196,7 @@ export function sqlIO(
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
       const sqlVar = element.toParam();
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      const varDef = VarDefBuilder.fromSQLVar(sqlVar, dialect);
+      const varDef = VarDefBuilder.fromSQLVar(sqlVar);
       vars.add(varDef);
     }
   }
@@ -218,12 +205,10 @@ export function sqlIO(
   opt = opt || {};
   return new SQLIO(
     sql,
-    dialect,
     vars,
     getSQLCode(
       sql,
       defaultTable,
-      dialect,
       opt.rewriteElement || null,
       opt.subqueryCallback || null,
       context,

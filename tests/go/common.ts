@@ -7,7 +7,6 @@ import * as mr from '../../dist/main.js';
 import { commonIOOptions } from '../io/common.js';
 import { eq } from '../assert-aliases.js';
 
-const dialect = mr.mysql;
 const destDataDir = 'tests/go/dest';
 const buildDir = 'build';
 const tableSQLFile = 'table_sql';
@@ -102,7 +101,7 @@ export async function testBuildToDirAsync(
   const tsOutDir = np.join(outDir, tsOutDirName);
   buildOpts.tsOutDir = tsOutDir;
 
-  const builder = new mr.Builder(dialect, outDir, buildOpts);
+  const builder = new mr.Builder(outDir, buildOpts);
   await builder.build(source);
 
   if (testOpts?.runOnly) {

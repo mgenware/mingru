@@ -4,7 +4,6 @@ import * as mfs from 'm-fs';
 import * as mr from '../../dist/main.js';
 import { eq } from '../assert-aliases.js';
 
-const dialect = mr.mysql;
 const DestDataDir = 'tests/csql/dest';
 
 export async function testBuildAsync(table: mm.Table, path: string) {
@@ -15,7 +14,7 @@ export async function testBuildAsync(table: mm.Table, path: string) {
     content = await mfs.readFileAsync(path, 'utf8');
   }
   mr.logger.enabled = false;
-  const builder = new mr.CSQLBuilder(table, dialect);
+  const builder = new mr.CSQLBuilder(table);
   const actual = builder.build('');
   if (path) {
     eq(actual, content);

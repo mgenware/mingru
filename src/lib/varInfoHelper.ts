@@ -8,17 +8,17 @@ import {
   typeInfoWithoutPointer,
 } from './varInfo.js';
 import * as stringUtils from './stringUtils.js';
-import { Dialect } from '../dialect.js';
+import ctx from '../ctx.js';
 
 export class TypeInfoBuilder {
-  static fromSQLVariable(variable: mm.SQLVariable, dialect: Dialect): TypeInfo {
+  static fromSQLVariable(variable: mm.SQLVariable): TypeInfo {
     const { type } = variable;
 
     let typeInfo: TypeInfo;
     if (type instanceof mm.Column) {
-      typeInfo = dialect.colTypeToGoType(type.__type());
+      typeInfo = ctx.dialect.colTypeToGoType(type.__type());
     } else if (type instanceof mm.ColumnType) {
-      typeInfo = dialect.colTypeToGoType(type);
+      typeInfo = ctx.dialect.colTypeToGoType(type);
     } else {
       let typePath = type.module || '';
       if (type.importPath) {
@@ -42,8 +42,8 @@ export class VarDefBuilder {
     return stringUtils.toCamelCase(this.getInputNameFromColumn(v, v.name, v.column));
   }
 
-  static fromSQLVar(v: mm.SQLVariable, dialect: Dialect): VarDef {
-    const typeInfo = TypeInfoBuilder.fromSQLVariable(v, dialect);
+  static fromSQLVar(v: mm.SQLVariable): VarDef {
+    const typeInfo = TypeInfoBuilder.fromSQLVariable(v);
     return { name: this.getSQLVarInputName(v), type: typeInfo };
   }
 

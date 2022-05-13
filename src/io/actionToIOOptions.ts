@@ -1,9 +1,6 @@
 import * as mm from 'mingru-models';
-import { Dialect } from '../dialect.js';
 
 export interface ActionToIOOptions {
-  dialect: Dialect;
-
   // If true, SELECT processors skip result type generation.
   // Used in UNIONs and subqueries.
   selectionLiteMode?: boolean;

@@ -1,5 +1,5 @@
 import * as mm from 'mingru-models';
-import { Dialect, StringSegment } from '../dialect.js';
+import { StringSegment } from '../dialect.js';
 import { settersToParamList, SetterIO } from './setterIO.js';
 import { SQLIO, sqlIO } from './sqlIO.js';
 import { ActionIO } from './actionIO.js';
@@ -11,10 +11,10 @@ import { forEachWithSlots, throwOnEmptyArray } from '../lib/arrayUtils.js';
 import BaseIOProcessor from './baseIOProcessor.js';
 import { ActionToIOOptions } from './actionToIOOptions.js';
 import { handleNonSelectSQLFrom } from '../lib/sqlHelper.js';
+import ctx from '../ctx.js';
 
 export class UpdateIO extends ActionIO {
   constructor(
-    dialect: Dialect,
     public updateAction: mm.UpdateAction,
     sql: StringSegment[],
     public setters: SetterIO[],
@@ -24,7 +24,7 @@ export class UpdateIO extends ActionIO {
     returnValues: ParamList,
     public setterArgs: ParamList,
   ) {
-    super(dialect, updateAction, sql, funcArgs, execArgs, returnValues, false);
+    super(updateAction, sql, funcArgs, execArgs, returnValues, false);
     throwOnEmptyArray(setters, 'setters');
   }
 }
@@ -32,8 +32,7 @@ export class UpdateIO extends ActionIO {
 class UpdateIOProcessor extends BaseIOProcessor<mm.UpdateAction> {
   convert(): UpdateIO {
     const sql: StringSegment[] = ['UPDATE '];
-    const { action, opt } = this;
-    const { dialect } = opt;
+    const { action } = this;
     const actionData = action.__getData();
     const sqlTable = this.mustGetAvailableSQLTable();
 
@@ -54,7 +53,6 @@ class UpdateIOProcessor extends BaseIOProcessor<mm.UpdateAction> {
     }
     const setterIOs = SetterIO.fromAction(
       action,
-      dialect,
       true,
       sqlTable,
       `[Building setters of ${action}]`,
@@ -63,7 +61,7 @@ class UpdateIOProcessor extends BaseIOProcessor<mm.UpdateAction> {
     forEachWithSlots(
       setterIOs,
       (setter) => {
-        sql.push(`${dialect.encodeColumnName(setter.col)} = `);
+        sql.push(`${ctx.dialect.encodeColumnName(setter.col)} = `);
         sql.push(...setter.sql.code);
       },
       () => sql.push(', '),
@@ -71,7 +69,7 @@ class UpdateIOProcessor extends BaseIOProcessor<mm.UpdateAction> {
 
     // WHERE
     const whereIO = actionData.whereSQLValue
-      ? sqlIO(actionData.whereSQLValue, dialect, sqlTable, `[Building WHERE of ${action}]`)
+      ? sqlIO(actionData.whereSQLValue, sqlTable, `[Building WHERE of ${action}]`)
       : null;
     if (whereIO) {
       sql.push(' WHERE ');
@@ -102,12 +100,11 @@ class UpdateIOProcessor extends BaseIOProcessor<mm.UpdateAction> {
     if (!actionData.ensureOneRowAffected) {
       returnValues.add({
         name: mm.ReturnValues.rowsAffected,
-        type: dialect.colTypeToGoType(mm.int().__type()),
+        type: ctx.dialect.colTypeToGoType(mm.int().__type()),
       });
     }
 
     return new UpdateIO(
-      dialect,
       action,
       sql,
       setterIOs,

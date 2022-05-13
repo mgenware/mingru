@@ -1,5 +1,4 @@
 import * as mm from 'mingru-models';
-import { Dialect } from '../dialect.js';
 import { ActionIO } from './actionIO.js';
 import { ParamList, ValueList } from '../lib/varList.js';
 import { ValueType } from '../lib/varInfo.js';
@@ -10,7 +9,6 @@ import BaseIOProcessor from './baseIOProcessor.js';
 
 export class WrapIO extends ActionIO {
   constructor(
-    dialect: Dialect,
     public wrapAction: mm.WrapAction,
     funcArgs: ParamList,
     execArgs: ValueList,
@@ -19,7 +17,7 @@ export class WrapIO extends ActionIO {
     public innerIO: ActionIO,
     firstParamDB: boolean,
   ) {
-    super(dialect, wrapAction, null, funcArgs, execArgs, returnValues, firstParamDB);
+    super(wrapAction, null, funcArgs, execArgs, returnValues, firstParamDB);
   }
 
   get isInnerActionInline(): boolean {
@@ -30,7 +28,6 @@ export class WrapIO extends ActionIO {
 class WrapIOProcessor extends BaseIOProcessor<mm.WrapAction> {
   convert(): ActionIO {
     const { action, opt } = this;
-    const { dialect } = opt;
     const actionData = action.__getData();
     const { innerAction } = actionData;
     if (!innerAction) {
@@ -148,7 +145,6 @@ class WrapIOProcessor extends BaseIOProcessor<mm.WrapAction> {
     );
 
     const retIO = new WrapIO(
-      dialect,
       action,
       this.hoiseTableParams(funcArgs),
       execArgs,

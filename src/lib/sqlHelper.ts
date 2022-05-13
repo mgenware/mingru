@@ -5,6 +5,7 @@ import { SQLIO } from '../io/sqlIO.js';
 import { ValueList, ParamList } from './varList.js';
 import { StringSegment } from '../dialect.js';
 import BaseIOProcessor from '../io/baseIOProcessor.js';
+import ctx from '../ctx.js';
 
 export function sniffSQLType(sql: mm.SQL): mm.ColumnType | null {
   for (const element of sql.elements) {
@@ -143,7 +144,7 @@ export function handleNonSelectSQLFrom(
   processor: BaseIOProcessor<mm.Action>,
   table: mm.Table,
 ): StringSegment[] {
-  const e = processor.opt.dialect.encodeName;
+  const e = ctx.dialect.encodeName;
   return processor.configurableTableName
     ? // Cast `mingru.Table` to `string`.
       [{ code: configurableTableParamToStringCode(processor.configurableTableName) }]

@@ -5,10 +5,10 @@ import * as mr from '../../dist/main.js';
 import { eq } from '../assert-aliases.js';
 
 const TimePkg = 'time';
-const dialect = mr.mysql;
+const dialect = new mr.MySQL();
 
 function sqlEq(sql: mm.SQL, value: string) {
-  eq(mr.sqlIO(sql, dialect, null, 'sqlEq').getCodeString(), `"${value}"`);
+  eq(mr.sqlIO(sql, null, 'sqlEq').getCodeString(), `"${value}"`);
 }
 
 function testDTToGoType(col: mm.Column, type: string, pkg?: string) {

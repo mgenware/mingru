@@ -1,7 +1,8 @@
 /* eslint-disable class-methods-use-this */
 import * as mm from 'mingru-models';
+import ctx from '../ctx.js';
 import * as defs from '../def/defs.js';
-import { Dialect, SQLTypeMode } from '../dialect.js';
+import { SQLTypeMode } from '../dialect.js';
 import { sqlIO } from '../io/sqlIO.js';
 import { extractStringContentFromSegments } from './goCodeUtil.js';
 
@@ -9,12 +10,12 @@ export default class CSQLBuilder {
   tableData: mm.TableData;
   sql = '';
 
-  constructor(public table: mm.Table, public dialect: Dialect) {
+  constructor(public table: mm.Table) {
     this.tableData = table.__getData();
   }
 
   build(header: string | undefined): string {
-    const { table, dialect, tableData } = this;
+    const { table, tableData } = this;
     const columns = Object.values(tableData.columns);
     const body = [];
 
@@ -28,7 +29,7 @@ export default class CSQLBuilder {
       }
       const colType = col.__type();
       const colData = col.__getData();
-      const colDBNameEncoded = this.dialect.encodeColumnName(col);
+      const colDBNameEncoded = ctx.dialect.encodeColumnName(col);
       const fk = colData.foreignColumn;
       if (colType.pk) {
         pks.push(colDBNameEncoded);
@@ -40,13 +41,10 @@ export default class CSQLBuilder {
       if (colData.index) {
         indicesLines.push(`${colData.isUniqueIndex ? 'UNIQUE ' : ''}INDEX (${colDBNameEncoded})`);
       }
-      const io = sqlIO(
-        dialect.colToSQLType(col),
-        dialect,
-        null,
-        `[Building SQL type of column ${col}]`,
+      const io = sqlIO(ctx.dialect.colToSQLType(col), null, `[Building SQL type of column ${col}]`);
+      body.push(
+        `${ctx.dialect.encodeColumnName(col)} ${extractStringContentFromSegments(io.code)}`,
       );
-      body.push(`${dialect.encodeColumnName(col)} ${extractStringContentFromSegments(io.code)}`);
 
       const colAlias = colData.attrs?.get(mm.ColumnAttribute.alias);
       if (typeof colAlias === 'string') {
@@ -56,13 +54,12 @@ export default class CSQLBuilder {
         colAliases.add(colAlias);
         const code = extractStringContentFromSegments(
           sqlIO(
-            dialect.colToSQLType(col, SQLTypeMode.alias),
-            dialect,
+            ctx.dialect.colToSQLType(col, SQLTypeMode.alias),
             null,
             `[Building SQL type of column ${col}] with alias ${colAlias}`,
           ).code,
         );
-        body.push(`${dialect.encodeName(colAlias)} ${code}`);
+        body.push(`${ctx.dialect.encodeName(colAlias)} ${code}`);
       }
     }
     if (pks.length) {
@@ -74,7 +71,7 @@ export default class CSQLBuilder {
     if (indicesLines.length) {
       body.push(...indicesLines);
     }
-    let sql = `CREATE TABLE ${dialect.encodeTableName(table)} (\n`;
+    let sql = `CREATE TABLE ${ctx.dialect.encodeTableName(table)} (\n`;
     sql += this.increaseIndent(body, ',\n');
     sql += '\n)\n';
     sql += 'CHARACTER SET=utf8mb4\nCOLLATE=utf8mb4_unicode_ci\n';
@@ -92,11 +89,10 @@ export default class CSQLBuilder {
   }
 
   private fkExpression(col: mm.Column, fCol: mm.Column): string {
-    const { dialect } = this;
-    return `CONSTRAINT FOREIGN KEY(${dialect.encodeColumnName(
+    return `CONSTRAINT FOREIGN KEY(${ctx.dialect.encodeColumnName(
       col,
-    )}) REFERENCES ${dialect.encodeTableName(
+    )}) REFERENCES ${ctx.dialect.encodeTableName(
       fCol.__getData().table as mm.Table,
-    )} (${dialect.encodeColumnName(fCol)}) ON DELETE CASCADE`;
+    )} (${ctx.dialect.encodeColumnName(fCol)}) ON DELETE CASCADE`;
   }
 }

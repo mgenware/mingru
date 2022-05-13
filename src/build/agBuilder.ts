@@ -1,6 +1,5 @@
 /* eslint-disable class-methods-use-this */
 import * as mm from 'mingru-models';
-import { Dialect } from '../dialect.js';
 import { SelectIO } from '../io/selectIO.js';
 import { UpdateIO } from '../io/updateIO.js';
 import { InsertIO } from '../io/insertIO.js';
@@ -25,6 +24,7 @@ import * as stringUtils from '../lib/stringUtils.js';
 import { BuildOptions } from './buildOptions.js';
 import AGBuilderContext from './agBuilderContext.js';
 import { AGIO } from '../io/agIO.js';
+import ctx from '../ctx.js';
 
 function joinParams(arr: string[]): string {
   return arr.join(', ');
@@ -71,10 +71,8 @@ export default class AGBuilder {
 
   private options: BuildOptions;
   private imports = new go.ImportList();
-  private dialect: Dialect;
 
   constructor(public agIO: AGIO, public opts: BuildOptions, public context: AGBuilderContext) {
-    this.dialect = agIO.opt.dialect;
     this.options = opts;
     if (opts.tsOutDir) {
       this.tsTypeCollector = new TSTypeCollector();
@@ -374,7 +372,7 @@ export default class AGBuilder {
       // Check if model name has been explicitly set.
       const userModelName = col.column?.__getData().modelName;
       const fieldName = userModelName ?? stringUtils.toPascalCase(col.modelName);
-      const originalTypeInfo = this.dialect.colTypeToGoType(col.getResultType());
+      const originalTypeInfo = ctx.dialect.colTypeToGoType(col.getResultType());
       const typeInfo = col.nullable ? typeInfoToPointer(originalTypeInfo) : originalTypeInfo;
       const varInfo: VarDef = { name: fieldName, type: typeInfo };
 
