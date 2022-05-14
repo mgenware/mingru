@@ -125,10 +125,10 @@ it('ORDER BY params', async () => {
 it('ORDER BY params with following columns', async () => {
   const cc = mm.sel(mm.sql`RAND()`, 'n', new mm.ColumnType(mm.dt.int));
   const followingColumns = new Map<mm.SelectedColumnTypesOrName, mm.OrderByColumn[]>();
-  followingColumns.set(
-    post.cmtCount,
-    [post.id, post.date].map((c) => new mm.OrderByColumn(c)),
-  );
+  followingColumns.set(post.cmtCount, [
+    new mm.OrderByColumn(post.id),
+    new mm.OrderByColumn(post.date, true),
+  ]);
   class PostAG extends mm.ActionGroup {
     selectT = mm
       .selectRows(post.id, cc, post.title)

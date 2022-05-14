@@ -270,14 +270,16 @@ export class ImportList {
 export function buildSwitch(
   builder: LinesBuilder,
   condition: string,
-  cases: Record<string, string>,
+  cases: Record<string, string[]>,
   defaultCode: string[],
 ) {
   builder.push(`switch ${condition} {`);
-  for (const [key, val] of Object.entries(cases)) {
+  for (const [key, lines] of Object.entries(cases)) {
     builder.push(`case ${key}:`);
     builder.increaseIndent();
-    builder.push(val);
+    for (const val of lines) {
+      builder.push(val);
+    }
     builder.decreaseIndent();
   }
   builder.push('default:');

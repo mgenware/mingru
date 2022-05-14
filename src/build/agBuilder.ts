@@ -342,12 +342,23 @@ export default class AGBuilder {
         const resultVarName = paramIO.sqlVarName;
 
         builder.push(`var ${resultVarName} string`);
+        // Add following columns SQL if needed.
+        const followingColsSQLVar = `${resultVarName}FC`;
+        const hasFC = paramIO.choices.some((ch) => ch.followingColumnValues.length);
+        if (hasFC) {
+          builder.push(`var ${followingColsSQLVar} string`);
+        }
         // Switch-case code.
-        const cases: Record<string, string> = {};
+        const cases: Record<string, string[]> = {};
         paramIO.choices.forEach((ch) => {
-          cases[
-            `${paramIO.enumTypeName}${ch.pascalName}`
-          ] = `${resultVarName} = ${go.makeStringFromSegments(ch.value)}`;
+          const caseLines: string[] = [];
+          cases[`${paramIO.enumTypeName}${ch.pascalName}`] = caseLines;
+          caseLines.push(`${resultVarName} = ${go.makeStringFromSegments(ch.value)}`);
+          if (ch.followingColumnValues.length) {
+            for (const code of ch.followingColumnValues) {
+              caseLines.push(`${followingColsSQLVar} += ", " + ${go.makeStringFromSegments(code)}`);
+            }
+          }
         });
 
         // Add `fmt` import as we are using `fmt.Errorf`.
@@ -361,6 +372,9 @@ export default class AGBuilder {
         builder.push(`if ${paramVarName}Desc {`);
         builder.increaseIndent();
         builder.push(`${resultVarName} += " DESC"`);
+        if (hasFC) {
+          builder.push(`${resultVarName} += ${followingColsSQLVar}`);
+        }
         builder.decreaseIndent();
         builder.push('}');
         builder.push();
