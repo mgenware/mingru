@@ -34,7 +34,7 @@ type PostAGSelectTResult struct {
 	Title string
 }
 
-func (mrTable *PostAGType) SelectT(mrQueryable mingru.Queryable, id uint64, orderBy1 int, orderBy1Desc bool, orderBy2 int, orderBy2Desc bool) ([]PostAGSelectTResult, error) {
+func (mrTable *PostAGType) SelectT(mrQueryable mingru.Queryable, id uint64, orderBy1 PostAGSelectTOrderBy1, orderBy1Desc bool, orderBy2 PostAGSelectTOrderBy2, orderBy2Desc bool) ([]PostAGSelectTResult, error) {
 	var orderBy1SQL string
 	switch orderBy1 {
 	case PostAGSelectTOrderBy1N:

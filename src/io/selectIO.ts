@@ -467,11 +467,11 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
 
     // ******** END OF changing the SQL code ********
 
-    // Merge inputs.
+    // Merge params in sub queries.
     for (const io of this.subqueryIOs) {
       sqlHelper.mergeIOVerListsWithActionIO(funcArgs, execArgs, io);
     }
-    // Handle inputs in join extra SQLs.
+    // Handle params in JOINs.
     for (const joinIO of this.joins) {
       if (joinIO.extraSQL) {
         sqlHelper.mergeIOVerListsWithSQLIO(funcArgs, execArgs, joinIO.extraSQL);
@@ -506,7 +506,7 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
       }
     }
 
-    // ORDER BY inputs.
+    // ORDER BY params.
     for (const param of this.orderByFuncParams) {
       funcArgs.add(param);
     }
@@ -620,7 +620,10 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
 
       // Add ORDER BY params.
       // `orderBy1` for enum param, and `orderBy1Desc` for ordering.
-      this.orderByFuncParams.push({ name: orderByParamName, type: defs.intTypeInfo });
+      this.orderByFuncParams.push({
+        name: orderByParamName,
+        type: new AtomicTypeInfo(enumTypeName, 0, null),
+      });
       const orderByDescVarName = `${orderByParamName}Desc`;
       this.orderByFuncParams.push({ name: orderByDescVarName, type: defs.boolTypeInfo });
 

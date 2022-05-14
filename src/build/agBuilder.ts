@@ -372,11 +372,13 @@ export default class AGBuilder {
         builder.push(`if ${paramVarName}Desc {`);
         builder.increaseIndent();
         builder.push(`${resultVarName} += " DESC"`);
+        builder.decreaseIndent();
+        builder.push('}');
+
+        // Append following column code if needed.
         if (hasFC) {
           builder.push(`${resultVarName} += ${followingColsSQLVar}`);
         }
-        builder.decreaseIndent();
-        builder.push('}');
         builder.push();
       }
     }
