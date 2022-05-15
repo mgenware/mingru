@@ -124,11 +124,12 @@ it('ORDER BY params', async () => {
 
 it('ORDER BY params with following columns', async () => {
   const cc = mm.sel(mm.sql`RAND()`, 'n', new mm.ColumnType(mm.dt.int));
-  const followingColumns = new Map<mm.SelectedColumnTypesOrName, mm.OrderByColumn[]>();
-  followingColumns.set(post.cmtCount, [
-    new mm.OrderByColumn(post.id),
-    new mm.OrderByColumn(post.date, true),
-  ]);
+  const followingColumns = {
+    [post.cmtCount.__getPath()]: [
+      new mm.OrderByColumn(post.id),
+      new mm.OrderByColumn(post.date, true),
+    ],
+  };
   class PostAG extends mm.ActionGroup {
     selectT = mm
       .selectRows(post.id, cc, post.title)
@@ -144,8 +145,9 @@ it('ORDER BY params with following columns', async () => {
 it('ORDER BY params with following columns with joins', async () => {
   const jc = post.user_id.join(user);
   const sigCol = jc.sig;
-  const followingColumns = new Map<mm.SelectedColumnTypesOrName, mm.OrderByColumn[]>();
-  followingColumns.set(sigCol, [new mm.OrderByColumn(post.id), new mm.OrderByColumn(jc.age, true)]);
+  const followingColumns = {
+    [sigCol.__getPath()]: [new mm.OrderByColumn(post.id), new mm.OrderByColumn(jc.age, true)],
+  };
   class PostAG extends mm.ActionGroup {
     selectT = mm
       .selectRows(post.title, sigCol)

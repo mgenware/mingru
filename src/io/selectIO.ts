@@ -604,7 +604,7 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
         const choiceName = stringUtils.toPascalCase(displayName);
         let followingColumnValues: StringSegment[][] = [];
 
-        const followingColumns = col.followingColumns?.get(choice);
+        const followingColumns = col.followingColumns?.[this.columnChoiceKey(choice)];
         if (followingColumns) {
           followingColumnValues = followingColumns.map(
             (fc) => this.getOrderByNonParamColumnSQLWithOrdering(fc)[1],
@@ -632,6 +632,16 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
     }
     const [, code] = this.getOrderByNonParamColumnSQLWithOrdering(col);
     return code;
+  }
+
+  private columnChoiceKey(col: mm.SelectedColumnTypesOrName) {
+    if (typeof col === 'string') {
+      return col;
+    }
+    if (col instanceof mm.SelectedColumn) {
+      throw new Error('`SelectedColumn` is not supported in ORDER BY params, use string instead.');
+    }
+    return col.__getPath();
   }
 
   private getOrderByNonParamColumnSQLWithOrdering(
@@ -685,7 +695,7 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
       const colTable = col.__mustGetTable();
       if (colTable instanceof mm.JoinTable) {
         const jt = col.__getData().table as mm.JoinTable;
-        const joinPath = jt.keyPath;
+        const joinPath = jt.path;
         const join = this.jcMap.get(joinPath);
         if (!join) {
           throw new Error(
@@ -866,7 +876,7 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
     }
 
     const sqlTable = this.mustGetAvailableSQLTable();
-    const result = this.jcMap.get(table.keyPath);
+    const result = this.jcMap.get(table.path);
     if (result) {
       // Update `JoinIO.extraSQL` if needed.
       // See `JoinIO.extraSQL` for details.
@@ -898,7 +908,7 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
 
     const joinIO = new JoinIO(
       table.joinType,
-      table.keyPath,
+      table.path,
       this.nextJoinedTableName(),
       localTableName,
       srcColumn,
@@ -906,7 +916,7 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
       destColumn,
       table.extraColumns,
     );
-    this.jcMap.set(table.keyPath, joinIO);
+    this.jcMap.set(table.path, joinIO);
     this.joins.push(joinIO);
 
     // Handle extra data that might contain joins.
@@ -946,7 +956,7 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
     let colIDString: string;
     let nullable: boolean;
     if (colTable instanceof mm.JoinTable) {
-      const joinIO = this.jcMap.get(colTable.keyPath);
+      const joinIO = this.jcMap.get(colTable.path);
       if (!joinIO) {
         throw new Error(`Unexpected null \`JoinIO\` for table "${colTable}"`);
       }
