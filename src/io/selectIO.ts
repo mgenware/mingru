@@ -634,6 +634,7 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
     return code;
   }
 
+  // eslint-disable-next-line class-methods-use-this
   private columnChoiceKey(col: mm.SelectedColumnTypesOrName) {
     if (typeof col === 'string') {
       return col;
