@@ -32,9 +32,12 @@ type PostAGSelectTResult struct {
 
 func (mrTable *PostAGType) SelectT(mrQueryable mingru.Queryable, orderBy1 PostAGSelectTOrderBy1, orderBy1Desc bool, orderBy2 PostAGSelectTOrderBy2, orderBy2Desc bool) ([]PostAGSelectTResult, error) {
 	var orderBy1SQL string
+	var orderBy1SQLFC string
 	switch orderBy1 {
 	case PostAGSelectTOrderBy1Sig:
 		orderBy1SQL = "`join_1`.`sig`"
+		orderBy1SQLFC += ", " + "`db_post`.`id`"
+		orderBy1SQLFC += ", " + "`join_1`.`age` DESC"
 	default:
 		err := fmt.Errorf("Unsupported value %v", orderBy1)
 		return nil, err
@@ -42,6 +45,7 @@ func (mrTable *PostAGType) SelectT(mrQueryable mingru.Queryable, orderBy1 PostAG
 	if orderBy1Desc {
 		orderBy1SQL += " DESC"
 	}
+	orderBy1SQL += orderBy1SQLFC
 
 	var orderBy2SQL string
 	switch orderBy2 {
