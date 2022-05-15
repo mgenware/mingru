@@ -119,7 +119,7 @@ it('ORDER BY params', async () => {
       .orderByParams(['n', post.title]);
   }
   const ta = mm.actionGroup(post, PostAG);
-  await testBuildAsync(ta, 'select/orderByInputs');
+  await testBuildAsync(ta, 'select/orderByParams');
 });
 
 it('ORDER BY params with following columns', async () => {
@@ -138,7 +138,23 @@ it('ORDER BY params with following columns', async () => {
       .orderByParams(['n', post.title]);
   }
   const ta = mm.actionGroup(post, PostAG);
-  await testBuildAsync(ta, 'select/orderByInputsFC');
+  await testBuildAsync(ta, 'select/orderByParamsFC');
+});
+
+it('ORDER BY params with following columns with joins', async () => {
+  const jc = post.user_id.join(user);
+  const sigCol = jc.sig;
+  const followingColumns = new Map<mm.SelectedColumnTypesOrName, mm.OrderByColumn[]>();
+  followingColumns.set(sigCol, [new mm.OrderByColumn(post.id), new mm.OrderByColumn(jc.age, true)]);
+  class PostAG extends mm.ActionGroup {
+    selectT = mm
+      .selectRows(post.title, sigCol)
+      .orderByAsc(post.title)
+      .orderByParams([sigCol], followingColumns)
+      .orderByParams([post.title]);
+  }
+  const ta = mm.actionGroup(post, PostAG);
+  await testBuildAsync(ta, 'select/orderByParamsFCJoins');
 });
 
 it('selectField, WHERE', async () => {
