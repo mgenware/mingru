@@ -178,7 +178,7 @@ export default class AGBuilder {
       for (const arrayParam of arrayParams) {
         const returnValueStrings = returnValues.map((v) => v.type.defaultValueString);
         returnValueStrings.push(
-          `fmt.Errorf("The array argument \`${arrayParam.name}\` cannot be empty")`,
+          `fmt.Errorf("the array argument \`${arrayParam.name}\` cannot be empty")`,
         );
         inputArrayChecks.push(`if len(${arrayParam.name}) == 0 {`);
         inputArrayChecks.increaseIndent();
@@ -364,7 +364,7 @@ export default class AGBuilder {
         // Add `fmt` import as we are using `fmt.Errorf`.
         this.imports.add(defs.fmtImport);
         go.buildSwitch(builder, paramVarName, cases, [
-          `err := fmt.Errorf("Unsupported value %v", ${paramVarName})`,
+          `err := fmt.Errorf("unsupported value %v", ${paramVarName})`,
           errReturnCode,
         ]);
 
@@ -471,11 +471,11 @@ export default class AGBuilder {
         this.imports.add(defs.fmtImport);
         builder.pushLines(
           `if ${defs.pageVarName} <= 0 {`,
-          `\terr := fmt.Errorf("Invalid page %v", ${defs.pageVarName})`,
+          `\terr := fmt.Errorf("invalid page %v", ${defs.pageVarName})`,
           `\t${errReturnCode}`,
           '}',
           `if ${defs.pageSizeVarName} <= 0 {`,
-          `\terr := fmt.Errorf("Invalid page size %v", ${defs.pageSizeVarName})`,
+          `\terr := fmt.Errorf("invalid page size %v", ${defs.pageSizeVarName})`,
           `\t${errReturnCode}`,
           '}',
           `limit := ${defs.pageSizeVarName} + 1`,

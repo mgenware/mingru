@@ -20,10 +20,10 @@ type PostAGTResult struct {
 
 func (mrTable *PostAGType) T(mrQueryable mingru.Queryable, ids []uint64, idInput uint64, id []uint64) ([]PostAGTResult, error) {
 	if len(ids) == 0 {
-		return nil, fmt.Errorf("The array argument `ids` cannot be empty")
+		return nil, fmt.Errorf("the array argument `ids` cannot be empty")
 	}
 	if len(id) == 0 {
-		return nil, fmt.Errorf("The array argument `id` cannot be empty")
+		return nil, fmt.Errorf("the array argument `id` cannot be empty")
 	}
 	var queryParams []interface{}
 	for _, item := range ids {

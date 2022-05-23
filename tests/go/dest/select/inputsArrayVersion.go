@@ -20,7 +20,7 @@ type PostAGTResult struct {
 
 func (mrTable *PostAGType) T(mrQueryable mingru.Queryable, nDatetime []*time.Time, p2 time.Time, p3 *time.Time, p4 uint64, p5 *uint64) (PostAGTResult, error) {
 	if len(nDatetime) == 0 {
-		return PostAGTResult{}, fmt.Errorf("The array argument `nDatetime` cannot be empty")
+		return PostAGTResult{}, fmt.Errorf("the array argument `nDatetime` cannot be empty")
 	}
 	var result PostAGTResult
 	var queryParams []interface{}

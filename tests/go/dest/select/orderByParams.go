@@ -44,7 +44,7 @@ func (mrTable *PostAGType) SelectT(mrQueryable mingru.Queryable, id uint64, orde
 	case PostAGSelectTOrderBy1CmtCount:
 		orderBy1SQL = "`cmt_c`"
 	default:
-		err := fmt.Errorf("Unsupported value %v", orderBy1)
+		err := fmt.Errorf("unsupported value %v", orderBy1)
 		return nil, err
 	}
 	if orderBy1Desc {
@@ -58,7 +58,7 @@ func (mrTable *PostAGType) SelectT(mrQueryable mingru.Queryable, id uint64, orde
 	case PostAGSelectTOrderBy2Title:
 		orderBy2SQL = "`title`"
 	default:
-		err := fmt.Errorf("Unsupported value %v", orderBy2)
+		err := fmt.Errorf("unsupported value %v", orderBy2)
 		return nil, err
 	}
 	if orderBy2Desc {
