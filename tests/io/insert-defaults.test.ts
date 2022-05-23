@@ -37,6 +37,6 @@ it('insertWithDefaults', () => {
 
   eq(
     io.getSQLCode(),
-    "\"INSERT INTO `cols` (`fk`, `text`, `int`, `nullable`, `def_int`, `def_var_char`, `def_time`) VALUES (?, '', 0, NULL, -3, '一二', CURTIME())\"",
+    "\"INSERT INTO `cols` (`text`, `int`, `nullable`, `def_int`, `def_var_char`, `def_time`, `fk`) VALUES ('', 0, NULL, -3, '一二', CURTIME(), ?)\"",
   );
 });

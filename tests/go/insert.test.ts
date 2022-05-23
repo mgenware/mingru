@@ -114,3 +114,11 @@ it('Nullable FK and `setInputs`', async () => {
   const ta = mm.actionGroup(myPost, PostAG);
   await testBuildAsync(ta, 'insert/nullableFKSetInputs');
 });
+
+it('Reference values come last', async () => {
+  class ColsAG extends mm.ActionGroup {
+    insertT = mm.insert().set(cols.int, cols.fk).setParams(cols.fk).setDefaults();
+  }
+  const ta = mm.actionGroup(cols, ColsAG);
+  await testBuildAsync(ta, 'insert/refValuesLast');
+});

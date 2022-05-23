@@ -19,22 +19,7 @@ export class SetterIO {
     }
     const actionData = action.__getData();
     const actionSetters = actionData.setters ?? new Map<mm.Column, unknown>();
-
-    // User setters come first.
-    // eslint-disable-next-line arrow-body-style
-    const res = Array.from(actionSetters, ([key, value]) => {
-      // Pass `null` for table argument. If `value` is not SQL, it's the default value of a column,
-      // thus no need the table argument as it's not an SQL object.
-      return new SetterIO(
-        key,
-        sqlIO(
-          value instanceof mm.SQL ? value : mm.sql`${ctx.dialect.objToSQL(value, null)}`,
-          sourceTable,
-          `${context} [Key: ${key}, value: ${value}]`,
-          opt,
-        ),
-      );
-    });
+    const res: SetterIO[] = [];
 
     for (const col of Object.values(table.__getData().columns)) {
       if (!col) {
@@ -79,6 +64,22 @@ export class SetterIO {
       }
     }
 
+    // User setters come last cuz some of them might depend on other columns.
+    // eslint-disable-next-line arrow-body-style
+    const userSetters = Array.from(actionSetters, ([key, value]) => {
+      // Pass `null` for table argument. If `value` is not SQL, it's the default value of a column,
+      // thus no need the table argument as it's not an SQL object.
+      return new SetterIO(
+        key,
+        sqlIO(
+          value instanceof mm.SQL ? value : mm.sql`${ctx.dialect.objToSQL(value, null)}`,
+          sourceTable,
+          `${context} [Key: ${key}, value: ${value}]`,
+          opt,
+        ),
+      );
+    });
+    res.push(...userSetters);
     return res;
   }
 

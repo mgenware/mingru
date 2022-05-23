@@ -10,7 +10,7 @@ var Ghost = &GhostAGType{}
 // ------------ Actions ------------
 
 func (mrTable *GhostAGType) InsertT(mrQueryable mingru.Queryable, fk uint64) error {
-	_, err := mrQueryable.Exec("INSERT INTO `cols` (`fk`, `text`, `int`, `nullable`, `def_int`, `def_var_char`, `def_time`) VALUES (?, '', 0, NULL, -3, '一二', CURTIME())", fk)
+	_, err := mrQueryable.Exec("INSERT INTO `cols` (`text`, `int`, `nullable`, `def_int`, `def_var_char`, `def_time`, `fk`) VALUES ('', 0, NULL, -3, '一二', CURTIME(), ?)", fk)
 	return err
 }
 
