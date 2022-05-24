@@ -13,20 +13,20 @@ it('Columns and escape strings', () => {
 });
 
 it('SQL calls', () => {
-  const sql = mm.sql`${post.datetime} = ${mm.localDatetimeNow()}`;
+  const sql = mm.sql`${post.datetime} = ${mm.datetimeNow()}`;
   const io = mr.sqlIO(sql, post, 't');
   eq(io.getCodeString(), '"`datetime` = NOW()"');
 });
 
 it('toSQL(sourceTable)', () => {
   itThrows(() => {
-    const sql = mm.sql`${post.datetime} = ${mm.localDatetimeNow()}`;
+    const sql = mm.sql`${post.datetime} = ${mm.datetimeNow()}`;
     const io = mr.sqlIO(sql, user, 't');
     io.getCodeString();
   }, 'Source table assertion failed, expected "User(user)", got "Post(post, db=db_post)". t');
 
   itThrows(() => {
-    const sql = mm.sql`${post.datetime} = ${mm.localDatetimeNow()} ${user.id}`;
+    const sql = mm.sql`${post.datetime} = ${mm.datetimeNow()} ${user.id}`;
     const io = mr.sqlIO(sql, post, 't');
     io.getCodeString();
   }, 'Source table assertion failed, expected "Post(post, db=db_post)", got "User(user)". t');

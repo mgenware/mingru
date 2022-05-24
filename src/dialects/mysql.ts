@@ -86,11 +86,11 @@ export class MySQL extends Dialect {
 
   override sqlCall(type: mm.SQLCallType): string {
     switch (type) {
-      case mm.SQLCallType.localDatetimeNow:
+      case mm.SQLCallType.datetimeNow:
         return 'NOW';
-      case mm.SQLCallType.localDateNow:
+      case mm.SQLCallType.dateNow:
         return 'CURDATE';
-      case mm.SQLCallType.localTimeNow:
+      case mm.SQLCallType.timeNow:
         return 'CURTIME';
       case mm.SQLCallType.utcDatetimeNow:
         return 'UTC_TIMESTAMP';

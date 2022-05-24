@@ -80,9 +80,9 @@ it('as', () => {
 it('SQL calls', () => {
   // eslint-disable-next-line @typescript-eslint/unbound-method
   const t = dialect.sqlCall;
-  eq(t(mm.SQLCallType.localDateNow), 'CURDATE');
-  eq(t(mm.SQLCallType.localTimeNow), 'CURTIME');
-  eq(t(mm.SQLCallType.localDatetimeNow), 'NOW');
+  eq(t(mm.SQLCallType.dateNow), 'CURDATE');
+  eq(t(mm.SQLCallType.timeNow), 'CURTIME');
+  eq(t(mm.SQLCallType.datetimeNow), 'NOW');
   eq(t(mm.SQLCallType.utcDateNow), 'UTC_DATE');
   eq(t(mm.SQLCallType.utcTimeNow), 'UTC_TIME');
   eq(t(mm.SQLCallType.utcDatetimeNow), 'UTC_TIMESTAMP');
@@ -153,6 +153,11 @@ it('colToSQLType', () => {
   sqlEq(dialect.colToSQLType(mm.time()), 'TIME NOT NULL');
   sqlEq(dialect.colToSQLType(mm.time({ defaultToNow: 'utc' })), 'TIME NOT NULL');
   sqlEq(dialect.colToSQLType(mm.time({ fsp: 3 })), 'TIME(3) NOT NULL');
+  sqlEq(
+    dialect.colToSQLType(mm.datetime({ defaultToNow: 'server', fsp: 3 })),
+    'DATETIME(3) NOT NULL',
+  );
+  sqlEq(dialect.colToSQLType(mm.time({ defaultToNow: 'server', fsp: 3 })), 'TIME(3) NOT NULL');
   // NULL
   sqlEq(dialect.colToSQLType(mm.int().nullable), 'INT NULL DEFAULT NULL');
   // Default value
