@@ -23,7 +23,7 @@ func (mrTable *PostAGType) T(mrQueryable mingru.Queryable, nDatetime []*time.Tim
 		return PostAGTResult{}, fmt.Errorf("the array argument `nDatetime` cannot be empty")
 	}
 	var result PostAGTResult
-	var queryParams []interface{}
+	var queryParams []any
 	for _, item := range nDatetime {
 		queryParams = append(queryParams, item)
 	}

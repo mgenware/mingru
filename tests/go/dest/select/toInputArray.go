@@ -25,7 +25,7 @@ func (mrTable *PostAGType) T(mrQueryable mingru.Queryable, ids []uint64, idInput
 	if len(id) == 0 {
 		return nil, fmt.Errorf("the array argument `id` cannot be empty")
 	}
-	var queryParams []interface{}
+	var queryParams []any
 	for _, item := range ids {
 		queryParams = append(queryParams, item)
 	}

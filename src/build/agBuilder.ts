@@ -799,7 +799,7 @@ export default class AGBuilder {
     variadicParams: boolean,
   ) {
     if (variadicParams) {
-      builder.push(`var ${defs.queryParamsVarName} []interface{}`);
+      builder.push(`var ${defs.queryParamsVarName} []any`);
       // When `variadicParams` is on, search for variable types from func args. Variables of
       // array type are expanded.
       const stringExecArgs = execArgs.values.filter((v) => typeof v === 'string') as string[];
