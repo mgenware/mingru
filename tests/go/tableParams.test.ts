@@ -69,9 +69,7 @@ it('Table params with WRAP action inside transactions', async () => {
 });
 
 it('Call a table action with a table param that has not been initialized', async () => {
-  class UserTP extends User {
-    id = mm.pk();
-  }
+  class UserTP extends User {}
   const userTP = mm.table(UserTP, { tableParam: true });
 
   class UserUtilAG extends mm.ActionGroup {
