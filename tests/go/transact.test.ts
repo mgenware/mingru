@@ -25,6 +25,29 @@ it('Declare return types', async () => {
   await testBuildAsync(employeeTA, 'tx/declareRetFromInsert/employee');
 });
 
+it('Ignore null members', async () => {
+  class Employee extends mm.Table {
+    id = mm.pk(mm.int()).autoIncrement.setDBName('emp_no');
+    firstName = mm.varChar(50);
+  }
+  const employee = mm.table(Employee, { dbName: 'employees' });
+  class EmployeeAG extends mm.ActionGroup {
+    insert = mm.insertOne().setParams();
+    insert2 = mm
+      .transact(
+        this.insert,
+        null,
+        this.insert.declareReturnValues({
+          [mm.ReturnValues.insertedID]: 'id2',
+        }),
+        null,
+      )
+      .setReturnValues('id2');
+  }
+  const employeeTA = mm.actionGroup(employee, EmployeeAG);
+  await testBuildAsync(employeeTA, 'tx/declareRetFromInsert/employee');
+});
+
 it('Pass values in child actions (no return value declaration)', async () => {
   class Employee extends mm.Table {
     id = mm.pk(mm.int()).autoIncrement.setDBName('emp_no');

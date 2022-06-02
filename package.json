@@ -1,6 +1,6 @@
 {
   "name": "mingru",
-  "version": "0.60.5",
+  "version": "0.60.6",
   "description": "SQL Generator for mingru-models",
   "type": "module",
   "exports": "./dist/main.js",
@@ -38,7 +38,7 @@
     "eslint-plugin-import": "^2.26.0",
     "it-throws": "^4.2.0",
     "mgenware-tsconfig-node-x": "^16.3.0",
-    "mingru-models": "^0.65.0",
+    "mingru-models": "^0.65.1",
     "mocha": "^10.0.0",
     "source-map-support": "^0.5.21",
     "typescript": "^4.7.2"
