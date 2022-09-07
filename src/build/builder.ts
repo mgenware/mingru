@@ -2,7 +2,7 @@ import * as mm from 'mingru-models';
 import * as mfs from 'm-fs';
 import * as np from 'path';
 import { promises as fs } from 'fs';
-import del from 'del';
+import { deleteAsync } from 'del';
 import { temporaryDirectory } from 'tempy';
 import toTypeString from 'to-type-string';
 import * as defs from '../def/defs.js';
@@ -66,7 +66,7 @@ export default class Builder {
 
     if (opt.cleanOutDir) {
       logger.info(`🛀  Cleaning directory "${outDir}"`);
-      await del(outDir, { force: true });
+      await deleteAsync(outDir, { force: true });
     }
     await fs.cp(workingDir, this.outDir, { recursive: true });
   }
