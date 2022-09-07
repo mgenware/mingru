@@ -15,6 +15,10 @@ it('Declare return types', async () => {
     insert2 = mm
       .transact(
         this.insert,
+        mm
+          .selectField(employee.firstName)
+          .by(employee.id)
+          .declareReturnValue(mm.ReturnValues.result, 'firstName'),
         this.insert.declareReturnValues({
           [mm.ReturnValues.insertedID]: 'id2',
         }),
@@ -37,6 +41,10 @@ it('Ignore null members', async () => {
       .transact(
         this.insert,
         null,
+        mm
+          .selectField(employee.firstName)
+          .by(employee.id)
+          .declareReturnValue(mm.ReturnValues.result, 'firstName'),
         this.insert.declareReturnValues({
           [mm.ReturnValues.insertedID]: 'id2',
         }),
@@ -92,6 +100,26 @@ it('Pass values in child actions and declare return values', async () => {
   }
   const employeeTA = mm.actionGroup(employee, EmployeeAG);
   await testBuildAsync(employeeTA, 'tx/passValuesAndDecRet/employee');
+});
+
+it('Pass values in child actions and declare return values (increment a col)', async () => {
+  class Post extends mm.Table {
+    id = mm.pk();
+    count = mm.uInt();
+  }
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  const post = mm.table(Post);
+  class PostAG extends mm.ActionGroup {
+    insert = mm.transact(
+      mm.selectField(post.count).by(post.id).declareReturnValue(mm.ReturnValues.result, 'val'),
+      mm
+        .insertOne()
+        .set(post.count, mm.sql`${post.count} + ${post.count.toParam('val')}`)
+        .wrap({ val: mm.captureVar('val') }),
+    );
+  }
+  const postAG = mm.actionGroup(post, PostAG);
+  await testBuildAsync(postAG, 'tx/passValuesAndDecRetInc/post');
 });
 
 it('Return multiple values', async () => {
