@@ -522,7 +522,7 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
         const originalTypeInfo = ctx.dialect.colTypeToGoType(col.getResultType());
         const typeInfo = col.nullable ? typeInfoToPointer(originalTypeInfo) : originalTypeInfo;
         returnValues.add({
-          name: mm.ReturnValues.result,
+          name: mm.ReturnValueSrc.result,
           type: selMode === mm.SelectActionMode.field ? typeInfo : typeInfoToArray(typeInfo),
         });
 
@@ -532,7 +532,7 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
           returnValues.add(defs.hasNextVar);
         }
       } else if (selMode === mm.SelectActionMode.exists) {
-        returnValues.add({ name: mm.ReturnValues.result, type: defs.boolTypeInfo });
+        returnValues.add({ name: mm.ReturnValueSrc.result, type: defs.boolTypeInfo });
       } else {
         // Handle return types that can be customized by attributes.
         // `selMode` == `.rowList` or `.row` or `.union`.
@@ -552,7 +552,7 @@ export class SelectIOProcessor extends BaseIOProcessor<mm.SelectAction> {
         const resultTypeInfo = new AtomicTypeInfo(resultType, `${resultType}{}`, null);
 
         returnValues.add({
-          name: mm.ReturnValues.result,
+          name: mm.ReturnValueSrc.result,
           type: new CompoundTypeInfo(resultTypeInfo, false, isResultTypeArray),
         });
         if (pgMode === mm.SelectActionPaginationMode.pagination) {

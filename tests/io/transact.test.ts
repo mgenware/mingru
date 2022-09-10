@@ -101,7 +101,7 @@ it('TX member IOs', () => {
       .transact(
         this.insert,
         this.insert.declareReturnValues({
-          [mm.ReturnValues.insertedID]: 'id2',
+          [mm.ReturnValueSrc.insertedID]: 'id2',
         }),
       )
       .setReturnValues('id2');

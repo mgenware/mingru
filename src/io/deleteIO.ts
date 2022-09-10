@@ -64,7 +64,7 @@ class DeleteIOProcessor extends BaseIOProcessor<mm.DeleteAction> {
     const returnValues = new ParamList(`Return values of action ${action}`);
     if (!actionData.ensureOneRowAffected) {
       returnValues.add({
-        name: mm.ReturnValues.rowsAffected,
+        name: mm.ReturnValueSrc.rowsAffected,
         type: ctx.dialect.colTypeToGoType(mm.int().__type()),
       });
     }

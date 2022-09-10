@@ -18,9 +18,9 @@ it('Declare return types', async () => {
         mm
           .selectField(employee.firstName)
           .by(employee.id)
-          .declareReturnValue(mm.ReturnValues.result, 'firstName'),
+          .declareReturnValue(mm.ReturnValueSrc.result, 'firstName'),
         this.insert.declareReturnValues({
-          [mm.ReturnValues.insertedID]: 'id2',
+          [mm.ReturnValueSrc.insertedID]: 'id2',
         }),
       )
       .setReturnValues('id2');
@@ -44,9 +44,9 @@ it('Ignore null members', async () => {
         mm
           .selectField(employee.firstName)
           .by(employee.id)
-          .declareReturnValue(mm.ReturnValues.result, 'firstName'),
+          .declareReturnValue(mm.ReturnValueSrc.result, 'firstName'),
         this.insert.declareReturnValues({
-          [mm.ReturnValues.insertedID]: 'id2',
+          [mm.ReturnValueSrc.insertedID]: 'id2',
         }),
         null,
       )
@@ -66,7 +66,7 @@ it('Pass values in child actions (no return value declaration)', async () => {
     getFirstName = mm.selectField(employee.firstName).by(employee.id);
     insert = mm.insertOne().setParams();
     insert1 = mm.transact(
-      this.getFirstName.declareReturnValue(mm.ReturnValues.result, 'firstName'),
+      this.getFirstName.declareReturnValue(mm.ReturnValueSrc.result, 'firstName'),
       mm
         .insertOne()
         .setParams()
@@ -87,13 +87,13 @@ it('Pass values in child actions and declare return values', async () => {
     getFirstName = mm.selectField(employee.firstName).by(employee.id);
     insert = mm
       .transact(
-        this.getFirstName.declareReturnValue(mm.ReturnValues.result, 'firstName'),
+        this.getFirstName.declareReturnValue(mm.ReturnValueSrc.result, 'firstName'),
         mm
           .insertOne()
           .setParams()
           .wrap({ firstName: mm.captureVar('firstName') })
           .declareReturnValues({
-            [mm.ReturnValues.insertedID]: 'id2',
+            [mm.ReturnValueSrc.insertedID]: 'id2',
           }),
       )
       .setReturnValues('firstName', 'id2');
@@ -111,7 +111,7 @@ it('Pass values in child actions and declare return values (increment a col)', a
   const post = mm.table(Post);
   class PostAG extends mm.ActionGroup {
     insert = mm.transact(
-      mm.selectField(post.count).by(post.id).declareReturnValue(mm.ReturnValues.result, 'val'),
+      mm.selectField(post.count).by(post.id).declareReturnValue(mm.ReturnValueSrc.result, 'val'),
       mm
         .insertOne()
         .set(post.count, mm.sql`${post.count} + ${post.count.toParam('val')}`)
@@ -131,7 +131,7 @@ it('Pass values in child actions and declare return values (increment a col) (ca
   const post = mm.table(Post);
   class PostAG extends mm.ActionGroup {
     insert = mm.transact(
-      mm.selectField(post.count).by(post.id).declareReturnValue(mm.ReturnValues.result, 'val'),
+      mm.selectField(post.count).by(post.id).declareReturnValue(mm.ReturnValueSrc.result, 'val'),
       mm.insertOne().set(post.count, mm.sql`${post.count} + ${post.count.toParam('val')}`),
     );
   }
@@ -176,8 +176,8 @@ it('Return multiple values', async () => {
     insertCore = mm.insertOne().setParams();
     insert = mm
       .transact(
-        employeeTA.insertEmp.declareReturnValue(mm.ReturnValues.insertedID, empNo),
-        deptTA.insertDept.declareReturnValue(mm.ReturnValues.insertedID, deptNo),
+        employeeTA.insertEmp.declareReturnValue(mm.ReturnValueSrc.insertedID, empNo),
+        deptTA.insertDept.declareReturnValue(mm.ReturnValueSrc.insertedID, deptNo),
         this.insertCore.wrapAsRefs({
           empNo,
           deptNo,
@@ -247,7 +247,7 @@ it('Reference property values', async () => {
   const user = mm.table(User);
   class UserAG extends mm.ActionGroup {
     t = mm.transact(
-      mm.selectRow(user.age, user.name).declareReturnValue(mm.ReturnValues.result, 'res'),
+      mm.selectRow(user.age, user.name).declareReturnValue(mm.ReturnValueSrc.result, 'res'),
       mm
         .insertOne()
         .setParams()
@@ -273,7 +273,7 @@ it('Use the return value of a TX', async () => {
       .transact(
         this.insert,
         this.insert.declareReturnValues({
-          [mm.ReturnValues.insertedID]: 'id2',
+          [mm.ReturnValueSrc.insertedID]: 'id2',
         }),
       )
       .setReturnValues('id2');
