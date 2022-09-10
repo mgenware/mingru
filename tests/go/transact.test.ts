@@ -136,7 +136,7 @@ it('Pass values in child actions and declare return values (increment a col) (ca
     );
   }
   const postAG = mm.actionGroup(post, PostAG);
-  await testBuildAsync(postAG, 'tx/passValuesAndDecRetInc/post');
+  await testBuildAsync(postAG, 'tx/captureRet/post');
 });
 
 it('Return multiple values', async () => {

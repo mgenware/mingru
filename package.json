@@ -38,10 +38,10 @@
     "eslint-plugin-import": "^2.26.0",
     "it-throws": "^4.2.0",
     "mgenware-tsconfig-node-x": "^16.3.0",
-    "mingru-models": "^0.65.1",
+    "mingru-models": "^0.65.2",
     "mocha": "^10.0.0",
     "source-map-support": "^0.5.21",
-    "typescript": "^4.8.2"
+    "typescript": "^4.8.3"
   },
   "dependencies": {
     "camelcase": "^7.0.0",
