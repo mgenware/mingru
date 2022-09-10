@@ -22,16 +22,12 @@ func (mrTable *PostAGType) insertChild1(mrQueryable mingru.Queryable, id uint64)
 	return result, nil
 }
 
-func (mrTable *PostAGType) insertChild2Core(mrQueryable mingru.Queryable, val uint) (uint64, error) {
+func (mrTable *PostAGType) insertChild2(mrQueryable mingru.Queryable, val uint) (uint64, error) {
 	result, err := mrQueryable.Exec("INSERT INTO `post` (`count`) VALUES (`count` + ?)", val)
 	return mingru.GetLastInsertIDUint64WithError(result, err)
 }
 
-func (mrTable *PostAGType) insertChild2(mrQueryable mingru.Queryable, val uint) (uint64, error) {
-	return mrTable.insertChild2Core(mrQueryable, val)
-}
-
-func (mrTable *PostAGType) Insert(db *sql.DB, id uint64) error {
+func (mrTable *PostAGType) Insert(db *sql.DB, id uint64, val uint) error {
 	txErr := mingru.Transact(db, func(tx *sql.Tx) error {
 		var err error
 		val, err := mrTable.insertChild1(tx, id)

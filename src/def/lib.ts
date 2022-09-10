@@ -11,10 +11,6 @@ export function actionPascalName(actionName: string): string {
   return su.toPascalCase(actionName);
 }
 
-export function paginateCoreFuncName(name: string): string {
-  return `${name}Core`;
-}
-
 export function tableNameCode(t: mm.Table): string {
   const tableName = t.__getData().name;
   const pascalName = tablePascalName(tableName);

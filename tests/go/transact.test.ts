@@ -122,6 +122,23 @@ it('Pass values in child actions and declare return values (increment a col)', a
   await testBuildAsync(postAG, 'tx/passValuesAndDecRetInc/post');
 });
 
+it('Pass values in child actions and declare return values (increment a col) (captured return value)', async () => {
+  class Post extends mm.Table {
+    id = mm.pk();
+    count = mm.uInt();
+  }
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  const post = mm.table(Post);
+  class PostAG extends mm.ActionGroup {
+    insert = mm.transact(
+      mm.selectField(post.count).by(post.id).declareReturnValue(mm.ReturnValues.result, 'val'),
+      mm.insertOne().set(post.count, mm.sql`${post.count} + ${post.count.toParam('val')}`),
+    );
+  }
+  const postAG = mm.actionGroup(post, PostAG);
+  await testBuildAsync(postAG, 'tx/passValuesAndDecRetInc/post');
+});
+
 it('Return multiple values', async () => {
   class Employee extends mm.Table {
     id = mm.pk(mm.int()).setDBName('emp_no').autoIncrement;

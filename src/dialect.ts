@@ -2,6 +2,7 @@
 import * as mm from 'mingru-models';
 import { TypeInfo } from './lib/varInfo.js';
 
+// See `CodeStringBuilder` for details.
 export type StringSegment = string | CodeSegment;
 
 export interface CodeSegment {

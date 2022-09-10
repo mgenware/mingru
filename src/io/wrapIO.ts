@@ -55,6 +55,8 @@ class WrapIOProcessor extends BaseIOProcessor<mm.WrapAction> {
     }
     const funcArgs = new ParamList(`Func args of action "${action}"`);
     const execArgs = new ValueList(`Exec args of action "${action}"`);
+
+    // See `userArgValue instanceof mm.CapturedVar` below for details.
     const capturedFuncArgs: Record<string, mm.CapturedVar> = {};
     const capturedVars: Record<string, mm.CapturedVar> = {};
 
@@ -73,10 +75,10 @@ class WrapIOProcessor extends BaseIOProcessor<mm.WrapAction> {
          * inner.wrap({ c: 1 })
          *
          * Result:
-         * wrapped(a, b) -> inner(a, b)
+         * wrapped(a, b) -> insert(a, b)
          */
       } else if (userArgValue instanceof mm.CapturedVar) {
-        // (This scenario is only supported in TX members)
+        // (This scenario only happens in TX members)
         // See the example below. Func and exec args are inherited from inner action.
         // The captured var is added to `capturedVars`, which will be handled by
         // `TransactIO`.

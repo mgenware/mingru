@@ -178,8 +178,16 @@ class TransactIOProcessor extends BaseIOProcessor<mm.TransactAction> {
 
     // funcArgs
     const funcArgs = new ParamList(`Func args of action "${action}"`);
+    const capturedRetVars = new Set<string>();
     for (const mem of memberIOs) {
       const mIO = mem.actionIO;
+      if (mem.member.returnValues) {
+        for (const capturedRetVar of Object.values(mem.member.returnValues)) {
+          if (capturedRetVar) {
+            capturedRetVars.add(capturedRetVar);
+          }
+        }
+      }
       for (const arg of mIO.funcArgs.list) {
         // See details in `WrapIO.ts` (the `mm.CapturedVar` section).
         // Check if this func arg has been captured in WRAP action.
@@ -187,7 +195,7 @@ class TransactIOProcessor extends BaseIOProcessor<mm.TransactAction> {
         // Also, the exec args of this member needs to be updated (only
         // tmp member can have wrapped `mm.CapturedVar`. We can safely
         // update exec args here.)
-        if (!mIO.capturedFuncArgs[arg.name]) {
+        if (!mIO.capturedFuncArgs[arg.name] && !capturedRetVars.has(arg.name)) {
           funcArgs.add(arg);
         }
       }
