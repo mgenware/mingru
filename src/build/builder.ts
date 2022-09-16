@@ -160,7 +160,7 @@ export default class Builder {
 
       if (opt.tsOutDir) {
         const outFile = np.join(opt.tsOutDir, 'types.ts');
-        await mfs.writeFileAsync(outFile, (opt.goFileHeader ?? '') + tsCode);
+        await mfs.writeFileAsync(outFile, (opt.typesTSHeader ?? '') + tsCode);
       }
     }
 

@@ -12,6 +12,7 @@ export interface BuildOptions {
   packageName?: string;
   goFileHeader?: string;
   sqlFileHeader?: string;
+  typesTSHeader?: string;
   cleanOutDir?: boolean;
   noOutput?: boolean;
   jsonTags?: JSONTagsOptions;
