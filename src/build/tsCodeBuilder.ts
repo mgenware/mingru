@@ -15,8 +15,17 @@ function goTypeToTSType(type: TypeInfo): { type: string; optional: boolean } {
       break;
     case 'int':
     case 'uint':
+    case 'int64':
     case 'uint64':
+    case 'int32':
+    case 'uint32':
+    case 'int16':
+    case 'uint16':
+    case 'int8':
+    case 'uint8':
     case 'double':
+    case 'byte':
+    case 'rune':
       tsTypeString = 'number';
       break;
     case 'string':
