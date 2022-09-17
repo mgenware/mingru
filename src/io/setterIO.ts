@@ -49,6 +49,7 @@ export class SetterIO {
             this.getAutoSetterValue(
               col,
               autoSetter,
+              actionData.autoSetterParamsOpt,
               table,
               sourceTable,
               `${context} [AutoSetter on ${col}]`,
@@ -86,6 +87,7 @@ export class SetterIO {
   private static getAutoSetterValue(
     col: mm.Column,
     autoSetter: mm.AutoSetterType,
+    autoSetterSetParamsOpt: mm.SetParamsOptions | undefined,
     table: mm.Table,
     sourceTable: mm.Table | null,
     context: string,
@@ -93,14 +95,12 @@ export class SetterIO {
   ): SetterIO {
     switch (autoSetter) {
       case mm.AutoSetterType.param: {
+        const param = autoSetterSetParamsOpt?.toParamCallback
+          ? autoSetterSetParamsOpt.toParamCallback(col)
+          : col.toParam(undefined, autoSetterSetParamsOpt?.toParamOpt);
         return new SetterIO(
           col,
-          sqlIO(
-            mm.sql`${col.toParam()}`,
-            sourceTable,
-            `${context} [Handling param setter on ${col}]`,
-            opt,
-          ),
+          sqlIO(mm.sql`${param}`, sourceTable, `${context} [Handling param setter on ${col}]`, opt),
         );
       }
 
