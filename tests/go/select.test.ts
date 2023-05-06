@@ -279,11 +279,21 @@ it('Join as', async () => {
 it('Join as (attr should not affect other things)', async () => {
   class CmtAG extends mm.ActionGroup {
     selectT = mm.selectRow(
-      cmt.id.attr(101, true),
-      cmt.user_id.as('a').attr(101, true),
-      cmt.target_id.join(post).title.as('b').attr(101, true),
-      cmt.target_id.join(post).user_id.join(user).url_name.attr(101, true),
-      cmt.target_id.join(post).user_id.join(user).url_name.as('c').attr(101, true),
+      cmt.id.attr(101 as mm.SelectedColumnAttribute, true),
+      cmt.user_id.as('a').attr(101 as mm.SelectedColumnAttribute, true),
+      cmt.target_id
+        .join(post)
+        .title.as('b')
+        .attr(101 as mm.SelectedColumnAttribute, true),
+      cmt.target_id
+        .join(post)
+        .user_id.join(user)
+        .url_name.attr(101 as mm.SelectedColumnAttribute, true),
+      cmt.target_id
+        .join(post)
+        .user_id.join(user)
+        .url_name.as('c')
+        .attr(101 as mm.SelectedColumnAttribute, true),
     );
   }
   const ta = mm.actionGroup(cmt, CmtAG);
