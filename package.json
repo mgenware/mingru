@@ -29,26 +29,26 @@
     "/dist/**/*.map"
   ],
   "devDependencies": {
-    "@types/mocha": "^9.1.1",
-    "@types/node": "^17.0.36",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^20.1.0",
     "@typescript-eslint/eslint-plugin": "^5.36.2",
     "@typescript-eslint/parser": "^5.36.2",
-    "daizong": "^0.25.5",
+    "daizong": "^0.26.0",
     "eslint": "^8.23.0",
     "eslint-plugin-import": "^2.26.0",
     "it-throws": "^4.2.0",
     "mgenware-tsconfig-node-x": "^16.3.0",
-    "mingru-models": "^0.65.4",
+    "mingru-models": "^0.66.0",
     "mocha": "^10.0.0",
     "source-map-support": "^0.5.21",
-    "typescript": "^4.8.3"
+    "typescript": "^5.0.4"
   },
   "dependencies": {
     "camelcase": "^7.0.0",
     "chalk": "^5.0.1",
     "decamelize": "^6.0.0",
     "del": "^7.0.0",
-    "eslint-config-mgenware": "^0.8.0",
+    "eslint-config-mgenware": "^0.9.0",
     "m-fs": "^5.2.0",
     "must-be-err": "^0.1.1",
     "tempy": "^3.0.0",
