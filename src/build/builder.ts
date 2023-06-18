@@ -18,8 +18,6 @@ import AGBuilder from './agBuilder.js';
 import { buildTSInterface } from './tsCodeBuilder.js';
 import ctx from '../ctx.js';
 
-const prodDir = 'prod';
-const devDir = 'dev';
 const tableSQLDir = 'table_sql';
 const migSQLDir = 'migration_sql';
 
@@ -206,17 +204,16 @@ export default class Builder {
     }
   }
 
-  private async buildCreateTableUpSQL(
-    tables: mm.Table[],
-    fileName: string,
-    header: string | undefined,
-    devMode: boolean,
-  ) {
-    const csqlBuilders = await Promise.all(tables.map((t) => this.buildCSQLCore(t, devMode)));
+  private async buildCreateTableSQL(tables: mm.Table[]): Promise<void> {
+    const { opt } = this;
+    if (!opt.createTableSQL || !tables.length) {
+      return;
+    }
+    const csqlBuilders = await Promise.all(tables.map((t) => this.buildCSQLCore(t)));
 
     // Generate migration up file.
-    const migUpSQLFile = np.join(this.workingDir, migSQLDir, devMode ? devDir : prodDir, fileName);
-    let upSQL = header ?? defs.fileHeader;
+    const migUpSQLFile = np.join(this.workingDir, migSQLDir, 'up.sql');
+    let upSQL = opt.sqlFileHeader ?? defs.fileHeader;
     let first = true;
     for (const builder of csqlBuilders) {
       if (first) {
@@ -226,19 +223,7 @@ export default class Builder {
       }
       upSQL += builder.sql;
     }
-
     await mfs.writeFileAsync(migUpSQLFile, upSQL);
-  }
-
-  private async buildCreateTableSQL(tables: mm.Table[]): Promise<void> {
-    const { opt } = this;
-    if (!opt.createTableSQL || !tables.length) {
-      return;
-    }
-
-    // Generate migration up file.
-    await this.buildCreateTableUpSQL(tables, 'up.sql', opt.sqlFileHeader, false);
-    await this.buildCreateTableUpSQL(tables, 'up-dev.sql', opt.sqlFileHeader, true);
 
     // Generate migration down file.
     const migDownSQLFile = np.join(this.workingDir, migSQLDir, 'down.sql');
@@ -253,16 +238,15 @@ export default class Builder {
     await mfs.writeFileAsync(migDownSQLFile, downSQL);
   }
 
-  private async buildCSQLCore(table: mm.Table, devMode: boolean): Promise<CSQLBuilder> {
+  private async buildCSQLCore(table: mm.Table): Promise<CSQLBuilder> {
     const { opt } = this;
     let { workingDir } = this;
-    workingDir = np.join(workingDir, tableSQLDir, devMode ? devDir : prodDir);
+    workingDir = np.join(workingDir, tableSQLDir);
     const builder = new CSQLBuilder(table);
     const fileName = su.toSnakeCase(table.__getData().name);
     const outFile = np.join(workingDir, fileName + '.sql');
-    const sql = builder.build({ devMode });
-    const header = opt.sqlFileHeader ?? defs.fileHeader;
-    await mfs.writeFileAsync(outFile, header + sql);
+    const sql = builder.build(opt.sqlFileHeader);
+    await mfs.writeFileAsync(outFile, sql);
     return builder;
   }
 }

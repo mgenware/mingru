@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 import * as mm from 'mingru-models';
 import toTypeString from 'to-type-string';
-import { ColToSQLTypeArgs, Dialect, SQLTypeMode } from '../dialect.js';
+import { Dialect, SQLTypeMode } from '../dialect.js';
 import { AtomicTypeInfo, CompoundTypeInfo, TypeInfo } from '../lib/varInfo.js';
 import escapeSQLString from './sqlEscapeString.js';
 
@@ -40,18 +40,12 @@ export class MySQL extends Dialect {
     return typeInfo;
   }
 
-  override colToSQLType(args: ColToSQLTypeArgs): mm.SQL {
-    const { col, mode } = args;
+  override colToSQLType(col: mm.Column, mode?: SQLTypeMode): mm.SQL {
     const colType = col.__type();
     const colData = col.__getData();
     let typeString = this.absoluteSQLType(colType);
     if (colType.length) {
       typeString = `${typeString}(${colType.length})`;
-    } else if (args.fallbackFsp) {
-      const firstType = colType.types[0];
-      if (firstType && mm.dt.isTimeRelated(firstType)) {
-        typeString = `${typeString}(${args.fallbackFsp})`;
-      }
     }
 
     const builder = new mm.SQLBuilder();
