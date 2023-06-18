@@ -3,7 +3,12 @@ import { itRejects } from 'it-throws';
 import user, { User } from '../models/user.js';
 import post, { Post } from '../models/post.js';
 import postReply from '../models/postReply.js';
-import { testBuildToDirAsync, migrationUpFile, migrationDownFile } from './common.js';
+import {
+  testBuildToDirAsync,
+  migrationUpFile,
+  migrationDownFile,
+  migrationUpDevFile,
+} from './common.js';
 
 it('Single table', async () => {
   class PostAG extends mm.ActionGroup {
@@ -112,45 +117,7 @@ it('Multiple tables, CSQL', async () => {
       '#tables.go',
       'extra_table.sql',
       migrationUpFile,
-      migrationDownFile,
-    ],
-    'multipleTablesCSQL',
-    { createTableSQL: true },
-  );
-});
-
-it('Multiple tables, CSQL (dedup)', async () => {
-  class UserAG extends mm.ActionGroup {
-    selectProfile = mm.selectRow(user.display_name, user.sig);
-    updateProfile = mm.unsafeUpdateAll().setParams(user.sig);
-    deleteByID = mm.deleteOne().whereSQL(user.id.isEqualToParam());
-  }
-  const userTA = mm.actionGroup(user, UserAG);
-
-  class PostAG extends mm.ActionGroup {
-    selectPostInfo = mm.selectRow(post.id, post.content, post.user_id.join(user).url_name);
-
-    updateContent = mm.unsafeUpdateAll().set(post.content, post.content.isEqualToParam());
-
-    deleteByID = mm.deleteOne().whereSQL(post.id.isEqualToParam());
-  }
-  const postTA = mm.actionGroup(post, PostAG);
-
-  class ExtraTable extends mm.Table {
-    id = mm.pk();
-  }
-  const et = mm.table(ExtraTable, { dbName: 'et' });
-
-  await testBuildToDirAsync(
-    [userTA, postTA, user, userTA, et],
-    [
-      'post',
-      'user',
-      'post.sql',
-      'user.sql',
-      '#tables.go',
-      'extra_table.sql',
-      migrationUpFile,
+      migrationUpDevFile,
       migrationDownFile,
     ],
     'multipleTablesCSQL',

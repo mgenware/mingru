@@ -16,6 +16,12 @@ export enum SQLTypeMode {
   alias,
 }
 
+export interface ColToSQLTypeArgs {
+  col: mm.Column;
+  mode?: SQLTypeMode;
+  fallbackFsp?: number;
+}
+
 // Base class for a dialect implementation.
 export class Dialect {
   // Encodes the given name to SQL.
@@ -34,7 +40,7 @@ export class Dialect {
   }
 
   // Converts the specified column to SQL type.
-  colToSQLType(_col: mm.Column, _mode?: SQLTypeMode): mm.SQL {
+  colToSQLType(_args: ColToSQLTypeArgs): mm.SQL {
     throw new Error('Not implemented yet');
   }
 

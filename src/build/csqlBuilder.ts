@@ -1,10 +1,13 @@
 /* eslint-disable class-methods-use-this */
 import * as mm from 'mingru-models';
 import ctx from '../ctx.js';
-import * as defs from '../def/defs.js';
 import { SQLTypeMode } from '../dialect.js';
 import { sqlIO } from '../io/sqlIO.js';
 import { extractStringContentFromSegments } from './goCodeUtil.js';
+
+export interface CSQLBuilderBuildOptions {
+  devMode?: boolean;
+}
 
 export default class CSQLBuilder {
   tableData: mm.TableData;
@@ -14,7 +17,7 @@ export default class CSQLBuilder {
     this.tableData = table.__getData();
   }
 
-  build(header: string | undefined): string {
+  build(opt: CSQLBuilderBuildOptions): string {
     const { table, tableData } = this;
     const columns = Object.values(tableData.columns);
     const body = [];
@@ -41,7 +44,11 @@ export default class CSQLBuilder {
       if (colData.index) {
         indicesLines.push(`${colData.isUniqueIndex ? 'UNIQUE ' : ''}INDEX (${colDBNameEncoded})`);
       }
-      const io = sqlIO(ctx.dialect.colToSQLType(col), null, `[Building SQL type of column ${col}]`);
+      const io = sqlIO(
+        ctx.dialect.colToSQLType({ col, fallbackFsp: opt.devMode ? 6 : undefined }),
+        null,
+        `[Building SQL type of column ${col}]`,
+      );
       body.push(
         `${ctx.dialect.encodeColumnName(col)} ${extractStringContentFromSegments(io.code)}`,
       );
@@ -54,7 +61,7 @@ export default class CSQLBuilder {
         colAliases.add(colAlias);
         const code = extractStringContentFromSegments(
           sqlIO(
-            ctx.dialect.colToSQLType(col, SQLTypeMode.alias),
+            ctx.dialect.colToSQLType({ col, mode: SQLTypeMode.alias }),
             null,
             `[Building SQL type of column ${col}] with alias ${colAlias}`,
           ).code,
@@ -76,8 +83,9 @@ export default class CSQLBuilder {
     sql += '\n)\n';
     sql += 'CHARACTER SET=utf8mb4\nCOLLATE=utf8mb4_unicode_ci\n';
     sql += ';\n';
+
     this.sql = sql;
-    return (header ?? defs.fileHeader) + sql;
+    return sql;
   }
 
   private groupNames(names: string[]): string {

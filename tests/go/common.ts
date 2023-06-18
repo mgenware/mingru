@@ -11,9 +11,12 @@ const destDataDir = 'tests/go/dest';
 const buildDir = 'build';
 const tableSQLFile = 'table_sql';
 const migrationSQLFile = 'migration_sql';
+const prodDir = 'prod';
+const devDir = 'dev';
 const tsOutDirName = '__ts';
 
 export const migrationUpFile = '__mig_up__.sql';
+export const migrationUpDevFile = '__mig_up_dev__.sql';
 export const migrationDownFile = '__mig_down__.sql';
 
 function defaultOptions() {
@@ -120,13 +123,16 @@ export async function testBuildToDirAsync(
       // `file` has changed here, we need to re-generate the expected file.
       expected = np.join(expectedDirPath, file);
     } else if (file === migrationUpFile) {
-      actual = np.join(outDir, migrationSQLFile, 'up.sql');
+      actual = np.join(outDir, migrationSQLFile, prodDir, 'up.sql');
       expected = np.join(expectedDirPath, migrationUpFile);
+    } else if (file === migrationUpDevFile) {
+      actual = np.join(outDir, migrationSQLFile, devDir, 'up-dev.sql');
+      expected = np.join(expectedDirPath, migrationUpDevFile);
     } else if (file === migrationDownFile) {
       actual = np.join(outDir, migrationSQLFile, 'down.sql');
       expected = np.join(expectedDirPath, migrationDownFile);
     } else if (np.extname(file)) {
-      actual = np.join(outDir, tableSQLFile, file);
+      actual = np.join(outDir, tableSQLFile, prodDir, file);
     } else {
       // A go file
       actual = np.join(outDir, `${file}_ag.go`);

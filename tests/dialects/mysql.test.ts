@@ -122,48 +122,51 @@ it('objToSQL', () => {
 
 it('colToSQLType', () => {
   // Integers
-  sqlEq(dialect.colToSQLType(mm.int()), 'INT NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.int(3)), 'INT(3) NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.bigInt()), 'BIGINT NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.bigInt(3)), 'BIGINT(3) NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.tinyInt()), 'TINYINT NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.tinyInt(1)), 'TINYINT(1) NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.smallInt()), 'SMALLINT NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.smallInt(3)), 'SMALLINT(3) NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.uInt()), 'INT UNSIGNED NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.uInt(3)), 'INT(3) UNSIGNED NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.uBigInt()), 'BIGINT UNSIGNED NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.uBigInt(3)), 'BIGINT(3) UNSIGNED NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.uTinyInt()), 'TINYINT UNSIGNED NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.uTinyInt(1)), 'TINYINT(1) UNSIGNED NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.uSmallInt()), 'SMALLINT UNSIGNED NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.uSmallInt(3)), 'SMALLINT(3) UNSIGNED NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.bool()), 'TINYINT NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.int() }), 'INT NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.int(3) }), 'INT(3) NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.bigInt() }), 'BIGINT NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.bigInt(3) }), 'BIGINT(3) NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.tinyInt() }), 'TINYINT NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.tinyInt(1) }), 'TINYINT(1) NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.smallInt() }), 'SMALLINT NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.smallInt(3) }), 'SMALLINT(3) NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.uInt() }), 'INT UNSIGNED NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.uInt(3) }), 'INT(3) UNSIGNED NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.uBigInt() }), 'BIGINT UNSIGNED NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.uBigInt(3) }), 'BIGINT(3) UNSIGNED NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.uTinyInt() }), 'TINYINT UNSIGNED NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.uTinyInt(1) }), 'TINYINT(1) UNSIGNED NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.uSmallInt() }), 'SMALLINT UNSIGNED NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.uSmallInt(3) }), 'SMALLINT(3) UNSIGNED NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.bool() }), 'TINYINT NOT NULL');
   // Chars
-  sqlEq(dialect.colToSQLType(mm.varChar(3)), 'VARCHAR(3) NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.char(3)), 'CHAR(3) NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.text()), 'TEXT NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.varChar(3) }), 'VARCHAR(3) NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.char(3) }), 'CHAR(3) NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.text() }), 'TEXT NOT NULL');
   // DateTime
-  sqlEq(dialect.colToSQLType(mm.date()), 'DATE NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.date({ defaultToNow: 'utc' })), 'DATE NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.date({ fsp: 3 })), 'DATE(3) NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.datetime()), 'DATETIME NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.datetime({ defaultToNow: 'utc' })), 'DATETIME NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.datetime({ fsp: 3 })), 'DATETIME(3) NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.time()), 'TIME NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.time({ defaultToNow: 'utc' })), 'TIME NOT NULL');
-  sqlEq(dialect.colToSQLType(mm.time({ fsp: 3 })), 'TIME(3) NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.date() }), 'DATE NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.date({ defaultToNow: 'utc' }) }), 'DATE NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.date({ fsp: 3 }) }), 'DATE(3) NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.datetime() }), 'DATETIME NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.datetime({ defaultToNow: 'utc' }) }), 'DATETIME NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.datetime({ fsp: 3 }) }), 'DATETIME(3) NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.time() }), 'TIME NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.time({ defaultToNow: 'utc' }) }), 'TIME NOT NULL');
+  sqlEq(dialect.colToSQLType({ col: mm.time({ fsp: 3 }) }), 'TIME(3) NOT NULL');
   sqlEq(
-    dialect.colToSQLType(mm.datetime({ defaultToNow: 'server', fsp: 3 })),
+    dialect.colToSQLType({ col: mm.datetime({ defaultToNow: 'server', fsp: 3 }) }),
     'DATETIME(3) NOT NULL',
   );
-  sqlEq(dialect.colToSQLType(mm.time({ defaultToNow: 'server', fsp: 3 })), 'TIME(3) NOT NULL');
-  // NULL
-  sqlEq(dialect.colToSQLType(mm.int().nullable), 'INT NULL DEFAULT NULL');
-  // Default value
-  sqlEq(dialect.colToSQLType(mm.int().default(43).nullable), 'INT NULL DEFAULT 43');
   sqlEq(
-    dialect.colToSQLType(mm.varChar(23).default('oo').nullable),
+    dialect.colToSQLType({ col: mm.time({ defaultToNow: 'server', fsp: 3 }) }),
+    'TIME(3) NOT NULL',
+  );
+  // NULL
+  sqlEq(dialect.colToSQLType({ col: mm.int().nullable }), 'INT NULL DEFAULT NULL');
+  // Default value
+  sqlEq(dialect.colToSQLType({ col: mm.int().default(43).nullable }), 'INT NULL DEFAULT 43');
+  sqlEq(
+    dialect.colToSQLType({ col: mm.varChar(23).default('oo').nullable }),
     "VARCHAR(23) NULL DEFAULT 'oo'",
   );
 });
